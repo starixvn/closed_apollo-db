@@ -105,5 +105,17 @@
     <NotInBuild Include="CSD\CustomerManagement\Script.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="Agent\Total Bets\Age_TotalBets_1_3_7_8.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Total Bets\Age_TotalBets_2_5_12_15_123.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Total Bets\Age_TotalBets_10.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Total Bets\Age_TotalBets_14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
 </Project>
