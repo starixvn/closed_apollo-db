@@ -1,6 +1,6 @@
 ﻿USE [DB05]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Forecast_1_7_GetByMatch]    Script Date: 3/1/2013 6:22:06 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Forecast_1_7_GetByMatch]    Script Date: 3/4/2013 2:28:28 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -43,7 +43,7 @@ BEGIN
 				SUM(CASE WHEN betteam='a' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END)  * ba.Stake * (ba.APositionTaking) ELSE 0 END) awaylose
 			FROM BetTrans_Agent ba WITH (NOLOCK)
 				INNER JOIN BetTrans AS b WITH (NOLOCK) ON ba.TransId = b.TransId
-			WHERE ba.BetType= @BetType
+			WHERE b.BetType= @BetType
 			AND b.MatchId = @MatchId
 			AND ba.AgentId = @AgentId
 			AND b.StatusId IN (0,1)

@@ -1,6 +1,6 @@
-﻿USE [TransDB]
+﻿USE [DB05]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_TotalBets_1_3_7_8]    Script Date: 2/28/2013 5:30:55 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_TotalBets_1_3_7_8]    Script Date: 3/4/2013 2:07:27 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -13,12 +13,11 @@ AS
  * Created by	: Quinn
  * Date			: 20130228
  * Task			: Retrieve Total Bet values for bettype 1,3,7,8
- * DB			: APL.TransDB
+ * DB			: APL.DB05
  * Revisions	:
  *	•
  * Parameters:
- *	@custid: agent ID
- *	@Language: Language
+ *	@AgentId: agent ID
  *  
  */
 
@@ -55,9 +54,9 @@ FROM
 	FROM BetTrans_Agent AS bta WITH (NOLOCK)
 	INNER JOIN BetTrans AS bt WITH (NOLOCK) ON bta.TransId = bt.TransId
 	WHERE
-			bta.BetType IN (1,3,7,8)
+			bt.BetType IN (1,3,7,8)
 			AND bta.AgentId = @AgentId
-			AND bta.StatusId in (0,1)
+			AND bt.StatusId in (0,1)
 			AND bt.Ruben = 0
 	GROUP BY bt.MatchId, bt.BetType, bt.BetTeam, bt.LiveIndicator, bt.LiveHomeScore, bt.LiveAwayScore) AS b
 	INNER JOIN Match AS m WITH (NOLOCK) ON m.MatchId = b.MatchId 	

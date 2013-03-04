@@ -1,6 +1,6 @@
-﻿USE [TransDB]
+﻿USE [DB05]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_TotalBets_10]    Script Date: 2/28/2013 5:49:53 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_TotalBets_10]    Script Date: 3/4/2013 2:29:57 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -13,7 +13,7 @@ AS
  * Created by	: Quinn
  * Date			: 20130228
  * Task			: Retrieve Total Bet values for bettype 10
- * DB			: APL.TransDB
+ * DB			: APL.DB05
  * Revisions	:
  *	•
  * Parameters:
@@ -50,8 +50,8 @@ FROM
 				) AS leaguetotal ON leaguetotal.leagueid = m.leagueid
 WHERE 
 	bta.AgentId = @AgentId 
-	AND bta.BetType = 10
-	AND bta.StatusId = 0
+	AND bt.BetType = 10
+	AND bt.StatusId = 0
 GROUP BY
 	m.teamid,
 	m.orid,

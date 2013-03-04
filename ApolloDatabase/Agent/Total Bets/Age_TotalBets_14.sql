@@ -1,6 +1,6 @@
-﻿USE [TransDB]
+﻿USE [DB05]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_TotalBets_14]    Script Date: 2/28/2013 5:50:52 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_TotalBets_14]    Script Date: 3/4/2013 2:24:22 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -13,7 +13,7 @@ AS
  * Created by	: Quinn
  * Date			: 20130228
  * Task			: Retrieve Total Bet values for bettype 14
- * DB			: APL.TransDB
+ * DB			: APL.DB05
  * Revisions	:
  *	•
  * Parameters:
@@ -46,9 +46,9 @@ FROM
 WHERE 
 	bta.AgentId = @AgentId 
 	AND m.EventStatus='running'
-	AND bta.BetType = 14 
+	AND bt.BetType = 14 
 	AND bt.Ruben=0 
-	AND bta.StatusId = 0 
+	AND bt.StatusId = 0 
 	AND (ISNULL(bta.SecAcceptFlag, 0) = 0	
 			OR (ISNULL(bta.SecAcceptFlag, 0) = 1 AND ISNULL(bt.CheckTime, CURRENT_TIMESTAMP) <= CURRENT_TIMESTAMP)
 		)
