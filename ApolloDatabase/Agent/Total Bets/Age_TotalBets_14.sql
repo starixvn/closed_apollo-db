@@ -1,6 +1,6 @@
 ﻿USE [DB05]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_TotalBets_14]    Script Date: 3/4/2013 2:24:22 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_TotalBets_14]    Script Date: 3/5/2013 11:05:49 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -47,8 +47,8 @@ WHERE
 	bta.AgentId = @AgentId 
 	AND m.EventStatus='running'
 	AND bt.BetType = 14 
-	AND bt.Ruben=0 
-	AND bt.StatusId = 0 
+	AND bt.Ruben=0 -- Match not yet settle
+	AND bt.StatusId = 0 -- status is running
 	AND (ISNULL(bta.SecAcceptFlag, 0) = 0	
 			OR (ISNULL(bta.SecAcceptFlag, 0) = 1 AND ISNULL(bt.CheckTime, CURRENT_TIMESTAMP) <= CURRENT_TIMESTAMP)
 		)

@@ -1,6 +1,6 @@
 ﻿USE [DB05]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Forecast_1_3_7_8_GetByLeague]    Script Date: 3/1/2013 6:19:01 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Forecast_1_3_7_8_GetByLeague]    Script Date: 3/5/2013 10:00:04 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -119,8 +119,8 @@ FROM
 						WHERE 
 							ba.AgentId = @AgentId
 							AND b.BetType=@BetTypeHDP
-							AND b.StatusId IN (0,1) 
-							AND b.Ruben=0
+							AND b.StatusId IN (0,1) -- status is waiting or running
+							AND b.Ruben=0	-- match not yet settle
 						GROUP BY 
 							b.Currency, b.Hdp2 - b.Hdp1, b.LiveHomeScore - b.LiveAwayScore, b.LiveIndicator, M.MatchId, o.LiveHomeScore, o.LiveAwayScore
 					) AS x 
@@ -158,8 +158,8 @@ FROM
 						where 
 							ba.AgentId = @AgentId
 							AND b.bettype=@BetTypeOU
-							AND b.statusID IN (0,1) 
-							AND b.ruben=0
+							AND b.statusID IN (0,1)	-- status is waiting or running
+							AND b.ruben=0	-- match not yet settle
 						group by 
 							b.currency, b.hdp1, b.liveindicator, M.MatchID, o.livehomescore, o.liveawayscore
 					) AS x 
@@ -196,8 +196,8 @@ FROM
 						WHERE 
 							ba.AgentId = @AgentId
 							AND b.BetType=@BetTypeHTHDP
-							AND b.StatusId IN (0,1) 
-							AND b.Ruben=0
+							AND b.StatusId IN (0,1)	-- status is waiting or running
+							AND b.Ruben=0	-- match not yet settle
 						GROUP BY
 							b.currency, b.hdp2 - b.hdp1, b.livehomescore - b.liveawayscore, b.liveindicator, M.MatchID, o.livehomescore, o.liveawayscore
 					) AS x 
@@ -235,8 +235,8 @@ FROM
 						WHERE 
 							ba.AgentId = @AgentId
 							AND b.bettype=@BetTypeHTOU
-							AND b.statusID IN (0,1) 
-							AND b.ruben=0
+							AND b.statusID IN (0,1)	-- status is waiting or running
+							AND b.ruben=0	-- match not yet settle
 						GROUP BY 
 							b.currency, b.hdp1, b.liveindicator, M.MatchID, o.livehomescore, o.liveawayscore
 					) AS x 
@@ -267,6 +267,3 @@ GROUP BY R.MatchID,  R.liveindicator,
 	M.ShowTime, M.MatchCode,
 	m.isNeutral
 ORDER BY R.LiveIndicator DESC, M.MatchCode
-
-
-

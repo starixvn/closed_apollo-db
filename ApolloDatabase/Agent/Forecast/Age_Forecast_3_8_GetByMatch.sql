@@ -1,6 +1,6 @@
 ﻿USE [DB05]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Forecast_3_8_GetByMatch]    Script Date: 3/4/2013 2:31:33 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Forecast_3_8_GetByMatch]    Script Date: 3/5/2013 10:51:08 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -47,13 +47,9 @@ BEGIN
 			WHERE b.BetType= @BetType
 			AND b.MatchId = @MatchId
 			AND ba.AgentId = @AgentId
-			AND b.StatusId IN (0,1)
-			and b.Ruben = 0
+			AND b.StatusId IN (0,1) -- status is waiting or running
+			AND b.Ruben = 0	-- match not yet settle
 			GROUP BY b.LiveIndicator, b.Status, b.Currency, hdp1, livehomescore + liveawayscore
 		)x 
 	GROUP BY x.status, x.LiveIndicator, x.score + x.hdp
 END
-
-
-
-

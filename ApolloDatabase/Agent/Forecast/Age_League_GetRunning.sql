@@ -1,6 +1,6 @@
 ﻿USE [DB05]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_League_GetRunning]    Script Date: 3/1/2013 2:26:39 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_League_GetRunning]    Script Date: 3/5/2013 10:56:43 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -35,7 +35,7 @@ WHERE  Match.EventStatus IN ('running')
 	(	SELECT DISTINCT bt.MatchId 
 		FROM BetTrans_Agent AS bta WITH (NOLOCK)
 		INNER JOIN BetTrans AS bt WITH (NOLOCK) ON bta.TransId = bt.TransId
-		WHERE bt.Ruben = 0 
+		WHERE bt.Ruben = 0 -- Match not yet settle
 			AND bta.AgentId = @AgID
 			AND bt.BetType IN (SELECT val FROM dbo.strSplit_Key(@Bettypes,',')))
 GROUP BY Match.leagueid, League.leaguename, Match.sporttype

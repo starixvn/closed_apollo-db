@@ -1,6 +1,6 @@
 ﻿USE [DB05]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Forecast_OddsGetTopByMatch]    Script Date: 3/4/2013 2:34:29 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Forecast_OddsGetTopByMatch]    Script Date: 3/5/2013 10:56:14 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -38,7 +38,7 @@ FROM
 	odds WITH (NOLOCK)
 	LEFT JOIN match M WITH (NOLOCK) ON odds.matchid = M.matchid 		
 WHERE 
-	bettype = @bettype AND
-	odds.matchid = @matchid
+	bettype = @bettype 
+	AND odds.matchid = @matchid
 ORDER BY 
 	oddsid DESC
