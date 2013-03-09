@@ -1,0 +1,6 @@
+D:\GitScm\apollo\apollo-db\ApolloDatabase\sql\debug\ApolloDatabase_Database.sqlsettings
+D:\GitScm\apollo\apollo-db\ApolloDatabase\sql\debug\ApolloDatabase_Database.sqldeployment
+D:\GitScm\apollo\apollo-db\ApolloDatabase\sql\debug\ApolloDatabase_Database.sqlcmdvars
+D:\GitScm\apollo\apollo-db\ApolloDatabase\sql\debug\ApolloDatabase.deploymanifest
+D:\GitScm\apollo\apollo-db\ApolloDatabase\sql\debug\ApolloDatabase.dbschema
+D:\GitScm\apollo\apollo-db\ApolloDatabase\obj\Debug\ApolloDatabase.dbschema
