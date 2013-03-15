@@ -1,6 +1,6 @@
 ﻿USE [DB05]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Forecast_OddsGetTopByMatch]    Script Date: 3/5/2013 10:56:14 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Forecast_OddsGetTopByMatch]    Script Date: 3/15/2013 3:30:05 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -9,6 +9,7 @@ ALTER PROCEDURE [dbo].[Age_Forecast_OddsGetTopByMatch]
 	@matchid INT,
 	@bettype INT = 1
 AS
+
 /**
  * Created by	: Quinn
  * Date			: 20130304
@@ -22,6 +23,7 @@ AS
  */
 
 SET NOCOUNT ON
+
 SELECT 	
 	TOP 1 hdp1, 
 	hdp2, 
@@ -33,10 +35,10 @@ SELECT
 	oddsstatus,
 	m.homeid,
 	m.awayid,
-	ISNULL(m.isNeutral, CONVERT(BIT,0)) AS IsNeutral	
+	ISNULL(m.isNeutral, CONVERT(BIT, 0)) AS IsNeutral	
 FROM 
 	odds WITH (NOLOCK)
-	LEFT JOIN match M WITH (NOLOCK) ON odds.matchid = M.matchid 		
+	LEFT JOIN match AS M WITH (NOLOCK) ON odds.matchid = M.matchid 		
 WHERE 
 	bettype = @bettype 
 	AND odds.matchid = @matchid

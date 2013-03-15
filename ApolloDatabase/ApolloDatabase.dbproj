@@ -66,6 +66,7 @@
     <Folder Include="Agent\User management" />
     <Folder Include="Agent\Misc" />
     <Folder Include="Agent\Customer Setting\Test" />
+    <Folder Include="Agent\AccountInfo" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -368,6 +369,21 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Customer Setting\Acc_Customer_UpdateSetting.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\AccountInfo\Age_Customer_GetAllInfo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\AccountInfo\Age_Customer_GetAgentDownLine.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\AccountInfo\Age_Customer_GetAgentDownLinePath.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\AccountInfo\Age_Customer_GetMembersDownLine.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\AccountInfo\Age_Customer_GetUserSearch.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
