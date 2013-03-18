@@ -1,6 +1,6 @@
-﻿USE [DB05]
+﻿USE DB05
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAllInfo]    Script Date: 3/18/2013 11:32:53 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAllInfo]    Script Date: 3/18/2013 2:08:19 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -48,7 +48,12 @@ BEGIN
 		@ParentName = b.Username,
 		@Enable = a.Enabled
 	FROM 
-	(	SELECT * 
+	(	SELECT 
+			AgentId,
+			Username,
+			AgentLevel,
+			Enabled,
+			ParentId  
 		FROM AgentInfo WITH (NOLOCK) 
 		WHERE 
 		((@CustId = -1 AND Username = @UserName) OR (@CustId <> -1 AND AgentId = @CustId))
@@ -77,11 +82,17 @@ BEGIN
 		@UGroup = a.UGroup,
 		@Enable = a.Enabled 
 	FROM 
-	( SELECT * FROM CustInfo p WITH (NOLOCK) 
-	WHERE 
-		((@CustId = -1 AND Username = @UserName) OR (@CustId <> -1 AND CustId = @CustId))
-		AND (SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = p.AgentId).IsDescendantOf(
-		(SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @CurrentAgentId)) = 1
+	(	SELECT 
+			 CustId,
+			 Username,
+			 AgentId,
+			 UGroup,
+			 Enabled
+		FROM CustInfo p WITH (NOLOCK) 
+		WHERE 
+			((@CustId = -1 AND Username = @UserName) OR (@CustId <> -1 AND CustId = @CustId))
+			AND (SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = p.AgentId).IsDescendantOf(
+			(SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @CurrentAgentId)) = 1
 	) a
 	INNER JOIN AgentInfo b WITH (NOLOCK) ON a.AgentId = b.AgentId
 
