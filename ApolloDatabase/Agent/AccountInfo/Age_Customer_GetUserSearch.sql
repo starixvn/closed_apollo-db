@@ -1,6 +1,6 @@
 ﻿USE [DB05]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetUserSearch]    Script Date: 3/15/2013 3:28:59 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetUserSearch]    Script Date: 3/18/2013 2:29:42 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -36,7 +36,7 @@ BEGIN
 		AgentInfo WITH (NOLOCK) 
 	WHERE 
 		AgentId <> @AgentId
-		AND Username like @UserName + '%'
+		AND Username LIKE @UserName + '%'
 		AND AgentHId.IsDescendantOf((SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @AgentId)) = 1
 	ORDER BY
 		Username	
@@ -48,7 +48,7 @@ BEGIN
 		p.Username 
 	FROM CustInfo p WITH (NOLOCK) 
 	WHERE 
-		Username like @UserName + '%'
+		Username LIKE @UserName + '%'
 		AND (SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = p.AgentId).IsDescendantOf(
 		(SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @AgentId)) = 1
 	ORDER BY
