@@ -1,16 +1,17 @@
 ﻿USE [DB05]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAllInfo]    Script Date: 3/15/2013 3:20:15 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAllInfo]    Script Date: 3/18/2013 11:32:53 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- [Age_Customer_GetAllInfo] 3, 'testcs-3-4', false
--- [Age_Customer_GetAllInfo] 4, 'anders-tes-3-10', true
+-- [Age_Customer_GetAllInfo] 4, 6 ,'anders-tes-3-10', true
 
 ALTER PROCEDURE [dbo].[Age_Customer_GetAllInfo]
-	@CurrentAgentId INT = null,
-	@UserName VARCHAR(50),
+	@CurrentAgentId INT = -1,
+	@CustId INT = -1,
+	@UserName VARCHAR(50) = null,
 	@IsMember BIT = 0
 AS
 
@@ -29,7 +30,7 @@ AS
 SET NOCOUNT ON
 DECLARE @ObjectId INT,
 	@AgentLevel SMALLINT,
-	@AgentHId HIERARCHYID,
+	-- @AgentHId HIERARCHYID,
 	@ParentId INT,
 	@ParentName VARCHAR(50),
 	@HasAgentDownLine BIT = 0,
@@ -41,7 +42,7 @@ IF (@IsMember = 0)
 BEGIN
 	SELECT 
 		@ObjectId = a.AgentId, 
-		@AgentHId = a.AgentHId,
+		@UserName = a.Username,
 		@AgentLevel = a.AgentLevel,
 		@ParentId = b.AgentId,
 		@ParentName = b.Username,
@@ -50,7 +51,7 @@ BEGIN
 	(	SELECT * 
 		FROM AgentInfo WITH (NOLOCK) 
 		WHERE 
-		Username = @UserName
+		((@CustId = -1 AND Username = @UserName) OR (@CustId <> -1 AND AgentId = @CustId))
 		AND AgentId <> @CurrentAgentId
 		AND AgentHId.IsDescendantOf((SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @CurrentAgentId)) = 1
 	) a
@@ -70,6 +71,7 @@ ELSE
 BEGIN
 	SELECT 
 		@ObjectId = a.CustId,
+		@UserName = a.Username,
 		@ParentId = a.AgentId,
 		@ParentName = b.Username,
 		@UGroup = a.UGroup,
@@ -77,7 +79,7 @@ BEGIN
 	FROM 
 	( SELECT * FROM CustInfo p WITH (NOLOCK) 
 	WHERE 
-		Username = @UserName
+		((@CustId = -1 AND Username = @UserName) OR (@CustId <> -1 AND CustId = @CustId))
 		AND (SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = p.AgentId).IsDescendantOf(
 		(SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @CurrentAgentId)) = 1
 	) a

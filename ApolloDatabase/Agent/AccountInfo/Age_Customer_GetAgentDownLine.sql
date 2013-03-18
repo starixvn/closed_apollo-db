@@ -1,11 +1,11 @@
 ﻿USE [DB05]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAgentDownLine]    Script Date: 3/15/2013 3:27:00 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAgentDownLine]    Script Date: 3/18/2013 11:29:59 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- [Age_Customer_GetDownLine] 2
+-- [Age_Customer_GetAgentDownLine] 7
 ALTER PROCEDURE [dbo].[Age_Customer_GetAgentDownLine]
 	@AgentId INT
 AS
@@ -27,8 +27,9 @@ SELECT
 	AgentId, 
 	Username,
 	ParentId,
-	Enabled
-FROM AgentInfo WITH (NOLOCK) 
+	Enabled,
+	CASE WHEN (EXISTS (SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE ParentId = a.AgentId)) THEN 'true' ELSE 'false' END AS hasChildren
+FROM AgentInfo a WITH (NOLOCK) 
 WHERE 
 	ParentId = @AgentId
 ORDER BY Username

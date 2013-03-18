@@ -1,13 +1,13 @@
 ﻿USE [DB05]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAgentDownLinePath]    Script Date: 3/15/2013 3:27:41 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAgentDownLinePath]    Script Date: 3/18/2013 11:30:57 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- [Age_Customer_GetDownLinePath] 3, 8
 ALTER PROCEDURE [dbo].[Age_Customer_GetAgentDownLinePath]
-	@CustID INT,
+	@ParentId INT,
 	@AgentId INT
 AS
 
@@ -34,7 +34,7 @@ SELECT
 FROM 
 	AgentInfo WITH (NOLOCK) 
 WHERE 
-	AgentHId.IsDescendantOf((SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @CustID)) = 1
+	AgentHId.IsDescendantOf((SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @ParentId)) = 1
 	AND (SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @AgentId).IsDescendantOf(AgentHId) = 1
-	-- AND AgentId <> @CustID
+ORDER BY AgentLevel
 

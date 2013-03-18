@@ -1,12 +1,12 @@
 ﻿USE [DB05]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetMembersDownLine]    Script Date: 3/15/2013 3:28:22 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetMemberDownLine]    Script Date: 3/18/2013 11:33:56 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- [Age_Customer_GetDownLine] 2
-ALTER PROCEDURE [dbo].[Age_Customer_GetMembersDownLine]
+ALTER PROCEDURE [dbo].[Age_Customer_GetMemberDownLine]
 	@AgentId INT
 AS
 

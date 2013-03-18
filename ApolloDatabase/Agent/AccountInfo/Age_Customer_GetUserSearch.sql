@@ -38,8 +38,9 @@ BEGIN
 		AgentId <> @AgentId
 		AND Username like @UserName + '%'
 		AND AgentHId.IsDescendantOf((SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @AgentId)) = 1
-		
-	END
+	ORDER BY
+		Username	
+END
 ELSE
 BEGIN
 	SELECT 
@@ -50,4 +51,6 @@ BEGIN
 		Username like @UserName + '%'
 		AND (SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = p.AgentId).IsDescendantOf(
 		(SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @AgentId)) = 1
+	ORDER BY
+		Username
 END
