@@ -380,7 +380,7 @@
     <NotInBuild Include="Agent\AccountInfo\Age_Customer_GetAgentDownLinePath.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\AccountInfo\Age_Customer_GetMembersDownLine.sql">
+    <NotInBuild Include="Agent\AccountInfo\Age_Customer_GetMemberDownLine.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\AccountInfo\Age_Customer_GetUserSearch.sql">
