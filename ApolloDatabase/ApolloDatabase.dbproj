@@ -374,7 +374,7 @@
     <NotInBuild Include="Agent\AccountInfo\Age_Customer_GetAllInfo.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\AccountInfo\Age_Customer_GetAgentDownLine.sql">
+    <NotInBuild Include="Agent\AccountInfo\Age_Customer_GetAgentDownline.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\AccountInfo\Age_Customer_GetAgentDownLinePath.sql">

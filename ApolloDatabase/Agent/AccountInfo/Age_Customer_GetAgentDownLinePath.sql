@@ -6,7 +6,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- [Age_Customer_GetDownLinePath] 3, 8
-ALTER PROCEDURE [dbo].[Age_Customer_GetAgentDownLinePath]
+ALTER PROCEDURE [dbo].[Age_Customer_GetAgentDownlinePath]
 	@ParentId INT,
 	@AgentId INT
 AS

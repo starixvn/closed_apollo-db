@@ -6,7 +6,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- [Age_Customer_GetDownLine] 2
-ALTER PROCEDURE [dbo].[Age_Customer_GetMemberDownLine]
+ALTER PROCEDURE [dbo].[Age_Customer_GetMemberDownline]
 	@AgentId INT
 AS
 
