@@ -67,6 +67,7 @@
     <Folder Include="Agent\Misc" />
     <Folder Include="Agent\Customer Setting\Test" />
     <Folder Include="Agent\AccountInfo" />
+    <Folder Include="CSD\Settlement" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -384,6 +385,72 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\AccountInfo\Age_Customer_GetUserSearch.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Match_Update.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Calculate_1.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Calculate_2.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Calculate_3.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Calculate_4.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Calculate_5.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Calculate_6.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Calculate_7.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Calculate_8.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Calculate_13.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Calculate_22.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Calculate_24.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Calculate_25.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Calculate_26.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Calculate_27.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Calculate_28.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Calculate_Undo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Match_UpdateMatchRemark.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Settlement_1.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Settlement_2.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Settlement_3.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\WriteLog_Settlement_Settle.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>

@@ -175,4 +175,5 @@ BEGIN
 */
 END
 
-
+GO
+GRANT EXECUTE ON [dbo].[Admin_Match_Update] TO [aplweb]
