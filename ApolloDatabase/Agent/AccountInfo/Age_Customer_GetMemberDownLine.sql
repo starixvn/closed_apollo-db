@@ -1,13 +1,16 @@
-﻿USE [DB05]
+﻿USE RepDB
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetMemberDownLine]    Script Date: 3/18/2013 11:33:56 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetMemberDownLine_test]    Script Date: 3/20/2013 2:00:53 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- [Age_Customer_GetDownLine] 2
-ALTER PROCEDURE [dbo].[Age_Customer_GetMemberDownline]
-	@AgentId INT
+ALTER PROCEDURE [dbo].[Age_Customer_GetMemberDownLine]
+	@AgentId INT,
+	@PageSize INT = 50,
+	@PageIndex	INT = 1,
+	@TotalPages	INT = 1 OUTPUT
 AS
 
 /**
@@ -22,13 +25,37 @@ AS
  */
 
 SET NOCOUNT ON
--- Member List
+
+DECLARE @RowCount INT, 
+		@RowStart INT, 
+		@RowEnd	INT,
+		@TotalItems INT
+SELECT	@PageIndex = @PageIndex - 1,
+		@RowStart = @PageSize * @PageIndex + 1,
+		@RowEnd = @RowStart + @PageSize - 1
+
+SELECT 
+	@TotalItems = COUNT(CustId), 
+	@TotalPages = @TotalItems/@PageSize + CASE WHEN @TotalItems % @PageSize > 0 THEN 1 ELSE 0 END
+FROM CustInfo p WITH(NOLOCK) 				 
+WHERE AgentId = @AgentId
+
 SELECT 
 	CustId,
 	Username,
 	AgentId,
-	Enabled 
-FROM CustInfo WITH (NOLOCK) 
+	Enabled  
+FROM 
+(
+	SELECT 
+		CustId,
+		Username,
+		AgentId,
+		Enabled,
+		ROW_NUMBER() OVER(ORDER BY Username) AS RowNumber 
+	FROM CustInfo WITH (NOLOCK) 
+	WHERE 
+		AgentId = @AgentId
+) p
 WHERE 
-	AgentId = @AgentId
-ORDER BY Username
+	p.RowNumber BETWEEN @RowStart AND @RowEnd
