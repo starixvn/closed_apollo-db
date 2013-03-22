@@ -1,0 +1,53 @@
+ALTER PROCEDURE [dbo].[Admin_Calculate_RefundAll]
+	@matchid			int	
+AS
+/*	Created by: Dan
+	Date: 2013-03-21
+	Task: Refund All
+	DB: SVRTXN/TransDB
+	Revisions:
+	
+*/
+SET NOCOUNT ON 
+
+BEGIN
+	WHILE 1=1
+	BEGIN
+	   UPDATE TOP (10000) dbo.bettrans with (ROWLOCK, UPDLOCK)
+	   set 
+			[status]='Refund',
+			statusID = 103,
+			winlost=actual_stake,			
+			playercomm=0,
+			ruben=1,
+			statuswinlost=0
+		where
+			matchid=@matchid
+			--and [status] not in ('Void', 'Reject')
+			AND statusID not in (103,101,102)
+			AND bettype <> 14
+			and bettype not between 1301 and 1334 -- exclude sporting solution product
+		IF @@ROWCOUNT < 10000 BREAK
+	END
+
+	WHILE 1=1
+	BEGIN
+		UPDATE TOP (10000) dbo.BetTrans_Agent with (ROWLOCK, UPDLOCK)
+		SET
+			status = 'Refund',
+			statusID = 103,
+			awinlost=0,
+			acomm=0
+		FROM  BetTrans_Agent b
+		where
+			b.matchid=@matchid
+			--AND [status] not in ('Void', 'Reject')
+			AND b.statusID not in (103,101,102)
+			AND b.bettype <> 14			
+			and b.bettype not between 1301 and 1334 -- exclude sporting solution product
+    
+		IF @@ROWCOUNT < 10000 BREAK
+	END
+END
+GO
+GRANT EXECUTE ON [dbo].[Admin_Calculate_RefundAll] TO [aplweb]
