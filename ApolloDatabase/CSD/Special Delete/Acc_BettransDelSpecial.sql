@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[Acc_BettransDelSpecial]
+﻿CREATE PROCEDURE [dbo].[Acc_BettransDelSpecial]
     @matchid INT,
     @f_transid BIGINT,
     @t_transid BIGINT,
