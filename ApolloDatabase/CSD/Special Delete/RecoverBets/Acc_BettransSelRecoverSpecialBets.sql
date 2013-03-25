@@ -1,6 +1,5 @@
-﻿CREATE  PROCEDURE [dbo].[Acc_BettransSelRecoverSpecialBets]
+﻿ALTER  PROCEDURE [dbo].[Acc_BettransSelRecoverSpecialBets]
     @transid bigint,
-    @Type SMALLINT = 0,
     @ErrCode INT = 0 OUTPUT,
 	@ErrMsg VARCHAR(1000) = '' OUTPUT
 AS
@@ -8,14 +7,14 @@ AS
 Created: Sophia
 Date:  20130307
 Task: get data to recover bet
-DB: SVRCSD.repDB
+DB: SVRCSD.RepDB
 Revisions: 
 
 	
 Param's Explanation:
 	- @Type: sports type
 		0: Sportsbook
-		1: Virtual sports
+		
 */
 
 SET NOCOUNT ON
@@ -36,7 +35,7 @@ BEGIN
 		RETURN
 	END
 	
-	IF NOT (@bettype < 31  or @bettype between 121 AND 999) AND @Type = 0  
+	IF NOT (@bettype < 31  or @bettype between 121 AND 999) 
 	BEGIN
 		SET @ErrCode = 2  
 		SET @ErrMsg ='This TransID doesn''t belong to sportsbook.'  
@@ -61,9 +60,16 @@ BEGIN
 			b.betteam, 
 			b.OddsType, 
 			b.currency, 
-			b.betfrom
-    FROM zzzbettrans (nolock) z
-		INNER JOIN bettrans b (nolock)ON b.CustId = z.CustId AND b.matchid = z.matchid and b.transid = z.transid
+			b.betfrom,
+			m.HomeId, 
+			m.AwayId,
+			m.LeagueId,
+			m.SportType
+    FROM zzzbettrans z WITH (NOLOCK) 
+	INNER JOIN bettrans b WITH (NOLOCK) 
+			ON b.CustId = z.CustId AND b.matchid = z.matchid and b.transid = z.transid
+	INNER JOIN Match m WITH (NOLOCK) 
+			ON m.MatchId = b.matchId
     WHERE z.transid = @transid AND b.matchid>0
     ORDER BY z.transid
 END
