@@ -27,30 +27,6 @@ Param's Explanation:
 */
 BEGIN
 	SET NOCOUNT ON
-
-	--Check permission for account site: @phuc20080213
-	--EXEC DBPOLICY.bodb02.dbo.Acc_Con_CheckPermission @custid=@UserID,@funcname='[SpecialDeleteNumberGame]',@ErrCode=@ErrCode OUTPUT,@ErrMsg=@ErrMsg OUTPUT
-	--IF @ErrCode <> 0
-	--	RETURN
-	--end
-	
-	DECLARE @today SMALLDATETIME
-	SET @today = convert(nvarchar(10), current_timestamp, 120)
-	
-	--Check settled Date
-	DECLARE @eventdate Datetime 
-	SELECT	@eventdate = eventdate
-	FROM	match WITH (NOLOCK)
-	WHERE	matchid = @matchid
-	
-	IF(@eventdate <> @today)
-	BEGIN
-		SELECT  @ErrCode = 103,
-				@ErrMsg = 'You are only allowed to delete today tickets.'
-		RETURN
-	END
-	
-	
 	
 	DECLARE @LogData NVARCHAR(500)
 	DECLARE @Remark VARCHAR(500)
@@ -171,8 +147,7 @@ BEGIN
 			WHERE
 				b.matchid = @matchid 						
 				AND b.transid BETWEEN @f_transid AND @t_transid			
-				and bettype BETWEEN 81 and 120					
-				AND winlostdate = @today
+				and bettype BETWEEN 81 and 120		
 				AND statusID NOT IN (101, 102, 121)											
 				AND
 				(   
