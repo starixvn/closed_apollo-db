@@ -8,7 +8,7 @@ GO
 
 
 
-ALTER PROCEDURE [dbo].[Acc_AgentUser_Insert]
+ALTER PROCEDURE [dbo].[Age_AgentUser_Insert]
 	@AgentUserId			INT,
 	@AgentId				INT,	
 	@Username				VARCHAR(50),
@@ -25,7 +25,7 @@ AS
  * Created by	: Edward
  * Date			: 20130304
  * Task			: Add new agent user information
- * DB			: SVRAGE.CustDB
+ * DB			: SVRCUST.CustDB
  * Revisions	:
  *	• 
  * Parameters:
