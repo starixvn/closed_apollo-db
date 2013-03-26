@@ -44,6 +44,24 @@ BEGIN
 		RETURN
 	END
 
+	DECLARE @Status TABLE (statusID TINYINT)
+
+		/*
+		INSERT INTO @Status
+		SELECT 'Void' UNION ALL
+		SELECT 'Reject' UNION ALL
+		SELECT 'WON' UNION ALL
+		SELECT 'LOSE' UNION ALL
+		SELECT 'DRAW'
+		*/
+		INSERT INTO @Status
+		SELECT 102 UNION ALL
+		SELECT 101 UNION ALL
+		SELECT 112 UNION ALL
+		SELECT 113 UNION ALL
+		SELECT 111
+
+
 	----################ check concurrent running #####################----
 	---- check by TempVariableNumber
 	IF EXISTS (SELECT 1 FROM dbo.TempVariableNumber WHERE KeyID = 1 AND KeyValue = @matchid)
@@ -148,7 +166,7 @@ BEGIN
 				b.matchid = @matchid 						
 				AND b.transid BETWEEN @f_transid AND @t_transid			
 				and bettype BETWEEN 81 and 120		
-				AND statusID NOT IN (101, 102, 121)											
+				AND statusID NOT IN (101, 102)											
 				AND
 				(   
 					(b.bettype IN (SELECT CONVERT(INT,val) FROM dbo.strSplit(@Dead,'^')) AND b.liveindicator = 0)
@@ -157,8 +175,61 @@ BEGIN
 				) 		
 				and  b.transid in (SELECT CONVERT(BIGINT, val) FROM dbo.strSplit(@transids, ','))
 				
+	----------------------------------------------------------------------------
+			
+	IF EXISTS (SELECT 1 FROM #BetDelete WHERE statusID IN (111,112,113))
+	BEGIN
+		SELECT @ErrCode = 100, @ErrMsg = 'You can only delete the unsettled or refunded tickets.'
+		
+		----release data of TempVariableNumber table
+		DELETE FROM dbo.TempVariableNumber WITH (ROWLOCK,UPDLOCK)
+		WHERE KeyID = 1 AND KeyValue = @matchid
+		IF (@@Error = 0)
+		BEGIN TRY
+			EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
+				@UserID = @UserID, 
+				@Matchid = @matchid, 
+				@KeyID = 1,
+				@ActionID = 0, 
+				@Remark = 'DEL SUCCESS SPName=Acc_BettransDelSpecial_NumberGame'
+		END TRY
+		BEGIN CATCH
+			SELECT @Remark = 'DEL SUCCESS SPName=Acc_BettransDelSpecial_NumberGame ErrMsg=' + left(error_message(), 400)
+			EXEC LogDB.dbo.WriteLog_Settlement_Checking 
+				@UserID = @UserID, 
+				@Matchid = @matchid, 
+				@KeyID = 1,
+				@ActionID = 0, 
+				@Remark = @Remark
+		END CATCH
+		ELSE
+		BEGIN
+			BEGIN TRY
+				EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
+					@UserID = @UserID, 
+					@Matchid = @matchid, 
+					@KeyID = 1,
+					@ActionID = 0, 
+					@Remark = 'DEL FAILED SPName=Acc_BettransDelSpecial_NumberGame'
+			END TRY
+			BEGIN CATCH
+				SELECT @Remark = 'DEL FAILED SPName=Acc_BettransDelSpecial_NumberGame ErrMsg=' + left(error_message(), 400)
+				EXEC LogDB.dbo.WriteLog_Settlement_Checking 
+					@UserID = @UserID, 
+					@Matchid = @matchid, 
+					@KeyID = 1,
+					@ActionID = 0, 
+					@Remark = @Remark
+			END CATCH
+		END
+		RETURN
+	END
+	ELSE
+	BEGIN
+		DELETE FROM #BetDelete WHERE statusID IN (SELECT * FROM @Status)
+	END
 										
-
+	--------------------------------------------------------------------------
 	
 	-- STEP 1 : BackUp
 	INSERT INTO zzzbettrans
@@ -192,37 +263,8 @@ BEGIN
 	WHERE	b.transid in (SELECT transid FROM #BetDelete)
 	GROUP BY b.CustId
 	
-	--INSERT INTO @NegativeBalanceCust (CustId, IsNegative)
-	--select  won.CustId,
-	--		case when won.balance > 0 and (c.credit + bal.balance - won.balance) < 0 THEN 1 ELSE 0 END 
-	--from #BeforeUpd won
-	--	inner join @BalanceCust bal on won.CustId= bal.CustId
-	--	inner join custInfo c with (NOLOCK) ON bal.CustId = c.CustId	
-
-	---- Get ticket infomation to mail related department before void ticket
-	--CREATE TABLE #TicketInfo(CustId int, odds smallmoney, oddstype tinyint, transdate datetime, bettype int, transid bigint, betteam nvarchar(20), hdp1 smallmoney, hdp2 smallmoney, betfrom nvarchar(2), stake money, winlost money, comm money, status nvarchar(20), currency tinyint, liveindicator bit, creator int)
-	--INSERT INTO #TicketInfo (CustId, odds, oddstype, transdate, bettype, transid, betteam, hdp1, hdp2, betfrom, stake, winlost, comm, status, currency, liveindicator, creator)
-	--SELECT			
-	--		b.CustId,
-	--		b.odds,  
-	--		b.OddsType, 
-	--		b.transdate,
-	--		b.bettype,
-	--		b.transid,
-	--		b.betteam,
-	--		b.hdp1,
-	--		b.hdp2,
-	--		b.betfrom,
-	--		b.stake,
-	--		b.winlost - actual_stake as winlost,
-	--		b.playercomm as comm, 
-	--		b.status,		          
-	--		b.currency,
-	--		b.liveindicator, 
-	--		b.creator
-	--FROM bettrans b WITH (NOLOCK)			
-	--WHERE b.transid IN(SELECT transid FROM #BetDelete)
 	
+		
 	-- STEP 2 : Update
 		UPDATE 
 			bettrans WITH (ROWLOCK, UPDLOCK)
