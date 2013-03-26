@@ -44,7 +44,8 @@ where
 order by transid
 
 
-SELECT * FROM #OutrightDeleteBets with (NOLOCK)
+SELECT * FROM #OutrightDeleteBets WITH (NOLOCK)
+ORDER BY transid
 
 DROP TABLE #OutrightDeleteBets
 
