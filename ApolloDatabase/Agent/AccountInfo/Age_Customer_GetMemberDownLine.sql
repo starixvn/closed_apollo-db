@@ -1,12 +1,12 @@
 ﻿USE RepDB
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetMemberDownLine_test]    Script Date: 3/20/2013 2:00:53 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetMemberDownline]    Script Date: 3/26/2013 10:39:54 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- [Age_Customer_GetDownLine] 2
-ALTER PROCEDURE [dbo].[Age_Customer_GetMemberDownLine]
+-- [Age_Customer_GetMemberDownline] 2
+ALTER PROCEDURE [dbo].[Age_Customer_GetMemberDownline]
 	@AgentId INT,
 	@PageSize INT = 50,
 	@PageIndex	INT = 1,
@@ -41,7 +41,7 @@ FROM CustInfo p WITH(NOLOCK)
 WHERE AgentId = @AgentId
 
 SELECT 
-	CustId,
+	CustId AS Id,
 	Username,
 	AgentId,
 	Enabled  
