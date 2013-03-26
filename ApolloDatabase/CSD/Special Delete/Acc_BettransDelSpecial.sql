@@ -28,7 +28,7 @@ AS
 /*
 Created by: Sophia
 Date: 20130305
-Task : delete bet
+Task : delete single bet and outright
 DB: SVRTXN.TransDB
 Original: 
 
