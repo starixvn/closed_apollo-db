@@ -54,6 +54,7 @@ BEGIN
 			b.bettype, 
 			b.liveindicator, 
 			b.betteam, 
+			b.betID,
 			b.OddsType, 
 			b.currency, 
 			b.betfrom			
