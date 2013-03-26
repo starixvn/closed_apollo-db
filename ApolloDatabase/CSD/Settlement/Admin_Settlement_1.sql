@@ -226,7 +226,7 @@ BEGIN
 	WHERE	matchid = @matchid
 
 
-	EXEC ProdDB.dbo.Admin_Match_Update @Command	= 'Admin_Settlement_1-CAL', 
+	EXEC SVRPRO.ProdDB.dbo.Admin_Match_Update @Command	= 'Admin_Settlement_1-CAL', 
 											@MatchID	= @matchid,
 											@FTHome		= @fth,
 											@FTAway		= @fta,
@@ -244,7 +244,6 @@ BEGIN
 		EXEC dbo.Admin_Settlement_3 @creator, @matchid, @action
 	END
 
-/* later
 	--Check and calc FGLG
 	IF @action IN('CAL', 'CAL-FT') 	
 	BEGIN
@@ -262,7 +261,7 @@ BEGIN
 	
 
 	END
-*/
+
 	IF @eventstatus = 'completed'
 		EXEC SVRPRO.ProdDB.dbo.[Admin_Match_UpdateMatchRemark] @matchid, 'C'
 	ELSE IF @action = 'CAL-HT'
