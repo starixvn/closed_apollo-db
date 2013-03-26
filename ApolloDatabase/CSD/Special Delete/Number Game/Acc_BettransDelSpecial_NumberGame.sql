@@ -384,12 +384,12 @@ BEGIN
 
 		 
 	---- List data to put Message
-	SELECT  B.TransId, A.AgentID as TargetID, A.Username as TargetName
+	SELECT  B.TransId, A.AgentID as TargetID, A.Username as TargetName, 1 as IsAgent
 	FROM	#BetDelete B
 	INNER JOIN Bettrans_Agent A WITH (NOLOCK)
 			ON A.TransID = B.TransID
 	UNION ALL
-	SELECT  B.TransId, B.CustId as TargetID, B.PlayerName as TargetName
+	SELECT  B.TransId, B.CustId as TargetID, B.PlayerName as TargetName, 0 as IsAgent
 	FROM	#BetDelete B
 
 

@@ -249,13 +249,13 @@ BEGIN
 
 	
 	---- List data to put Message
-	SELECT  @TransId as TransId, A.AgentID as TargetID, A.Username as TargetName
+	SELECT  @TransId as TransId, A.AgentID as TargetID, A.Username as TargetName, 1 as IsAgent
 	FROM	Bettrans B WITH (NOLOCK)
 	INNER JOIN Bettrans_Agent A WITH (NOLOCK)
 			ON A.TransID = B.TransID
 	WHERE B.TransId = @TransId
 	UNION ALL
-	SELECT  @TransId as TransId, @CustId as TargetId, @Username as TargetName
+	SELECT  @TransId as TransId, @CustId as TargetId, @Username as TargetName, 0 as IsAgent
 	
 
 
