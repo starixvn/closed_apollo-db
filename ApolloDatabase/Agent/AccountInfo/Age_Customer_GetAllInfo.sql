@@ -1,6 +1,6 @@
 ﻿USE RepDB
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAllInfo]    Script Date: 3/25/2013 3:28:46 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAllInfo]    Script Date: 3/26/2013 10:42:00 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -105,11 +105,10 @@ SELECT
 		@ObjectId AS Id, 
 		@UserName AS UserName, 
 		@AgentLevel AS AgentLevel,
-		@ParentId AS ParentId,
-		@ParentName AS ParentName,
 		@HasAgentDownline AS HasAgentDownline, 
 		@HasMemberDownline AS HasMemberDownline,
 		@Enable AS Enable,
-		@UGroup AS UserGroup
+		@UGroup AS UserGroup,
+		@ParentId AS ParentId,
+		@ParentName AS ParentName
 
----- Retrive downline
