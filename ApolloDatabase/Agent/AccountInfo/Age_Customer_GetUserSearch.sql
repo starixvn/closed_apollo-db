@@ -1,6 +1,6 @@
-﻿USE [DB05]
+﻿USE RepDB
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetUserSearch]    Script Date: 3/18/2013 2:29:42 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetUserSearch]    Script Date: 3/26/2013 10:39:23 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -26,7 +26,7 @@ AS
  */
 
 SET NOCOUNT ON
--- Member List
+
 IF (@IsMember = 0)
 BEGIN
 	SELECT 

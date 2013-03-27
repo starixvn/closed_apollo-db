@@ -1,6 +1,6 @@
-﻿USE DB05
+﻿USE RepDB
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAllInfo]    Script Date: 3/18/2013 2:08:19 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAllInfo]    Script Date: 3/26/2013 10:42:00 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -33,8 +33,8 @@ DECLARE @ObjectId INT,
 	-- @AgentHId HIERARCHYID,
 	@ParentId INT,
 	@ParentName VARCHAR(50),
-	@HasAgentDownLine BIT = 0,
-	@HasPlayerDownLine BIT = 0,
+	@HasAgentDownline BIT = 0,
+	@HasMemberDownline BIT = 0,
 	@UGroup varchar(3),
 	@Enable  BIT = 0
 
@@ -66,10 +66,10 @@ BEGIN
 		RETURN
 
 	IF(EXISTS (SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE ParentId = @ObjectId))
-		SET @HasAgentDownLine = 1
+		SET @HasAgentDownline = 1
 
 	IF(EXISTS (SELECT 1 FROM CustInfo WITH (NOLOCK) WHERE AgentId = @ObjectId))
-		SET @HasPlayerDownLine = 1
+		SET @HasMemberDownline = 1
 
 END
 ELSE
@@ -102,14 +102,13 @@ END
 
 SELECT 
 		@IsMember AS IsMember,
-		@ObjectId AS ObjectId, 
+		@ObjectId AS Id, 
 		@UserName AS UserName, 
 		@AgentLevel AS AgentLevel,
-		@ParentId as ParentId,
-		@ParentName as ParentName,
-		@HasAgentDownLine AS HasAgentDownLine, 
-		@HasPlayerDownLine AS HasPlayerDownLine,
-		@Enable as Enabled,
-		@UGroup as UGroup
+		@HasAgentDownline AS HasAgentDownline, 
+		@HasMemberDownline AS HasMemberDownline,
+		@Enable AS Enable,
+		@UGroup AS UserGroup,
+		@ParentId AS ParentId,
+		@ParentName AS ParentName
 
----- Retrive downline

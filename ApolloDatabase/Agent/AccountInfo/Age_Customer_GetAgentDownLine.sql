@@ -1,6 +1,6 @@
-﻿USE [DB05]
+﻿USE RepDB
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAgentDownLine]    Script Date: 3/18/2013 11:29:59 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAgentDownline]    Script Date: 3/25/2013 2:31:10 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -24,13 +24,12 @@ AS
 SET NOCOUNT ON
 
 SELECT 
-	AgentId, 
+	AgentId AS Id, 
 	Username,
 	ParentId,
 	Enabled,
-	CASE WHEN (EXISTS (SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE ParentId = a.AgentId)) THEN 'true' ELSE 'false' END AS hasChildren
+	CASE WHEN (EXISTS (SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE ParentId = a.AgentId)) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS HasChildren
 FROM AgentInfo a WITH (NOLOCK) 
 WHERE 
 	ParentId = @AgentId
 ORDER BY Username
-
