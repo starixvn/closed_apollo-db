@@ -7,7 +7,7 @@ ALTER PROCEDURE [dbo].[Admin_Match_UpdateMatchRemark]
 	Created date: 2013-03-08
 	Task:  	--part of replication (call by settle_new_test2)
 			--MUST modify in all replication if modify the code
-	DB: DB02.ProdDB
+	DB: SVRPRO/ProdDB
 	Original SP: updateMatch_remark
 	
 	Revisions:
@@ -17,8 +17,8 @@ ALTER PROCEDURE [dbo].[Admin_Match_UpdateMatchRemark]
 AS
 SET NOCOUNT ON 
 
-DECLARE @IsHTCal BIT, @Calculate BIT, @IsPending BIT
-SELECT	@IsHTCal = IsHTCal, @Calculate = Calculate, @IsPending = IsPending
+DECLARE @IsHTCal BIT, @Calculate BIT--, @IsPending BIT
+SELECT	@IsHTCal = IsHTCal_APL, @Calculate = Calculate_APL--, @IsPending = IsPending
 FROM	match_remark WITH (NOLOCK)
 WHERE	matchid = @matchid 
 
@@ -27,24 +27,23 @@ IF NOT EXISTS (SELECT * FROM match_remark with (nolock) WHERE matchid = @matchid
 	INSERT INTO match_remark (matchid, LiveTimer, LivePeriod, HomeRedCard, AwayRedCard) 
 			VALUES (@matchid, '01 JAN 2000',0,0,0)
 
---IF @command = 'Q' UPDATE match_remark with (rowlock, updlock) SET Calculate = 0, multiple = 0, calrefund = 0, calStatus = 'Q' WHERE matchid = @matchid
-IF @command = 'C' UPDATE match_remark with (rowlock, updlock) SET Calculate = 1, calrefund = 0, IsHTCal = 1, isPending = 0, isUndecided = 0 WHERE matchid = @matchid -- whole match calculated
+--IF @command = 'Q' UPDATE match_remark with (rowlock, updlock) SET Calculate_APL = 0, multiple_APL = 0, calrefund_APL_APL = 0, calStatus = 'Q' WHERE matchid = @matchid
+IF @command = 'C' 
+	UPDATE match_remark with (rowlock, updlock) 
+	SET Calculate_APL = 1, calrefund_APL = 0, IsHTCal_APL = 1
+	WHERE matchid = @matchid -- whole match Calculate_APLd
 
-IF @command = 'H'  -- Half Time Calculated
+IF @command = 'H'  -- Half Time Calculate_APLd
 UPDATE match_remark with (rowlock, updlock) 
-SET		IsHTCal = 1 , 
-		isPending = CASE WHEN @IsHTCal = 0 AND @Calculate = 0 AND @IsPending = 1 THEN 0 ELSE isPending END,
-		isUndecided = 0
-WHERE	matchid = @matchid -- Half Time Calculated
+SET		IsHTCal_APL = 1 
+WHERE	matchid = @matchid -- Half Time Calculate_APLd
 
+IF @command = 'F' UPDATE match_remark with (rowlock, updlock) SET Calculate_APL = 0, IsHTCal_APL = 0, calrefund_APL = 1 WHERE matchid = @matchid -- Match refund_APL
 
+IF @command = 'M' UPDATE match_remark with (rowlock, updlock) SET multiple_APL = 1, refund_APL = 0 WHERE matchid = @matchid -- Mix Parlay Calculate_APLd
+IF @command = 'R' UPDATE match_remark with (rowlock, updlock) SET multiple_APL = 0, refund_APL = 1 WHERE matchid = @matchid -- Mix Parlay refund_APL
 
-IF @command = 'F' UPDATE match_remark with (rowlock, updlock) SET calculate = 0, IsHTCal = 0, calrefund = 1, isPending = 0, isUndecided = 0 WHERE matchid = @matchid -- Match Refund
-
-IF @command = 'M' UPDATE match_remark with (rowlock, updlock) SET multiple = 1, refund = 0, isUndecided = 0 WHERE matchid = @matchid -- Mix Parlay calculated
-IF @command = 'R' UPDATE match_remark with (rowlock, updlock) SET multiple = 0, refund = 1, isUndecided = 0 WHERE matchid = @matchid -- Mix Parlay Refund
-
-IF @command = 'U' UPDATE match_remark with (rowlock, updlock) SET IsHTCal = 0, Calculate = 0, multiple = 0, calrefund = 0, refund = 0, isUndecided = 0 WHERE matchid = @matchid -- [U]ndo settlement
+IF @command = 'U' UPDATE match_remark with (rowlock, updlock) SET IsHTCal_APL = 0, Calculate_APL = 0, multiple_APL = 0, calrefund_APL = 0, refund_APL = 0 WHERE matchid = @matchid -- [U]ndo settlement
 
 -- Total Bet control session
 -- relative to UserControl of Totalbet access
@@ -82,12 +81,6 @@ IF @command = 'LP1' UPDATE match_remark with (rowlock, updlock) SET LivePeriod =
 IF @command = 'LP2' UPDATE match_remark with (rowlock, updlock) SET LivePeriod = 2, LiveTimer = DATEADD(second, @ivalue, CURRENT_TIMESTAMP) WHERE matchid = @matchid
 	
 --DELETE FROM match_remark WHERE matchid IN (SELECT matchid FROM match14 with (nolock))
-
--- update isPending
-IF @command = 'IsP' UPDATE match_remark WITH (ROWLOCK, UPDLOCK) SET isPending = @ivalue WHERE matchid = @matchid   
-  
--- update isUndecided  
-IF @command = 'IsU' UPDATE match_remark WITH (ROWLOCK, UPDLOCK) SET isUndecided = @ivalue WHERE matchid = @matchid	--20120306@Hurri
 
 GO
 GRANT EXECUTE ON [dbo].[Admin_Match_UpdateMatchRemark] TO [aplweb]

@@ -4,7 +4,7 @@ AS
 /*	Created by: Dan
 	Date: 2013-03-21
 	Task: Refund FT 
-	DB: DBTRANS.BODB02
+	DB: SVRTXN/TransDB
 	
 	Revisions:
 		

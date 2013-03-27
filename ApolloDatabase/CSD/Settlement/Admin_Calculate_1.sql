@@ -12,7 +12,7 @@ IF @betcount = 0 AND @@SERVERNAME NOT LIKE N'DBIOM%' RETURN
 	Created by: Dan
 	Date: 2013-03-15
 	Task: Settlement 
-	DB: DBTRANS.TransDB
+	DB: SVRTXN/TransDB
 	Orginal SP: bodb02.[Admin_Calculate_1]
 	Revisions:
 		

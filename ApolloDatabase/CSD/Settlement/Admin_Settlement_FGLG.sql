@@ -194,10 +194,10 @@ DECLARE
 		@finalhomescore INT, @finalawayscore INT,
 		@hthomescore INT, @htawayscore INT
 SELECT 
-		@finalhomescore = finalhomescore,
-		@finalawayscore = finalawayscore,
-		@hthomescore = hthomescore, 
-		@htawayscore = htawayscore
+		@finalhomescore = finalhomescore_APL,
+		@finalawayscore = finalawayscore_APL,
+		@hthomescore = hthomescore_APL, 
+		@htawayscore = htawayscore_APL
  FROM	SVRPRO.ProdDB.dbo.match WITH(NOLOCK) WHERE matchid = @matchid
  
 DECLARE	@LogData VARCHAR(200)

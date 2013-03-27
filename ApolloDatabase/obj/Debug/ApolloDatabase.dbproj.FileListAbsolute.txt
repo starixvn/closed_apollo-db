@@ -4,3 +4,9 @@ D:\GitScm\apollo\apollo-db\ApolloDatabase\sql\debug\ApolloDatabase_Database.sqlc
 D:\GitScm\apollo\apollo-db\ApolloDatabase\sql\debug\ApolloDatabase.deploymanifest
 D:\GitScm\apollo\apollo-db\ApolloDatabase\sql\debug\ApolloDatabase.dbschema
 D:\GitScm\apollo\apollo-db\ApolloDatabase\obj\Debug\ApolloDatabase.dbschema
+D:\Project\Apollo\apollo-db\ApolloDatabase\sql\debug\ApolloDatabase_Database.sqlsettings
+D:\Project\Apollo\apollo-db\ApolloDatabase\sql\debug\ApolloDatabase_Database.sqldeployment
+D:\Project\Apollo\apollo-db\ApolloDatabase\sql\debug\ApolloDatabase_Database.sqlcmdvars
+D:\Project\Apollo\apollo-db\ApolloDatabase\sql\debug\ApolloDatabase.deploymanifest
+D:\Project\Apollo\apollo-db\ApolloDatabase\sql\debug\ApolloDatabase.dbschema
+D:\Project\Apollo\apollo-db\ApolloDatabase\obj\Debug\ApolloDatabase.dbschema
