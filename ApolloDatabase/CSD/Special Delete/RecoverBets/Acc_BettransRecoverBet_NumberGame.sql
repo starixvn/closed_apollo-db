@@ -53,7 +53,7 @@ BEGIN
 	INSERT INTO dbo.TempVariableNumber (KeyID, KeyValue) VALUES (1, @matchid)
 	IF (@@Error = 0)
 	BEGIN TRY
-		EXEC DBLOG.LogDB.dbo.WriteLog_Settlement_Checking
+		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking
 			@UserID = @userid, 
 			@Matchid = @matchid, 
 			@KeyID = 1,
@@ -88,7 +88,7 @@ BEGIN
 			WHERE KeyID = 1 AND KeyValue = @matchid
 			IF (@@Error = 0)
 			BEGIN TRY
-				EXEC DBLOG.LogDB.dbo.WriteLog_Settlement_Checking
+				EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking
 					@UserID = @userid, 
 					@Matchid = @matchid, 
 					@KeyID = 1,
@@ -107,7 +107,7 @@ BEGIN
 			ELSE
 			BEGIN
 				BEGIN TRY
-					EXEC DBLOG.LogDB.dbo.WriteLog_Settlement_Checking
+					EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking
 						@UserID = @userid, 
 						@Matchid = @matchid, 
 						@KeyID = 1,
@@ -163,7 +163,7 @@ BEGIN
 		WHERE KeyID = 1 AND KeyValue = @matchid	
 		IF (@@Error = 0)
 		BEGIN TRY
-			EXEC DBLOG.LogDB.dbo.WriteLog_Settlement_Checking
+			EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking
 				@UserID = @userid, 
 				@Matchid = @matchid, 
 				@KeyID = 1,
@@ -182,7 +182,7 @@ BEGIN
 		ELSE
 		BEGIN
 			BEGIN TRY
-				EXEC DBLOG.LogDB.dbo.WriteLog_Settlement_Checking
+				EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking
 					@UserID = @userid, 
 					@Matchid = @matchid, 
 					@KeyID = 1,
@@ -272,7 +272,7 @@ BEGIN
 	WHERE KeyID = 1 AND KeyValue = @matchid	
 	IF (@@Error = 0)
 	BEGIN TRY
-		EXEC DBLOG.LogDB.dbo.WriteLog_Settlement_Checking
+		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking
 			@UserID = @userid, 
 			@Matchid = @matchid, 
 			@KeyID = 1,
@@ -291,7 +291,7 @@ BEGIN
 	ELSE
 	BEGIN
 		BEGIN TRY
-			EXEC DBLOG.LogDB.dbo.WriteLog_Settlement_Checking
+			EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking
 				@UserID = @userid, 
 				@Matchid = @matchid, 
 				@KeyID = 1,
