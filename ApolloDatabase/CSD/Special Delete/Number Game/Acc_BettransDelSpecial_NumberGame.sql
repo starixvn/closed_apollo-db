@@ -222,6 +222,12 @@ BEGIN
 					@Remark = @Remark
 			END CATCH
 		END
+
+		----release data of systemSettings table
+		UPDATE	systemSettings WITH (ROWLOCK, UPDLOCK)
+		SET		VValue = '0'
+		WHERE	VName = 'isCalculatingNGManual'	
+
 		RETURN
 	END
 	ELSE
