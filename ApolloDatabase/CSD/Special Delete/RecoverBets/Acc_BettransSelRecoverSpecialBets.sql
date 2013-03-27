@@ -42,36 +42,72 @@ BEGIN
 		RETURN
 	END	
 	
-	
-    SELECT  DISTINCT z.transid AS refno, 
-			z.transid, 
-			z.CustId, 
-			b.username, 
-			b.transdate, 
-			b.hdp1, 
-			b.hdp2, 
-			b.odds, 
-			b.stake AS StakePositiontaking, 
-			z.STATUS, 
-			b.livehomescore, 
-			b.liveawayscore, 
-			b.bettype, 
-			b.liveindicator, 
-			b.betteam, 
-			b.OddsType, 
-			b.currency, 
-			b.betfrom,
-			m.HomeId, 
-			m.AwayId,
-			m.LeagueId,
-			m.SportType
-    FROM zzzbettrans z WITH (NOLOCK) 
-	INNER JOIN bettrans b WITH (NOLOCK) 
-			ON b.CustId = z.CustId AND b.matchid = z.matchid and b.transid = z.transid
-	INNER JOIN Match m WITH (NOLOCK) 
-			ON m.MatchId = b.matchId
-    WHERE z.transid = @transid AND b.matchid>0
-    ORDER BY z.transid
+	IF @bettype = 10 
+	BEGIN 
+			SELECT  DISTINCT z.transid AS refno, 
+					z.transid, 
+					z.CustId, 
+					b.username, 
+					b.transdate, 
+					b.hdp1, 
+					b.hdp2, 
+					b.odds, 
+					b.stake AS StakePositiontaking, 
+					z.STATUS, 
+					b.livehomescore, 
+					b.liveawayscore, 
+					b.bettype, 
+					b.liveindicator, 
+					b.betteam, 
+					b.OddsType, 
+					b.currency, 
+					b.betfrom,
+					m.teamId as HomeId, 
+					0 as AwayId,
+					m.LeagueId,
+					l.SportType
+			FROM zzzbettrans z WITH (NOLOCK) 
+			INNER JOIN bettrans b WITH (NOLOCK) 
+					ON b.CustId = z.CustId AND b.matchid = z.matchid and b.transid = z.transid
+			INNER JOIN Outright m WITH (NOLOCK) 
+					ON m.orid = b.matchId
+			INNER JOIN League l WITH (NOLOCK)
+					ON l.LeagueId = m.LeagueId
+			WHERE z.transid = @transid AND b.matchid>0
+			ORDER BY z.transid
+	END
+	ELSE
+	BEGIN 
+			SELECT  DISTINCT z.transid AS refno, 
+					z.transid, 
+					z.CustId, 
+					b.username, 
+					b.transdate, 
+					b.hdp1, 
+					b.hdp2, 
+					b.odds, 
+					b.stake AS StakePositiontaking, 
+					z.STATUS, 
+					b.livehomescore, 
+					b.liveawayscore, 
+					b.bettype, 
+					b.liveindicator, 
+					b.betteam, 
+					b.OddsType, 
+					b.currency, 
+					b.betfrom,
+					m.HomeId, 
+					m.AwayId,
+					m.LeagueId,
+					m.SportType
+			FROM zzzbettrans z WITH (NOLOCK) 
+			INNER JOIN bettrans b WITH (NOLOCK) 
+					ON b.CustId = z.CustId AND b.matchid = z.matchid and b.transid = z.transid
+			INNER JOIN Match m WITH (NOLOCK) 
+					ON m.MatchId = b.matchId
+			WHERE z.transid = @transid AND b.matchid>0
+			ORDER BY z.transid
+	END 
 END
 
 GO
