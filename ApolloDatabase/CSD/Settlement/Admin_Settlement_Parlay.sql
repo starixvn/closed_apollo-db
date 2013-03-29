@@ -94,8 +94,8 @@ BEGIN
 	)
 
 	INSERT INTO @match(matchid,matchcode, eventdate,fth, fta, hth, hta, SportType, betstatus, GoalRecord)
-			SELECT	matchid,matchcode, eventdate,	finalhomescore_APL, finalawayscore_APL, hthomescore_APL, htawayscore_APL,
-					SportType, betstatus_APL, GoalRecord_APL
+			SELECT	matchid,matchcode, eventdate,	finalhomescore_ext, finalawayscore_ext, hthomescore_ext, htawayscore_ext,
+					SportType, betstatus_ext, GoalRecord_ext
 			FROM SVRPRO.ProdDB.dbo.Match with (rowlock)
 			WHERE matchid IN (SELECT val FROM dbo.strSplit(@matchids,','))
 
@@ -166,7 +166,7 @@ BEGIN
 
 	-- Generate data for BetParlayDetail/Result
 	SET @subStart = CURRENT_TIMESTAMP
-		--EXEC dbo.Admin_Calculate_29_Precal @matchids
+		EXEC dbo.Admin_Calculate_29_Precal @matchids
 	SET @PreCal = DATEDIFF(millisecond, @subStart, CURRENT_TIMESTAMP)
 
 -------------------------------------------------------------
@@ -250,7 +250,7 @@ END --IF @SkipBalanceUpdate = 0
 
 		BEGIN TRANSACTION
 			SET @9Start = CURRENT_TIMESTAMP
-			--EXEC dbo.Admin_Calculate_29 @matchids = @subMatchIDs, @matchdate = @matchdate
+			EXEC dbo.Admin_Calculate_29 @matchids = @subMatchIDs, @matchdate = @matchdate
 			SET @29Time = @29Time + DATEDIFF(millisecond, @9Start, CURRENT_TIMESTAMP)
 		COMMIT TRANSACTION
 

@@ -20,7 +20,8 @@ SET NOCOUNT ON
 			statusID = 103,
 			ruben = 1,
 			winlost=actual_stake,			
-			playercomm=0			
+			playercomm=0,
+			TWinLost=0,TComm=0			
 		WHERE
 			matchid=@matchid
 			--AND [status] not in (N'Void', N'Reject')

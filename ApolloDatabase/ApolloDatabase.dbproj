@@ -616,5 +616,11 @@
     <NotInBuild Include="CSD\Settlement\Admin_Settlement_Parlay.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Calculate_29.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Calculate_29_PreCal.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
 </Project>

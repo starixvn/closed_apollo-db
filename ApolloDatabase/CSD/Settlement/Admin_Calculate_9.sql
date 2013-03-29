@@ -231,7 +231,7 @@ SET
 	WHEN 1 THEN 2 
 	ELSE 1 END,--'s','m'
 				
-	awinlost = CASE 
+	@winlost = awinlost = CASE 
 		WHEN @statusID = 113 and loseCnt > 0  THEN  stake*apositiontaking
 		WHEN @statusID IN (112, 113) THEN -stake*apositiontaking*(@odds-1)
 		ELSE 0
