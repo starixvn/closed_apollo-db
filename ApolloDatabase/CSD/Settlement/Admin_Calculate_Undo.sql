@@ -5,7 +5,7 @@ As
 Created By: Dan 
 Created Date: 2013-03-14
 Task : unsettle a match, called by main SP Acc_Settlement_Undo, uses Rep execution
-DB: ApollloTrans/TransDB
+DB: SVRTXN/TransDB
 Original: DBTRANS.bodb02.Admin_Calculate_Undo
 
 Revisions:

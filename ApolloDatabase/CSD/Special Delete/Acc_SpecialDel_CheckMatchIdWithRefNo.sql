@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[Acc_SpecialDel_CheckMatchIdWithRefNo]
+﻿ALTEr PROCEDURE [dbo].[Acc_SpecialDel_CheckMatchIdWithRefNo]
 	@MatchId int,
 	@FromRefNo bigint, --transid
 	@ToRefNo bigint, --transid
@@ -30,55 +30,59 @@ BEGIN
 	FROM  match with (NOLOCK)
 	WHERE matchid = @MatchID
 
+	IF  (@Sporttype IS NULL)
+	BEGIN 
+			SET @ErrCode = 1
+			SET @ErrMsg ='This MatchId is invalid.' 
+			RETURN
+	END
 	
 	IF @Type IN (0,1) 
 	BEGIN
 		IF (@Sporttype not between 1 and 99 AND @Type = 0 ) OR (@Sporttype IS NULL)
 		BEGIN 
-			SET @ErrCode = 1
+			SET @ErrCode = 2
 			SET @ErrMsg ='This MatchId doesn''t belong to sportbook.' 
 			RETURN
 		END 
 		ELSE
 		IF (@Sporttype <> 161 AND @Type = 1 ) OR (@Sporttype IS NULL)
 		BEGIN 
-			SET @ErrCode =2
+			SET @ErrCode =3
 			SET @ErrMsg ='This MatchId doesn''t belong to number game.' 
 			RETURN
 		END 
-		
 	
-		IF NOT EXISTS (SELECT TOP 1 1 
-						FROM dbo.bettrans WITH (NOLOCK)		
-						WHERE transid = @FromRefno
-							AND matchid = @MatchID)
-		BEGIN 
-			SET @ErrCode =3
-			SET @ErrMsg ='You have entered an invalid From BetId.' 
-			RETURN
-		END
-		
-		IF NOT EXISTS (SELECT TOP 1 1 
-						FROM dbo.bettrans WITH (NOLOCK)		
-						WHERE transid = @ToRefno
-							AND matchid = @MatchID)
-		BEGIN 
-			SET @ErrCode =4
-			SET @ErrMsg ='You have entered an invalid To BetId.' 
-			RETURN
-		END
 	END
 	ELSE
 	IF @Type = 2
 	BEGIN	
 		IF (@Sporttype =161) OR (@Sporttype IS NULL)
-			SET @ErrCode = 5
+			SET @ErrCode = 4
 			SET @ErrMsg ='This MatchId is invalid.' 
 			RETURN
 	END
 	
 
-
+	IF NOT EXISTS (SELECT TOP 1 1 
+					FROM dbo.bettrans WITH (NOLOCK)		
+					WHERE transid = @FromRefno
+						AND matchid = @MatchID)
+	BEGIN 
+		SET @ErrCode =5
+		SET @ErrMsg ='You have entered an invalid From BetId.' 
+		RETURN
+	END
+		
+	IF NOT EXISTS (SELECT TOP 1 1 
+					FROM dbo.bettrans WITH (NOLOCK)		
+					WHERE transid = @ToRefno
+						AND matchid = @MatchID)
+	BEGIN 
+		SET @ErrCode =6
+		SET @ErrMsg ='You have entered an invalid To BetId.' 
+		RETURN
+	END
 	
 	SET NOCOUNT OFF
 END

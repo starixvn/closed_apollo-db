@@ -86,11 +86,12 @@ BEGIN
 				b.liveindicator = 1   
 			)  
 		)    
-	ORDER BY Transid  
+	
   
 
 	SELECT *   
 	FROM #SpecialDeleteBets WITH (NOLOCK)  
+	ORDER BY Transid  
 
 
 	DROP TABLE #SpecialDeleteBets  

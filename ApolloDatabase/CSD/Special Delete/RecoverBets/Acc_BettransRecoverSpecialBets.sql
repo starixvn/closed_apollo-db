@@ -32,16 +32,17 @@ BEGIN
         @matchid int,      
         @bettype int,
 		@Status NVARCHAR(10),
-        @balance money,
-		@CustId int,
-		@Username varchar(50)
+		@Username varchar(50),       
+		@CustId int,		
+		@balance money,
+		@bf_balance MONEY,
+		@at_balance MONEY
 
     SELECT	@matchid = matchid, 
-			@bettype = bettype ,
-			@CustId = CustId,
+			@bettype = bettype ,			
 			@Status = status,
-			@balance = Winlost,
-			@Username = Username
+			@Username = Username,
+			@CustId = CustId
 	FROM	Bettrans WITH (NOLOCK) 
 	WHERE   transid=@transid
       
@@ -178,18 +179,17 @@ BEGIN
 		RETURN
 	END
 
+	----Get data before update				
+	SELECT	@bf_balance = b.winlost - b.actual_stake + b.playercomm
+	FROM	bettrans b WITH (NOLOCK)			
+	WHERE   b.transid = @transid	
 
-
-	--update balance debit
-	IF @balance > 0
-	BEGIN
-		EXEC Dot_BalanceUpdDebit @CustId = @CustId, @balance = @balance
-	END
 	
 ------ Recover 
 	-- update Bettrans 
     UPDATE bettrans WITH(ROWLOCK,UPDLOCK)
     SET winlost = 0, 
+		PlayerComm =0,
 		ruben= 0, 
 		statuswinlost = 0, 
 		STATUS ='running', 
@@ -199,22 +199,35 @@ BEGIN
     INNER JOIN zzzbettrans z WITH(NOLOCK) ON b.transid =z.transid
     WHERE b.transid = @transid
 
+
 	-- update Bettrans_Agent
 	UPDATE	A  WITH(ROWLOCK,UPDLOCK)			
 	SET		status = 'running', 
-			statusID = 0       
+			statusID = 0,
+			AWinlost= 0,
+			AComm= 0       
 	FROM	Bettrans_Agent A 
 		INNER JOIN Bettrans B  WITH (NOLOCK)
 			ON A.TransID = B.TransID
 	 WHERE b.transid = @transid
 
-
+	----Get data after update
+    SELECT	@at_balance = b.winlost - b.actual_stake + b.playercomm
+	FROM	bettrans b WITH (NOLOCK)
+	WHERE   b.transid = @transid
     
-    --update balance credit	
+   --update balance	
+	SELECT @balance = (@at_balance - @bf_balance )
+	
+	IF @balance > 0
+	BEGIN
+		EXEC Dot_BalanceUpdCredit @custid = @custid, @balance = @balance
+	END
+	
 	IF @balance < 0
 	BEGIN
 		SELECT @balance = ABS(@balance)
-		EXEC Dot_BalanceUpdCredit @CustId = @CustId, @balance = @balance
+		EXEC Dot_BalanceUpdDebit @custid = @custid, @balance = @balance
 	END
 
 	--IF @bettype IN (1,3,7,8)

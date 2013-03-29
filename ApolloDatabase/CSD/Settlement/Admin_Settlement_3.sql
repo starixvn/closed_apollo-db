@@ -26,11 +26,11 @@ Revisions:
 		@matchCode nvarchar(50)
 
 	SELECT
-			@fth = FinalHomeScore, @fta = FinalAwayScore,
-			@hth = HTHomeScore, @HTA = HTAwayScore,
+			@fth = FinalHomeScore_APL, @fta = FinalAwayScore_APL,
+			@hth = HTHomeScore_APL, @HTA = HTAwayScore_APL,
 			@sporttype = SportType,
-			@betstatus = betstatus,
-			@GoalRecord = IsNull(GoalRecord, ''),
+			@betstatus = betstatus_APL,
+			@GoalRecord = IsNull(GoalRecord_APL, ''),
 			@matchCode = IsNull(matchCode, '')
 	FROM	SVRPRO.ProdDB.dbo.Match with (nolock) WHERE matchid = @matchid
 

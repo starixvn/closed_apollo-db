@@ -156,8 +156,6 @@ BEGIN
 	
 	CREATE TABLE #BetDelete (transid BIGINT, CustId INT, PlayerName varchar(50), betfrom NVARCHAR(1),statusID INT)
 		
-	DECLARE @BalanceCust TABLE (CustId INT, Balance Money)
-	
 
 	INSERT INTO #BetDelete (transid, CustId, PlayerName, betfrom, statusID)			
 			SELECT DISTINCT transid, CustId, Username, betfrom, statusID
@@ -222,6 +220,12 @@ BEGIN
 					@Remark = @Remark
 			END CATCH
 		END
+
+		----release data of systemSettings table
+		UPDATE	systemSettings WITH (ROWLOCK, UPDLOCK)
+		SET		VValue = '0'
+		WHERE	VName = 'isCalculatingNGManual'	
+
 		RETURN
 	END
 	ELSE
@@ -240,13 +244,6 @@ BEGIN
 		bettrans b WITH (nolock)
 	WHERE
 		b.transid IN (SELECT transid FROM #BetDelete)		
-
-	-- calculate a balance of customer
-	INSERT INTO @BalanceCust (CustId, Balance)
-	SELECT CustId, sum(winlost - actual_stake + playercomm)
-	from bettrans with (nolock) 	
-	where CustId in (SELECT CustId FROM #BetDelete)
-	group BY CustId
 	
 	CREATE TABLE #BeforeUpd (
 			CustId		 INT,

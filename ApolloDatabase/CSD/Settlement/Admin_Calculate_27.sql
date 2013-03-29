@@ -11,11 +11,10 @@ IF @betcount = 0 AND @@SERVERNAME NOT LIKE N'DBIOM%' RETURN
 	Created by: Dan
 	Date: 2013-03-15
 	Task: Settlement - To Win to nil
-	DB: DB02.BODB02
+	DB: SVRTXN/TransDB
 	
 	Revisions:
-		- 20120426@Lukas: Get from production & exclude DB044
-		- 20121018@Johnson: Merge code for checking double comm losing from production
+		
 */
 IF @@SERVERNAME IN ('DB04', 'DB042', 'DB043', 'DB044') RETURN
 

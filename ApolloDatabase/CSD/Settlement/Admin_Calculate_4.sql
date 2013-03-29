@@ -12,7 +12,7 @@ AS
 	Created by: Dan
 	Date: 2013-03-15
 	Task: Settlement 
-	DB: DBTRANS.BODB02
+	DB: SVRTXN/TransDB
 	
 	Revisions:
 		

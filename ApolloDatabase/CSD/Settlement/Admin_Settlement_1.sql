@@ -52,7 +52,7 @@ where bettype <=19000 and matchid = @matchid
 
 SELECT @matchcode = matchcode
 	,@sporttype = sporttype
-	,@goalrecord_old = ISNULL(goalrecord,'')
+	,@goalrecord_old = ISNULL(GoalRecord_APL,'')
 FROM match WITH(NOLOCK)
 WHERE matchid = @matchid
 
@@ -179,7 +179,7 @@ IF @action = 'UNDO'
 BEGIN
 				
 	EXEC dbo.Admin_Calculate_Undo @matchid
-	--EXEC dbo.Admin_Settlement_Parlay @matchid, @creator, 'UNDO', @IP = @IP
+	EXEC dbo.Admin_Settlement_Parlay @matchid, @creator, 'UNDO', @IP = @IP
 	EXEC SVRPRO.ProdDB.dbo.Admin_Match_UpdateMatchRemark @matchid, 'U'
 	
 	EXEC SVRPRO.ProdDB.dbo.Admin_Match_Update @Command = 'Admin_Settlement_1-UNDO', @MatchID = @matchid, @creator = @creator 		
@@ -216,10 +216,10 @@ BEGIN
 	*/	
 
 	SELECT	@eventstatus = CASE	WHEN @action = 'CAL' THEN N'completed'
-							    WHEN @action = 'CAL-HT' AND matchcode LIKE '%hedge%' THEN eventstatus -- Jamie@20120330: Not change eventstatus='completed' for Hedge Match although 
+							    WHEN @action = 'CAL-HT' AND matchcode LIKE '%hedge%' THEN eventstatus_APL -- Jamie@20120330: Not change eventstatus='completed' for Hedge Match although 
 								WHEN @action = 'CAL-HT' AND @FTDone = 1 THEN N'completed'
 								WHEN @action = 'CAL-FT' AND @HTDone = 1 THEN N'completed'
-								ELSE eventstatus 
+								ELSE eventstatus_APL 
 							END,
 			@FTDone = CASE WHEN @action = 'CAL-HT' AND matchcode LIKE '%hedge%' THEN 0 ELSE @FTDone END 
 	FROM	SVRPRO.ProdDB.dbo.Match WITH(NOLOCK) --DBPRO.BODB02.dbo.Match WITH(NOLOCK)

@@ -14,7 +14,7 @@ AS
 /*
 Creator: Dan
 Date: 2013-03-14
-DB: CustomerLog
+DB: SVRLOG/LogDB, SVRTXN/LogDB
 Task: Insert LOGS for settlement function
 
 Revision:
