@@ -584,4 +584,9 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
+  <ItemGroup>
+    <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">
+      <SubType>Code</SubType>
+    </Build>
+  </ItemGroup>
 </Project>
