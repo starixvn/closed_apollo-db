@@ -1,6 +1,6 @@
-﻿USE [DB05]
+﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Forecast_OddsGetTopByMatch]    Script Date: 3/15/2013 3:30:05 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Forecast_OddsGetTopByMatch]    Script Date: 4/1/2013 3:31:35 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -14,7 +14,7 @@ AS
  * Created by	: Quinn
  * Date			: 20130304
  * Task			: Forecast at Agent Site 
- * DB			: APL.DB05
+ * DB			: APL.REPDB
  * Revisions	:
  *	•
  * Parameters:
@@ -24,23 +24,22 @@ AS
 
 SET NOCOUNT ON
 
-SELECT 	
-	TOP 1 hdp1, 
-	hdp2, 
-	odds1a, 
+SELECT TOP 1
+	hdp1,
+	hdp2,
+	odds1a,
 	odds2a,
-	odds.livehomescore, 
-	odds.liveawayscore, 
+	o.livehomescore, 
+	o.liveawayscore, 
 	switch, 
 	oddsstatus,
 	m.homeid,
 	m.awayid,
-	ISNULL(m.isNeutral, CONVERT(BIT, 0)) AS IsNeutral	
+	ISNULL(m.isNeutral, CONVERT(BIT, 0)) AS IsNeutral
 FROM 
-	odds WITH (NOLOCK)
-	LEFT JOIN match AS M WITH (NOLOCK) ON odds.matchid = M.matchid 		
+	odds AS o WITH (NOLOCK)
+	LEFT JOIN match AS M WITH (NOLOCK) ON o.matchid = M.matchid
 WHERE 
 	bettype = @bettype 
-	AND odds.matchid = @matchid
-ORDER BY 
-	oddsid DESC
+	AND o.matchid = @matchid
+ORDER BY oddsid DESC

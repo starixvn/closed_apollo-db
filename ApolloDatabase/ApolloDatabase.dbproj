@@ -78,6 +78,7 @@
     <Folder Include="CSD\Special Delete\Parlay" />
     <Folder Include="CSD\Special Delete\RecoverBets" />
     <Folder Include="CSD\Special Delete\Tickets Listing" />
+    <Folder Include="Agent\Message" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -583,5 +584,28 @@
     <NotInBuild Include="CSD\Settlement\Admin_Calculate_29_PreCal.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="Agent\Message\Dot_Msg_GetPriMsgCount.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Message\Dot_Msg_GetTopPriMessage24.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">
+      <SubType>Code</SubType>
+    </Build>
+    <Build Include="Agent\Message\Age_CustomerSelMessages.sql">
+      <SubType>Code</SubType>
+    </Build>
+    <Build Include="Agent\Message\Acc_Msg_GetTopPubMessage.sql">
+      <SubType>Code</SubType>
+    </Build>
+    <Build Include="Agent\Message\Dot_Msg_HasPriMessage24.sql">
+      <SubType>Code</SubType>
+    </Build>
+    <Build Include="Agent\Message\Dot_Msg_SetPriMsgRead.sql">
+      <SubType>Code</SubType>
+    </Build>
   </ItemGroup>
 </Project>

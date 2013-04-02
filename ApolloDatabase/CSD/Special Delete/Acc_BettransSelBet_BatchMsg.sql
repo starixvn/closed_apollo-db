@@ -1,5 +1,11 @@
-﻿ALTER PROCEDURE [dbo].[Acc_BettransSelBet_BatchMsg]
-@transids varchar(4000)
+﻿ 
+/****** Object:  StoredProcedure [dbo].[Acc_BettransSelBet_BatchMsg]    Script Date: 4/1/2013 10:34:59 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[Acc_BettransSelBet_BatchMsg]
+@transids varchar(8000)
 AS
 SET NOCOUNT ON
 /*
@@ -22,7 +28,7 @@ INSERT INTO @BetDelete (transid, custid, Username)
 SELECT B.TransId, B.CustId as TargetID, B.Username
 FROM bettrans B with (nolock)
 WHERE transid in ( SELECT convert(varchar,val) FROM dbo.strSplit(@transids,',') )
- 
+
 
 SELECT  B.TransId, A.AgentID as TargetID, A.Username as TargetName, 1 as IsAgent
 FROM	@BetDelete B
@@ -33,9 +39,4 @@ SELECT  B.TransId, B.CustId as TargetID, B.Username as TargetName, 0 as IsAgent
 FROM	@BetDelete B
 
 
-
-GO
-GRANT EXECUTE ON [dbo].[Acc_BettransSelBet_BatchMsg] TO [aplweb]
-GO
---GRANT VIEW DEFINITION ON [dbo].[Acc_BettransSelBet_BatchMsg] TO [VNTeam]
 

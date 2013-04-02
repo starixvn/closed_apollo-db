@@ -29,7 +29,7 @@ AS
 
 BEGIN
 	
-	SET NOCOUNT ON	
+	SET NOCOUNT ON
 
 	SELECT 
 		@OutSportType = OutSportType,
@@ -39,5 +39,5 @@ BEGIN
 		InSportType = @InSportType 
 		AND InBetType = @InBetType
 		
-END	
+END
 
