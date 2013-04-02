@@ -137,7 +137,7 @@ IF @@SERVERNAME IN ('DB042', 'DB043', 'DB044') RETURN
 
 	-- get BetParlayResult_Agent
 	SELECT ba.transid, ba.[AgentId], [AgentLevel], ba.[DoubleCommLosing], 
-		APositionTaking, ADiscount, cast(0 as smallmoney) as DownlinePT, 
+		APositionTaking, ADiscount, DownlinePT, 
 		pra.[Stake], pra.AWinLost, cast(0 as money) as AComm ,		
 		pra.StatusId, pra.RefNo,Serial,  pra.WinLostDate, cast(0 as bit) as IsUpdated 
 	INTO #temp_parlayResult_Agent 
@@ -186,8 +186,8 @@ IF @@SERVERNAME IN ('DB042', 'DB043', 'DB044') RETURN
 			END,
 				
 		acomm = CASE @statusID
-					WHEN 112 THEN @commWinRate  * PRA.stake * adiscount*(1-@DownlinePT)
-					WHEN 113 THEN @commLostRate * PRA.stake * adiscount*(1-@DownlinePT)
+					WHEN 112 THEN @commWinRate  * PRA.stake * adiscount*(1-DownlinePT)
+					WHEN 113 THEN @commLostRate * PRA.stake * adiscount*(1-DownlinePT)
 					ELSE 0 END,							
 		--NoRefund = m.NoRefund,
 		--runningCnt = m.runningCnt,
@@ -197,8 +197,7 @@ IF @@SERVERNAME IN ('DB042', 'DB043', 'DB044') RETURN
 			
 	FROM #temp_parlayResult_Agent PRA 
 		INNER JOIN @EffectiveOdds m ON PRA.refno = m.refno AND PRA.serial = m.serial
-		--INNER JOIN #temp_bettrans TB ON PRA.refno = TB.refno
-	OPTION (MAXDOP 1) --should use this for quirky update to avoid parallelism problem	
+		--INNER JOIN #temp_bettrans TB ON PRA.refno = TB.refno	
 
 	-- calculate result for each sub-ticket
 	UPDATE PR
@@ -281,42 +280,6 @@ IF @@SERVERNAME IN ('DB042', 'DB043', 'DB044') RETURN
 	
 	--	 below code is just for DBTRANS to process
 	
-	-- update ticket for agents in bettrans_agent	
-	;WITH PRS_Agent AS (
-		SELECT
-			t.transid, t.refno, pr.AgentId, SUM(CASE statusID WHEN 0 THEN stake ELSE 0 END) RunningStake,			
-			SUM(awinlost) awinlost, 
-			SUM(acomm) acomm
-		FROM  			
-			dbo.BetParlayResult_Agent pr WITH(NOLOCK)
-				INNER JOIN #temp_bettrans t ON pr.refno = t.refno
-		GROUP BY
-			t.transid, t.refno, pr.AgentId
-	)	
-	
-	UPDATE ba WITH(ROWLOCK,UPDLOCK)
-	SET 
-		winlostdate = b.winlostdate,		
-		actual_stake = b.actual_stake,		
-		@statusID= ba.statusID = b.StatusId,
-		[status] = b.Status,		
-		awinlost  = CASE @statusID WHEN 0 THEN 0 ELSE prs.awinlost END,		
-		AComm = CASE @statusID WHEN 0 THEN 0 ELSE prs.acomm END		
-	FROM dbo.BetTrans_Agent ba with (rowlock)
-		INNER JOIN PRS_Agent prs with (nolock) ON ba.transid = PRS.transid and ba.AgentId = PRS.AgentId
-		INNER JOIN BetTrans b with (nolock) ON B.transid = ba.transid
-	WHERE
-		   (prs.runningStake > 0 AND ba.statusID > 0) -- set back to running
-		OR (prs.runningStake = 0 AND ba.statusID = 0) -- setting it
-		OR -- update result
-		(
-		(prs.runningStake = 0 AND ba.statusID > 0) AND
-			(  ba.winlostdate <> b.winlostdate
-			OR ba.awinlost <> prs.awinlost 
-			OR ba.acomm <> prs.acomm
-			)
-		)
-
 	-- update ticket in bettrans
 	;WITH PRS AS (
 		SELECT
@@ -371,5 +334,45 @@ IF @@SERVERNAME IN ('DB042', 'DB043', 'DB044') RETURN
 			)
 		)
 
+	-- update ticket for agents in bettrans_agent	
+	;WITH PRS_Agent AS (
+		SELECT
+			t.transid, t.refno, pr.AgentId, SUM(CASE statusID WHEN 0 THEN stake ELSE 0 END) RunningStake,			
+			SUM(awinlost) awinlost, 
+			SUM(acomm) acomm
+		FROM  			
+			dbo.BetParlayResult_Agent pr WITH(NOLOCK)
+				INNER JOIN #temp_bettrans t ON pr.refno = t.refno
+		GROUP BY
+			t.transid, t.refno, pr.AgentId
+	)	
+	
+	UPDATE ba WITH(ROWLOCK,UPDLOCK)
+	SET 
+		winlostdate = b.winlostdate,		
+		actual_stake = b.actual_stake,		
+		@statusID= ba.statusID = b.StatusId,
+		[status] = b.Status,		
+		awinlost  = CASE @statusID WHEN 0 THEN 0 ELSE prs.awinlost END,		
+		AComm = CASE @statusID WHEN 0 THEN 0 ELSE prs.acomm END		
+	FROM dbo.BetTrans_Agent ba with (rowlock)
+		INNER JOIN PRS_Agent prs with (nolock) ON ba.transid = PRS.transid and ba.AgentId = PRS.AgentId
+		INNER JOIN BetTrans b with (nolock) ON B.transid = ba.transid
+	WHERE
+		   (prs.runningStake > 0 AND ba.statusID > 0) -- set back to running
+		OR (prs.runningStake = 0 AND ba.statusID = 0) -- setting it
+		OR -- update result
+		(
+		(prs.runningStake = 0 AND ba.statusID > 0) AND
+			(  ba.winlostdate <> b.winlostdate
+			OR ba.awinlost <> prs.awinlost 
+			OR ba.acomm <> prs.acomm
+			)
+		)
+	
+	DROP TABLE #temp_parlayResult
+	DROP TABLE #temp_bettrans
+	DROP TABLE  #temp_bettrans_Agent
+	DROP TABLE  #temp_parlayResult_Agent
 GO
 GRANT EXECUTE ON [dbo].[Admin_Calculate_29] TO [aplweb] AS [dbo]
