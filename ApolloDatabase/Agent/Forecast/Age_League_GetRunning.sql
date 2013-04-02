@@ -1,15 +1,16 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_League_GetRunning]    Script Date: 4/1/2013 3:37:03 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_League_GetRunning]    Script Date: 4/2/2013 8:40:25 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+
 ALTER PROCEDURE [dbo].[Age_League_GetRunning]
-	@AgID		INT,
+	@AgID		INT,	
 	@Bettypes	VARCHAR(100) = '0'--0: all, 1:1,3,7,8; 5:5,15 
 AS
-SET NOCOUNT ON
+
 /**
  * Created by	: Quinn
  * Date			: 20130301
@@ -23,13 +24,14 @@ SET NOCOUNT ON
  *  
  */
 
-SELECT @Bettypes = 
-	CASE @Bettypes 
-		WHEN '0' THEN '1,3,7,8,5,15'
-		WHEN '1' THEN '1,3,7,8'
-		WHEN '5' THEN '5,15'
-		ELSE '1,3,7,8,5,15'
-	END 
+SET NOCOUNT ON
+
+SELECT @Bettypes = 	CASE @Bettypes 
+						WHEN '0' THEN '1,3,7,8,5,15' 
+						WHEN '1' THEN '1,3,7,8' 
+						WHEN '5' THEN '5,15' 
+						ELSE '1,3,7,8,5,15' 
+					END 
 
 SELECT 
 	m.LeagueId, 
@@ -48,8 +50,8 @@ WHERE
 							AND bta.AgentId = @AgID
 							AND bt.BetType IN (SELECT val FROM dbo.strSplit_Key(@Bettypes, ',')))
 GROUP BY 
-	m.leagueid,
-	l.leaguename,
+	m.leagueid, 
+	l.leaguename, 
 	m.sporttype
 ORDER BY l.leaguename
 

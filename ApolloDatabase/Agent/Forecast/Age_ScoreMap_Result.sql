@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_ScoreMap_Result]    Script Date: 4/1/2013 4:56:11 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_ScoreMap_Result]    Script Date: 4/2/2013 8:38:39 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -31,6 +31,8 @@ AS
  */
 
 BEGIN
+
+	SET NOCOUNT ON
 
 	DECLARE @tmpScores TABLE(
 		home INT, 

@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_ScoreMap_SelBettype]    Script Date: 4/1/2013 4:50:33 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_ScoreMap_SelBettype]    Script Date: 4/2/2013 8:39:00 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -24,6 +24,8 @@ AS
  */
 
 BEGIN
+
+	SET NOCOUNT ON
 
 				SELECT 1 typeid, 1 isLive, 1 isDead, 7 [1stId]
 	UNION ALL	SELECT 2 typeid, 1 isLive, 1 isDead, 12 [1stId]

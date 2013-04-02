@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_ScoreMap_SelMatch]    Script Date: 4/1/2013 5:38:33 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_ScoreMap_SelMatch]    Script Date: 4/2/2013 8:39:48 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -25,6 +25,9 @@ AS
  */
  
 BEGIN
+
+	SET NOCOUNT ON
+
 	SELECT 
 		MatchId, 
 		HomeId, 

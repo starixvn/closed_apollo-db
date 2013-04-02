@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_ScoreMap_SelLeague]    Script Date: 4/1/2013 5:26:49 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_ScoreMap_SelLeague]    Script Date: 4/2/2013 8:39:23 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -24,6 +24,9 @@ AS
  */
 
 BEGIN
+
+	SET NOCOUNT ON
+
 	SELECT 
 		m.LeagueId, 
 		m.SportType
