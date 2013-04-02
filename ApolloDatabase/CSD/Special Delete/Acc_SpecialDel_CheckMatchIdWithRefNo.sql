@@ -11,7 +11,7 @@ BEGIN
 	Created by: Sophia
 	Date:  20130305
 	Task: check constraint between refno and matchid
-	DB: ApolloArchive.TransDB	
+	DB: SVRCSD.TransDB	
 	Original: 
 	
 	Revisions:
