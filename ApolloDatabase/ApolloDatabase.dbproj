@@ -79,6 +79,8 @@
     <Folder Include="CSD\Special Delete\RecoverBets" />
     <Folder Include="CSD\Special Delete\Tickets Listing" />
     <Folder Include="Agent\Message" />
+    <Folder Include="Agent\Report\Outstanding" />
+    <Folder Include="Agent\Report\Result" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -588,6 +590,42 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Message\Dot_Msg_GetTopPriMessage24.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Report\Outstanding\Age_Rpt_Outstanding.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Report\Outstanding\Age_Rpt_Outstanding_Agent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Report\Outstanding\Age_Rpt_Outstanding_Member.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Report\Result\Age_Result_LeagueSelByDate.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Report\Result\Age_Result_MatchSelByLeague.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Report\Result\Age_Result_MatchSelGoalHistory.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Report\Result\Age_Result_MatchSelNumberGameByLeague.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Report\Result\Age_Result_Outright.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Report\Result\Age_Result_SelAvaiDate.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Report\Result\Age_Result_SportSelByDate.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Function\StrSplit_Key.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Special Delete\Acc_BettransSelBet_BatchMsg.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
