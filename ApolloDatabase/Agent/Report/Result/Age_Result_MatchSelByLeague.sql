@@ -44,7 +44,7 @@ BEGIN
 			 when m.betstatus like 'Refund%' then 'Refund' 
 		else m.eventstatus end as eventstatus,  
 		m.showtime,
-		CASE WHEN ISNULL(m.homeid2,0) = 0 AND m.sporttype = 162 THEN 1101 ELSE homeid2 END as homeid2,  -- contains bettype of Live Casino 
+		m.homeid2 , 
 		isnull(m.isNeutral, CONVERT(BIT,0)) as IsNeutral,
 		m.goalrecord,
 		ISNULL(mr.IsHTCal,0) as IsHTCal,
@@ -100,7 +100,7 @@ BEGIN
 		m.showtime,
 		isnull(m.isNeutral, CONVERT(BIT,0)) as IsNeutral,
 		m.goalrecord,
-		CASE WHEN ISNULL(m.homeid2,0) = 0 AND m.sporttype = 162 THEN 1101 ELSE homeid2 END as homeid2,  -- contains bettype of Live Casino 
+		m.homeid2, 
 		ISNULL(mr.IsHTCal,0) as IsHTCal,
 		ISNULL(mr.calculate,0) as calculate	,
 		ISNULL(mr.IsPending,0) as IsPending	
