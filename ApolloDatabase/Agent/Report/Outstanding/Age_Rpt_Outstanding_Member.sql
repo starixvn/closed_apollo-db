@@ -12,11 +12,11 @@ Revisions:
 
 */
 SET NOCOUNT ON
-DECLARE @MemberOutstanding TABLE (CustID INT, Outstanding MONEY , Positiontaking MONEY, Outstanding_NG MONEY, Positiontaking_NG MONEY)
 
 -----Member Outstanding
-	INSERT INTO @MemberOutstanding 
-	SELECT  B.CustID, ISNULL(SUM(CASE when BA.bettype < 31 OR BA.bettype between 121 and 999 OR BA.bettype between 1301 and 1334 then ABS(BA.actual_stake) END),0) Outstanding,  
+
+	SELECT  C.Username, B.CustID, 
+			ISNULL(SUM(CASE when BA.bettype < 31 OR BA.bettype between 121 and 999 OR BA.bettype between 1301 and 1334 then ABS(BA.actual_stake) END),0) Outstanding,  
 			ISNULL(SUM(CASE when BA.bettype < 31 OR BA.bettype between 121 and 999 OR BA.bettype between 1301 and 1334 then ABS(BA.actual_stake) * BA.APositiontaking END),0) Positiontaking,
 			ISNULL(SUM(CASE when BA.bettype BETWEEN 80 and 120 then ABS(BA.actual_stake) END),0) Outstanding_NG,
 			ISNULL(SUM(CASE when BA.bettype BETWEEN 80 and 120 then ABS(BA.actual_stake) * BA.APositiontaking END),0) Positiontaking_NG
@@ -26,15 +26,7 @@ DECLARE @MemberOutstanding TABLE (CustID INT, Outstanding MONEY , Positiontaking
 	INNER JOIN CustInfo C WITH (NOLOCK)
 			ON B.CustID = C.CustID AND BA.AgentId = C.AgentId
 	WHERE	BA.AgentId = @AgentID AND BA.StatusId IN (0,1)	 
-	GROUP BY B.CustID
-
-
-	SELECT C.Username, M.*
-	FROM	@MemberOutstanding M
-	INNER JOIN CustInfo C WITH (NOLOCK)
-			ON C.CustID = M.CustID
-
-	  
+	GROUP BY C.Username, B.CustID
 
 
 GO
