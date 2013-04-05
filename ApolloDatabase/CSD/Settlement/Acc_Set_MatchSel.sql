@@ -1,4 +1,5 @@
 ﻿
+
 ALTER PROCEDURE [dbo].[Acc_Set_MatchSel]
 	@FromDate datetime,
 	@ToDate datetime,
@@ -97,7 +98,7 @@ FROM
 		AND m.sporttype = CASE WHEN @sporttype = 0 THEN m.sporttype ELSE @sporttype END  	  		
 		AND (@matchcode = '' OR m.matchcode = @matchcode) 
 		AND (m.matchcode NOT LIKE 'hedge%')
-		AND (@eventstatus='' OR eventstatus_ext in (@eventstatus,'internal')) 
+		AND (@eventstatus='' OR ISNULL(eventstatus_ext, 'running') = @eventstatus) 
 		AND (@isRefund IS NULL OR
 				(@isRefund =1 AND betstatus_ext like 'Refund%') or
 				(@isRefund =0 AND ISNULL(betstatus_ext,'') not like 'Refund%') 
@@ -120,6 +121,3 @@ ON (ml.Matchid = t.matchid)
 ORDER BY LogId ASC
 
 GRANT EXECUTE ON [dbo].[Acc_Set_MatchSel] TO [aplweb]
-
-
-
