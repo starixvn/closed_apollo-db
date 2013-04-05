@@ -95,7 +95,7 @@ FROM
 			AND m.sporttype = @sporttype 		
 			AND (@matchcode = '' OR  m.matchcode = @matchcode) 
 			AND (m.matchcode NOT LIKE 'hedge%')
-			AND m.eventstatus_ext IN ('Closed','running','internal')
+			AND (m.eventstatus_ext IN ('Closed','running') OR ISNULL(eventstatus_ext, 'running') = 'running')
 			AND ((datediff(minute,m.kickofftime,CURRENT_TIMESTAMP) > @HTOverStartMins
 				AND datediff(minute,m.kickofftime,CURRENT_TIMESTAMP) < @HTOverEndMins
 				)  
@@ -109,7 +109,7 @@ FROM
 			 JOIN match WITH (NOLOCK)  ON match.matchid = bettrans.matchid  
 		  WHERE  match.eventdate BETWEEN @FromDate AND @ToDate  			
 				 AND BETTYPE <= 19000  			 			 
-				 AND match.eventstatus_ext IN ('Closed','running','internal')
+				 AND (match.eventstatus_ext IN ('Closed','running') OR ISNULL(eventstatus_ext, 'running') = 'running')
 				 AND match.sporttype = @sporttype  
 		  GROUP BY bettrans.matchid  
 			) c on m.matchid = c.matchid  
