@@ -16,7 +16,6 @@ Revision:
 	
 */
 SET NOCOUNT ON 
-SELECT @isShowAll = CASE @isShowAll WHEN 1 THEN NULL ELSE 0 END
 	
 declare @ToDate datetime
 Select @ToDate = dateadd(s,-1, dateadd(d, 1, @FromDate))
@@ -73,7 +72,7 @@ BEGIN
 		and m.matchcode not like '%hedge%'	
 		and m.matchcode not like '%betdaq%'
 		---and (isnull(@site,'')='789y' OR  (m.matchcode not like '%(LR)%' and isnull(@site,'')<>'789y'))
-		and l.isTest = isnull(@isShowAll, l.isTest)	
+		and (l.isTest = 0 OR @isShowAll = 1)
 	order by m.eventdate, m.sporttype, m.leagueid
 END
 else
@@ -124,7 +123,7 @@ BEGIN
 		and m.matchcode not like '%hedge%'
 		and m.matchcode not like '%betdaq%'
 		----and (isnull(@site,'')='789y' OR  (m.matchcode not like '%(LR)%' and isnull(@site,'')<>'789y'))
-		and l.isTest = isnull(@isShowAll, l.isTest)
+		and (l.isTest = 0 OR @isShowAll = 1)
 	order by m.eventdate, m.sporttype, m.leagueID
 END
 GO

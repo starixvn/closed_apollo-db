@@ -19,7 +19,6 @@ Revisions:
   
 SET NOCOUNT ON  
 
-SELECT @isShowAll = CASE @isShowAll WHEN 1 THEN NULL ELSE 0 END
 
 IF @ToDate IS NULL
 BEGIN
@@ -61,7 +60,7 @@ FROM
 	LEFT OUTER JOIN match_remark mr WITH(NOLOCK) ON m.matchid = mr.matchid  
 	INNER JOIN league with (nolock) on m.leagueid = league.leagueid
 WHERE (m.eventstatus NOT IN ('internal','running') OR (m.eventstatus = 'running' AND mr.ishtcal=1))
-		and league.isTest = isnull(@isShowAll, league.isTest)
+		and (league.isTest = 0 OR @isShowAll = 1)
 
 GO
 
