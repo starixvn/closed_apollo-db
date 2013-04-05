@@ -55,7 +55,7 @@ END
  
 
 -----Member Outstanding
- INSERT INTO @MemberOutstanding ---(AgentId, IsAgent, Outstanding, Positiontaking, Outstanding_NG, Positiontaking_NG)
+	INSERT INTO @MemberOutstanding 
 	SELECT  '', C.AgentId, 0 as IsAgent,
 			ISNULL(SUM(CASE when BA.bettype < 31 OR BA.bettype between 121 and 999 OR BA.bettype between 1301 and 1334 then ABS(BA.actual_stake) END),0) Outstanding,  
 			ISNULL(SUM(CASE when BA.bettype < 31 OR BA.bettype between 121 and 999 OR BA.bettype between 1301 and 1334 then ABS(BA.actual_stake) * BA.APositiontaking END),0) Positiontaking,
