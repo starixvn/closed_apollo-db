@@ -19,8 +19,6 @@ Revisions:
 
 SET NOCOUNT ON
 
-SELECT @isShowAll = CASE @isShowAll WHEN 1 THEN NULL ELSE 0 END
-
 declare @toDate datetime
 Select @toDate = dateadd(s,-1, dateadd(d, 1, @EventDate))
 
@@ -47,7 +45,7 @@ BEGIN
 			)
 		----AND (match.sporttype <= 99 OR match.sporttype = 161)  
 		and match.sporttype = case when @sporttype = 0 then match.sporttype else @sporttype end
-		and league.isTest = isnull(@isShowAll, league.isTest)
+		and (league.isTest = 0 OR @isShowAll = 1)
 	order by match.sporttype, league.leaguename
 END
 
@@ -63,7 +61,7 @@ END
 --		 ) o ON l.leagueid = o.leagueid 	
 --	where  o.eventdate  >= @EventDate and o.eventdate <= @toDate
 --		   and oddsstatus ='completed'
---		   and l.isTest = isnull(@isShowAll, l.isTest)
+--		   and (l.isTest = 0 OR @isShowAll = 1)
 --		   and l.sporttype = @sporttype
 --END
 --ELSE IF @sporttype IN (181)
@@ -79,7 +77,7 @@ END
 --		 ) o ON r.EventID = o.EventID
 --	where  o.EventDate  >= @EventDate and o.EventDate <= @toDate
 --		   and r.EventStatus ='completed'
---		   and l.isTest = isnull(@isShowAll, l.isTest)
+--		   and (l.isTest = 0 OR @isShowAll = 1)
 --		   and r.sporttype = @sporttype
 --END
 
