@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[Acc_Set_MatchSelNumberGame]
+﻿ALTER PROCEDURE [dbo].[Acc_Set_MatchSelNumberGame]
 	@FromDate		DATETIME,
 	@ToDate			DATETIME = NULL,
 	@LeagueID		INT,
@@ -24,8 +23,7 @@ AS
    
 SET NOCOUNT ON  
 DECLARE @eventstatus NVARCHAR(50),
-		@isRefund BIT,
-		@matchid INT
+		@isRefund BIT
 
 IF @ToDate IS NULL
 BEGIN
@@ -67,6 +65,7 @@ SELECT
 		 ELSE 0 END AS BIT) AS IsRefund,
 	b.seq,
 	CAST(b.number AS VARCHAR(20)) AS number
+INTO #tmpMatch
 FROM  
    (SELECT sporttype, betstatus, matchid, matchcode, leagueid, eventdate, eventstatus, kickofftime, homeid  
 	FROM MATCH (NOLOCK)  
@@ -88,14 +87,22 @@ FROM
 WHERE (m.eventstatus NOT IN ('internal','running')  
 			OR (m.eventstatus = 'running' AND mr.ishtcal=1)
 		)		
-		AND (@matchcode = '' OR (m.matchid = @matchid OR m.matchcode = @matchcode)) 
+		AND (@matchcode = '' OR  m.matchcode = @matchcode) 
 		AND (@eventstatus='' OR eventstatus IN (@eventstatus)) 
 		AND (@isRefund is null OR 
 				(@isRefund =1 AND betstatus LIKE 'Refund%') OR
 				(@isRefund =0 AND ISNULL(betstatus,'') NOT LIKE 'Refund%') 
 			)	  
 ORDER BY m.leagueid, m.matchid, b.seq
+
+SELECT * FROM #tmpMatch WITH (NOLOCK)
+
+SELECT ml.* FROM match_log ml WITH (NOLOCK) 
+INNER JOIN #tmpMatch t WITH (NOLOCK) ON (ml.Matchid = t.matchid)
+ORDER BY LogId ASC
+
 GRANT EXECUTE ON [dbo].[Acc_Set_MatchSelNumberGame] TO [aplweb]	
   
   
+
 
