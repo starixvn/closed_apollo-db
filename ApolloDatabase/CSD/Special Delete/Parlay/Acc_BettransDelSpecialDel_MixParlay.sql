@@ -515,12 +515,15 @@ BEGIN
 		 
 	---- List data to put Message
 	SELECT  B.TransId, A.AgentID as TargetID, A.Username as TargetName
-	FROM	#BetDelete B
+	FROM	#Ref B
 	INNER JOIN Bettrans_Agent A WITH (NOLOCK)
 			ON A.TransID = B.TransID
 	UNION ALL
-	SELECT  B.TransId, B.CustId as TargetID, B.PlayerName as TargetName
-	FROM	#BetDelete B
+	SELECT  B.TransId, B.CustId as TargetID, C.Username as TargetName
+	FROM	#Ref B
+	INNER JOIN SVRCUST.CustDB.dbo.CustInfo C WITH (NOLOCK)
+			ON C.CustId = B.CustId
+
 
 
 
