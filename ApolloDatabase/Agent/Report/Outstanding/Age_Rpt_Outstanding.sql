@@ -30,7 +30,7 @@ BEGIN
 			ON BA.AgentID = C.AgentID		
 	INNER JOIN Bettrans B WITH (NOLOCK) 
 			ON B.TransID = BA.TransID			
-	WHERE	C.ParentId = @AgentID
+	WHERE	C.ParentId = @AgentID AND BA.StatusID IN (0,1)			
 	GROUP BY  C.Username, C.AgentID
 END
 ELSE 
