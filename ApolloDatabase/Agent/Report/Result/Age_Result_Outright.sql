@@ -16,8 +16,7 @@ Revisions:
  
 */
 SET NOCOUNT ON 
-
-SELECT @isShowAll = CASE @isShowAll WHEN 1 THEN NULL ELSE 0 END
+ 
 
 SELECT DISTINCT 
 		league.sporttype, outright.leagueid, outright.eventdate, outright.teamid, 
@@ -35,7 +34,7 @@ SELECT DISTINCT
 		) AS outright 
 		 INNER JOIN dbo.league with (nolock) on outright.leagueid = league.leagueid
 	WHERE (league.sporttype <=99 OR league.sporttype = 161)
-		and league.isTest = isnull(@isShowAll, league.isTest)
+		  and (league.isTest = 0 OR @isShowAll = 1)
 	ORDER BY outright.leagueid,outright.eventdate, outright.teamid
 	
 	

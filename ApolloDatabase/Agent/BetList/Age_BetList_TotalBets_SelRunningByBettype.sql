@@ -55,13 +55,11 @@ BEGIN
 	FROM BetTrans AS bt  WITH (NOLOCK) 
 		INNER JOIN BetTrans_Agent AS bta WITH (NOLOCK) ON bta.TransId = bt.TransId
 	WHERE
-		bta.AgentId = @AgentId AND
-		bt.BetType = @bettype AND
+		bta.AgentId = @AgentId AND	
+		bt.CustID = bt.CustID AND 
 		bt.matchid = @bettype AND
-		bt.Status='running' AND
-		bt.statusID BETWEEN 0 AND 1 AND 
-		bt.ruben=0 
-		
+		bt.BetType = @bettype AND
+		bt.statusID IN (0,1)
 	order by bt.status, bt.transid
 	RETURN
 END
@@ -108,10 +106,9 @@ BEGIN
 		INNER JOIN  Match m WITH (NOLOCK) ON  bt.MatchId = m.MatchId 				
 	where 
 		bta.AgentId = @AgentId 
-		AND bt.BetType=@bettype 
-		AND bt.Status='running'
-		AND bt.StatusId in (0,1)
-		
+		AND bt.CustID = bt.CustID  
+		AND bt.BetType=@bettype 	
+		AND bt.StatusId in (0,1)		
 	order by bt.Status, bt.TransId
 END
 

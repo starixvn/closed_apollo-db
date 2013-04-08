@@ -13,7 +13,7 @@ AS
 /**
  * Created by	: Quinn
  * Date			: 20130309
- * Task			: Retrieve agent and member of current agent
+ * Task			: Retrieve agent of current agent
  * DB			: APL.DB05
  * Revisions	:
  *	•

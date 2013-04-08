@@ -628,6 +628,9 @@
     <NotInBuild Include="CSD\Special Delete\Acc_BettransSelBet_BatchMsg.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="Agent\AccountInfo\Age_Customer_IsExistValueSearch.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">

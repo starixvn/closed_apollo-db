@@ -16,7 +16,6 @@ Revision:
 	
 */
 SET NOCOUNT ON 
-SELECT @isShowAll = CASE @isShowAll WHEN 1 THEN NULL ELSE 0 END
 	
 declare @ToDate datetime
 Select @ToDate = dateadd(s,-1, dateadd(d, 1, @FromDate))
@@ -44,7 +43,7 @@ BEGIN
 			 when m.betstatus like 'Refund%' then 'Refund' 
 		else m.eventstatus end as eventstatus,  
 		m.showtime,
-		CASE WHEN ISNULL(m.homeid2,0) = 0 AND m.sporttype = 162 THEN 1101 ELSE homeid2 END as homeid2,  -- contains bettype of Live Casino 
+		m.homeid2 , 
 		isnull(m.isNeutral, CONVERT(BIT,0)) as IsNeutral,
 		m.goalrecord,
 		ISNULL(mr.IsHTCal,0) as IsHTCal,
@@ -73,7 +72,7 @@ BEGIN
 		and m.matchcode not like '%hedge%'	
 		and m.matchcode not like '%betdaq%'
 		---and (isnull(@site,'')='789y' OR  (m.matchcode not like '%(LR)%' and isnull(@site,'')<>'789y'))
-		and l.isTest = isnull(@isShowAll, l.isTest)	
+		and (l.isTest = 0 OR @isShowAll = 1)
 	order by m.eventdate, m.sporttype, m.leagueid
 END
 else
@@ -100,7 +99,7 @@ BEGIN
 		m.showtime,
 		isnull(m.isNeutral, CONVERT(BIT,0)) as IsNeutral,
 		m.goalrecord,
-		CASE WHEN ISNULL(m.homeid2,0) = 0 AND m.sporttype = 162 THEN 1101 ELSE homeid2 END as homeid2,  -- contains bettype of Live Casino 
+		m.homeid2, 
 		ISNULL(mr.IsHTCal,0) as IsHTCal,
 		ISNULL(mr.calculate,0) as calculate	,
 		ISNULL(mr.IsPending,0) as IsPending	
@@ -124,7 +123,7 @@ BEGIN
 		and m.matchcode not like '%hedge%'
 		and m.matchcode not like '%betdaq%'
 		----and (isnull(@site,'')='789y' OR  (m.matchcode not like '%(LR)%' and isnull(@site,'')<>'789y'))
-		and l.isTest = isnull(@isShowAll, l.isTest)
+		and (l.isTest = 0 OR @isShowAll = 1)
 	order by m.eventdate, m.sporttype, m.leagueID
 END
 GO
