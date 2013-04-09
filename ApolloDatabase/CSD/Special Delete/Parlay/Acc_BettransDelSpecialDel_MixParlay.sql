@@ -514,15 +514,15 @@ BEGIN
 
 		 
 	---- List data to put Message
-	SELECT  B.TransId, A.AgentID as TargetID, A.Username as TargetName
+	SELECT  B.TransId, A.AgentID as TargetID, A.Username as TargetName, 1 as IsAgent
 	FROM	#Ref B
 	INNER JOIN Bettrans_Agent A WITH (NOLOCK)
-			ON A.TransID = B.TransID
+			ON A.RefNo = B.RefNo
 	UNION ALL
-	SELECT  B.TransId, B.CustId as TargetID, C.Username as TargetName
+	SELECT  B.TransId, B.CustId as TargetID, C.Username as TargetName, 0 as IsAgent
 	FROM	#Ref B
-	INNER JOIN SVRCUST.CustDB.dbo.CustInfo C WITH (NOLOCK)
-			ON C.CustId = B.CustId
+	INNER JOIN Bettrans C WITH (NOLOCK)
+			ON C.RefNo = B.RefNo
 
 
 
