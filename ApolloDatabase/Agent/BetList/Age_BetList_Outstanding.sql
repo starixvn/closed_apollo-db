@@ -2,6 +2,15 @@
 	@AgentId INT,
 	@CustId INT
  AS
+/*
+Created: 20130301@Sophia
+Task : Betlist for Outstanding
+DB:  SVRAGE.RepDB
+Original:  
+
+Revisions:
+  
+*/ 
  
 SET NOCOUNT ON
 DECLARE @Betlist TABLE (SportType tinyint, Username NVARCHAR(50), BetType smallint, CustId INT ,TransId BIGINT, RefNo BIGINT,

@@ -5,17 +5,18 @@
  AS
 
 /**
- * Created by	: Kaden
- * Date			: 20130301
- * TASk			: Retrieve total bet of Parlay, Clean Sheet, Double Chance, Both/One/Neither Team To Score, To Win To Nil, 3-Way Handicap
- * DB			: SVRAGE.RepDB
- * Revisions	:
- *
- * Parameters:
- *	@AgentId: agent ID
- * 	@Bettype: bettype ID
- *	@Language: default English
- *  
+  Created by	: Kaden
+  Date			: 20130301
+  TASk			: Retrieve total bet of Parlay, Clean Sheet, Double Chance, Both/One/Neither Team To Score, To Win To Nil, 3-Way Handicap
+  DB			: SVRAGE.RepDB
+  Revisions	:
+	- 20130409@Sophia: revise all, change @bettype to @bettypes 
+ 
+  Parameters:
+ 		@AgentId: agent ID
+  		@Bettypes: string of bettypes , seperate by ^
+ 		@Language: default English
+   
  */
 
 SET NOCOUNT ON
@@ -72,12 +73,11 @@ BEGIN
 	WHERE
 		BA.AgentId = @AgentId 	
 		AND B.CustID = B.CustID  
-		AND B.matchid in (SELECT Bettype FROM @Bettype) AND B.matchid IN (9,29) 
 		AND B.bettype in (SELECT Bettype FROM @Bettype) AND B.bettype IN (9,29)
 		AND B.StatusId IN (0,1)
 END
 
-
+--- Outright
 IF EXISTS (SELECT TOP 1 1  FROM @Bettype WHERE Bettype = 10)
 BEGIN
 	INSERT INTO @Betlist
@@ -120,6 +120,7 @@ BEGIN
 		INNER JOIN SVRPRO.ProdDB.dbo.league l WITH (NOLOCK) on m.leagueid = l.leagueid	
 	WHERE 
 		BA.AgentId = @AgentId 	
+		AND B.CustID = B.CustID
 		AND B.bettype = 10
 		AND B.StatusId=0 		
 END
