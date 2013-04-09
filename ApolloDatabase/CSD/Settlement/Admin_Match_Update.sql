@@ -70,11 +70,12 @@ BEGIN
 		WHERE matchid = @MatchID
 	END
 	ELSE IF @Command = 'Admin_Settlement_Refund_All'
-	BEGIN
+	BEGIN		
 		UPDATE match WITH(ROWLOCK,UPDLOCK) 
-		SET eventstatus_ext='Completed', --ruben=1, 
-			finalhomescore_ext=0, finalawayscore_ext=0, hthomescore_ext=0, htawayscore_ext=0,betstatus_ext='Refund', GoalRecord_ext =''
-			, changetime_ext = GETDATE(), settleTime_ext = GETDATE()
+		SET eventstatus_ext='Completed', ruben_ext=1, finalhomescore_ext=0, finalawayscore_ext=0, hthomescore_ext=0, htawayscore_ext=0,
+			betstatus_ext= 'Refund' + CASE WHEN CHARINDEX('FL:',betstatus_ext) = 0 THEN '' ELSE ';' + SUBSTRING(betstatus_ext,CHARINDEX('FL:',betstatus_ext),6) END	
+			,GoalRecord_ext =''
+			,changetime_ext = GETDATE(), settleTime_ext = GETDATE()
 		WHERE matchid=@MatchID
 	END
 	ELSE IF @Command = 'Admin_Settlement_RefundFT'
@@ -104,6 +105,12 @@ BEGIN
 		UPDATE match WITH(ROWLOCK,UPDLOCK)
 		SET	betstatus_ext = @betstatus, GoalRecord_ext = @GoalRecord, changetime_ext = GETDATE()
 		WHERE matchid = @MatchID
+	END
+	IF @Command = 'Admin_Settlement_Refund_FGLG'
+	BEGIN
+		UPDATE match WITH(ROWLOCK,UPDLOCK) 
+		SET betstatus_ext = @BetStatus, changetime_ext = GETDATE() 
+		WHERE matchid=@MatchID
 	END
 	ELSE IF @Command = 'Admin_Settlement_Parlay'
 	BEGIN

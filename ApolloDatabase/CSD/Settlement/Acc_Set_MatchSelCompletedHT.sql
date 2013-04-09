@@ -1,5 +1,4 @@
-﻿
-ALTER PROCEDURE [dbo].[Acc_Set_MatchSelCompletedHT]	
+﻿ALTER PROCEDURE [dbo].[Acc_Set_MatchSelCompletedHT]	
 	@FromDate datetime,
 	@ToDate datetime,
 	@sporttype tinyint = 0,
@@ -63,48 +62,51 @@ FROM
 			END AS eventstatus,    
 			m.sporttype,  
 			isnull(m.isNeutral, CONVERT(BIT,0)) AS IsNeutral,  
-			m.eventdate,  
-			m.GoalRecord, 
+			m.eventdate,  			 
 			ISNULL(m.IsHTCal,0) AS IsHTCal,   		
 			CAST(CASE WHEN hthomescore IS NOT NULL AND htawayscore IS NOT NULL AND finalhomescore IS NOT NULL AND finalawayscore IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS IsKeyscore ,
-			c.betcount
+			c.betcount,
+			m.goalrecord,
+			CASE WHEN c.cntFGLG = 0 THEN 0 ELSE 1 END AS isExistFGLG
 	FROM		
 		(
-		SELECT m.matchid, m.leagueid ,
+		SELECT match.matchid, match.leagueid ,
 			hthomescore_ext AS hthomescore,
 			htawayscore_ext AS htawayscore, 
 			mr.calculate_ext AS calculate,
 			mr.multiple_ext AS multiple,  
 			mr.refund_ext AS refund, 
 			mr.calrefund_ext AS calrefund,  		
-			m.homeid, m.awayid,  
-			m.matchcode, m.kickofftime,  
-			m.finalhomescore_ext AS finalhomescore,  
-			m.finalawayscore_ext AS finalawayscore, 
-			m.betstatus_ext AS betstatus,  
-			m.eventstatus_ext AS eventstatus,  		
-			m.sporttype,  
-			m.isNeutral,  
-			m.eventdate,  
-			m.GoalRecord_ext AS GoalRecord, 
-			mr.IsHTCal_ext AS IsHTCal
-		FROM  match m WITH (NOLOCK)   
-		INNER JOIN match_remark mr WITH (NOLOCK) on m.matchid = mr.matchid                    
-		WHERE m.eventdate BETWEEN @FromDate AND @ToDate  
-			AND m.leagueID = CASE WHEN @LeagueID <> 0 THEN @LeagueID ELSE m.leagueID END  
-			AND m.sporttype = @sporttype 		
-			AND (@matchcode = '' OR  m.matchcode = @matchcode) 
-			AND (m.matchcode NOT LIKE 'hedge%')
-			AND (m.eventstatus_ext IN ('Closed','running') OR ISNULL(eventstatus_ext, 'running') = 'running')
-			AND ((datediff(minute,m.kickofftime,CURRENT_TIMESTAMP) > @HTOverStartMins
-				AND datediff(minute,m.kickofftime,CURRENT_TIMESTAMP) < @HTOverEndMins
+			match.homeid, match.awayid,  
+			match.matchcode, match.kickofftime,  
+			match.finalhomescore_ext AS finalhomescore,  
+			match.finalawayscore_ext AS finalawayscore, 
+			match.betstatus_ext AS betstatus,  
+			match.eventstatus_ext AS eventstatus,  		
+			match.sporttype,  
+			match.isNeutral,  
+			match.eventdate,  			
+			mr.IsHTCal_ext AS IsHTCal,
+			match.goalrecord_ext as goalrecord
+		FROM SVRPRO.ProdDB.dbo.match WITH (NOLOCK)   
+		INNER JOIN SVRPRO.ProdDB.dbo.match_remark mr WITH (NOLOCK) on match.matchid = mr.matchid                    
+		WHERE match.eventdate BETWEEN @FromDate AND @ToDate  
+			AND match.leagueID = CASE WHEN @LeagueID <> 0 THEN @LeagueID ELSE match.leagueID END  
+			AND match.sporttype = @sporttype 		
+			AND (@matchcode = '' OR  match.matchcode = @matchcode) 
+			AND (match.matchcode NOT LIKE 'hedge%')  -- exclude hedge matches
+			AND (match.eventstatus_ext IN ('Closed','running') OR ISNULL(eventstatus_ext, 'running') = 'running')
+			AND ((datediff(minute,match.kickofftime,CURRENT_TIMESTAMP) > @HTOverStartMins
+				AND datediff(minute,match.kickofftime,CURRENT_TIMESTAMP) < @HTOverEndMins
 				)  
-				OR  mr.confirmHT <> 0) 		
+				--OR  mr.confirmHT <> 0
+				) 		
 			AND mr.IsHTCal_ext=0  
-		) m
+		) AS m
 		INNER JOIN  
 		(SELECT   bettrans.matchid,  
-			 count(bettrans.matchid)  betcount  
+			 COUNT(bettrans.matchid)  betcount,
+			 SUM(CASE WHEN bettype = 14 THEN 1 ELSE 0 END) AS cntFGLG  
 		  FROM     bettrans WITH (NOLOCK) 
 			 JOIN match WITH (NOLOCK)  ON match.matchid = bettrans.matchid  
 		  WHERE  match.eventdate BETWEEN @FromDate AND @ToDate  			
@@ -113,7 +115,7 @@ FROM
 				 AND match.sporttype = @sporttype  
 		  GROUP BY bettrans.matchid  
 			) c on m.matchid = c.matchid  
-) X
+) AS X
 ORDER BY  
 	sporttype, leagueid, 
 	CASE eventstatus WHEN 'completed' THEN 1 WHEN 'Refund' THEN 1 ELSE 0 END,  
