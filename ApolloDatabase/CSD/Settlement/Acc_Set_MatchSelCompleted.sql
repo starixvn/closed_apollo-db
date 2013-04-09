@@ -41,7 +41,8 @@ Declare @m TABLE (
 		IsRefund bit, 
 		IsCalRefund bit,  
 		IsHTCal bit,
-		calculate bit)  
+		calculate bit 
+		)		
 INSERT INTO @m  
 SELECT  
 		m.matchid, 
@@ -50,9 +51,9 @@ SELECT
 		ISNULL(mr.refund_ext,0) IsRefund, 
 		ISNULL(mr.calrefund_ext,0) IsCalRefund,  
 		mr.IsHTCal_ext AS IsHTCal,
-		mr.calculate_ext AS calculate
-FROM  match m with (nolock)  
-	INNER JOIN match_remark mr with (nolock) ON m.matchid = mr.matchid  
+		mr.calculate_ext AS calculate		
+FROM  SVRPRO.ProdDB.dbo.match m with (nolock)  
+	INNER JOIN SVRPRO.ProdDB.dbo.match_remark mr with (nolock) ON m.matchid = mr.matchid  
 	
 WHERE
 	m.eventdate BETWEEN @FromDate AND @ToDate  
@@ -92,11 +93,13 @@ FROM
 		C.betcount,  	
 		ISNULL(tm.IsHTCal,0) as IsHTCal,  
 		ISNULL(tm.calculate,0) as calculate,  
-		CAST(CASE WHEN hthomescore_ext IS NOT NULL AND htawayscore_ext IS NOT NULL AND finalhomescore_ext IS NOT NULL AND finalawayscore_ext IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS IsKeyscore  
-	FROM match m with (nolock)  
+		CAST(CASE WHEN hthomescore_ext IS NOT NULL AND htawayscore_ext IS NOT NULL AND finalhomescore_ext IS NOT NULL AND finalawayscore_ext IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS IsKeyscore ,		
+		c.isExistFGLG
+	FROM SVRPRO.ProdDB.dbo.match m with (nolock)  
 		INNER JOIN @m tm ON m.matchid = tm.matchid  
 		INNER JOIN (  
-					SELECT b.matchid, count(b.matchid) AS BetCount  
+					SELECT b.matchid, count(b.matchid) AS BetCount 
+							,SUM(CASE WHEN bettype = 14 THEN 1 ELSE 0 END) AS isExistFGLG 
 					FROM bettrans b with (nolock)  
 					INNER JOIN @m stm ON b.matchid = stm.matchid  
 					GROUP BY b.matchid  
