@@ -13,11 +13,11 @@ Revisions:
 */ 
  
 SET NOCOUNT ON
-DECLARE @Betlist TABLE (SportType tinyint, Username NVARCHAR(50), BetType smallint, CustId INT ,TransId BIGINT, RefNo BIGINT,
-						MatchId INT, MatchCode nvarchar(50), HomeId INT, AwayId INT, Hdp1 smallmoney, Hdp2 smallmoney, Odds smallmoney, MOdds smallmoney,
-						Status varchar(10), Stake MONEY, Actual_Stake MONEY, TransDate datetime, BetTeam varchar(10), BetId bigint, 
-						APositionTaking smallmoney, ADiscount decimal (9,8), LeagueId INT, LiveHomeScore smallint, LiveAwayScore smallint,LiveIndicator bit, 
-						IP varchar(40), IsNeutral BIT, Oddstype tinyint, ShowTime nvarchar(50),	DoubleCommLosing BIT)
+DECLARE @Betlist TABLE (SportType TINYINT, Username NVARCHAR(50), BetType SMALLINT, CustId INT ,TransId BIGINT, RefNo BIGINT,
+						MatchId INT, MatchCode NVARCHAR(50), HomeId INT, AwayId INT, Hdp1 SMALLMONEY, Hdp2 SMALLMONEY, Odds SMALLMONEY, MOdds SMALLMONEY,
+						Status VARCHAR(10), Stake MONEY, Actual_Stake MONEY, TransDate DATETIME, BetTeam VARCHAR(10), BetId BIGINT, 
+						APositionTaking SMALLMONEY, ADiscount DECIMAL (9,8), LeagueId INT, LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
+						IP VARCHAR(40), IsNeutral BIT, OddsType TINYINT, ShowTime NVARCHAR(50),	DoubleCommLosing BIT)
 
 INSERT INTO @Betlist
 SELECT 
@@ -28,7 +28,7 @@ SELECT
 		B.TransId,
 		B.RefNo,
 		m.MatchId,
-		Convert(nvarchar(50),m.MatchCode) as MatchCode ,
+		Convert(NVARCHAR(50),m.MatchCode) as MatchCode ,
 		m.HomeId,
 		m.AwayId,
 		B.Hdp1, 
@@ -54,11 +54,11 @@ SELECT
 		B.Oddstype,
 		m.ShowTime,
 		DoubleCommLosing
- 	from 	
+ 	FROM 	
 		BetTrans AS b  WITH (NOLOCK) 
 		INNER JOIN BetTrans_Agent AS ba WITH (NOLOCK) ON BA.TransId = B.TransId
 		INNER JOIN  Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 				
-	where 
+	WHERE 
 		BA.AgentId = @AgentId 
 		AND B.CustID = @CustId
 		AND (	B.bettype < 31 
@@ -116,7 +116,7 @@ INSERT INTO @Betlist
 
 ----- Outright
 INSERT INTO @Betlist
-select 
+SELECT 
 		l.sporttype,
 		B.username,
 		B.bettype,	
@@ -148,16 +148,16 @@ select
 		0 as oddstype,
 		'' as showtime,
 		B.DoubleCommLosing
-	from 		
-		bettrans b with (nolock)
+	FROM 		
+		bettrans b WITH (NOLOCK)
 		INNER JOIN BetTrans_Agent AS ba WITH (NOLOCK) ON BA.TransId = B.TransId
-		INNER JOIN SVRPRO.ProdDB.dbo.outright as m with (nolock) on  B.matchid=m.orid
-		INNER JOIN SVRPRO.ProdDB.dbo.league l with (nolock) on m.leagueid = l.leagueid	
-	where 
+		INNER JOIN outright as m WITH (NOLOCK) on  B.matchid=m.orid
+		INNER JOIN league l WITH (NOLOCK) on m.leagueid = l.leagueid	
+	WHERE 
 		BA.AgentId = @AgentId 	
 		AND B.CustId = @CustId
 		AND B.bettype = 10
-		AND B.statusID=0 			 
+		AND B.statusID IN (0,1)
  
 
 SELECT * FROM @Betlist 
