@@ -15,7 +15,7 @@ AS
 /**
  * Created by	: Edward
  * Date			: 20130328
- * Task			: Check permission update of agent
+ * Task			: Check permission update of agents
  * DB			: APL.CustDB
  * Revisions	:
  *	• 

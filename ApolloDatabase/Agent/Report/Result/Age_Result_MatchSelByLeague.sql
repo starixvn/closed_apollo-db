@@ -118,7 +118,7 @@ BEGIN
 				OR ( mr.IsPending=1 AND m.eventstatus IN ('running','closed') )
 				OR ( mr.IsHTCal = 1 AND m.eventstatus ='running')
 			)
-		and (m.sporttype <= 99 OR m.sporttype = 161)
+		and (m.sporttype <= 99 )----OR m.sporttype = 161)
 		and m.sporttype = case when @sporttype = 0 then m.sporttype else @sporttype end
 		and m.matchcode not like '%hedge%'
 		and m.matchcode not like '%betdaq%'
