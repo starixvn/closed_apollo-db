@@ -28,11 +28,13 @@ IF @@SERVERNAME IN ('DB042', 'DB043', 'DB044') RETURN
 ------- 20121105@Viet : bring modds value from DBTrans to replicated servers.----
 -- 1st call: RUN at DBTRANS only
 --IF @targetserver = 'DBTRANS' AND @@SERVERNAME <> 'DBTRANS' RETURN
-IF @targetserver = 'DBTRANS' AND @@SERVERNAME <> 'DB215\SQL2012' RETURN
+IF @targetserver = 'DBTRANS' AND ( @@SERVERNAME <> 'DB215\SQL2012' or db_name() <> N'TransDB')
+	 RETURN
 
 -- 2nd call: RUN all servers except DBTRANS
 --IF @targetserver = '' AND @@SERVERNAME = 'DBTRANS' RETURN
-IF @targetserver = '' AND @@SERVERNAME = 'DB215\SQL2012' RETURN
+IF @targetserver = '' AND (@@SERVERNAME = 'DB215\SQL2012' and db_name() = N'TransDB')
+	RETURN
 
 --------/ 20121105@Viet : bring modds value from DBTrans to replicated servers.---
 
@@ -51,7 +53,7 @@ INSERT INTO @tmp_mrefno (refno)
 	FROM dbo.bettransm bm WITH (ROWLOCK)
 		INNER JOIN @match m ON bm.matchid = m.matchid   
 
-CREATE TABLE #temp_bettrans  (
+CREATE TABLE #tmp_bettrans  (
 	[transid] [bigint] NOT NULL ,  
 	[refno] [bigint] unique clustered NOT NULL ,  
 	[stake] [money] NOT NULL ,  
@@ -70,18 +72,18 @@ CREATE TABLE #temp_bettrans  (
 	[DoubleCommLosing] BIT NULL,
 	IsUpdated [bit] NULL -- this field to stored value indicate if this row been change
 )   
---create index temp_index on #temp_bettrans (TransID)  
+--create index temp_index on #tmp_bettrans (TransID)  
 -- GET list of concern Ticket
 SET @subStart = CURRENT_TIMESTAMP
-	INSERT INTO #temp_bettrans ([transid], [refno], [stake], [status],
+	INSERT INTO #tmp_bettrans ([transid], [refno], [stake], [status],
 			[winlost], 	[winlostdate], 	[playerdiscount], [playercomm],  
 			[TPositionTaking], Tdiscount, [TWinLost], TComm,
-			[ruben], [modds],[statusID], [DoubleCommLosing])
+			[ruben], [modds],[statusID], [DoubleCommLosing], IsUpdated)
 	SELECT
 		[transid], b.[refno], [stake], [status],
 		[winlost], 	[winlostdate], 	[playerdiscount], [playercomm], 
 		[TPositionTaking], Tdiscount, [TWinLost], TComm,
-		[ruben], [modds],[statusID], [DoubleCommLosing]
+		[ruben], [modds],[statusID], [DoubleCommLosing], 0
 	FROM dbo.bettrans b WITH (ROWLOCK)
 		inner join @tmp_mrefno t on b.refno = t.refno
 	WHERE 
@@ -176,7 +178,7 @@ SELECT ba.transid, ba.[AgentId], [AgentLevel], b.[DoubleCommLosing], b.[Stake],
 	AWinLost,ba.AComm,APositionTaking, ADiscount, cast(0 as smallmoney) as DownlinePT, 
 	ba.Status, ba.StatusId, b.RefNo, b.WinLostDate, cast(0 as bit) as IsUpdated 
 INTO #ba 
-FROM #temp_bettrans B WITH (NOLOCK) JOIN BetTrans_Agent ba WITH (ROWLOCK) ON 
+FROM #tmp_bettrans B WITH (NOLOCK) JOIN BetTrans_Agent ba WITH (ROWLOCK) ON 
 	b.TransId=ba.TransId JOIN AgentInfo a WITH (NOLOCK) ON a.AgentID=ba.AgentID	
 		
 --create index		
@@ -311,7 +313,7 @@ SET
 			WHEN 113 THEN @commLostRate * Tdiscount*stake*(1-[TPositionTaking])
 			ELSE 0 END
 
-FROM #temp_bettrans T 
+FROM #tmp_bettrans T 
 		INNER JOIN @modds m ON T.refno = m.m_refno
 		INNER JOIN (SELECT TransId, sum(AWinLost) aWinlost
 					FROM #ba 
@@ -341,7 +343,7 @@ SET @subStart = CURRENT_TIMESTAMP
 		TWinLost = s.Twinlost,  
 		TComm  = s.TComm  		
 	FROM dbo.bettrans b 
-			INNER JOIN 	#temp_bettrans s  ON b.transid = s.transid
+			INNER JOIN 	#tmp_bettrans s  ON b.transid = s.transid
 	WHERE s.IsUpdated = 1
 		--AND (bettrans.status <> s.status OR bettrans.winlost <> s.winlost)  
 
@@ -366,6 +368,9 @@ SET @subStart = CURRENT_TIMESTAMP
 
 SET @updTime = @updTime + DATEDIFF(millisecond, @subStart, CURRENT_TIMESTAMP)
 
+drop table #tmp_bettrans
+drop table #parlay
+drop table #ba
 ---------------------------------------------------------------  
 GO
-GRANT EXECUTE ON [dbo].[Admin_Calculate_9] TO [aplweb]
+GRANT EXECUTE ON [dbo].[Admin_Calculate_9] TO [aplweb]  as dbo

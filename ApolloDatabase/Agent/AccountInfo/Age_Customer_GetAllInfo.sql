@@ -102,7 +102,7 @@ END
 
 SELECT 
 		@IsMember AS IsMember,
-		@ObjectId AS Id, 
+		@ObjectId AS CustId, 
 		@UserName AS UserName, 
 		@AgentLevel AS AgentLevel,
 		@HasAgentDownline AS HasAgentDownline, 
