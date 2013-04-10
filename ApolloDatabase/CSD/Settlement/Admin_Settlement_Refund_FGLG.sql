@@ -167,7 +167,7 @@ SELECT
 	@htawayscore = htawayscore,
 	@goalrecord = goalrecord,
 	@betstatus = betstatus
- FROM dbo.match WITH(NOLOCK) WHERE matchid = @matchid
+ FROM SVRPRO.ProdDB.dbo.match WITH(NOLOCK) WHERE matchid = @matchid
 
 SELECT @Remark = 'RefundLGOnly=' + convert(char(1), @LGOnly)
 

@@ -18,7 +18,7 @@ AS
 SET NOCOUNT ON 
 
 DECLARE @IsHTCal BIT, @Calculate BIT--, @IsPending BIT
-SELECT	@IsHTCal = IsHTCal_APL, @Calculate = Calculate_APL--, @IsPending = IsPending
+SELECT	@IsHTCal = IsHTCal_ext, @Calculate = Calculate_ext--, @IsPending = IsPending
 FROM	match_remark WITH (NOLOCK)
 WHERE	matchid = @matchid 
 
@@ -27,23 +27,23 @@ IF NOT EXISTS (SELECT * FROM match_remark with (nolock) WHERE matchid = @matchid
 	INSERT INTO match_remark (matchid, LiveTimer, LivePeriod, HomeRedCard, AwayRedCard) 
 			VALUES (@matchid, '01 JAN 2000',0,0,0)
 
---IF @command = 'Q' UPDATE match_remark with (rowlock, updlock) SET Calculate_APL = 0, multiple_APL = 0, calrefund_APL_APL = 0, calStatus = 'Q' WHERE matchid = @matchid
+--IF @command = 'Q' UPDATE match_remark with (rowlock, updlock) SET Calculate_ext = 0, multiple_ext = 0, calrefund_ext_ext = 0, calStatus = 'Q' WHERE matchid = @matchid
 IF @command = 'C' 
 	UPDATE match_remark with (rowlock, updlock) 
-	SET Calculate_APL = 1, calrefund_APL = 0, IsHTCal_APL = 1
-	WHERE matchid = @matchid -- whole match Calculate_APLd
+	SET Calculate_ext = 1, calrefund_ext = 0, IsHTCal_ext = 1
+	WHERE matchid = @matchid -- whole match Calculate_extd
 
-IF @command = 'H'  -- Half Time Calculate_APLd
+IF @command = 'H'  -- Half Time Calculate_extd
 UPDATE match_remark with (rowlock, updlock) 
-SET		IsHTCal_APL = 1 
-WHERE	matchid = @matchid -- Half Time Calculate_APLd
+SET		IsHTCal_ext = 1 
+WHERE	matchid = @matchid -- Half Time Calculate_extd
 
-IF @command = 'F' UPDATE match_remark with (rowlock, updlock) SET Calculate_APL = 0, IsHTCal_APL = 0, calrefund_APL = 1 WHERE matchid = @matchid -- Match refund_APL
+IF @command = 'F' UPDATE match_remark with (rowlock, updlock) SET Calculate_ext = 0, IsHTCal_ext = 0, calrefund_ext = 1 WHERE matchid = @matchid -- Match refund_ext
 
-IF @command = 'M' UPDATE match_remark with (rowlock, updlock) SET multiple_APL = 1, refund_APL = 0 WHERE matchid = @matchid -- Mix Parlay Calculate_APLd
-IF @command = 'R' UPDATE match_remark with (rowlock, updlock) SET multiple_APL = 0, refund_APL = 1 WHERE matchid = @matchid -- Mix Parlay refund_APL
+IF @command = 'M' UPDATE match_remark with (rowlock, updlock) SET multiple_ext = 1, refund_ext = 0 WHERE matchid = @matchid -- Mix Parlay Calculate_extd
+IF @command = 'R' UPDATE match_remark with (rowlock, updlock) SET multiple_ext = 0, refund_ext = 1 WHERE matchid = @matchid -- Mix Parlay refund_ext
 
-IF @command = 'U' UPDATE match_remark with (rowlock, updlock) SET IsHTCal_APL = 0, Calculate_APL = 0, multiple_APL = 0, calrefund_APL = 0, refund_APL = 0 WHERE matchid = @matchid -- [U]ndo settlement
+IF @command = 'U' UPDATE match_remark with (rowlock, updlock) SET IsHTCal_ext = 0, Calculate_ext = 0, multiple_ext = 0, calrefund_ext = 0, refund_ext = 0 WHERE matchid = @matchid -- [U]ndo settlement
 
 -- Total Bet control session
 -- relative to UserControl of Totalbet access

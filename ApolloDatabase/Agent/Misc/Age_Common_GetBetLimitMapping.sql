@@ -29,10 +29,10 @@ AS
 
 BEGIN
 	
-	SET NOCOUNT ON	
+	SET NOCOUNT ON
 
 	SET @OutSportType = @InSportType
-	SET	@OutBetType = @InBetType
+	SET @OutBetType = @InBetType
 
 	IF EXISTS ( SELECT 1 
 				FROM AgentBetLimit WITH (NOLOCK) 
@@ -49,7 +49,7 @@ BEGIN
 		END
 
 	SET @OutSportType = 99		-- Other sports
-	SET	@OutBetType = 1			-- Handicap
+	SET @OutBetType = 1			-- Handicap
 		
-END	
+END
 

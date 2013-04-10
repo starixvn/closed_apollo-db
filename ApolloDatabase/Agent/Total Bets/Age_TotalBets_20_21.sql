@@ -1,15 +1,13 @@
-﻿USE [DB05]
+﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_TotalBets_20_21]    Script Date: 3/1/2013 6:24:11 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_TotalBets_20_21]    Script Date: 4/2/2013 8:55:31 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-ALTER PROCEDURE [dbo].[Age_TotalBets_20_21] 
-
-	@AgentId		INT	
-
+ALTER PROCEDURE [dbo].[Age_TotalBets_20_21]
+	@AgentId	INT
 AS
 
 /**
@@ -24,57 +22,86 @@ AS
  *	•
  *  
  */
+
 SET NOCOUNT ON
-SELECT
+
+SELECT 
 	m.ShowTime, 
 	m.LeagueId,
 	m.MatchCode,
-	b.LiveIndicator,
+	bt.LiveIndicator,
 	m.MatchId,
 	m.HomeId,
 	m.AwayId,
-	b.LiveHomeScore,
-	b.LiveAwayScore,
+	bt.LiveHomeScore,
+	bt.LiveAwayScore,
 	
-	SUM((CASE WHEN ba.BetType = 20 THEN (CASE WHEN b.BetTeam = 'h' THEN (ba.APositionTaking) * ba.Stake ELSE 0 END) * (CASE WHEN ABS(b.Odds) <1 THEN 1 ELSE ABS(b.Odds) END) ELSE 0 END)) AS Home_Odds,
-	SUM((CASE WHEN ba.BetType = 20 THEN (CASE WHEN b.BetTeam = 'a' THEN (ba.APositionTaking) * ba.Stake ELSE 0 END) * (CASE WHEN ABS(b.Odds) <1 THEN 1 ELSE ABS(b.Odds) END) ELSE 0 END)) AS Away_Odds,
+	SUM((CASE WHEN bt.BetType = 20 THEN (CASE WHEN bt.BetTeam = 'h' THEN bt.APositionTaking * bt.Stake ELSE 0 END) * (CASE WHEN ABS(bt.Odds) < 1 THEN 1 ELSE ABS(bt.Odds) END) ELSE 0 END)) AS Home_Odds,
+	SUM((CASE WHEN bt.BetType = 20 THEN (CASE WHEN bt.BetTeam = 'a' THEN bt.APositionTaking * bt.Stake ELSE 0 END) * (CASE WHEN ABS(bt.Odds) < 1 THEN 1 ELSE ABS(bt.Odds) END) ELSE 0 END)) AS Away_Odds,
 	
-	SUM(CASE WHEN ba.BetType = 20 THEN (CASE WHEN b.BetTeam = 'h' THEN ba.Stake * (CASE WHEN b.Odds < 0 THEN 1 ELSE b.Odds END) * ba.APositionTaking ELSE - ba.Actual_Stake * ba.APositionTaking END) ELSE 0 END ) AS WinLost_Home,
-	SUM(CASE WHEN ba.BetType = 20 THEN (CASE WHEN b.BetTeam = 'a' THEN ba.Stake * (CASE WHEN b.Odds < 0 THEN 1 ELSE b.Odds END) * ba.APositionTaking ELSE - ba.Actual_Stake * ba.APositionTaking END) ELSE 0 END) AS WinLost_Away,
+	SUM(CASE WHEN bt.BetType = 20 THEN (CASE WHEN bt.BetTeam = 'h' THEN bt.Stake * (CASE WHEN bt.Odds < 0 THEN 1 ELSE bt.Odds END) * bt.APositionTaking ELSE - bt.Actual_Stake * bt.APositionTaking END) ELSE 0 END ) AS WinLost_Home,
+	SUM(CASE WHEN bt.BetType = 20 THEN (CASE WHEN bt.BetTeam = 'a' THEN bt.Stake * (CASE WHEN bt.Odds < 0 THEN 1 ELSE bt.Odds END) * bt.APositionTaking ELSE - bt.Actual_Stake * bt.APositionTaking END) ELSE 0 END) AS WinLost_Away,
 	
-	SUM((CASE WHEN ba.BetType = 21 THEN (CASE WHEN b.BetTeam = 'h' THEN (ba.APositionTaking) * ba.Stake ELSE 0 END)*(CASE WHEN ABS(b.Odds) <1 THEN 1 ELSE ABS(b.Odds) END) ELSE 0 END)) AS Home_Odds_HalfTime,
-	SUM((CASE WHEN ba.BetType = 21 THEN (CASE WHEN b.BetTeam = 'a' THEN (ba.APositionTaking) * ba.Stake ELSE 0 END)*(CASE WHEN ABS(b.Odds) <1 THEN 1 ELSE ABS(b.Odds) END) ELSE 0 END)) AS Away_Odds_HalfTime,
+	SUM((CASE WHEN bt.BetType = 21 THEN (CASE WHEN bt.BetTeam = 'h' THEN bt.APositionTaking * bt.Stake ELSE 0 END) * (CASE WHEN ABS(bt.Odds) < 1 THEN 1 ELSE ABS(bt.Odds) END) ELSE 0 END)) AS Home_Odds_HT,
+	SUM((CASE WHEN bt.BetType = 21 THEN (CASE WHEN bt.BetTeam = 'a' THEN bt.APositionTaking * bt.Stake ELSE 0 END) * (CASE WHEN ABS(bt.Odds) < 1 THEN 1 ELSE ABS(bt.Odds) END) ELSE 0 END)) AS Away_Odds_HT,
 	
-	SUM(CASE WHEN ba.BetType = 21 THEN (CASE WHEN b.BetTeam = 'h' THEN ba.Stake * (CASE WHEN b.Odds < 0 THEN 1 ELSE b.Odds END)* ba.APositionTaking ELSE - ba.Actual_Stake * ba.APositionTaking END) ELSE 0 END) AS WinLost_Home_HT,
-	SUM(CASE WHEN ba.BetType = 21 THEN (CASE WHEN b.BetTeam = 'a' THEN ba.Stake * (CASE WHEN b.Odds < 0 THEN 1 ELSE b.Odds END)* ba.APositionTaking ELSE - ba.Actual_Stake * ba.APositionTaking END) ELSE 0 END) AS WinLost_Away_HT,
-	
-	ISNULL(m.isNeutral, CONVERT(BIT,0)) AS IsNeutral
-		
+	SUM(CASE WHEN bt.BetType = 21 THEN (CASE WHEN bt.BetTeam = 'h' THEN bt.Stake * (CASE WHEN bt.Odds < 0 THEN 1 ELSE bt.Odds END)* bt.APositionTaking ELSE - bt.Actual_Stake * bt.APositionTaking END) ELSE 0 END) AS WinLost_Home_HT,
+	SUM(CASE WHEN bt.BetType = 21 THEN (CASE WHEN bt.BetTeam = 'a' THEN bt.Stake * (CASE WHEN bt.Odds < 0 THEN 1 ELSE bt.Odds END)* bt.APositionTaking ELSE - bt.Actual_Stake * bt.APositionTaking END) ELSE 0 END) AS WinLost_Away_HT,
+
+	SUM(CASE WHEN bt.BetType = 20 AND bt.BetTeam = 'h' THEN BetCount ELSE 0 END) AS BetCount_Home,
+	SUM(CASE WHEN bettype = 20 AND bt.BetTeam = 'a'  THEN BetCount ELSE 0 END) AS BetCount_Away,
+	SUM(CASE WHEN bt.BetType = 21 AND bt.BetTeam = 'h' THEN BetCount ELSE 0 END) AS BetCount_Home_HT,
+	SUM(CASE WHEN bettype = 21 AND bt.BetTeam = 'a'  THEN BetCount ELSE 0 END) AS BetCount_Away_HT,
+
+	ISNULL(m.isNeutral, CONVERT(BIT, 0)) AS IsNeutral
 FROM
-	BetTrans_Agent ba WITH (NOLOCK)
-	INNER JOIN BetTrans b WITH (NOLOCK) ON ba.TransId = b.TransId
-	INNER JOIN Match m WITH (NOLOCK) ON b.MatchId = m.MatchId	
-	
-WHERE 
-	ba.bettype IN (20,21) AND
-	ba.AgentId = @AgentId AND
-	m.EventStatus = 'running'  AND
-	ba.StatusId = 0  AND 
-	(	ISNULL(ba.SecAcceptFlag, 0) = 0	
-		OR (ISNULL(ba.SecAcceptFlag, 0) = 1 AND ISNULL(b.CheckTime, CURRENT_TIMESTAMP) <= CURRENT_TIMESTAMP )
-	)
-	
-	
+	(
+		SELECT 
+			b.LiveIndicator,
+			b.LiveHomeScore,
+			b.LiveAwayScore,
+			b.MatchId,
+			b.BetType,
+			b.BetTeam,
+			b.Stake,
+			b.Actual_Stake,
+			b.Odds,
+			ba.APositionTaking,
+			COUNT(*) AS BetCount 
+		FROM 
+			BetTrans_Agent AS ba WITH (NOLOCK)
+			INNER JOIN BetTrans AS b WITH (NOLOCK) ON ba.TransId = b.TransId
+		WHERE
+			ba.BetType IN (20, 21) 
+			AND ba.AgentId = @AgentId
+			AND ba.StatusId IN (0, 1)
+			AND b.Ruben = 0
+		GROUP BY 
+			b.LiveIndicator,
+			b.LiveHomeScore,
+			b.LiveAwayScore,
+			b.MatchId,
+			b.BetType,
+			b.BetTeam,
+			b.Stake,
+			b.Actual_Stake,
+			b.Odds,
+			ba.APositionTaking
+	) AS bt
+	INNER JOIN match AS m WITH (NOLOCK) ON m.matchid = bt.MatchId
+WHERE m.eventstatus = 'running'
 GROUP BY
 	m.ShowTime, 
 	m.LeagueId,
 	m.MatchCode,
-	b.LiveIndicator,
+	bt.LiveIndicator,
 	m.MatchId,
 	m.HomeId,
 	m.AwayId,
-	b.LiveHomeScore,
-	b.LiveAwayScore,
-	m.IsNeutral
+	bt.LiveHomeScore,
+	bt.LiveAwayScore,
+	m.isNeutral
 ORDER BY
-	m.MatchCode, b.LiveIndicator DESC
+	m.MatchCode, 
+	bt.LiveIndicator DESC
+

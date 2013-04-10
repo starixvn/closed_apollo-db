@@ -20,7 +20,8 @@ BEGIN
 		statusID = 103,
 		winlost=actual_stake,		
 		playercomm=0,		
-		ruben = 1 
+		ruben = 1,
+		TWinLost=0,TComm=0 
 	where
 		matchid=@matchid
 		--AND [status] not in ('Void', 'Reject')
