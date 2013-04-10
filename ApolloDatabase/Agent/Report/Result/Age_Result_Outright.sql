@@ -33,7 +33,7 @@ SELECT DISTINCT
 			and eventdate >= @FromDate and eventdate <= @ToDate
 		) AS outright 
 		 INNER JOIN dbo.league with (nolock) on outright.leagueid = league.leagueid
-	WHERE (league.sporttype <=99 OR league.sporttype = 161)
+	WHERE (league.sporttype <=99 ) ---OR league.sporttype = 161)
 		  and (league.isTest = 0 OR @isShowAll = 1)
 	ORDER BY outright.leagueid,outright.eventdate, outright.teamid
 	

@@ -23,7 +23,7 @@ SET NOCOUNT ON
 DECLARE @Bettype TABLE (bettype INT)
 
 INSERT INTO  @Bettype
-SELECT convert(INT,val) FROM dbo.strSplit_key(@bettypes,'^')
+SELECT convert(INT,val) FROM dbo.strSplit(@bettypes,'^')
 
 DECLARE @Betlist TABLE (SportType TINYINT, Username NVARCHAR(50), BetType SMALLINT, CustId INT ,TransId BIGINT, RefNo BIGINT,
 						MatchId INT, MatchCode NVARCHAR(50), HomeId INT, AwayId INT, Hdp1 SMALLMONEY, Hdp2 SMALLMONEY, Odds SMALLMONEY, MOdds SMALLMONEY,
@@ -116,8 +116,8 @@ BEGIN
 	FROM 		
 		bettrans b WITH (NOLOCK)
 		INNER JOIN BetTrans_Agent AS ba WITH (NOLOCK) ON BA.TransId = B.TransId
-		INNER JOIN SVRPRO.ProdDB.dbo.outright AS m WITH (NOLOCK) on  B.matchid=m.orid
-		INNER JOIN SVRPRO.ProdDB.dbo.league l WITH (NOLOCK) on m.leagueid = l.leagueid	
+		INNER JOIN outright AS m WITH (NOLOCK) on  B.matchid=m.orid
+		INNER JOIN league l WITH (NOLOCK) on m.leagueid = l.leagueid	
 	WHERE 
 		BA.AgentId = @AgentId 	
 		AND B.CustID = B.CustID
