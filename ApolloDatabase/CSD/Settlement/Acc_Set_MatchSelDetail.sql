@@ -7,7 +7,7 @@ AS
  * Created by	: Kaden
  * Date			: 20130318
  * Task			: Select match detail
- * DB			: APL.TransDB
+ * DB			: SVRTXN/TransDB
  * Revisions	:
  *	•
  * Parameters:
@@ -125,7 +125,7 @@ Select @FGLGStatus = CASE
 IF EXISTS(select top 1 1 from bettrans (nolock) where matchid = @matchid AND liveindicator = 1)
 	Select @IsLive = 1		
 
-select	match.sporttype, match.betstatus, hthomescore_ext,htawayscore_ext,
+SELECT	match.sporttype, match.betstatus_ext betstatus, hthomescore_ext hthomescore,htawayscore_ext htawayscore,
 		datediff(minute,kickofftime,CURRENT_TIMESTAMP) playtime,	
 		match.leagueid,
 		match.matchid,  
@@ -137,7 +137,7 @@ select	match.sporttype, match.betstatus, hthomescore_ext,htawayscore_ext,
 		isnull(mr.refund_ext,0) IsRefund, isnull(mr.calrefund_ext,0) IsCalRefund,
 		isnull(mr.calculate_ext,0) IsCalculated, isnull(mr.multiple_ext,0) IsMultiCaled,
 		isnull(match.isNeutral, CONVERT(BIT,0)) as IsNeutral,
-		mr.ishtcal,
+		mr.ishtcal_ext,
 		match.GoalRecord_ext as GoalRecord,
 		@HTStatus HTStatus,
 		@FTStatus FTStatus,
@@ -147,7 +147,9 @@ select	match.sporttype, match.betstatus, hthomescore_ext,htawayscore_ext,
 		@IsHTOnly as IsHTOnly,	
 		@IsLive as IsLive,
 		@DelayTime DelayTime		
-from	match with (nolock) 	
-		left outer join match_remark mr with (nolock) on match.matchid = mr.matchid
-where match.matchid = @matchid
+FROM	SVRPRO.ProdDB.dbo.match with (nolock) 	
+		left outer join SVRPRO.ProdDB.dbo.match_remark mr with (nolock) on match.matchid = mr.matchid
+WHERE match.matchid = @matchid
+
+GO
 GRANT EXECUTE ON [dbo].[Acc_Set_MatchSelDetail] TO [aplweb]	

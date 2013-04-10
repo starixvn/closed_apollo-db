@@ -8,7 +8,7 @@ AS
  * Created by	: Kaden
  * Date			: 20130318
  * Task			: View Match results on Settlement 
- * DB			: APL.ProdDB
+ * DB			: SVRPRO/ProdDB
  * Revisions	:
  *	•
  * Parameters:
@@ -71,33 +71,35 @@ BEGIN
 	FROM   
 	(
 		SELECT m.matchid, m.leagueid ,
-			hthomescore,htawayscore, 						
+			hthomescore_ext hthomescore,
+			htawayscore_ext htawayscore,
 			m.homeid, m.awayid,  
 			m.matchcode, m.kickofftime,  
-			m.finalhomescore,  
-			m.finalawayscore, m.betstatus,  
-			CASE WHEN m.betstatus like 'Refund FT%' THEN 'Refund FT'  
-			WHEN m.betstatus like 'Refund HT%' THEN 'Refund HT'  
-			WHEN m.betstatus like 'Refund%' THEN 'Refund'  
-			ELSE m.eventstatus  
+			m.finalhomescore_ext finalhomescore,  
+			m.finalawayscore_ext finalawayscore, 
+			m.betstatus_ext betstatus,  
+			CASE WHEN m.betstatus_ext like 'Refund FT%' THEN 'Refund FT'  
+			WHEN m.betstatus_ext like 'Refund HT%' THEN 'Refund HT'  
+			WHEN m.betstatus_ext like 'Refund%' THEN 'Refund'  
+			ELSE m.eventstatus_ext  
 			END AS eventstatus,    			
 			m.sporttype,  
 			CAST(isnull(m.isNeutral,0) AS BIT) AS IsNeutral,  
 			m.eventdate,  
-			m.goalrecord,
+			m.goalrecord_ext goalrecord,
 			m.showtime,
 			ISNULL(mr.isPending,0) AS isPending,
-			ISNULL(mr.calculate,0) AS calculate	,
-			ISNULL(mr.IsHTCal,0) AS IsHTCal
+			ISNULL(mr.calculate_ext,0) AS calculate	,
+			ISNULL(mr.IsHTCal_ext,0) AS IsHTCal
 		FROM match m WITH (NOLOCK)  
 			LEFT JOIN match_remark mr WITH (NOLOCK) ON m.matchid = mr.matchid  
 		WHERE m.eventdate = @date
 			AND m.leagueID = CASE WHEN @LeagueID <> 0 THEN @LeagueID ELSE m.leagueID END  
 			AND m.sporttype = CASE WHEN @sporttype = 0 THEN m.sporttype ELSE @sporttype END 	
-			AND (@eventstatus='' OR eventstatus in (@eventstatus,'internal')) 
+			AND (@eventstatus='' OR eventstatus_ext in (@eventstatus,'internal')) 
 			AND (@isRefund IS NULL OR 
-					(@isRefund =1 AND betstatus LIKE 'Refund%') OR
-					(@isRefund =0 AND ISNULL(betstatus,'') NOT LIKE 'Refund%') 
+					(@isRefund =1 AND betstatus_ext LIKE 'Refund%') OR
+					(@isRefund =0 AND ISNULL(betstatus_ext,'') NOT LIKE 'Refund%') 
 				)	  	
 	) X 
 
