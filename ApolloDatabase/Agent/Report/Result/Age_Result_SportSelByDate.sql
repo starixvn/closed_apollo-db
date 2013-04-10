@@ -20,7 +20,8 @@ DECLARE @toDate		DATETIME,
 SELECT @toDate = DATEADD(s,-1, DATEADD(d, 1, @EventDate))
 
 SELECT DISTINCT sports.sporttype, sportname 
-FROM sports WITH (nolock) INNER JOIN (	SELECT matchid, eventdate, eventstatus, sporttype
+FROM sports WITH (NOLOCK) 
+INNER JOIN (	SELECT matchid, eventdate, eventstatus, sporttype
 										FROM match (nolock)
 										UNION ALL
 										SELECT matchid, eventdate, eventstatus, sporttype
