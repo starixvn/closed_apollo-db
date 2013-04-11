@@ -71,8 +71,8 @@ SELECT 	B.TransId,
 		B.DoubleCommLosing
  	FROM 	
 		BetTrans AS B  WITH (NOLOCK) 
-		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
 		INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
+		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
 		INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 				
 	WHERE 
 		BA.AgentId = CASE WHEN @AgentId = -1 THEN BA.AgentId ELSE @AgentId END 
@@ -115,17 +115,17 @@ INSERT INTO @Betlist
 		B.BetId,
 		L.APositionTaking,
 		L.ADiscount,
-		L.ADiscount,
-		L.AWinlost,		
+		L.AWinlost,
+		L.AComm,
 		0 AS LiveHomeScore, 
 		0 AS LiveAwayScore,
 		0 AS LiveIndicator ,
 		B.IP,		
 		0 as OddStype,		
 		B.DoubleCommLosing	
-	FROM BetTrans AS B  WITH (NOLOCK) 
-		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
+	FROM BetTrans AS B  WITH (NOLOCK) 		
 		INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
+		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
 	WHERE
 		BA.AgentId = CASE WHEN @AgentId = -1 THEN BA.AgentId ELSE @AgentId END 
 		AND B.CustID = CASE WHEN @CustId = -1 THEN B.CustId ELSE @CustId END 
@@ -162,8 +162,8 @@ SELECT
 		B.betID,
 		L.APositionTaking,
 		L.ADiscount,
-		L.ADiscount,
-		L.AWinlost,		
+		L.AWinlost,
+		L.AComm,		
 		B.livehomescore,
 		B.liveawayscore,
 		B.liveindicator, 
@@ -171,9 +171,9 @@ SELECT
 		0 as oddstype,		
 		B.DoubleCommLosing
 	FROM 		
-		bettrans b WITH (NOLOCK)
-		INNER JOIN BetTrans_Agent AS ba WITH (NOLOCK) ON BA.TransId = B.TransId
+		bettrans B WITH (NOLOCK)
 		INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
+		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
 		INNER JOIN outright as m WITH (NOLOCK) on  B.matchid=m.orid
 		INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
 	WHERE 

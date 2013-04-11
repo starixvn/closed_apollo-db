@@ -14,17 +14,15 @@ Original:
 
 Revisions:
 
+Param's Explanation:  
+	+ @IsAgent = 1 : by Agent's Username,
+			   = 0 : by Member's Username
+
 EX: 
 	DECLARE @AgentID INT , @Custid INT 
 	Exec [Age_BetList_GetId] @LoggedId =3, @IsAgent=0, @Username= 'anders-tes-3-35', @AgentID = @AgentID OUTPUT, @Custid = @CustID OUTPUT
 	SELECT  @AgentID  , @Custid     
-
-
-Param's Explanation:  
-	+ @IsAgent = 1 : by Agent's Username,
-			   = 0 : by Member's Username
-				
-   
+	   
  
 */
 AS
