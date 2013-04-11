@@ -80,7 +80,7 @@ CREATE TABLE #matchList
 		finalawayscore INT,   
 		betstatus NVARCHAR(50),
 		eventstatus NVARCHAR(50),                            		
-		sporttype INT,
+		sporttype TINYINT,
 		IsNeutral BIT,
 		eventdate  DATETIME,          
 		goalrecord VARCHAR(50),                       		
