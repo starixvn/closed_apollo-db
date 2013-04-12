@@ -100,7 +100,7 @@ END
 
 ---===============================================
 --Check if match already Refund HT => refund whole match
-if exists(select 1 from SVRPRO.ProdDB.dbo.Match with (nolock) where matchid = @matchid AND betstatus like '%Refund HT%')
+if exists(select 1 from SVRPRO.ProdDB.dbo.Match with (nolock) where matchid = @matchid AND betstatus_ext like '%Refund HT%')
 	AND @HTDone = 1
 BEGIN
 	-----
@@ -217,10 +217,10 @@ BEGIN
 	SELECT @Remark = 'Duration=' + CAST(DATEDIFF(millisecond, @start, @stop) as nvarchar(50)) + ' ms;'
 
 	SELECT 
-			@hthomescore = hthomescore, 
-			@htawayscore = htawayscore,
-			@goalrecord = goalrecord,
-			@betstatus = betstatus
+			@hthomescore = hthomescore_ext, 
+			@htawayscore = htawayscore_ext,
+			@goalrecord = goalrecord_ext,
+			@betstatus = betstatus_ext
 	 FROM	SVRPRO.ProdDB.dbo.match WITH(NOLOCK) WHERE matchid = @matchid
 
 	BEGIN TRY

@@ -196,10 +196,10 @@ BEGIN
 			@betstatus nvarchar(50), @goalrecord varchar(50)
 
 	SELECT 
-			@finalhomescore = finalhomescore, 
-			@finalawayscore = finalawayscore,
-			@goalrecord = goalrecord,
-			@betstatus = betstatus
+			@finalhomescore = finalhomescore_ext, 
+			@finalawayscore = finalawayscore_ext,
+			@goalrecord = goalrecord_ext,
+			@betstatus = betstatus_ext
 	 FROM	SVRPRO.ProdDB.dbo.Match WITH(NOLOCK) WHERE matchid = @matchid
 
 	SELECT	@Remark = 'Duration=' + CAST(DATEDIFF(millisecond, @start, @stop) as nvarchar(50)) + ' ms;'
