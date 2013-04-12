@@ -28,11 +28,18 @@ SET NOCOUNT ON
 DECLARE @Betlist TABLE (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVARCHAR(50), 
 						HomeId INT, AwayId INT, SportType TINYINT, LeagueId INT, IsNeutral BIT, Showtime NVARCHAR(50),
 						Username NVARCHAR(50), BetType SMALLINT, CustId INT , Hdp1 SMALLMONEY, Hdp2 SMALLMONEY, Odds SMALLMONEY, MOdds SMALLMONEY,
-						Status VARCHAR(10), Stake MONEY, Actual_Stake MONEY, TransDate DATETIME, BetTeam VARCHAR(10), BetId BIGINT, 
+						Status VARCHAR(10), Stake MONEY, Actual_Stake MONEY, TransDate DATETIME, WinLostDate SMALLDATETIME,	BetTeam VARCHAR(10), BetId BIGINT, 
 						APositionTaking SMALLMONEY, ADiscount DECIMAL (9,8), AWinlost MONEY, AComm MONEY,
 						LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
 						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT)
 
+
+DECLARE @DirectChild TABLE ( AgentId INT)
+
+INSERT INTO @DirectChild 
+SELECT	AgentId 
+FROM	AgentInfo WITH (NOLOCK)
+WHERE	ParentId = @LoggedId
 
  
 	INSERT INTO @Betlist
@@ -64,7 +71,7 @@ DECLARE @Betlist TABLE (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 			L.APositionTaking,
 			L.ADiscount,
 			L.AWinlost,
-			L.AComm,
+			L.AComm - ISNULL(D.AComm, B.PlayerComm) as AComm,
 			B.LiveHomeScore,
 			B.LiveAwayScore,
 			B.LiveIndicator, 
@@ -75,6 +82,7 @@ DECLARE @Betlist TABLE (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 			BetTrans_BK AS B  WITH (NOLOCK) 
 			INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 			INNER JOIN BetTrans_Agent_BK AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
+			LEFT JOIN Bettrans_Agent_BK D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM @DirectChild) 
 			INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId 				
 		WHERE 
 			BA.AgentId = CASE WHEN @AgentId = -1 THEN BA.AgentId ELSE @AgentId END 
@@ -118,7 +126,7 @@ DECLARE @Betlist TABLE (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 			L.APositionTaking,
 			L.ADiscount,
 			L.AWinlost,
-			L.AComm,
+			L.AComm - ISNULL(D.AComm, B.PlayerComm) as AComm,
 			0 AS LiveHomeScore, 
 			0 AS LiveAwayScore,
 			0 AS LiveIndicator ,
@@ -128,6 +136,7 @@ DECLARE @Betlist TABLE (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 		FROM BetTrans_BK AS B  WITH (NOLOCK) 		
 			INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 			INNER JOIN BetTrans_Agent_BK AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
+			LEFT JOIN Bettrans_Agent_BK D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM @DirectChild) 
 		WHERE
 			BA.AgentId = CASE WHEN @AgentId = -1 THEN BA.AgentId ELSE @AgentId END 
 			AND B.CustID = CASE WHEN @CustId = -1 THEN B.CustId ELSE @CustId END 
@@ -165,7 +174,7 @@ DECLARE @Betlist TABLE (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 			L.APositionTaking,
 			L.ADiscount,
 			L.AWinlost,
-			L.AComm,		
+			L.AComm - ISNULL(D.AComm, B.PlayerComm) as AComm,
 			B.livehomescore,
 			B.liveawayscore,
 			B.liveindicator, 
@@ -176,6 +185,7 @@ DECLARE @Betlist TABLE (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 			bettrans_BK B WITH (NOLOCK)
 			INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 			INNER JOIN BetTrans_Agent_BK AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
+			LEFT JOIN Bettrans_Agent_BK D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM @DirectChild) 
 			INNER JOIN outright_BK as m WITH (NOLOCK) on  B.matchid=m.orid
 			INNER JOIN league_BK lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
 		WHERE 

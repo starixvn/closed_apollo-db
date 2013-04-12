@@ -42,8 +42,8 @@ FROM
 		  
  ) as Match  
 	INNER JOIN League WITH (NOLOCK) on Match.LeagueID = League.LeagueID and League.isTest = isnull(@isShowAll, League.isTest)   
-GROUP BY EventDate, sporttype
-ORDER BY EventDate, Sporttype
+GROUP BY  Sporttype, EventDate
+ORDER BY  Sporttype, EventDate
 
 GO
 GRANT EXECUTE ON [dbo].[Age_Rpt_MatchSelResultEntered] TO [aplweb]

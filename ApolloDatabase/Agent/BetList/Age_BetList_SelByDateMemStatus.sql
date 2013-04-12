@@ -15,7 +15,9 @@ Original:
 
 Revisions:
   
-EX: Exec [Age_BetList_SelByDateMemStatus] 3,-1, 35, '2013-01-01' , '2013-04-09', '0^1^101^103'
+EX:
+ Exec [Age_BetList_SelByDateMemStatus] 3,-1, 63967, '2013-01-01' , '2013-04-09', '0^1^101^103' 
+ Exec [Age_BetList_SelByDateMemStatus] 3,99, -1, '2012-01-01' , '2013-04-15', '0^1^101^102^103^111^112^113'
 
 Param's Explanation:  
 	+ @IsAgent = 1 : by Agent's Username,
@@ -32,6 +34,14 @@ DECLARE @Betlist TABLE (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						APositionTaking SMALLMONEY, ADiscount DECIMAL (9,8), AWinlost MONEY, AComm MONEY,
 						LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
 						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT)
+
+DECLARE @DirectChild TABLE ( AgentId INT)
+
+INSERT INTO @DirectChild 
+SELECT	AgentId 
+FROM	AgentInfo WITH (NOLOCK)
+WHERE	ParentId = @LoggedId
+ 
 
 INSERT INTO @Betlist
 SELECT 	B.TransId,
@@ -62,7 +72,7 @@ SELECT 	B.TransId,
 		L.APositionTaking,
 		L.ADiscount,
 		L.AWinlost,
-		L.AComm,
+		L.AComm - ISNULL(D.AComm, B.PlayerComm) as AComm,
 		B.LiveHomeScore,
 		B.LiveAwayScore,
 		B.LiveIndicator, 
@@ -71,8 +81,9 @@ SELECT 	B.TransId,
 		B.DoubleCommLosing
  	FROM 	
 		BetTrans AS B  WITH (NOLOCK) 
+		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId 
 		INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
-		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
+		LEFT JOIN Bettrans_Agent D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM @DirectChild) 
 		INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 				
 	WHERE 
 		BA.AgentId = CASE WHEN @AgentId = -1 THEN BA.AgentId ELSE @AgentId END 
@@ -116,7 +127,7 @@ INSERT INTO @Betlist
 		L.APositionTaking,
 		L.ADiscount,
 		L.AWinlost,
-		L.AComm,
+		L.AComm - ISNULL(D.AComm, B.PlayerComm) as AComm,
 		0 AS LiveHomeScore, 
 		0 AS LiveAwayScore,
 		0 AS LiveIndicator ,
@@ -124,8 +135,9 @@ INSERT INTO @Betlist
 		0 as OddStype,		
 		B.DoubleCommLosing	
 	FROM BetTrans AS B  WITH (NOLOCK) 		
-		INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
+		INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
+		LEFT JOIN Bettrans_Agent D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM @DirectChild) 
 	WHERE
 		BA.AgentId = CASE WHEN @AgentId = -1 THEN BA.AgentId ELSE @AgentId END 
 		AND B.CustID = CASE WHEN @CustId = -1 THEN B.CustId ELSE @CustId END 
@@ -163,7 +175,7 @@ SELECT
 		L.APositionTaking,
 		L.ADiscount,
 		L.AWinlost,
-		L.AComm,		
+		L.AComm - ISNULL(D.AComm, B.PlayerComm) as AComm,		
 		B.livehomescore,
 		B.liveawayscore,
 		B.liveindicator, 
@@ -172,8 +184,9 @@ SELECT
 		B.DoubleCommLosing
 	FROM 		
 		bettrans B WITH (NOLOCK)
-		INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
+		INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
+		LEFT JOIN Bettrans_Agent D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM @DirectChild) 
 		INNER JOIN outright as m WITH (NOLOCK) on  B.matchid=m.orid
 		INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
 	WHERE 
@@ -183,9 +196,10 @@ SELECT
 		AND B.StatusId in ( SELECT convert(int,val) FROM dbo.strSplit_Key(@StatusIds,'^') ) 		
 		AND B.TransDate Between @FromDate AND @ToDate
 
-SELECT * FROM @Betlist 
+SELECT DISTINCT * FROM @Betlist 
 ORDER BY TransID
 
 GO
-GRANT VIEW DEFINITION ON [dbo].[Age_BetList_SelByDateMemStatus] TO [aplweb]
-
+GRANT EXECUTE ON [dbo].[Age_BetList_SelByDateMemStatus] TO [aplweb]
+GO
+GRANT VIEW DEFINITION ON [dbo].[Age_BetList_SelByDateMemStatus] TO [vnteam]

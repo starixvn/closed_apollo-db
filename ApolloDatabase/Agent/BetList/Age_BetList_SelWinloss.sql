@@ -11,7 +11,7 @@
 /*
 Created: 20130301@Sophia
 Task : Betlist for Winloss Report 
-DB:  SVRAGR.REPDB
+DB:  SVRAGE.REPDB
 Original:  
 
 Revisions:
@@ -35,6 +35,13 @@ DECLARE @Betlist TABLE (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT)
 
 
+DECLARE @DirectChild TABLE ( AgentId INT)
+
+INSERT INTO @DirectChild 
+SELECT	AgentId 
+FROM	AgentInfo WITH (NOLOCK)
+WHERE	ParentId = @LoggedId
+ 
 IF @Todate > @MoveBetsDay 
 BEGIN 
 	INSERT INTO @Betlist
@@ -67,7 +74,7 @@ BEGIN
 			L.APositionTaking,
 			L.ADiscount,
 			L.AWinlost,
-			L.AComm,
+			L.AComm - ISNULL(D.AComm, B.PlayerComm) as AComm,
 			B.LiveHomeScore,
 			B.LiveAwayScore,
 			B.LiveIndicator, 
@@ -78,6 +85,7 @@ BEGIN
 			BetTrans AS B  WITH (NOLOCK) 
 			INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 			INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
+			LEFT JOIN Bettrans_Agent D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM @DirectChild) 
 			INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 				
 		WHERE 
 			BA.AgentId = CASE WHEN @AgentId = -1 THEN BA.AgentId ELSE @AgentId END 
@@ -122,7 +130,7 @@ BEGIN
 			L.APositionTaking,
 			L.ADiscount,
 			L.AWinlost,
-			L.AComm,
+			L.AComm - ISNULL(D.AComm, B.PlayerComm) as AComm,
 			0 AS LiveHomeScore, 
 			0 AS LiveAwayScore,
 			0 AS LiveIndicator ,
@@ -132,6 +140,7 @@ BEGIN
 		FROM BetTrans AS B  WITH (NOLOCK) 		
 			INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 			INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
+			LEFT JOIN Bettrans_Agent D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM @DirectChild) 
 		WHERE
 			BA.AgentId = CASE WHEN @AgentId = -1 THEN BA.AgentId ELSE @AgentId END 
 			AND B.CustID = CASE WHEN @CustId = -1 THEN B.CustId ELSE @CustId END 
@@ -170,7 +179,7 @@ BEGIN
 			L.APositionTaking,
 			L.ADiscount,
 			L.AWinlost,
-			L.AComm,		
+			L.AComm - ISNULL(D.AComm, B.PlayerComm) as AComm,	
 			B.livehomescore,
 			B.liveawayscore,
 			B.liveindicator, 
@@ -181,6 +190,7 @@ BEGIN
 			bettrans B WITH (NOLOCK)
 			INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 			INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
+			LEFT JOIN Bettrans_Agent D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM @DirectChild) 
 			INNER JOIN outright as m WITH (NOLOCK) on  B.matchid=m.orid
 			INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
 		WHERE 
@@ -223,7 +233,7 @@ BEGIN
 			L.APositionTaking,
 			L.ADiscount,
 			L.AWinlost,
-			L.AComm,
+			L.AComm - ISNULL(D.AComm, B.PlayerComm) as AComm,
 			B.LiveHomeScore,
 			B.LiveAwayScore,
 			B.LiveIndicator, 
@@ -234,6 +244,7 @@ BEGIN
 			BetTrans14 AS B  WITH (NOLOCK) 
 			INNER JOIN BetTrans14_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 			INNER JOIN BetTrans14_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
+			LEFT JOIN Bettrans14_Agent D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM @DirectChild) 
 			INNER JOIN Match14 m WITH (NOLOCK) ON  B.MatchId = m.MatchId 				
 		WHERE 
 			BA.AgentId = CASE WHEN @AgentId = -1 THEN BA.AgentId ELSE @AgentId END 
@@ -278,7 +289,7 @@ BEGIN
 			L.APositionTaking,
 			L.ADiscount,
 			L.AWinlost,
-			L.AComm,
+			L.AComm - ISNULL(D.AComm, B.PlayerComm) as AComm,
 			0 AS LiveHomeScore, 
 			0 AS LiveAwayScore,
 			0 AS LiveIndicator ,
@@ -288,6 +299,7 @@ BEGIN
 		FROM BetTrans14 AS B  WITH (NOLOCK) 		
 			INNER JOIN BetTrans14_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 			INNER JOIN BetTrans14_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
+			LEFT JOIN Bettrans14_Agent D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM @DirectChild) 
 		WHERE
 			BA.AgentId = CASE WHEN @AgentId = -1 THEN BA.AgentId ELSE @AgentId END 
 			AND B.CustID = CASE WHEN @CustId = -1 THEN B.CustId ELSE @CustId END 
@@ -326,7 +338,7 @@ BEGIN
 			L.APositionTaking,
 			L.ADiscount,
 			L.AWinlost,
-			L.AComm,		
+			L.AComm - ISNULL(D.AComm, B.PlayerComm) as AComm,	
 			B.livehomescore,
 			B.liveawayscore,
 			B.liveindicator, 
@@ -337,6 +349,7 @@ BEGIN
 			bettrans14 B WITH (NOLOCK)
 			INNER JOIN BetTrans14_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 			INNER JOIN BetTrans14_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
+			LEFT JOIN Bettrans14_Agent D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM @DirectChild) 
 			INNER JOIN outright14 as m WITH (NOLOCK) on  B.matchid=m.orid
 			INNER JOIN league14 lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
 		WHERE 
