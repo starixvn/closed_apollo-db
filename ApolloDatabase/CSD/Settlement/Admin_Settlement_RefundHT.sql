@@ -77,7 +77,7 @@ GROUP BY custid
 
 --Check if match already Refund FT => refund whole match
 
-if exists(select 1 from SVRPRO.ProdDB.dbo.Match with (nolock) where matchid = @matchid AND betstatus like '%Refund FT%')
+if exists(select 1 from SVRPRO.ProdDB.dbo.Match with (nolock) where matchid = @matchid AND betstatus_ext like '%Refund FT%')
 BEGIN
 	-----
 	DELETE FROM dbo.TempVariableNumber WITH (ROWLOCK,UPDLOCK)
