@@ -990,9 +990,6 @@
     <NotInBuild Include="CSD\Special Delete\Parlay\Acc_BettransDelSpecialDel_MixParlay.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_Outstanding.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="Agent\Report\Winloss\Age_Rpt_MatchSelResultEntered.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
