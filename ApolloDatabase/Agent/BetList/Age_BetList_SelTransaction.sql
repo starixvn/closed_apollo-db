@@ -344,7 +344,7 @@ BEGIN
 			INNER JOIN BetTrans14_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
 			LEFT JOIN Bettrans14_Agent D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM @DirectChild) 
 			INNER JOIN outright14 as m WITH (NOLOCK) on  B.matchid=m.orid
-			INNER JOIN league14 lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
+			INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
 		WHERE 
 			BA.AgentId = CASE WHEN @AgentId = -1 THEN BA.AgentId ELSE @AgentId END 
 			AND B.CustID = CASE WHEN @CustId = -1 THEN B.CustId ELSE @CustId END 		
