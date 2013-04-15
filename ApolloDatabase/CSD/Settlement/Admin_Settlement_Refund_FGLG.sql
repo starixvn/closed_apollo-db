@@ -85,8 +85,8 @@ DECLARE
 	@matchdate datetime
 	
 SELECT	@matchdate = eventdate,
-		@betstatus = betstatus
-FROM match WITH(NOLOCK)
+		@betstatus = betstatus_ext
+FROM SVRPRO.ProdDB.dbo.match WITH(NOLOCK)
 WHERE matchid=@matchid
 
 IF @LGOnly = 1 ---refund last goal
@@ -161,12 +161,12 @@ EXEC dbo.WriteLog_UserLog_T @AdminID, @LogData
 --Write Log Settle
 
 SELECT 
-	@finalhomescore = finalhomescore,
-	@finalawayscore = finalawayscore,
-	@hthomescore = hthomescore, 
-	@htawayscore = htawayscore,
-	@goalrecord = goalrecord,
-	@betstatus = betstatus
+	@finalhomescore = finalhomescore_ext,
+	@finalawayscore = finalawayscore_ext,
+	@hthomescore = hthomescore_ext, 
+	@htawayscore = htawayscore_ext,
+	@goalrecord = goalrecord_ext,
+	@betstatus = betstatus_ext
  FROM SVRPRO.ProdDB.dbo.match WITH(NOLOCK) WHERE matchid = @matchid
 
 SELECT @Remark = 'RefundLGOnly=' + convert(char(1), @LGOnly)

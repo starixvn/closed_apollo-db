@@ -77,7 +77,7 @@ GROUP BY custid
 
 --Check if match already Refund FT => refund whole match
 
-if exists(select 1 from SVRPRO.ProdDB.dbo.Match with (nolock) where matchid = @matchid AND betstatus like '%Refund FT%')
+if exists(select 1 from SVRPRO.ProdDB.dbo.Match with (nolock) where matchid = @matchid AND betstatus_ext like '%Refund FT%')
 BEGIN
 	-----
 	DELETE FROM dbo.TempVariableNumber WITH (ROWLOCK,UPDLOCK)
@@ -196,10 +196,10 @@ BEGIN
 			@betstatus nvarchar(50), @goalrecord varchar(50)
 
 	SELECT 
-			@finalhomescore = finalhomescore, 
-			@finalawayscore = finalawayscore,
-			@goalrecord = goalrecord,
-			@betstatus = betstatus
+			@finalhomescore = finalhomescore_ext, 
+			@finalawayscore = finalawayscore_ext,
+			@goalrecord = goalrecord_ext,
+			@betstatus = betstatus_ext
 	 FROM	SVRPRO.ProdDB.dbo.Match WITH(NOLOCK) WHERE matchid = @matchid
 
 	SELECT	@Remark = 'Duration=' + CAST(DATEDIFF(millisecond, @start, @stop) as nvarchar(50)) + ' ms;'

@@ -73,8 +73,8 @@ if
 	exists
 	(
 		select	1 
-		from	match m with (nolock) 
-				inner join match_remark mr with (nolock) on m.matchid = mr.matchid
+		from	SVRPRO.ProdDB.dbo.match m with (nolock) 
+				inner join SVRPRO.ProdDB.dbo.match_remark mr with (nolock) on m.matchid = mr.matchid
 		where	m.matchid=@matchid 
 				AND sporttype = 1 
 				AND datediff(minute,kickofftime,CURRENT_TIMESTAMP) < 100
@@ -137,7 +137,7 @@ SELECT	match.sporttype, match.betstatus_ext betstatus, hthomescore_ext hthomesco
 		isnull(mr.refund_ext,0) IsRefund, isnull(mr.calrefund_ext,0) IsCalRefund,
 		isnull(mr.calculate_ext,0) IsCalculated, isnull(mr.multiple_ext,0) IsMultiCaled,
 		isnull(match.isNeutral, CONVERT(BIT,0)) as IsNeutral,
-		mr.ishtcal_ext,
+		mr.ishtcal_ext ishtcal,
 		match.GoalRecord_ext as GoalRecord,
 		@HTStatus HTStatus,
 		@FTStatus FTStatus,
