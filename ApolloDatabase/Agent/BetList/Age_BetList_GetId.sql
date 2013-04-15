@@ -66,4 +66,4 @@ BEGIN
 END
 
 GO 
-GRANT VIEW DEFINITION ON [dbo].[Age_BetList_GetId] TO [aplweb]
+GRANT EXECUTE ON [dbo].[Age_BetList_GetId] TO [aplweb]
