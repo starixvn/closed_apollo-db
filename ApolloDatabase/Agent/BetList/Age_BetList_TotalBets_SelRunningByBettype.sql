@@ -64,7 +64,7 @@ BEGIN
 		B.TransDate,		
 		B.BetTeam,
 		B.BetId,
-		BA.APositionTaking,
+		ISNULL(BA.APositionTaking, 1-B.TPositionTaking) AS APositionTaking,
 		BA.ADiscount,
 		
 		0 AS LiveHomeScore, 
@@ -74,7 +74,7 @@ BEGIN
 		0 AS OddStype,		
 		B.DoubleCommLosing	
 	FROM BetTrans AS B  WITH (NOLOCK) 
-		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
+		LEFT JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
 	WHERE
 		BA.AgentId = @AgentId 	
 		AND B.CustID = B.CustID  
@@ -110,7 +110,7 @@ BEGIN
 		B.transdate,		
 		B.betteam,
 		B.betID,
-		BA.APositionTaking,
+		ISNULL(BA.APositionTaking, 1-B.TPositionTaking) AS APositionTaking,
 		BA.ADiscount,		
 		B.livehomescore,
 		B.liveawayscore,
@@ -120,7 +120,7 @@ BEGIN
 		B.DoubleCommLosing
 	FROM 		
 		bettrans b WITH (NOLOCK)
-		INNER JOIN BetTrans_Agent AS ba WITH (NOLOCK) ON BA.TransId = B.TransId
+		LEFT JOIN BetTrans_Agent AS ba WITH (NOLOCK) ON BA.TransId = B.TransId
 		INNER JOIN outright AS m WITH (NOLOCK) on  B.matchid=m.orid
 		INNER JOIN league l WITH (NOLOCK) on m.leagueid = l.leagueid	
 	WHERE 
@@ -160,7 +160,7 @@ BEGIN
 		B.TransDate,		
 		B.BetTeam,
 		B.BetId,
-		BA.APositionTaking,
+		ISNULL(BA.APositionTaking, 1-B.TPositionTaking) AS APositionTaking,
 		BA.ADiscount,		 
 		B.LiveHomeScore,
 		B.LiveAwayScore,
@@ -170,7 +170,7 @@ BEGIN
 		B.DoubleCommLosing
  	FROM 	
 		BetTrans AS b  WITH (NOLOCK) 
-		INNER JOIN BetTrans_Agent AS ba WITH (NOLOCK) ON BA.TransId = B.TransId
+		LEFT JOIN BetTrans_Agent AS ba WITH (NOLOCK) ON BA.TransId = B.TransId
 		INNER JOIN  Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 				
 	WHERE 
 		BA.AgentId = @AgentId 

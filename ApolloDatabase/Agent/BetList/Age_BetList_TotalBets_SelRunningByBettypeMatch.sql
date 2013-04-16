@@ -43,7 +43,7 @@ BEGIN
 		0 as Liveindicator, 
 		0 as Livehomescore, 
 		0 as Liveawayscore, 		 				
-		BA.APositiontaking,  		
+		ISNULL(BA.APositionTaking, 1-B.TPositionTaking) AS APositionTaking,  		
 		BA.ADiscount ,
 		B.IP as IP,
 		CONVERT(BIT,0) as isNeutral,
@@ -53,7 +53,7 @@ BEGIN
 		B.refno,
 		B.DoubleCommLosing									
 	FROM Bettrans B WITH (NOLOCK)
-	INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
+	LEFT JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
 		ON B.TransID = BA.TransID
 	INNER JOIN outright m WITH (NOLOCK) 
 		ON B.matchid=m.orid
@@ -94,7 +94,7 @@ BEGIN
 		B.Liveindicator,
 		B.Livehomescore, 
 		B.Liveawayscore, 		 	
-		BA.APositiontaking,  		
+		ISNULL(BA.APositionTaking, 1-B.TPositionTaking) AS APositionTaking,	
 		BA.ADiscount ,
 		B.IP as IP,
 		isnull(m.isNeutral, CONVERT(BIT,0)) as IsNeutral,
@@ -105,7 +105,7 @@ BEGIN
 		B.DoubleCommLosing
 	
 	FROM Bettrans B WITH (NOLOCK)
-	INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
+	LEFT JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
 		ON B.TransID = BA.TransID
 	INNER JOIN Match m  WITH (NOLOCK) ON B.matchid=m.matchid 	
 	WHERE

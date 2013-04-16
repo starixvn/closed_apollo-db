@@ -44,11 +44,12 @@ FROM	BetTrans_Agent_BK WITH (NOLOCK)
 WHERE	TransID = @TransId 
 
 
-DECLARE @AgentLevel INT
+DECLARE @AgentLevel INT, @Username NVARCHAR(50)
 
-SELECT	@AgentLevel = AgentLevel +1
+SELECT	@AgentLevel = AgentLevel +1, @Username = Username
 FROM	AgentInfo  WITH (NOLOCK)
-WHERE	AgentID =@LoggedId
+WHERE	AgentID = @LoggedId
+ 
 
 			INSERT INTO @BetListDetail
 			SELECT	BA.TransID,
@@ -76,7 +77,32 @@ WHERE	AgentID =@LoggedId
 						OR BA.Bettype  BETWEEN 81 AND 120 )
 					AND ISNULL(C.AgentLevel,@AgentLevel) >= @AgentLevel   
 	 
-	
+	IF @AgentLevel = 1 
+	BEGIN 
+		INSERT INTO @BetListDetail
+			SELECT	B.TransID,
+					@LoggedId as AgentID,
+					@Username as Username,
+					B.Status,
+					(1 - B.TPositionTaking) AS APositionTaking,
+					NULL AS ADiscount,
+					- (B.Winlost - B.Actual_Stake + B.TWinlost) AS AWinLost,				
+					- (B.TComm) AS AComm									
+			FROM	BetTrans_Agent_BK  BA WITH (NOLOCK)
+			INNER JOIN	Bettrans_BK B WITH (NOLOCK) 
+					ON	B.TransID= BA.TransID 
+			LEFT JOIN	SVRCUST.CUSTDB.dbo.AgentInfo C WITH (NOLOCK)
+					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM @AgentIdList)	 
+			LEFT JOIN BetTrans_BK D WITH (NOLOCK)
+					ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
+			WHERE	BA.TransId = @TransId 
+					AND BA.Winlostdate BETWEEN @fromdate AND @todate 
+					AND (BA.bettype < 31 
+						OR BA.bettype BETWEEN 121 AND 999 
+						OR BA.bettype BETWEEN 1301 AND 1334   
+						OR BA.Bettype  BETWEEN 81 AND 120 )
+					AND ISNULL(C.AgentLevel,@AgentLevel) >= @AgentLevel 
+	END	
 
  	
 SELECT DISTINCT * FROM @BetListDetail

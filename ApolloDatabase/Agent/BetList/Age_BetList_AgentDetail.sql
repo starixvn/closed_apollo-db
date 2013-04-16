@@ -27,11 +27,9 @@ SET NOCOUNT ON
 
 DECLARE @BetListDetail TABLE(
 		TransID BIGINT,
-		AgentID INT,
-		--AgentHID HIERARCHYID,
+		AgentID INT,		
 		Username VARCHAR(50),
-		Status   VARCHAR(10),
-		--AgentLevel SMALLINT,
+		Status   VARCHAR(10),	
 		APositionTaking SMALLMONEY, 
 		ADiscount	DECIMAL(9,8),
 		AWinlost MONEY,
@@ -45,27 +43,52 @@ FROM	BetTrans_Agent WITH (NOLOCK)
 WHERE	TransID = @TransId
 
 
-DECLARE @AgentLevel INT
+DECLARE @AgentLevel INT, @Username NVARCHAR(50)
 
-SELECT	@AgentLevel = AgentLevel +1
+SELECT	@AgentLevel = AgentLevel +1, @Username = Username
 FROM	AgentInfo  WITH (NOLOCK)
-WHERE	AgentID =@LoggedId
+WHERE	AgentID = @LoggedId
  
 
 IF @Todate > @MoveBetsDay
 BEGIN 
-	BEGIN
-			INSERT INTO @BetListDetail
-			SELECT	BA.TransID,
-					BA.AgentID,
-					--A.AgentHID,
-					BA.Username,
-					BA.Status,
-					--A.AgentLevel,
-					BA.APositionTaking,
-					BA.ADiscount,
-					BA.AWinlost,				
-					 BA.AComm - ISNULL(D.Acomm, B.Playercomm) AS AComm									
+	
+	INSERT INTO @BetListDetail
+	SELECT	BA.TransID,
+			BA.AgentID,
+			BA.Username,
+			BA.Status,
+			BA.APositionTaking,
+			BA.ADiscount,
+			BA.AWinlost,				
+			BA.AComm - ISNULL(D.Acomm, B.Playercomm) AS AComm									
+	FROM	BetTrans_Agent  BA WITH (NOLOCK)
+	INNER JOIN	Bettrans B WITH (NOLOCK) 
+			ON	B.TransID= BA.TransID 
+	LEFT JOIN	AgentInfo C WITH (NOLOCK)
+			ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM @AgentIdList)	 
+	LEFT JOIN BetTrans_Agent D WITH (NOLOCK)
+			ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
+	WHERE	BA.TransId = @TransId 
+			AND BA.Winlostdate BETWEEN @fromdate AND @todate 
+			AND (BA.bettype < 31 
+				OR BA.bettype BETWEEN 121 AND 999 
+				OR BA.bettype BETWEEN 1301 AND 1334   
+				OR BA.Bettype  BETWEEN 81 AND 120 )
+			AND ISNULL(C.AgentLevel,@AgentLevel) >= @AgentLevel   
+
+	-----Super View add 1 more row of Super
+	IF @AgentLevel = 1 
+	BEGIN 
+		INSERT INTO @BetListDetail
+			SELECT	B.TransID,
+					@LoggedId as AgentID,
+					@Username as Username,
+					B.Status,
+					(1 - B.TPositionTaking) AS APositionTaking,
+					NULL AS ADiscount,
+					- (B.Winlost - B.Actual_Stake + B.TWinlost) AS AWinLost,				
+					- (B.TComm) AS AComm									
 			FROM	BetTrans_Agent  BA WITH (NOLOCK)
 			INNER JOIN	Bettrans B WITH (NOLOCK) 
 					ON	B.TransID= BA.TransID 
@@ -79,9 +102,10 @@ BEGIN
 						OR BA.bettype BETWEEN 121 AND 999 
 						OR BA.bettype BETWEEN 1301 AND 1334   
 						OR BA.Bettype  BETWEEN 81 AND 120 )
-					AND ISNULL(C.AgentLevel,@AgentLevel) >= @AgentLevel   
+					AND ISNULL(C.AgentLevel,@AgentLevel) >= @AgentLevel 
 	END
 	
+		
 END	
 
 IF @Fromdate <= @MoveBetsDay
@@ -89,14 +113,12 @@ BEGIN
 			INSERT INTO @BetListDetail
 			SELECT	BA.TransID,
 					BA.AgentID,
-					--A.AgentHID,
 					BA.Username,
 					BA.Status,
-					--A.AgentLevel,
 					BA.APositionTaking,
 					BA.ADiscount,
 					BA.AWinlost,				
-					BA.AComm - ISNULL(D.Acomm, B.Playercomm) AS AComm									
+					BA.AComm - D.Acomm AS AComm									
 			FROM	BetTrans14_Agent  BA WITH (NOLOCK)
 			INNER JOIN	Bettrans14 B WITH (NOLOCK) 
 					ON	B.TransID= BA.TransID 
@@ -110,7 +132,35 @@ BEGIN
 						OR BA.bettype BETWEEN 121 AND 999 
 						OR BA.bettype BETWEEN 1301 AND 1334  
 						OR BA.bettype  BETWEEN 81 AND 120 ) 
-					AND ISNULL(C.AgentLevel,@AgentLevel) >= @AgentLevel   		
+					AND ISNULL(C.AgentLevel,@AgentLevel) >= @AgentLevel 
+					  	
+	-----Super View add 1 more row of Super
+	IF @AgentLevel = 1 
+	BEGIN 
+		INSERT INTO @BetListDetail
+			SELECT	B.TransID,
+					@LoggedId as AgentID,
+					@Username as Username,
+					B.Status,
+					(1 - B.TPositionTaking) AS APositionTaking,
+					NULL AS ADiscount,
+					- (B.Winlost - B.Actual_Stake + B.TWinlost) AS AWinLost,			
+					- (B.TComm) AS AComm								
+			FROM	BetTrans14_Agent  BA WITH (NOLOCK)
+			INNER JOIN	Bettrans14 B WITH (NOLOCK) 
+					ON	B.TransID= BA.TransID 
+			LEFT JOIN	AgentInfo C WITH (NOLOCK)
+					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM @AgentIdList)	 
+			LEFT JOIN BetTrans14_Agent D WITH (NOLOCK)
+					ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
+			WHERE	BA.TransId = @TransId 
+					AND BA.Winlostdate BETWEEN @fromdate AND @todate 
+					AND (BA.bettype < 31 
+						OR BA.bettype BETWEEN 121 AND 999 
+						OR BA.bettype BETWEEN 1301 AND 1334   
+						OR BA.Bettype  BETWEEN 81 AND 120 )
+					AND ISNULL(C.AgentLevel,@AgentLevel) >= @AgentLevel 
+	END	
 	
 END		
  	
