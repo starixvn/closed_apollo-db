@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateSetting]    Script Date: 3/29/2013 10:45:56 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateSetting]    Script Date: 4/17/2013 2:55:30 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -10,10 +10,8 @@ ALTER PROCEDURE [dbo].[Age_Customer_UpdateSetting]
 	@ActorAgentId		INT				= NULL,
 	@CustId				INT,	
 	@UGroup				VARCHAR(3),
-	@BetLimit			VARCHAR(MAX)	= '',
-	@BetLimit3rd		VARCHAR(MAX)	= '',
-	@Discount			VARCHAR(MAX)	= '',
-	@Discount3rd		VARCHAR(MAX)	= '',	
+	@BetLimit			VARCHAR(MAX)	= '',	
+	@Discount			VARCHAR(MAX)	= '',		
 	@ErrCode			INT				= 0			OUTPUT,
 	@ErrMsg				NVARCHAR(1000)	= ''		OUTPUT 		
 AS
@@ -69,8 +67,8 @@ BEGIN
 			RETURN			
 		END	
 
-	EXEC Age_Customer_UpdateBetLimit @ActorAgentId, @CustId, @BetLimit, @BetLimit3rd, @ErrCode, @ErrMsg
+	EXEC Age_Customer_UpdateBetLimit @ActorAgentId, @CustId, @BetLimit, @ErrCode, @ErrMsg
 	
-	EXEC Age_Customer_UpdateDiscount @ActorAgentId, @CustId, @UGroup, @Discount, @Discount3rd, @ErrCode, @ErrMsg	
+	EXEC Age_Customer_UpdateDiscount @ActorAgentId, @CustId, @UGroup, @Discount, @ErrCode, @ErrMsg	
 
 END

@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_InsertBetLimit]    Script Date: 3/29/2013 10:42:54 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_InsertBetLimit]    Script Date: 4/17/2013 2:54:14 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -9,8 +9,9 @@ GO
 ALTER PROCEDURE [dbo].[Age_Customer_InsertBetLimit]
 	@CustId			INT,
 	@AgentId		INT,
-	@BetLimit		VARCHAR(MAX)	= '',
-	@BetLimit3rd	VARCHAR(MAX)	= '',
+	@BetLimit		VARCHAR(MAX)	= '',	
+	@Creator	INT				= NUL,
+	@LogDate	DATETIME		= NULL,
 	@ErrCode		INT				= 0			OUTPUT,
 	@ErrMsg			NVARCHAR(1000)	= ''		OUTPUT 		
 AS
@@ -21,7 +22,7 @@ AS
  * Task			: Insert customer bet limit
  * DB			: APL.CustDB
  * Revisions	:
- *	• 
+  *	•	20130417@Edward	: Write log and add @Creator, @LogDate, remove @BetLimit3rd 
  * Parameters:
  *	• @BetLimit : 
 		<ROOT>
@@ -37,6 +38,17 @@ BEGIN
 
 	IF @BetLimit <> ''
 		BEGIN
+			
+			-- For write log
+			DECLARE @startRun			DATETIME  
+					,@endRun			DATETIME  
+					,@duration			INT
+					,@logSPData			VARCHAR(5000)
+					,@logSPDataOld		VARCHAR(5000)			
+					,@xml				XML			
+
+			SET @startRun = GETDATE()
+
 		   DECLARE @BetLimitTable TABLE(
 				SportType SMALLINT,
 				BetType SMALLINT,
@@ -196,9 +208,33 @@ BEGIN
 				MaxBet,
 				MaxPerMatch
 			FROM @BetLimitTable
-		END	
-	/*---- Update 3rd-----*/
-	EXEC Acc_Customer_InsertBetLimit3rd @CustId, @AgentId, @BetLimit3rd, @ErrCode, @ErrMsg	
-	/*--------------------*/
 
+			SET @xml = (
+				SELECT SportType		AS '@s' 
+						,BetType		AS '@b'
+						,MinBet			AS '@mi'
+						,MaxBet			AS '@ma'
+						,MaxPerMatch	AS '@mpm'
+				FROM @BetLimitTable
+				FOR XML PATH('z'), ROOT('r')
+			)
+
+			SET @logSPData = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
+
+			SET @endRun		= GETDATE()  
+			SET @duration	= DATEDIFF(millisecond, @startRun, @endRun) 
+
+			IF @LogDate IS NULL
+				SET @LogDate = GETDATE()	
+
+			EXEC LogDB.dbo.Age_LogRunSp_Insert
+				@UserId			= @Creator,
+				@SPName			= 'Age_Customer_InsertBetLimit',
+				@LogDate		= @LogDate,
+				@ObjectId		= @CustId,
+				@ObjectTypeId	= 2,			--Object type : Customer						
+				@Duration		= @Duration,
+				@Data			= @logSPData,
+				@OldData		= @logSPDataOld
+		END	
 END

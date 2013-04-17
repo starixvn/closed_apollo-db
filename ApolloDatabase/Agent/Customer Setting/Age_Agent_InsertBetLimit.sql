@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_InsertBetLimit]    Script Date: 3/29/2013 10:08:31 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_InsertBetLimit]    Script Date: 4/17/2013 2:50:14 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -9,6 +9,8 @@ GO
 ALTER PROCEDURE [dbo].[Age_Agent_InsertBetLimit]
 	@AgentId	INT,
 	@BetLimit	VARCHAR(MAX)	= '',
+	@Creator	INT				= NUL,
+	@LogDate	DATETIME		= NULL,
 	@ErrCode	INT				= 0			OUTPUT,
 	@ErrMsg		NVARCHAR(1000)	= ''		OUTPUT 		
 AS
@@ -19,7 +21,7 @@ AS
  * Task			: Insert agent bet limit
  * DB			: APL.CustDB
  * Revisions	:
- *	• 
+ *	•	20130417@Edward	: Write log and add @Creator, @LogDate
  * Parameters:
  *	• @BetLimit : 
 		<ROOT>
@@ -32,6 +34,16 @@ AS
 BEGIN
 	
 	SET NOCOUNT ON
+
+	-- For write log
+    DECLARE @startRun			DATETIME  
+			,@endRun			DATETIME  
+			,@duration			INT
+			,@logSPData			VARCHAR(5000)
+			,@logSPDataOld		VARCHAR(5000)			
+			,@xml				XML			
+
+	SET @startRun = GETDATE()	
 
 	DECLARE @BetLimitTable TABLE(
 		SportType SMALLINT,
@@ -195,4 +207,31 @@ BEGIN
 		MaxPerMatch
 	FROM @BetLimitTable
 	
+	SET @xml = (
+		SELECT SportType		AS '@s' 
+				,BetType		AS '@b'
+				,MinBet			AS '@mi'
+				,MaxBet			AS '@ma'
+				,MaxPerMatch	AS '@mpm'
+		FROM @BetLimitTable
+		FOR XML PATH('z'), ROOT('r')
+	)
+
+	SET @logSPData = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
+
+	SET @endRun		= GETDATE()  
+	SET @duration	= DATEDIFF(millisecond, @startRun, @endRun) 
+
+	IF @LogDate IS NULL
+		SET @LogDate = GETDATE()	
+
+	EXEC LogDB.dbo.Age_LogRunSp_Insert
+		@UserId			= @Creator,
+		@SPName			= 'Age_Agent_InsertBetLimit',
+		@LogDate		= @LogDate,
+		@ObjectId		= @AgentId,
+		@ObjectTypeId	= 1,			--Object type : Agent						
+		@Duration		= @Duration,
+		@Data			= @logSPData,
+		@OldData		= @logSPDataOld
 END

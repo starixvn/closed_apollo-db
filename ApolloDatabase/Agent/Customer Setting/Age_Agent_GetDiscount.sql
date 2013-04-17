@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_GetDiscount]    Script Date: 3/29/2013 9:57:09 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_GetDiscount]    Script Date: 4/17/2013 2:56:57 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -37,17 +37,4 @@ BEGIN
 		DiscountD
 	FROM AgentDiscount WITH (NOLOCK)
 	WHERE AgentId = @AgentId	
-
-	UNION
-
-	SELECT 
-		SportType,
-		BetType,
-		DiscountA,
-		DiscountB,
-		DiscountC,
-		DiscountD
-	FROM AgentDiscount3rd WITH (NOLOCK)
-	WHERE AgentId = @AgentId	
-
 END
