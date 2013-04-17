@@ -53,6 +53,13 @@ SELECT	AgentId
 FROM	AgentInfo WITH (NOLOCK)
 WHERE	ParentId = @LoggedId
 
+
+DECLARE @LoggedAgentLevel INT
+SELECT	@LoggedAgentLevel = AgentLevel
+FROM	AgentInfo WITH (NOLOCK)
+WHERE	AgentId = @LoggedId
+
+
 CREATE TABLE #StatusId ( StatusId TINYINT)
 INSERT INTO #StatusId
 SELECT val FROM dbo.strSplit_Key(@StatusIds,'^')
@@ -1537,7 +1544,8 @@ END
 END 
 
 
-SELECT DISTINCT * FROM #Betlist 
+SELECT DISTINCT * , @LoggedAgentLevel as AgentLevel
+FROM #Betlist 
 ORDER BY TransID
 
 GO

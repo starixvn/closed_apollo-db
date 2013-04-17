@@ -169,7 +169,7 @@ BEGIN
 	
 END		
  	
-SELECT	B.* , A.Username 
+SELECT	B.* , A.Username , A.Agentlevel
 FROM	@BetListDetail B
 INNER JOIN AgentInfo A
 	ON	 A.AgentId = B.AgentId

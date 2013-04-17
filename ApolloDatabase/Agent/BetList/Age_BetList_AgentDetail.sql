@@ -29,6 +29,7 @@ DECLARE @BetListDetail TABLE(
 		TransID BIGINT,
 		AgentID INT,		
 		--Username VARCHAR(50),
+
 		Status   VARCHAR(10),		
 		APositionTaking SMALLMONEY, 
 		ADiscount	DECIMAL(9,8),
@@ -169,7 +170,7 @@ BEGIN
 	
 END		
  	
-SELECT	B.* , A.Username 
+SELECT	B.* , A.Username, A.AgentLevel
 FROM	@BetListDetail B
 INNER JOIN AgentInfo A
 	ON	 A.AgentId = B.AgentId
