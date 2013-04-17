@@ -1017,6 +1017,12 @@
     <NotInBuild Include="Agent\BetList\Age_BetList_AgentDetail_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_Customer_UpdatePositionTaking.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_Customer_GetPositionTakingForUpdate.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">

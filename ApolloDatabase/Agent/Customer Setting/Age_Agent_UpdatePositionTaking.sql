@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking]    Script Date: 4/16/2013 10:00:43 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking]    Script Date: 4/17/2013 2:53:10 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -36,8 +36,7 @@ GO
 ALTER PROCEDURE [dbo].[Age_Agent_UpdatePositionTaking]
 	@ActorAgentId			INT				= NULL,
 	@AgentId				INT,
-	@PositionTaking			VARCHAR(MAX)	= '',
-	@PositionTaking3rd		VARCHAR(MAX)	= '',
+	@PositionTaking			VARCHAR(MAX)	= '',	
 	@Language				VARCHAR(2)		= 'E',
 	@LogDate				DATETIME		= NULL,
 	@ErrCode				INT				= 0			OUTPUT,
@@ -78,6 +77,18 @@ BEGIN
 			RETURN			
 		END				
 		
+	-- For write log
+    DECLARE @startRun			DATETIME  
+			,@endRun			DATETIME  
+			,@duration			INT
+			,@logSPData			VARCHAR(5000)
+			,@logSPDataOld		VARCHAR(5000)			
+			,@xml				XML
+
+	SET @startRun = GETDATE()			
+		
+	-- begin update	
+
 	-- begin update	
 
 	IF @PositionTaking <> ''
@@ -90,8 +101,7 @@ BEGIN
 				,@sportType			SMALLINT
 				,@tempAgentId		INT
 				,@isLastAgent		BIT
-				,@currentCustId		INT
-				,@xml				XML
+				,@currentCustId		INT				
 				,@data				VARCHAR(MAX)
 
 
@@ -147,7 +157,7 @@ BEGIN
 		WHERE 
 			AgentId = @AgentId
 
-		
+		-- Check current agent is last agent ?
 		IF EXISTS (
 			SELECT TOP(1) * 
 			FROM AgentInfo WITH (NOLOCK)
@@ -237,16 +247,16 @@ BEGIN
 		-- Check validate max and min
 		SELECT TOP(1) @sportType = tpt.SportType
 		FROM @TablePositiongTaking AS tpt					
-		WHERE tpt.MinGivenPT < 0
-			OR tpt.MaxGivenPT < 0
-			OR tpt.MaxUpperPT < 0 
+		WHERE tpt.MinGivenPT	< 0
+			OR tpt.MaxGivenPT	< 0
+			OR tpt.MaxUpperPT	< 0 
 
 		IF @sportType IS NOT NULL 
 			BEGIN
 				SELECT @ErrCode = 1
 
 				----Message for each sport type	WITH CASE @sportType
-				SELECT @ErrMsg	= 'Invalid range Position Taking.' + ' (' + dbo.f_Get_SportNameBySporttype(@sportType,@Language) + ')'
+				SELECT @ErrMsg	= 'Positiont king must be greater than zero .' + ' (' + dbo.f_Get_SportNameBySporttype(@sportType,@Language) + ')'
 
 				RETURN			
 			END	
@@ -288,6 +298,7 @@ BEGIN
 				RETURN			
 			END	
 
+		-- Update new position taking if had changed
 		IF EXISTS(
 			SELECT TOP(1) * 
 			FROM AgentPositionTaking AS apt WITH (NOLOCK)
@@ -301,6 +312,31 @@ BEGIN
 					 OR apt.MinPositionTaking	<> tpt.MinGivenPT)
 		)
 			BEGIN
+				
+				-- write log before update
+				
+				SET @xml = (
+					SELECT  
+						apt.SportType				AS '@s'
+						,apt.BetType				AS '@b'
+						,apt.IsLive					AS '@i'
+						,apt.PresetPositionTaking	AS '@p'
+						,apt.MaxPositionTaking		AS '@ma'
+						,apt.MinPositionTaking		AS '@mi'
+					FROM 
+						AgentPositionTaking AS apt WITH (NOLOCK)
+						INNER JOIN @TablePositiongTaking AS tpt
+							ON apt.SportType	= tpt.SportType
+							AND apt.BetType		= tpt.BetType
+							AND apt.IsLive		= tpt.IsLive
+					WHERE apt.AgentId = @AgentId				
+					FOR XML PATH('z'), ROOT('r')
+				)
+
+				SET @logSPDataOld = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
+
+				-- end write log
+
 				-- Edit Main Share Holder Position Taking
 				IF @agentLevel = @MAINSHAREHOLDERLEVEL
 					BEGIN
@@ -317,6 +353,8 @@ BEGIN
 						)
 							BEGIN
 								-- Check validate when update main share holder
+
+								-- Max given position taking must be MinGivenPT < MaxGivenPT < @MAXSHAREHOLDERPT
 								SELECT TOP(1) @sportType = tpt.SportType
 								FROM @TablePositiongTaking AS tpt					
 								WHERE tpt.MaxGivenPT NOT BETWEEN tpt.MinGivenPT AND @MAXSHAREHOLDERPT
@@ -331,6 +369,7 @@ BEGIN
 										RETURN			
 									END
 
+								-- Max given position taking must be greater or equal Max[Sum(PreK+MaxK)]
 								SELECT TOP(1) @sportType		= tpt.SportType
 												,@tempAgentId	= shareHolderTemp.AgentId
 								FROM @TablePositiongTaking AS tpt
@@ -362,8 +401,9 @@ BEGIN
 
 										RETURN			
 									END
+								-- End check validate when update main share holder
 
-								-- Update Max Given PT and MaxUpper PT
+								-- Begin update
 								UPDATE apt
 								SET apt.MaxPositionTaking		= tpt.MaxGivenPT
 									,apt.PresetPositionTaking	= @MAXPT - tpt.MaxGivenPT 
@@ -373,6 +413,7 @@ BEGIN
 										AND apt.BetType		= tpt.BetType
 										AND apt.IsLive		= tpt.IsLive
 								WHERE apt.AgentId = @AgentId
+								-- End update
 							END
 						-- End update Max Given PT
 
@@ -455,7 +496,7 @@ BEGIN
 									END
 								-- End update Min Given PT greater than Current Min Given PT
 
-								-- Update Min Given PT
+								-- Begin update
 								UPDATE apt
 								SET apt.MinPositionTaking	= tpt.MinGivenPT
 								FROM AgentPositionTaking AS apt WITH (ROWLOCK,UPDLOCK)
@@ -464,15 +505,14 @@ BEGIN
 										AND apt.BetType		= tpt.BetType
 										AND apt.IsLive		= tpt.IsLive
 								WHERE apt.AgentId = @AgentId								
-									
+								-- End update									
 							END
 						-- End update Min Given PT
 					END
 				-- End edit Main Share Holder Position Taking
 				ELSE
-				-- Begin edit Agent
+				-- Begin edit Agent with level k ( k > 1)
 					BEGIN
-
 						-- Edit Max Upper PT
 						IF EXISTS(
 							SELECT TOP(1) * 
@@ -513,15 +553,14 @@ BEGIN
 											ON tpt.SportType	= apt.SportType
 											AND tpt.BetType		= apt.BetType
 											AND tpt.IsLive		= apt.IsLive
-									WHERE apt.AgentId = @AgentId
-										AND tpt.MaxUpperPT < apt.PresetPositionTaking
+									WHERE apt.AgentId		= @AgentId
+										AND tpt.MaxUpperPT	< apt.PresetPositionTaking
 								)
 									BEGIN
 
 										-- Insert direct member of agent
 										-- Reset @TableCust
-										DELETE @TableCust
-																				
+										DELETE @TableCust																				
 										INSERT INTO @TableCust(CustId)
 										SELECT CustId
 										FROM CustInfo WITH (NOLOCK)
@@ -554,11 +593,10 @@ BEGIN
 														ON cpt.CustId = tc.CustId
 												WHERE cpt.AgentId = @parentAgentId
 													AND cpt.PositionTaking > tpt.MaxUpperPT
-											END
+											END -- Get member break rule of agent level n										
 										ELSE
 										-- Get member break rule of agent level k
-											BEGIN											
-																																
+											BEGIN										
 												INSERT INTO @TableCustPositionTaking(
 													CustId
 													,SportType
@@ -577,7 +615,7 @@ BEGIN
 														AND tpt.BetType		= cpt.BetType
 														AND tpt.IsLive		= cpt.IsLive
 													INNER JOIN @TableCust AS tc
-														ON cpt.CustId = tc.CustId
+														ON cpt.CustId		= tc.CustId
 													INNER JOIN AgentPositionTaking AS apt WITH (NOLOCK)
 														ON apt.SportType	= cpt.SportType
 														AND apt.BetType		= cpt.BetType
@@ -586,7 +624,7 @@ BEGIN
 													AND apt.AgentId = @AgentId
 													AND cpt.PositionTaking	> tpt.MaxUpperPT 
 													AND cpt.PositionTaking	<= apt.PresetPositionTaking
-											END		
+											END	-- Get member break rule of agent level k	
 											
 										WHILE EXISTS(
 											SELECT TOP(1) * FROM @TableCustPositionTaking
@@ -595,7 +633,8 @@ BEGIN
 												-- Select current Cust Id
 												SELECT TOP(1) @currentCustId = CustId
 												FROM @TableCustPositionTaking
-													
+												
+												-- Begin update	
 												UPDATE cpt
 												SET cpt.PositionTaking = CASE WHEN tpt.MaxUpperPT > papt.MinPositionTaking - downCust.SumOfPositionTaking
 																			THEN tpt.MaxUpperPT
@@ -635,6 +674,7 @@ BEGIN
 														AND cpt.IsLive		= papt.IsLive
 												WHERE papt.AgentId	= @parentAgentId	
 													AND cpt.AgentId	= @parentAgentId																									
+												-- End update
 
 												-- Edit Position Taking of member for mem less than current mem pt
 												DELETE @TableStackPositionTaking
@@ -665,7 +705,8 @@ BEGIN
 													AND ai.AgentLevel	<= @agentParentLevel
 												ORDER BY ai.AgentLevel
 														
-												-- @index = Level of parent agent - 1	
+												-- @index = Level of parent agent - 1
+												SET @index = @agentParentLevel - 1	
 												WHILE @index > 0
 													BEGIN
 									
@@ -1049,7 +1090,8 @@ BEGIN
 													WHERE cpt.CustId = @currentCustId
 														AND ai.AgentLevel <= @agentParentLevel
 													ORDER BY ai.AgentLevel
-															
+														
+													SET @index = @agentParentLevel - 1		
 													WHILE @index > 0
 														BEGIN
 									
@@ -1234,7 +1276,7 @@ BEGIN
 													AND ai.AgentLevel <= @agentLevel
 												ORDER BY ai.AgentLevel
 
-												SET @index = @agentLevel - 1
+												--SET @index = @agentLevel - 1
 
 												DELETE @TableUpdateCustPositionTaking
 												INSERT INTO @TableUpdateCustPositionTaking(
@@ -1255,6 +1297,7 @@ BEGIN
 												WHERE cpt.CustId	= @currentCustId
 													AND cpt.AgentId	= @AgentId
 
+												SET @index = @agentLevel - 1
 												WHILE @index > 0
 													BEGIN
 														SELECT TOP(1) @currentAgentId = AgentId
@@ -1456,7 +1499,7 @@ BEGIN
 															AND ai.AgentLevel <= @agentLevel
 														ORDER BY ai.AgentLevel
 
-														SET @index = @agentLevel - 1
+														--SET @index = @agentLevel - 1
 
 														DELETE @TableUpdateCustPositionTaking
 														INSERT INTO @TableUpdateCustPositionTaking(
@@ -1477,6 +1520,7 @@ BEGIN
 														WHERE cpt.CustId	= @currentCustId
 															AND cpt.AgentId	= @AgentId
 
+														SET @index = @agentLevel - 1
 														WHILE @index > 0
 															BEGIN
 																SELECT TOP(1) @currentAgentId = AgentId
@@ -1605,8 +1649,8 @@ BEGIN
 														SELECT TOP(1) @currentCustId = CustId
 														FROM @TableCust																										
 
-														DECLARE @TableCustAgent TABLE(CustId INT, AgentId INT,AgentLevel INT)
-
+														DECLARE @TableCustAgent TABLE(CustId INT, AgentId INT,AgentLevel INT)														
+														
 														INSERT INTO @TableCustAgent(CustId, AgentId,AgentLevel)
 														SELECT DISTINCT 
 																	cpt.CustId
@@ -1625,15 +1669,18 @@ BEGIN
 																AND cpt.CustId = @currentCustId
 														ORDER BY ai.AgentLevel
 
-														DELETE @TableCustPositionTaking
+														SELECT TOP(1) @tempAgentId = AgentId FROM @TableCustAgent
 
-														INSERT INTO @TableCustPositionTaking(																														
-															SportType
+														DELETE @TableCustPositionTaking
+														INSERT INTO @TableCustPositionTaking(
+															CustId																														
+															,SportType
 															,BetType
 															,IsLive
 															,PositionTaking)
 														SELECT 
-															cpt.SportType
+															cpt.CustId
+															,cpt.SportType
 															,cpt.BetType
 															,cpt.IsLive
 															,CASE WHEN capt.PresetPositionTaking > tpt.MinGivenPT - dcpt.SumOfPositionTaking
@@ -1644,11 +1691,11 @@ BEGIN
 															INNER JOIN @TablePositiongTaking AS tpt
 																 ON cpt.SportType	= tpt.SportType
 																 AND cpt.BetType	= tpt.BetType
-																 AND cpt.IsLive		= tpt.IsLive
-															INNER JOIN @TableCustAgent AS tca
-																ON cpt.CustId = tca.CustId
+																 AND cpt.IsLive		= tpt.IsLive															
 															INNER JOIN AgentPositionTaking AS capt WITH (NOLOCK)
-																ON tca.AgentId = capt.AgentId
+																ON cpt.SportType	= capt.SportType
+																 AND cpt.BetType	= capt.BetType
+																 AND cpt.IsLive		= capt.IsLive
 															INNER JOIN (
 																SELECT 
 																	CustId
@@ -1660,17 +1707,18 @@ BEGIN
 																	CustPositionTaking AS cpt WITH (NOLOCK)															
 																	INNER JOIN AgentInfo AS ai WITH (NOLOCK)
 																		ON cpt.AgentId	= ai.AgentId
-																	WHERE cpt.CustId = @currentCustId
-																		AND ai.AgentLevel > @agentLevel
+																	WHERE cpt.CustId		= @currentCustId
+																		AND ai.AgentLevel	> @agentLevel
 																GROUP BY CustId, SportType, BetType, IsLive	
 															) AS dcpt 
 																ON 	cpt.SportType	= dcpt.SportType
 																	AND cpt.BetType = dcpt.BetType
 																	AND cpt.IsLive	= dcpt.IsLive
 																	AND cpt.CustId  = dcpt.CustId
-														WHERE cpt.AgentId = @AgentId
-															AND cpt.CustId = @currentCustId
-															AND cpt.PositionTaking > capt.PresetPositionTaking
+														WHERE cpt.AgentId			= @AgentId
+															AND cpt.CustId			= @currentCustId
+															AND capt.AgentId		= @tempAgentId
+															AND cpt.PositionTaking	> capt.PresetPositionTaking
 
 
 														UPDATE cpt	
@@ -1681,11 +1729,15 @@ BEGIN
 																 AND cpt.BetType	= tcpt.BetType
 																 AND cpt.IsLive		= tcpt.IsLive															
 														WHERE cpt.AgentId	= @AgentId
-															AND cpt.CustId = @currentCustId														
+															AND cpt.CustId	= @currentCustId														
 
-														-- Edit Position Taking of member
-														DELETE @TableStackPositionTaking
-														INSERT INTO @TableStackPositionTaking (
+														IF EXISTS(
+															SELECT TOP(1) * FROM @TableCustPositionTaking
+														)
+															BEGIN														
+																-- Edit Position Taking of member
+																DELETE @TableStackPositionTaking
+																																																																INSERT INTO @TableStackPositionTaking (
 																AgentId
 																,AgentLevel
 																,SportType
@@ -1707,12 +1759,13 @@ BEGIN
 																AND cpt.CustId		= tcpt.CustId
 															INNER JOIN AgentInfo AS ai WITH (NOLOCK)
 																ON cpt.AgentId = ai.AgentId
-														WHERE cpt.CustId = @currentCustId
+														WHERE cpt.CustId	= @currentCustId
 															AND ai.AgentLevel <= @agentLevel
 														ORDER BY ai.AgentLevel
 															
-														WHILE @index > 0
-															BEGIN
+																SET @index = @agentLevel - 1
+																WHILE @index > 0
+																																																																																																																																																			BEGIN
 									
 																SELECT TOP(1) @currentAgentId = AgentId
 																FROM @TableStackPositionTaking 
@@ -1741,7 +1794,7 @@ BEGIN
 																	AND ai.AgentLevel >= @index
 																GROUP BY cpt.SportType
 																		,cpt.BetType
-																		,cpt.IsLive
+																		,cpt.IsLive																
 
 																IF EXISTS(
 																	SELECT TOP(1) *
@@ -1777,10 +1830,13 @@ BEGIN
 																		WHERE cpt.CustId = @currentCustId
 																			AND cpt.AgentId = @currentAgentId
 																			AND apt.AgentId	= @currentAgentId
+
+																		SET @index = 0 
 																	END	 
 															END
-														-- End edit positin taking of member
-
+																-- End edit positin taking of member
+															END
+														
 														-- Remove cust id
 														DELETE @TableCust WHERE CustId = @currentCustId
 													END												
@@ -1804,7 +1860,44 @@ BEGIN
 							END
 						-- End edit Min Given PT
 					END
-				-- End edit Agent
+				-- End edit Agent with level k ( k > 1)
+
+				-- write log before update
+				
+				SET @xml = (
+					SELECT  
+						tpt.SportType				AS '@s'
+						,tpt.BetType				AS '@b'
+						,tpt.IsLive					AS '@i'
+						,tpt.MaxUpperPT				AS '@p'
+						,tpt.MaxGivenPT				AS '@ma'
+						,tpt.MinGivenPT				AS '@mi'
+					FROM @TablePositiongTaking AS tpt							
+					FOR XML PATH('z'), ROOT('r')
+				)
+
+				SET @logSPData = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
+
+				-- end write log
+
+				
+				SET @endRun		= GETDATE()  
+				SET @duration	= DATEDIFF(millisecond, @startRun, @endRun) 
+
+				IF @LogDate IS NULL
+					SET @LogDate = GETDATE()				
+
+				EXEC LogDB.dbo.Age_LogRunSp_Insert
+					@UserId			= @ActorAgentId,
+					@SPName			= 'Age_Agent_UpdatePositionTaking',
+					@LogDate		= @LogDate,
+					@ObjectId		= @AgentId,
+					@ObjectTypeId	= 1,			--Object type : Agent						
+					@Duration		= @Duration,
+					@Data			= @logSPData,
+					@OldData		= @logSPDataOld
 			END
+					-- End update new position taking if had changed
 	END
+	-- end update
 END	
