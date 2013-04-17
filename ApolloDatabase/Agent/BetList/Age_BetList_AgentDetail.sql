@@ -14,7 +14,7 @@ ALTER PROCEDURE [dbo].[Age_BetList_AgentDetail]
 
 /*
 Created: 20130301@Sophia
-Task : Detail Betlist
+Task : Detail Betlist for Transdate
 DB:  SVRAGE.RepDB
 Original:  
 
@@ -28,8 +28,8 @@ SET NOCOUNT ON
 DECLARE @BetListDetail TABLE(
 		TransID BIGINT,
 		AgentID INT,		
-		Username VARCHAR(50),
-		Status   VARCHAR(10),	
+		--Username VARCHAR(50),
+		Status   VARCHAR(10),		
 		APositionTaking SMALLMONEY, 
 		ADiscount	DECIMAL(9,8),
 		AWinlost MONEY,
@@ -54,9 +54,10 @@ IF @Todate > @MoveBetsDay
 BEGIN 
 	
 	INSERT INTO @BetListDetail
-	SELECT	BA.TransID,
+	SELECT	DISTINCT
+			BA.TransID,
 			BA.AgentID,
-			BA.Username,
+			--BA.Username,
 			BA.Status,
 			BA.APositionTaking,
 			BA.ADiscount,
@@ -70,20 +71,22 @@ BEGIN
 	LEFT JOIN BetTrans_Agent D WITH (NOLOCK)
 			ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
 	WHERE	BA.TransId = @TransId 
-			AND BA.Winlostdate BETWEEN @fromdate AND @todate 
+			AND BA.TransDate BETWEEN @fromdate AND @todate 
 			AND (BA.bettype < 31 
 				OR BA.bettype BETWEEN 121 AND 999 
 				OR BA.bettype BETWEEN 1301 AND 1334   
 				OR BA.Bettype  BETWEEN 81 AND 120 )
 			AND ISNULL(C.AgentLevel,@AgentLevel) >= @AgentLevel   
 
+
 	-----Super View add 1 more row of Super
 	IF @AgentLevel = 1 
 	BEGIN 
 		INSERT INTO @BetListDetail
-			SELECT	B.TransID,
+			SELECT	DISTINCT
+					B.TransID,
 					@LoggedId as AgentID,
-					@Username as Username,
+					--@Username as Username,
 					B.Status,
 					(1 - B.TPositionTaking) AS APositionTaking,
 					NULL AS ADiscount,
@@ -97,7 +100,7 @@ BEGIN
 			LEFT JOIN BetTrans_Agent D WITH (NOLOCK)
 					ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
 			WHERE	BA.TransId = @TransId 
-					AND BA.Winlostdate BETWEEN @fromdate AND @todate 
+					AND BA.TransDate BETWEEN @fromdate AND @todate 
 					AND (BA.bettype < 31 
 						OR BA.bettype BETWEEN 121 AND 999 
 						OR BA.bettype BETWEEN 1301 AND 1334   
@@ -111,9 +114,10 @@ END
 IF @Fromdate <= @MoveBetsDay
 BEGIN
 			INSERT INTO @BetListDetail
-			SELECT	BA.TransID,
+			SELECT	DISTINCT
+					BA.TransID,
 					BA.AgentID,
-					BA.Username,
+					--BA.Username,
 					BA.Status,
 					BA.APositionTaking,
 					BA.ADiscount,
@@ -127,7 +131,7 @@ BEGIN
 			LEFT JOIN BetTrans14_Agent D WITH (NOLOCK)
 					ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
 			WHERE	BA.TransId = @TransId 
-					AND BA.winlostdate BETWEEN @fromdate AND @todate 
+					AND BA.TransDate BETWEEN @fromdate AND @todate 
 					AND (BA.bettype < 31 
 						OR BA.bettype BETWEEN 121 AND 999 
 						OR BA.bettype BETWEEN 1301 AND 1334  
@@ -138,9 +142,10 @@ BEGIN
 	IF @AgentLevel = 1 
 	BEGIN 
 		INSERT INTO @BetListDetail
-			SELECT	B.TransID,
+			SELECT	DISTINCT 
+					B.TransID,
 					@LoggedId as AgentID,
-					@Username as Username,
+				---	@Username as Username,
 					B.Status,
 					(1 - B.TPositionTaking) AS APositionTaking,
 					NULL AS ADiscount,
@@ -154,7 +159,7 @@ BEGIN
 			LEFT JOIN BetTrans14_Agent D WITH (NOLOCK)
 					ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
 			WHERE	BA.TransId = @TransId 
-					AND BA.Winlostdate BETWEEN @fromdate AND @todate 
+					AND BA.TransDate BETWEEN @fromdate AND @todate 
 					AND (BA.bettype < 31 
 						OR BA.bettype BETWEEN 121 AND 999 
 						OR BA.bettype BETWEEN 1301 AND 1334   
@@ -164,8 +169,11 @@ BEGIN
 	
 END		
  	
-SELECT DISTINCT * FROM @BetListDetail
-ORDER BY TransID
+SELECT	B.* , A.Username 
+FROM	@BetListDetail B
+INNER JOIN AgentInfo A
+	ON	 A.AgentId = B.AgentId
+ORDER BY B.TransID, A.AgentLevel
 
 	
 GO
