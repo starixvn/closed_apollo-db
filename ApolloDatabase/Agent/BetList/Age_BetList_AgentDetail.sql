@@ -118,7 +118,7 @@ BEGIN
 					BA.APositionTaking,
 					BA.ADiscount,
 					BA.AWinlost,				
-					BA.AComm - D.Acomm AS AComm									
+					BA.AComm - ISNULL(D.Acomm, B.Playercomm) AS AComm									
 			FROM	BetTrans14_Agent  BA WITH (NOLOCK)
 			INNER JOIN	Bettrans14 B WITH (NOLOCK) 
 					ON	B.TransID= BA.TransID 
