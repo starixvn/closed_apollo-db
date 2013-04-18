@@ -25,7 +25,7 @@ EX: Exec [Age_BetList_SelWinloss_Old] 3,-1, 35, '2013-01-01' , '2013-04-09', '0^
 SET NOCOUNT ON
 
 
-DECLARE @Betlist TABLE (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVARCHAR(50), 
+CREATE TABLE #Betlist  (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVARCHAR(50), 
 						HomeId INT, AwayId INT, SportType TINYINT, LeagueId INT, IsNeutral BIT, Showtime NVARCHAR(50),
 						Username NVARCHAR(50), BetType SMALLINT, CustId INT , Hdp1 SMALLMONEY, Hdp2 SMALLMONEY, Odds SMALLMONEY, MOdds SMALLMONEY,
 						Status VARCHAR(10), Stake MONEY, Actual_Stake MONEY, TransDate DATETIME, WinLostDate SMALLDATETIME,	BetTeam VARCHAR(10), BetId BIGINT, 
@@ -34,15 +34,21 @@ DECLARE @Betlist TABLE (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT)
 
 
-DECLARE @DirectChild TABLE ( AgentId INT)
+CREATE TABLE #DirectChild ( AgentId INT)
 
-INSERT INTO @DirectChild 
+INSERT INTO #DirectChild 
 SELECT	AgentId 
 FROM	AgentInfo WITH (NOLOCK)
 WHERE	ParentId = @LoggedId
 
  
-	INSERT INTO @Betlist
+DECLARE @LoggedAgentLevel INT
+SELECT	@LoggedAgentLevel = AgentLevel
+FROM	AgentInfo WITH (NOLOCK)
+WHERE	AgentId = @LoggedId
+
+
+	INSERT INTO #Betlist
 	SELECT 	B.TransId,
 			B.RefNo,
 			m.MatchId,
@@ -82,7 +88,7 @@ WHERE	ParentId = @LoggedId
 			BetTrans_BK AS B  WITH (NOLOCK) 
 			INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 			INNER JOIN BetTrans_Agent_BK AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
-			LEFT JOIN Bettrans_Agent_BK D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM @DirectChild) 
+			LEFT JOIN Bettrans_Agent_BK D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
 			INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId 				
 		WHERE 
 			BA.AgentId = CASE WHEN @AgentId = -1 THEN BA.AgentId ELSE @AgentId END 
@@ -97,7 +103,7 @@ WHERE	ParentId = @LoggedId
 
 
 	----- Mix parlay AND Combination mix parlay
-	INSERT INTO @Betlist
+	INSERT INTO #Betlist
 		SELECT 
 		
 			B.TransId,
@@ -136,7 +142,7 @@ WHERE	ParentId = @LoggedId
 		FROM BetTrans_BK AS B  WITH (NOLOCK) 		
 			INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 			INNER JOIN BetTrans_Agent_BK AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
-			LEFT JOIN Bettrans_Agent_BK D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM @DirectChild) 
+			LEFT JOIN Bettrans_Agent_BK D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
 		WHERE
 			BA.AgentId = CASE WHEN @AgentId = -1 THEN BA.AgentId ELSE @AgentId END 
 			AND B.CustID = CASE WHEN @CustId = -1 THEN B.CustId ELSE @CustId END 
@@ -146,7 +152,7 @@ WHERE	ParentId = @LoggedId
 
 
 	----- Outright
-	INSERT INTO @Betlist
+	INSERT INTO #Betlist
 	SELECT 				
 			B.transid,
 			B.refno,
@@ -185,7 +191,7 @@ WHERE	ParentId = @LoggedId
 			bettrans_BK B WITH (NOLOCK)
 			INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 			INNER JOIN BetTrans_Agent_BK AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
-			LEFT JOIN Bettrans_Agent_BK D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM @DirectChild) 
+			LEFT JOIN Bettrans_Agent_BK D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
 			INNER JOIN outright_BK as m WITH (NOLOCK) on  B.matchid=m.orid
 			INNER JOIN league_BK lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
 		WHERE 
@@ -195,9 +201,14 @@ WHERE	ParentId = @LoggedId
 			AND B.StatusId in ( SELECT convert(int,val) FROM dbo.strSplit_Key(@StatusIds,'^') ) 		
 			AND B.WinlostDate Between @FromDate AND @ToDate
 
-SELECT	* 
-FROM	@Betlist 
+SELECT	* , @LoggedAgentLevel
+FROM	#Betlist 
 ORDER BY TransID DESC 
+
+
+DROP TABLE #Betlist
+DROP TABLE #DirectChild
+DROP TABLE #StatusId
 
 GO
 GRANT EXECUTE ON [dbo].[Age_BetList_SelWinloss_Old] TO [aplweb]
