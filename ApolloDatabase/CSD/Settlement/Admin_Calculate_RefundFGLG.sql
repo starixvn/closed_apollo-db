@@ -35,19 +35,19 @@ END
 
 WHILE 1=1
 BEGIN
-	UPDATE TOP (10000) dbo.BetTrans_Agent with (ROWLOCK, UPDLOCK)
+	UPDATE TOP (10000) ba with (ROWLOCK, UPDLOCK)
 	SET
 		status = 'Refund',
 		statusID = 103,
 		awinlost=0,
 		acomm=0
-	FROM  BetTrans B WITH (NOLOCK) JOIN BetTrans_Agent ON 
-		b.TransId=BetTrans_Agent.TransId and BetTrans_Agent.matchid=b.matchid AND BetTrans_Agent.bettype=b.bettype 
+	FROM  BetTrans B WITH (NOLOCK) JOIN BetTrans_Agent  ba ON 
+		b.TransId=ba.TransId and ba.matchid=b.matchid AND ba.bettype=b.bettype 
 	where
-		b.matchid=@matchid
+		ba.matchid=@matchid
 		--AND [status] not in ('Void', 'Reject')
-		AND b.statusID not in (103,101,102)
-		AND b.bettype = 14
+		AND ba.statusID not in (103,101,102)
+		AND ba.bettype = 14
 		--AND ruben = 1 
 		AND right(b.betteam, 1) = case when @LGOnly = 1 then '2' else right(b.betteam, 1) end
     
