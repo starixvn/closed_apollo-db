@@ -17,7 +17,7 @@ AS
     
 SET NOCOUNT ON
 
-DECLARE @WinLossMember TABLE ( Username NVARCHAR(50), CustID INT, PositionTaking SMALLINT, TurnOver MONEY, ActualTO MONEY, WinLost MONEY, PlayerComm MONEY, MemTotal MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY)
+DECLARE @WinLossMember TABLE ( Username NVARCHAR(50), CustID INT, PositionTaking SMALLINT, TurnOver MONEY, ActualTO MONEY, WinLost MONEY, PlayerComm MONEY, MemTotal MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, UplineTotal MONEY)
 
 
 IF @Todate >= @BalanceUpDay
