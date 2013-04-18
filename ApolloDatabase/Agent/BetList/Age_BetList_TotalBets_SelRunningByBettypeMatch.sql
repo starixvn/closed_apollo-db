@@ -18,6 +18,14 @@ Revisions:
 */
 
 SET NOCOUNT ON
+
+
+DECLARE @AgentLevel INT
+SELECT	@AgentLevel = AgentLevel
+FROM	AgentInfo WITH (NOLOCK)
+WHERE	AgentId = @AgentID
+
+
 if @bettype in (10)
 BEGIN
 	SELECT 
@@ -51,7 +59,8 @@ BEGIN
 		B.betid,
 		'' as showtime,
 		B.refno,
-		B.DoubleCommLosing									
+		B.DoubleCommLosing,
+		@AgentLevel
 	FROM Bettrans B WITH (NOLOCK)
 	LEFT JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
 		ON B.TransID = BA.TransID
@@ -102,8 +111,8 @@ BEGIN
 		B.betid,
 		m.showtime,
 		B.refno,
-		B.DoubleCommLosing
-	
+		B.DoubleCommLosing,
+		@AgentLevel	
 	FROM Bettrans B WITH (NOLOCK)
 	LEFT JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
 		ON B.TransID = BA.TransID

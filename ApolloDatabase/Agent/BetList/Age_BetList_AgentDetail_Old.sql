@@ -27,8 +27,7 @@ SET NOCOUNT ON
 DECLARE @BetListDetail TABLE(
 		TransID BIGINT,
 		AgentID INT,
-		--AgentHID HIERARCHYID,
-		Username VARCHAR(50),
+		--Username VARCHAR(50),
 		Status   VARCHAR(10),
 		--AgentLevel SMALLINT,
 		APositionTaking SMALLMONEY, 
@@ -52,10 +51,10 @@ WHERE	AgentID = @LoggedId
  
 
 			INSERT INTO @BetListDetail
-			SELECT	BA.TransID,
+			SELECT	DISTINCT 
+					BA.TransID,
 					BA.AgentID,
-					--A.AgentHID,
-					BA.Username,
+					---BA.Username,
 					BA.Status,
 					--A.AgentLevel,
 					BA.APositionTaking,
@@ -70,7 +69,7 @@ WHERE	AgentID = @LoggedId
 			LEFT JOIN BetTrans_Agent_BK D WITH (NOLOCK)
 					ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
 			WHERE	BA.TransId = @TransId 
-					AND BA.Winlostdate BETWEEN @fromdate AND @todate 
+					AND BA.TransDate BETWEEN @fromdate AND @todate 
 					AND (BA.bettype < 31 
 						OR BA.bettype BETWEEN 121 AND 999 
 						OR BA.bettype BETWEEN 1301 AND 1334   
@@ -80,9 +79,10 @@ WHERE	AgentID = @LoggedId
 	IF @AgentLevel = 1 
 	BEGIN 
 		INSERT INTO @BetListDetail
-			SELECT	B.TransID,
+			SELECT	DISTINCT 
+					B.TransID,
 					@LoggedId as AgentID,
-					@Username as Username,
+					---@Username as Username,
 					B.Status,
 					(1 - B.TPositionTaking) AS APositionTaking,
 					NULL AS ADiscount,
@@ -96,7 +96,7 @@ WHERE	AgentID = @LoggedId
 			LEFT JOIN BetTrans_BK D WITH (NOLOCK)
 					ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
 			WHERE	BA.TransId = @TransId 
-					AND BA.Winlostdate BETWEEN @fromdate AND @todate 
+					AND BA.TransDate BETWEEN @fromdate AND @todate 
 					AND (BA.bettype < 31 
 						OR BA.bettype BETWEEN 121 AND 999 
 						OR BA.bettype BETWEEN 1301 AND 1334   
@@ -105,9 +105,11 @@ WHERE	AgentID = @LoggedId
 	END	
 
  	
-SELECT DISTINCT * FROM @BetListDetail
-ORDER BY TransID
-
+SELECT	B.* , A.Username , A.AgentLevel
+FROM	@BetListDetail B
+INNER JOIN AgentInfo A
+	ON	 A.AgentId = B.AgentId
+ORDER BY B.TransID, A.AgentLevel
 	
 GO
 GRANT EXECUTE ON [dbo].[Age_BetList_AgentDetail] TO [aplweb]

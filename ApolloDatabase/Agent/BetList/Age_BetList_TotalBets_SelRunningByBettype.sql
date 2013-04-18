@@ -10,11 +10,11 @@
   TASk			: Retrieve total bet of Parlay, Clean Sheet, Double Chance, Both/One/Neither Team To Score, To Win To Nil, 3-Way Handicap
   DB			: SVRAGE.RepDB
   Revisions	:
-	- 20130409@Sophia: revise all, change @bettype to @bettypes 
+	- 20130409@Sophia: revise all, change #Bettype to #Bettypes 
  
   Parameters:
  		@AgentId: agent ID
-  		@Bettypes: string of bettypes , seperate by ^
+  		#Bettypes: string of bettypes , seperate by ^
  		@Language: default English
 
   EX: EXEC [Age_BetList_TotalBets_SelRunningByBettype] 3, '1^0^9^29^10'
@@ -23,10 +23,10 @@
  */
 
 SET NOCOUNT ON
-DECLARE @Bettype TABLE (bettype INT)
+CREATE TABLE #Bettype (bettype INT)
 
-INSERT INTO  @Bettype
-SELECT convert(INT,val) FROM dbo.strSplit_Key(@bettypes,'^')
+INSERT INTO #Bettype
+SELECT val FROM dbo.strSplit_Key(@Bettypes,'^')
 
 DECLARE @Betlist TABLE (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, MatchCode NVARCHAR(50), 
 						HomeId INT, AwayId INT, SportType TINYINT, LeagueId INT, IsNeutral BIT,  Showtime NVARCHAR(50),
@@ -36,8 +36,15 @@ DECLARE @Betlist TABLE (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT)
 
 
+
+DECLARE @AgentLevel INT
+SELECT	@AgentLevel = AgentLevel
+FROM	AgentInfo WITH (NOLOCK)
+WHERE	AgentId = @AgentID
+
+
 --inlcude mix parlay AND Combination mix parlay
-IF EXISTS (SELECT TOP 1 1  FROM @Bettype WHERE Bettype IN (9,29))
+IF EXISTS (SELECT TOP 1 1  FROM #Bettype WHERE Bettype IN (9,29))
 BEGIN
 	INSERT INTO @Betlist
 	SELECT 			
@@ -78,12 +85,12 @@ BEGIN
 	WHERE
 		BA.AgentId = @AgentId 	
 		AND B.CustID = B.CustID  
-		AND B.bettype in (SELECT Bettype FROM @Bettype) AND B.bettype IN (9,29)
+		AND B.bettype in (SELECT Bettype FROM #Bettype) AND B.bettype IN (9,29)
 		AND B.StatusId IN (0,1)
 END
 
 --- Outright
-IF EXISTS (SELECT TOP 1 1  FROM @Bettype WHERE Bettype = 10)
+IF EXISTS (SELECT TOP 1 1  FROM #Bettype WHERE Bettype = 10)
 BEGIN
 	INSERT INTO @Betlist
 	SELECT 				
@@ -130,7 +137,7 @@ BEGIN
 		AND B.StatusId=0 		
 END
  
-IF EXISTS (SELECT TOP 1 1  FROM @Bettype WHERE Bettype NOT IN (10,9,29))
+IF EXISTS (SELECT TOP 1 1  FROM #Bettype WHERE Bettype NOT IN (10,9,29))
 BEGIN
 	INSERT INTO @Betlist
 	SELECT
@@ -175,12 +182,12 @@ BEGIN
 	WHERE 
 		BA.AgentId = @AgentId 
 		AND B.CustID = B.CustID  
-		AND B.bettype in (SELECT Bettype FROM @Bettype)
+		AND B.bettype in (SELECT Bettype FROM #Bettype)
 		AND B.StatusId in (0,1)	
 END
 
 
-SELECT * FROM @Betlist
+SELECT *, @AgentLevel FROM @Betlist
 ORDER BY TransID
 
 
