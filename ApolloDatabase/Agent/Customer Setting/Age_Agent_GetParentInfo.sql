@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_GetParentInfo]    Script Date: 3/29/2013 9:58:07 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_GetParentInfo]    Script Date: 4/18/2013 1:37:45 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -17,7 +17,7 @@ AS
  * Task			: Get parent information
  * DB			: APL.CustDB
  * Revisions	:
- *	•	
+ *	• @20130418	: Add statuses
  * Parameters:
  *	•
  *	•
@@ -36,24 +36,24 @@ BEGIN
 	WHERE ai.AgentId = @AgentId
 
 	-- Get parent information
-	SELECT 
+	SELECT
 		ai.AgentId,
 		ai.AgentLevel,
 		ai.Username,
 		ai.Currency,		
-		ai.AutoSuspend,
-		ai.Suspended,
+		ai.Status,
+		ai.BetStatus,
+		ai.UplineStatus,
+		ai.UplineBetStatus,
 		ai.Credit,
-		ai.Closed,
 		ai.MatchLimit,
 		ai.VirtualMultiplier,
-		ai.Enabled,
 		ai.DoubleCommLosing,
 		ai.ParentId,
-		ap.Username				AS ParentUsername
+		pai.Username AS ParentUsername		
 	FROM 
 		AgentInfo AS ai WITH (NOLOCK)
-		INNER JOIN AgentInfo AS ap WITH (NOLOCK) ON ai.ParentId = ap.AgentId
+		INNER JOIN AgentInfo AS pai WITH (NOLOCK) ON ai.ParentId = pai.AgentId		 
 	WHERE ai.AgentId = @parentId
 END
 
