@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateBetLimit]    Script Date: 3/29/2013 10:44:44 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateBetLimit]    Script Date: 4/17/2013 2:54:51 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -9,8 +9,7 @@ GO
 ALTER PROCEDURE [dbo].[Age_Customer_UpdateBetLimit]
 	@ActorAgentId	INT				= NULL,
 	@CustId			INT,	
-	@BetLimit		VARCHAR(MAX)	= '',
-	@BetLimit3rd	VARCHAR(MAX)	= '',
+	@BetLimit		VARCHAR(MAX)	= '',	
 	@LogDate		DATETIME		= NULL,
 	@Language		VARCHAR(2)		= 'E',
 	@ErrCode		INT				= 0			OUTPUT,
@@ -60,9 +59,7 @@ BEGIN
 			,@endRun			DATETIME  
 			,@duration			INT
 			,@logSPData			VARCHAR(5000)
-			,@logSPDataOld		VARCHAR(5000)
-			,@logSPData3rd		VARCHAR(5000)
-			,@logSPDataOld3rd	VARCHAR(5000)	        		
+			,@logSPDataOld		VARCHAR(5000)			
 			,@xml				XML
 
 	SET @startRun = GETDATE()
@@ -83,8 +80,11 @@ BEGIN
 				MinMaxBet MONEY,
 				MinMaxPerMatch MONEY)
 			
-			DECLARE @agentHId	HIERARCHYID
-			DECLARE @sportType	INT		
+			DECLARE @agentHId		HIERARCHYID
+					,@sportType		INT		
+					,@SUPERLEVEL	INT
+
+			SET @SUPERLEVEL	= 0
 
 			-- For read xml
 			DECLARE @DocHandler int
@@ -157,16 +157,18 @@ BEGIN
 			FROM AgentBetLimit WITH (NOLOCK)
 			WHERE AgentId IN (	SELECT AgentId 
 								FROM AgentInfo WITH (NOLOCK)
-								WHERE @AgentHId.IsDescendantOf(AgentHId) = 1)
+								WHERE @AgentHId.IsDescendantOf(AgentHId) = 1
+								AND AgentLevel <> @SUPERLEVEL)
 			GROUP BY SportType, BetType
 
 			-- Check if min bet must be equal to or greater than all parents min bet
 			SELECT TOP(1) @sportType = btct.SportType
 			FROM 
 				@BetLimitCompareTable AS btct
-				INNER JOIN @BetLimitTable AS btt ON btct.SportType = btt.SportType 
+				INNER JOIN @BetLimitTable AS btt 
+					ON btct.SportType = btt.SportType 
 					AND btct.BetType = btt.BetType	
-					AND btt.MinBet < btct.MaxMinBet
+			WHERE btt.MinBet < btct.MaxMinBet
 
 			IF @sportType IS NOT NULL 
 				BEGIN
@@ -228,7 +230,7 @@ BEGIN
 							ON cbl.SportType	= blt.SportType
 							AND cbl.BetType		= blt.BetType
 					WHERE cbl.CustId			= @CustId				
-					FOR XML PATH('z')
+					FOR XML PATH('z'), ROOT('r')
 			)
 
 			SET @logSPDataOld = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
@@ -256,29 +258,20 @@ BEGIN
 						,blt.MaxBet			AS '@mab'
 						,blt.MaxPerMatch	AS '@mam'
 					FROM @BetLimitTable AS blt						
-					FOR XML PATH('z')
+					FOR XML PATH('z'), ROOT('r')
 			)
 
 			SET @logSPData = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
 
 			-- end write log
-		END	
-
-	/*------ Update 3rd------*/
-
-	EXEC Age_Customer_UpdateBetLimit3rd @ActorAgentId , @CustId, @BetLimit3rd, @Language, @ErrCode OUTPUT, @ErrMsg OUTPUT, @logSPData3rd OUTPUT, @logSPDataOld3rd OUTPUT
-	
-	/*-----------------------*/
+		END		
 
 	SET @endRun		= GETDATE()  
 	SET @duration	= DATEDIFF(millisecond, @startRun, @endRun) 
 
 	IF @LogDate IS NULL
 		SET @LogDate = GETDATE()
-
-	SELECT @logSPData = CONCAT('<r>',@logSPData,@logSPData3rd,'</r>')
-	SELECT @logSPDataOld = CONCAT('<r>',@logSPDataOld,@logSPDataOld3rd,'</r>')
-
+		
 	EXEC LogDB.dbo.Age_LogRunSp_Insert
 		@UserId			= @ActorAgentId,
 		@SPName			= 'Age_Customer_UpdateBetLimit',

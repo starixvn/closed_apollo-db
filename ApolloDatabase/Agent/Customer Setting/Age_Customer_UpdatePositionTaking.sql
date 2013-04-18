@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdatePositionTaking]    Script Date: 4/16/2013 9:59:44 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdatePositionTaking]    Script Date: 4/17/2013 2:55:18 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -36,9 +36,9 @@ ALTER PROCEDURE [dbo].[Age_Customer_UpdatePositionTaking]
 	@ActorAgentId			INT				= NULL,
 	@AgentId				INT,
 	@CustId					INT,	
-	@PositionTaking			VARCHAR(MAX)	= '',
-	@PositionTaking3rd		VARCHAR(MAX)	= '',
+	@PositionTaking			VARCHAR(MAX)	= '',	
 	@Language				VARCHAR(2)		= 'E',
+	@LogDate				DATETIME		= NULL,
 	@ErrCode				INT				= 0			OUTPUT,
 	@ErrMsg					NVARCHAR(1000)	= ''		OUTPUT 			
 AS
@@ -66,6 +66,16 @@ BEGIN
 	
 	IF @PositionTaking <> ''
 		BEGIN
+			-- For write log
+			DECLARE @startRun			DATETIME  
+					,@endRun			DATETIME  
+					,@duration			INT
+					,@logSPData			VARCHAR(5000)
+					,@logSPDataOld		VARCHAR(5000)			
+					,@xml				XML			
+
+			SET @startRun = GETDATE()
+
 			DECLARE @TablePositionTaking TABLE(
 								SportType	SMALLINT,
 								BetType		SMALLINT,
@@ -130,6 +140,29 @@ BEGIN
 			)
 				BEGIN
 					
+					-- write log before update
+				
+					SET @xml = (
+						SELECT  
+							cpt.SportType				AS '@s'
+							,cpt.BetType				AS '@b'
+							,cpt.IsLive					AS '@i'
+							,cpt.PositionTaking			AS '@p'							
+						FROM 
+							CustPositionTaking AS cpt WITH (NOLOCK)
+							INNER JOIN @TablePositionTaking AS tpt
+								ON cpt.SportType	= tpt.SportType
+								AND cpt.BetType		= tpt.BetType
+								AND cpt.IsLive		= tpt.IsLive
+						WHERE cpt.AgentId	= @AgentId				
+							AND cpt.CustId	= @CustId
+						FOR XML PATH('z'), ROOT('r')
+					)
+
+					SET @logSPDataOld = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
+
+					-- end write log
+
 					---- Declare agentId
 					DECLARE @agentLevel				INT
 							,@agentHId				HIERARCHYID
@@ -511,6 +544,32 @@ BEGIN
 						END
 					-- End if New Position Taking less than Current Position Taking	
 					
-				END	
+					SET @xml = (
+						SELECT SportType	AS '@s' 
+								,BetType	AS '@b'
+								,IsLive		AS '@i'
+								,PT			AS '@p'				
+						FROM @TablePositionTaking
+						FOR XML PATH('z'), ROOT('r')
+					)
+
+					SET @logSPData = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
+
+					SET @endRun		= GETDATE()  
+					SET @duration	= DATEDIFF(millisecond, @startRun, @endRun) 
+
+					IF @LogDate IS NULL
+						SET @LogDate = GETDATE()	
+
+					EXEC LogDB.dbo.Age_LogRunSp_Insert
+						@UserId			= @ActorAgentId,
+						@SPName			= 'Age_Customer_UpdatePositionTaking',
+						@LogDate		= @LogDate,
+						@ObjectId		= @CustId,
+						@ObjectTypeId	= 2,			--Object type : Customer						
+						@Duration		= @Duration,
+						@Data			= @logSPData,
+						@OldData		= @logSPDataOld	
+				END					
 		END	   
 END

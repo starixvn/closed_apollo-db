@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_GetBetLimit]    Script Date: 3/29/2013 9:55:38 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_GetBetLimit]    Script Date: 4/17/2013 2:56:10 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -37,18 +37,6 @@ BEGIN
 		MaxPerMatch,
 		0 AS MaxPerBall	 
 	FROM AgentBetLimit AS abt WITH (NOLOCK)
-	WHERE AgentId = @AgentId
-		
-	UNION
-
-	SELECT 
-		SportType,
-		BetType,
-		MinBet,
-		MaxBet,
-		MaxPerMatch,
-		MaxPerBall	 
-	FROM AgentBetLimit3rd AS abt WITH (NOLOCK)
 	WHERE AgentId = @AgentId
 	
 END

@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateBetLimit]    Script Date: 3/29/2013 10:10:13 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateBetLimit]    Script Date: 4/17/2013 2:52:30 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -9,8 +9,7 @@ GO
 ALTER PROCEDURE [dbo].[Age_Agent_UpdateBetLimit]
 	@ActorAgentId	INT				= NULL,
 	@AgentId		INT,
-	@BetLimit		VARCHAR(MAX)	= '',
-	@BetLimit3rd	VARCHAR(MAX)	= '',
+	@BetLimit		VARCHAR(MAX)	= '',	
 	@Language		VARCHAR(2)		= 'E',
 	@LogDate		DATETIME		= NULL,
 	@ErrCode		INT				= 0			OUTPUT,
@@ -58,10 +57,8 @@ BEGIN
 			,@endRun			DATETIME  
 			,@duration			INT
 			,@logSPData			VARCHAR(5000)
-			,@logSPDataOld		VARCHAR(5000)
-			,@logSPData3rd		VARCHAR(5000)
-			,@logSPDataOld3rd	VARCHAR(5000)	        		
-			,@xml				XML
+			,@logSPDataOld		VARCHAR(5000)			
+			,@xml				XML			
 
 	SET @startRun = GETDATE()			
 		
@@ -69,6 +66,9 @@ BEGIN
 	IF @BetLimit <> ''
 	BEGIN
 		DECLARE @agentHId HIERARCHYID
+				,@SUPERLEVEL		INT
+
+		SET @SUPERLEVEL = 0
 
 		-- Get agent hierarchy ID
 		SELECT @agentHId = AgentHId
@@ -168,7 +168,9 @@ BEGIN
 				FROM AgentBetLimit WITH (NOLOCK)
 				WHERE AgentId IN (	SELECT AgentId 
 									FROM AgentInfo 
-									WHERE @AgentHId.IsDescendantOf(AgentHId) = 1 AND AgentId <> @AgentId )
+									WHERE @AgentHId.IsDescendantOf(AgentHId) = 1 
+									AND AgentId		<> @AgentId
+									AND AgentLevel	<> @SUPERLEVEL )
 				GROUP BY SportType, BetType			
 
 				---- Check validate min bet must be equal to or greater than parent
@@ -243,7 +245,7 @@ BEGIN
 								ON abl.SportType	= blt.SportType
 								AND abl.BetType		= blt.BetType
 						WHERE abl.AgentId			= @AgentId				
-						FOR XML PATH('z')
+						FOR XML PATH('z'),ROOT('r')
 				)
 
 				SET @logSPDataOld = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
@@ -273,7 +275,7 @@ BEGIN
 							,blt.MaxBet			AS '@mab'
 							,blt.MaxPerMatch	AS '@mam'
 						FROM @BetLimitTable AS blt						
-						FOR XML PATH('z')
+						FOR XML PATH('z'),ROOT('r')
 				)
 
 				SET @logSPData = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
@@ -282,20 +284,11 @@ BEGIN
 			END	   					
 	END	
 
-	/*-----------Update 3rd-----------*/
-
-	EXEC Age_Agent_UpdateBetLimit3rd @ActorAgentId, @AgentId, @BetLimit3rd, @Language, @ErrCode OUTPUT, @ErrMsg OUTPUT, @logSPData3rd OUTPUT, @logSPDataOld3rd OUTPUT
-	
-	/*--------------------------------*/   	
-
 	SET @endRun		= GETDATE()  
 	SET @duration	= DATEDIFF(millisecond, @startRun, @endRun) 
 
 	IF @LogDate IS NULL
-		SET @LogDate = GETDATE()
-
-	SELECT @logSPData = CONCAT('<r>',@logSPData,@logSPData3rd,'</r>')
-	SELECT @logSPDataOld = CONCAT('<r>',@logSPDataOld,@logSPDataOld3rd,'</r>')
+		SET @LogDate = GETDATE()	
 
 	EXEC LogDB.dbo.Age_LogRunSp_Insert
 		@UserId			= @ActorAgentId,

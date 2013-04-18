@@ -24,11 +24,10 @@ AS
 SET NOCOUNT ON
 
 
-DECLARE @BetListDetail TABLE(
+CREATE TABLE #BetListDetail (
 		TransID BIGINT,
 		AgentID INT,
-		--AgentHID HIERARCHYID,
-		Username VARCHAR(50),
+		--Username VARCHAR(50),
 		Status   VARCHAR(10),
 		--AgentLevel SMALLINT,
 		APositionTaking SMALLMONEY, 
@@ -36,25 +35,26 @@ DECLARE @BetListDetail TABLE(
 		AWinlost MONEY,
 		AComm MONEY)
 
-DECLARE @AgentIdList TABLE ( AgentId INT)
+CREATE TABLE #AgentIdList ( AgentId INT)
 
-INSERT INTO @AgentIdList 
+INSERT INTO #AgentIdList 
 SELECT	AgentId 
 FROM	BetTrans_Agent_BK WITH (NOLOCK)
 WHERE	TransID = @TransId 
 
 
-DECLARE @AgentLevel INT
+DECLARE @AgentLevel INT, @Username NVARCHAR(50)
 
-SELECT	@AgentLevel = AgentLevel +1
+SELECT	@AgentLevel = AgentLevel +1, @Username = Username
 FROM	AgentInfo  WITH (NOLOCK)
-WHERE	AgentID =@LoggedId
+WHERE	AgentID = @LoggedId
+ 
 
-			INSERT INTO @BetListDetail
-			SELECT	BA.TransID,
+			INSERT INTO #BetListDetail
+			SELECT	DISTINCT 
+					BA.TransID,
 					BA.AgentID,
-					--A.AgentHID,
-					BA.Username,
+					---BA.Username,
 					BA.Status,
 					--A.AgentLevel,
 					BA.APositionTaking,
@@ -65,23 +65,55 @@ WHERE	AgentID =@LoggedId
 			INNER JOIN	Bettrans_BK B WITH (NOLOCK) 
 					ON	B.TransID= BA.TransID 
 			LEFT JOIN	SVRCUST.CUSTDB.dbo.AgentInfo C WITH (NOLOCK)
-					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM @AgentIdList)	 
+					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM #AgentIdList)	 
 			LEFT JOIN BetTrans_Agent_BK D WITH (NOLOCK)
 					ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
 			WHERE	BA.TransId = @TransId 
-					AND BA.Winlostdate BETWEEN @fromdate AND @todate 
+					AND BA.TransDate BETWEEN @fromdate AND @todate 
 					AND (BA.bettype < 31 
 						OR BA.bettype BETWEEN 121 AND 999 
 						OR BA.bettype BETWEEN 1301 AND 1334   
 						OR BA.Bettype  BETWEEN 81 AND 120 )
 					AND ISNULL(C.AgentLevel,@AgentLevel) >= @AgentLevel   
 	 
-	
+	IF @AgentLevel = 1 
+	BEGIN 
+		INSERT INTO #BetListDetail
+			SELECT	DISTINCT 
+					B.TransID,
+					@LoggedId as AgentID,
+					---@Username as Username,
+					B.Status,
+					(1 - B.TPositionTaking) AS APositionTaking,
+					NULL AS ADiscount,
+					- (B.Winlost - B.Actual_Stake + B.TWinlost) AS AWinLost,				
+					- (B.TComm) AS AComm									
+			FROM	BetTrans_Agent_BK  BA WITH (NOLOCK)
+			INNER JOIN	Bettrans_BK B WITH (NOLOCK) 
+					ON	B.TransID= BA.TransID 
+			LEFT JOIN	SVRCUST.CUSTDB.dbo.AgentInfo C WITH (NOLOCK)
+					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM #AgentIdList)	 
+			LEFT JOIN BetTrans_BK D WITH (NOLOCK)
+					ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
+			WHERE	BA.TransId = @TransId 
+					AND BA.TransDate BETWEEN @fromdate AND @todate 
+					AND (BA.bettype < 31 
+						OR BA.bettype BETWEEN 121 AND 999 
+						OR BA.bettype BETWEEN 1301 AND 1334   
+						OR BA.Bettype  BETWEEN 81 AND 120 )
+					AND ISNULL(C.AgentLevel,@AgentLevel) >= @AgentLevel 
+	END	
 
  	
-SELECT DISTINCT * FROM @BetListDetail
-ORDER BY TransID
-
+SELECT	B.* , A.Username , A.AgentLevel
+FROM	#BetListDetail B
+INNER JOIN AgentInfo A
+	ON	 A.AgentId = B.AgentId
+ORDER BY B.TransID, A.AgentLevel
 	
+		
+DROP TABLE #BetListDetail
+DROP TABLE #AgentIdList
+
 GO
-GRANT EXECUTE ON [dbo].[Age_BetList_AgentDetail] TO [aplweb]
+GRANT EXECUTE ON [dbo].[Age_BetList_AgentDetail_Old] TO [aplweb]

@@ -1,29 +1,26 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_Insert]    Script Date: 3/29/2013 10:08:14 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_Insert]    Script Date: 4/17/2013 2:49:44 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-
 ALTER PROCEDURE [dbo].[Age_Agent_Insert]
 	@AgentId				INT,
-	@AgentUserId			INT,
-	@Username				VARCHAR(50),
-	@Currency				TINYINT,
+	@Username				NVARCHAR(50),
 	@ParentId				INT,
-	@AutoSuspend			BIT				= 0,
-	@Suspended				BIT				= 0,
+	@Currency				VARCHAR(3),
+	@Status					TINYINT			= 1,
+	@BetStatus				TINYINT			= 1,
+	@UplineStatus			TINYINT			= 1,
+	@UplineBetStatus		TINYINT			= 1,
 	@Credit					MONEY			= 0,
-	@Closed					BIT				= 0,
 	@MatchLimit				SMALLMONEY		= 0,
 	@VirtualMultiplier		SMALLMONEY		= 0,
-	@Enabled				BIT				= 1,
 	@DoubleCommLosing		BIT				= 0,
-	@PageAccess				VARCHAR(50)		= '',
-	@CreateDate				DATETIME,
-	@Creator				INT,
+	@Creator				INT				= NULL,
+	@LogDate				DATETIME		= NULL,
 	@ErrCode				INT				= 0			OUTPUT,
 	@ErrMsg					NVARCHAR(1000)	= ''		OUTPUT 
 AS
@@ -34,7 +31,10 @@ AS
  * Task			: Add new agent information and default setting
  * DB			: APL.CustDB
  * Revisions	:
- *	• 20132702@Edward	: Implement
+ *	• 20130227@Edward	: Implement
+ *	• 20130412@Kos		: Remove AgentUserId
+ *	• 20130415@Edward	: Write log	and add @LogDate
+
  * Parameters:
  *	•
  *	•
@@ -45,91 +45,129 @@ BEGIN
 	
 	SET NOCOUNT ON
 
-	DECLARE @UplineNode HIERARCHYID,
-			@LastChild HIERARCHYID
+	-- For write log
+    DECLARE @startRun			DATETIME  
+			,@endRun			DATETIME  
+			,@duration			INT
+			,@logSPData			VARCHAR(5000)
+			,@logSPDataOld		VARCHAR(5000)			
+			,@xml				XML			
 
-	---- Get Hierarchyid of UplineID
-	SELECT	@UplineNode = AgentHId
-	FROM	[CustDB].[dbo].[AgentInfo] WITH (NOLOCK)
-	WHERE	AgentId = @ParentId
+	SET @startRun = GETDATE()
 
-	---- Get Hierarchyid of of LastChild
-	SELECT	@LastChild = Max(AgentHId) 
-	FROM	[CustDB].[dbo].[AgentInfo]
-	WHERE	AgentHId.GetAncestor(1) = @UplineNode
+	-- Begin update
+	DECLARE @UplineNode HIERARCHYID
+	DECLARE	@LastChild HIERARCHYID
+	DECLARE @ExchangeId INT
+	DECLARE @ParentStatus TINYINT
+	DECLARE @ParentBetStatus TINYINT
+	DECLARE @ParentUplineStatus TINYINT
+	DECLARE @ParentUplineBetStatus TINYINT
 
+	-- Get parent information
+	SELECT	
+		@UplineNode = AgentHId,
+		@ParentStatus = Status,
+		@ParentBetStatus = BetStatus,
+		@ParentUplineStatus = UplineStatus,
+		@ParentUplineBetStatus = UplineBetStatus
+	FROM AgentInfo WITH (NOLOCK)
+	WHERE AgentId = @ParentId
 
-	---- Insert AgentInfo
-	INSERT INTO AgentInfo(
+	-- Get last child hierarchyid 
+	SELECT @LastChild = MAX(AgentHId) 
+	FROM AgentInfo WITH (NOLOCK)
+	WHERE AgentHId.GetAncestor(1) = @UplineNode
+
+	SELECT	@ExchangeId = exchangeid
+	FROM [SVRTXN].[TransDB].[dbo].[Exchange] WITH (NOLOCK)
+	WHERE UPPER(Code) = UPPER(@Currency)
+
+	-- Get upline status if not a shareholder
+	IF @ParentId > 0 
+		BEGIN
+			SELECT
+				@UplineStatus = CASE WHEN @ParentStatus = 2 OR @ParentUplineStatus = 2 THEN 2 ELSE 1 END,
+				@UplineBetStatus = CASE WHEN @ParentBetStatus = 2 OR @ParentUplineBetStatus = 2 THEN 2 ELSE 1 END
+		END
+
+	-- Insert into AgentInfo
+	INSERT INTO AgentInfo (
 		AgentId,
 		AgentHId,
 		Username,
 		Currency,
 		ParentId,
 		AutoSuspend,
-		Suspended,
 		Credit,
-		Closed,
 		MatchLimit,
 		VirtualMultiplier,
-		Enabled,
-		DoubleCommLosing)
-	VALUES(
-		 @AgentId,
-		@UplineNode.GetDescendant(@LastChild,NULL),
+		DoubleCommLosing,
+		Status,
+		BetStatus,
+		UplineStatus,
+		UplineBetStatus
+	)
+	VALUES (
+		@AgentId,
+		@UplineNode.GetDescendant(@LastChild, NULL),
 		@Username,
-		@Currency,
+		@ExchangeId,
 		@ParentId,
-		@AutoSuspend,
-		@Suspended,
+		0,				-- AutoSuspend
 		@Credit,
-		@Closed,
 		@MatchLimit,
 		@VirtualMultiplier,
-		@Enabled,
-		@DoubleCommLosing)	
+		@DoubleCommLosing,
+		@Status,
+		@BetStatus,
+		@UplineStatus,
+		@UplineBetStatus
+	)	
 
-	---- Not support for multiple language
+	-- Not support for multiple language
 	IF @@ERROR > 0
-	BEGIN
-		SELECT 
-			@ErrCode = 1, 
-			@ErrMsg = 'Failed to insert agent [AgentId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
-		RETURN
-	END	
+		BEGIN
+			SELECT 
+				@ErrCode = 1105, 
+				@ErrMsg = 'Failed to insert agent [AgentId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
+			RETURN
+		END	
 
-	---- Insert AgentUser isMaster = true
-	INSERT INTO AgentUser(
+	-- Insert into AgentUser
+	INSERT INTO AgentUser (
 		AgentUserId,
 		AgentId,
 		Username,
 		IsMaster,
 		PageAccess,
 		CreateDate,
-		Closed,
 		Creator,
-		LoginCount)
-	VALUES(
-		@AgentUserId,
+		LoginCount,
+		Status
+	)
+	VALUES (
+		@AgentId,
 		@AgentId,
 		@Username,
-		1,
-		@PageAccess,
-		@CreateDate,
-		@Closed,
+		1,			-- master
+		'',			
+		GETDATE(),
 		@Creator,
-		0)
+		0,			-- LoginCount
+		1			-- Status
+	)	
 
-	---- Not support for multiple language
+	-- Not support for multiple language
 	IF @@ERROR > 0
-	BEGIN
-		SELECT 
-			@ErrCode = 1, 
-			@ErrMsg = 'Failed to insert agent user [AgentUserId = ' + COALESCE(CAST(@AgentUserId AS VARCHAR(10)), SPACE(1)) + ']'
-		RETURN
-	END
+		BEGIN
+			SELECT 
+				@ErrCode = 1205, 
+				@ErrMsg = 'Failed to insert agent user [AgentUserId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
+			RETURN
+		END	
 
-	---- Insert default agent bet limit (From it's parent)
+	-- Insert default agent bet limit (from its parent)
 	INSERT INTO AgentBetLimit(
 		AgentId,
 		SportType,
@@ -139,34 +177,15 @@ BEGIN
 		MaxPerMatch)
 	SELECT 	
 		@AgentId,
-		abl.SportType,
-		abl.BetType,
-		0,
-		0,
-		0
-	FROM AgentBetLimit AS abl WITH (NOLOCK)
-	WHERE abl.AgentId = @ParentId
-
-	INSERT INTO AgentBetLimit3rd(
-		AgentId,
 		SportType,
 		BetType,
-		MinBet,
-		MaxBet,
-		MaxPerMatch,
-		MaxPerBall)
-	SELECT 	
-		@AgentId,
-		abl.SportType,
-		abl.BetType,
-		0,
-		0,
-		0,
-		0
-	FROM AgentBetLimit3rd AS abl WITH (NOLOCK)
-	WHERE abl.AgentId = @ParentId
+		0,			-- MinBet
+		0,			-- MaxBet
+		0			-- MaxPerMatch
+	FROM AgentBetLimit WITH (NOLOCK)
+	WHERE AgentId = @ParentId
 
-	---- Insert default agent discount (From it's parent)
+	---- Insert default agent discount (from its parent)
 	INSERT INTO AgentDiscount(
 		AgentId,
 		SportType,
@@ -177,33 +196,14 @@ BEGIN
 		DiscountD)
 	SELECT 
 		@AgentId,
-		ad.SportType,
-		ad.BetType,
-		0,
-		0,
-		0,
-		0
-	FROM AgentDiscount AS ad WITH (NOLOCK)
-	WHERE ad.AgentId = @ParentId
-
-	INSERT INTO AgentDiscount3rd(
-		AgentId,
 		SportType,
 		BetType,
-		DiscountA,
-		DiscountB,
-		DiscountC,
-		DiscountD)
-	SELECT 
-		@AgentId,
-		ad.SportType,
-		ad.BetType,
-		0,
-		0,
-		0,
-		0
-	FROM AgentDiscount3rd AS ad WITH (NOLOCK)
-	WHERE ad.AgentId = @ParentId
+		0,			-- DiscountA
+		0,			-- DiscountB
+		0,			-- DiscountC
+		0			-- DiscountD
+	FROM AgentDiscount WITH (NOLOCK)
+	WHERE AgentId = @ParentId
 
 	---- Insert default agent position taking (From it's parent)
 	INSERT INTO AgentPositionTaking(
@@ -216,34 +216,46 @@ BEGIN
 		MinPositionTaking)
 	SELECT
 		@AgentId,
-		apt.SportType,
-		apt.BetType,
-		apt.IsLive,
-		0,
-		0,
-		0
-	FROM AgentPositionTaking AS apt WITH (NOLOCK)
-	WHERE apt.AgentId = @ParentId		
-
-	INSERT INTO AgentPositionTaking3rd(
-		AgentId,
 		SportType,
 		BetType,
 		IsLive,
-		PresetPositionTaking,
-		MaxPositionTaking,
-		MinPositionTaking)
-	SELECT
-		@AgentId,
-		apt.SportType,
-		apt.BetType,
-		apt.IsLive,
-		0,
-		0,
-		0
-	FROM AgentPositionTaking3rd AS apt WITH (NOLOCK)
-	WHERE apt.AgentId = @ParentId	
-		
+		0,			-- preset
+		0,			-- max
+		0			-- min
+	FROM AgentPositionTaking WITH (NOLOCK)
+	WHERE AgentId = @ParentId		
+	-- End update			
+
+	SET @xml = (
+		SELECT	@Username			AS '@u'
+				,@ParentId			AS '@p'
+				,@Currency			AS '@c'
+				,@Status			AS '@s'
+				,@BetStatus			AS '@bs'
+				,@UplineStatus		AS '@us'
+				,@UplineBetStatus	AS '@ubs'
+				,@Credit			AS '@cr'
+				,@MatchLimit		AS '@ml'
+				,@VirtualMultiplier	AS '@vm'
+				,@DoubleCommLosing	AS '@dc'
+		 FOR XML PATH('z'), ROOT('r')
+	)
+
+	SET @logSPData = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
+
+	SET @endRun		= GETDATE()  
+	SET @duration	= DATEDIFF(millisecond, @startRun, @endRun) 
+
+	IF @LogDate IS NULL
+		SET @LogDate = GETDATE()	
+
+	EXEC LogDB.dbo.Age_LogRunSp_Insert
+		@UserId			= @Creator,
+		@SPName			= 'Age_Agent_Insert',
+		@LogDate		= @LogDate,
+		@ObjectId		= @AgentId,
+		@ObjectTypeId	= 1,			--Object type : Agent						
+		@Duration		= @Duration,
+		@Data			= @logSPData,
+		@OldData		= @logSPDataOld
 END
-
-

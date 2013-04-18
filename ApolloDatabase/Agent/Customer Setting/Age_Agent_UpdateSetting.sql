@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateSetting]    Script Date: 3/29/2013 10:42:15 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateSetting]    Script Date: 4/17/2013 2:53:21 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -9,12 +9,11 @@ GO
 ALTER PROCEDURE [dbo].[Age_Agent_UpdateSetting]
 	@ActorAgentId		INT				= NULL,
 	@AgentId			INT,
-	@BetLimit			VARCHAR(MAX)	= '',
-	@BetLimit3rd		VARCHAR(MAX)	= '',
-	@Discount			VARCHAR(MAX)	= '',
-	@Discount3rd		VARCHAR(MAX)	= '',
-	@PositionTaking		VARCHAR(MAX)	= '',
-	@PositionTaking3rd	VARCHAR(MAX)	= '',
+	@BetLimit			VARCHAR(MAX)	= '',	
+	@Discount			VARCHAR(MAX)	= '',	
+	@PositionTaking		VARCHAR(MAX)	= '',	
+	@Language			VARCHAR(2)		= 'E',
+	@LogDate			DATETIME		= NULL,
 	@ErrCode			INT				= 0			OUTPUT,
 	@ErrMsg				NVARCHAR(1000)	= ''		OUTPUT 		
 AS
@@ -70,10 +69,10 @@ BEGIN
 			RETURN			
 		END	
 
-	EXEC Age_Agent_UpdateBetLimit @ActorAgentId, @AgentId, @BetLimit, @BetLimit3rd, @ErrCode OUTPUT, @ErrMsg OUTPUT
+	EXEC Age_Agent_UpdateBetLimit @ActorAgentId, @AgentId, @BetLimit, @Language, @LogDate, @ErrCode OUTPUT, @ErrMsg OUTPUT
 
-	EXEC Age_Agent_UpdateDiscount @ActorAgentId, @AgentId, @Discount, @Discount3rd, @ErrCode OUTPUT, @ErrMsg OUTPUT
+	EXEC Age_Agent_UpdateDiscount @ActorAgentId, @AgentId, @Discount, @Language,@LogDate, @ErrCode OUTPUT, @ErrMsg OUTPUT
 
-	EXEC Age_Agent_UpdatePositionTaking @ActorAgentId, @AgentId, @PositionTaking, @PositionTaking3rd, @ErrCode OUTPUT, @ErrMsg OUTPUT
+	EXEC Age_Agent_UpdatePositionTaking @ActorAgentId, @AgentId, @PositionTaking, @Language, @LogDate, @ErrCode OUTPUT, @ErrMsg OUTPUT
 
 END

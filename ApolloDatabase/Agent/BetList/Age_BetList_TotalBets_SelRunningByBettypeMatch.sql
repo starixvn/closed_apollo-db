@@ -1,9 +1,8 @@
 ﻿
-ALTER PROCEDURE [dbo].[Age_BetList_TotalBets_SelRunningByBettypeMatch]
+ALTER PROCEDURE [dbo].[Age_BetList_TotalBets_SelRunningByBettypeMatch_xtest]
 	@MatchID int,
-	@AgentId int,
+	@LoggedId int,
 	@Bettype int,
-	@Language varchar(2) = 'E',
 	@liveindicator int = 0,
 	@Betteam nvarchar(20) = NULL
 AS
@@ -18,6 +17,14 @@ Revisions:
 */
 
 SET NOCOUNT ON
+
+
+DECLARE @AgentLevel INT
+SELECT	@AgentLevel = AgentLevel
+FROM	AgentInfo WITH (NOLOCK)
+WHERE	AgentId = @LoggedId
+
+
 if @bettype in (10)
 BEGIN
 	SELECT 
@@ -43,7 +50,7 @@ BEGIN
 		0 as Liveindicator, 
 		0 as Livehomescore, 
 		0 as Liveawayscore, 		 				
-		BA.APositiontaking,  		
+		ISNULL(BA.APositionTaking, 1-B.TPositionTaking) AS APositionTaking,  		
 		BA.ADiscount ,
 		B.IP as IP,
 		CONVERT(BIT,0) as isNeutral,
@@ -51,16 +58,17 @@ BEGIN
 		B.betid,
 		'' as showtime,
 		B.refno,
-		B.DoubleCommLosing									
+		B.DoubleCommLosing,
+		@AgentLevel as AgentLevel
 	FROM Bettrans B WITH (NOLOCK)
-	INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
+	LEFT JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
 		ON B.TransID = BA.TransID
 	INNER JOIN outright m WITH (NOLOCK) 
 		ON B.matchid=m.orid
 	INNER JOIN league l WITH (NOLOCK) 
 		ON m.leagueid = l.leagueid		
 	WHERE
-		BA.AgentId = @AgentId and
+		(BA.AgentId = @LoggedId OR @LoggedId = 0) and
 		B.matchid=@matchid and 
 		B.bettype=@bettype and
 		B.statusID = 0		
@@ -94,7 +102,7 @@ BEGIN
 		B.Liveindicator,
 		B.Livehomescore, 
 		B.Liveawayscore, 		 	
-		BA.APositiontaking,  		
+		ISNULL(BA.APositionTaking, 1-B.TPositionTaking) AS APositionTaking,	
 		BA.ADiscount ,
 		B.IP as IP,
 		isnull(m.isNeutral, CONVERT(BIT,0)) as IsNeutral,
@@ -102,14 +110,14 @@ BEGIN
 		B.betid,
 		m.showtime,
 		B.refno,
-		B.DoubleCommLosing
-	
+		B.DoubleCommLosing,
+		@AgentLevel	as AgentLevel
 	FROM Bettrans B WITH (NOLOCK)
-	INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
+	LEFT JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
 		ON B.TransID = BA.TransID
 	INNER JOIN Match m  WITH (NOLOCK) ON B.matchid=m.matchid 	
 	WHERE
-		BA.AgentID =@AgentId AND
+		(BA.AgentId = @LoggedId OR @LoggedId = 0) AND 
 		B.matchid=@matchid and 
 		B.bettype=@bettype and
 		B.statusID in (0,1) and 
@@ -119,7 +127,7 @@ BEGIN
 END
 
 GO
-GRANT EXECUTE ON [dbo].[Age_BetList_TotalBets_SelRunningByBettypeMatch] TO [aplweb]
+GRANT EXECUTE ON [dbo].[Age_BetList_TotalBets_SelRunningByBettypeMatch_xtest] TO [aplweb]
 GO
 --GRANT VIEW DEFINITION ON [dbo].[Age_BetList_TotalBets_SelRunningByBettypeMatch] TO [vnteam]
  
