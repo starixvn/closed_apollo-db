@@ -25,20 +25,19 @@ AS
 SET NOCOUNT ON
 
 
-DECLARE @BetListDetail TABLE(
+CREATE TABLE  #BetListDetail (
 		TransID BIGINT,
 		AgentID INT,		
 		--Username VARCHAR(50),
-
 		Status   VARCHAR(10),		
 		APositionTaking SMALLMONEY, 
 		ADiscount	DECIMAL(9,8),
 		AWinlost MONEY,
 		AComm MONEY)
 
-DECLARE @AgentIdList TABLE ( AgentId INT)
+CREATE TABLE  #AgentIdList ( AgentId INT)
 
-INSERT INTO @AgentIdList 
+INSERT INTO #AgentIdList 
 SELECT	AgentId 
 FROM	BetTrans_Agent WITH (NOLOCK)
 WHERE	TransID = @TransId
@@ -54,7 +53,7 @@ WHERE	AgentID = @LoggedId
 IF @Todate > @MoveBetsDay
 BEGIN 
 	
-	INSERT INTO @BetListDetail
+	INSERT INTO #BetListDetail
 	SELECT	DISTINCT
 			BA.TransID,
 			BA.AgentID,
@@ -68,7 +67,7 @@ BEGIN
 	INNER JOIN	Bettrans B WITH (NOLOCK) 
 			ON	B.TransID= BA.TransID 
 	LEFT JOIN	AgentInfo C WITH (NOLOCK)
-			ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM @AgentIdList)	 
+			ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM #AgentIdList)	 
 	LEFT JOIN BetTrans_Agent D WITH (NOLOCK)
 			ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
 	WHERE	BA.TransId = @TransId 
@@ -83,7 +82,7 @@ BEGIN
 	-----Super View add 1 more row of Super
 	IF @AgentLevel = 1 
 	BEGIN 
-		INSERT INTO @BetListDetail
+		INSERT INTO #BetListDetail
 			SELECT	DISTINCT
 					B.TransID,
 					@LoggedId as AgentID,
@@ -97,7 +96,7 @@ BEGIN
 			INNER JOIN	Bettrans B WITH (NOLOCK) 
 					ON	B.TransID= BA.TransID 
 			LEFT JOIN	AgentInfo C WITH (NOLOCK)
-					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM @AgentIdList)	 
+					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM #AgentIdList)	 
 			LEFT JOIN BetTrans_Agent D WITH (NOLOCK)
 					ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
 			WHERE	BA.TransId = @TransId 
@@ -114,7 +113,7 @@ END
 
 IF @Fromdate <= @MoveBetsDay
 BEGIN
-			INSERT INTO @BetListDetail
+			INSERT INTO #BetListDetail
 			SELECT	DISTINCT
 					BA.TransID,
 					BA.AgentID,
@@ -128,7 +127,7 @@ BEGIN
 			INNER JOIN	Bettrans14 B WITH (NOLOCK) 
 					ON	B.TransID= BA.TransID 
 			LEFT JOIN	AgentInfo C WITH (NOLOCK)
-					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM @AgentIdList)	 
+					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM #AgentIdList)	 
 			LEFT JOIN BetTrans14_Agent D WITH (NOLOCK)
 					ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
 			WHERE	BA.TransId = @TransId 
@@ -142,7 +141,7 @@ BEGIN
 	-----Super View add 1 more row of Super
 	IF @AgentLevel = 1 
 	BEGIN 
-		INSERT INTO @BetListDetail
+		INSERT INTO #BetListDetail
 			SELECT	DISTINCT 
 					B.TransID,
 					@LoggedId as AgentID,
@@ -156,7 +155,7 @@ BEGIN
 			INNER JOIN	Bettrans14 B WITH (NOLOCK) 
 					ON	B.TransID= BA.TransID 
 			LEFT JOIN	AgentInfo C WITH (NOLOCK)
-					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM @AgentIdList)	 
+					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM #AgentIdList)	 
 			LEFT JOIN BetTrans14_Agent D WITH (NOLOCK)
 					ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
 			WHERE	BA.TransId = @TransId 
@@ -171,11 +170,14 @@ BEGIN
 END		
  	
 SELECT	B.* , A.Username, A.AgentLevel
-FROM	@BetListDetail B
+FROM	#BetListDetail B
 INNER JOIN AgentInfo A
 	ON	 A.AgentId = B.AgentId
 ORDER BY B.TransID, A.AgentLevel
 
+
+DROP TABLE #BetListDetail
+DROP TABLE #AgentIdList
 	
 GO
 GRANT EXECUTE ON [dbo].[Age_BetList_AgentDetail] TO [aplweb]

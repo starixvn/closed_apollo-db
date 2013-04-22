@@ -24,7 +24,7 @@ AS
 SET NOCOUNT ON
 
 
-DECLARE @BetListDetail TABLE(
+CREATE TABLE #BetListDetail (
 		TransID BIGINT,
 		AgentID INT,
 		--Username VARCHAR(50),
@@ -35,9 +35,9 @@ DECLARE @BetListDetail TABLE(
 		AWinlost MONEY,
 		AComm MONEY)
 
-DECLARE @AgentIdList TABLE ( AgentId INT)
+CREATE TABLE #AgentIdList ( AgentId INT)
 
-INSERT INTO @AgentIdList 
+INSERT INTO #AgentIdList 
 SELECT	AgentId 
 FROM	BetTrans_Agent_BK WITH (NOLOCK)
 WHERE	TransID = @TransId 
@@ -50,7 +50,7 @@ FROM	AgentInfo  WITH (NOLOCK)
 WHERE	AgentID = @LoggedId
  
 
-			INSERT INTO @BetListDetail
+			INSERT INTO #BetListDetail
 			SELECT	DISTINCT 
 					BA.TransID,
 					BA.AgentID,
@@ -65,7 +65,7 @@ WHERE	AgentID = @LoggedId
 			INNER JOIN	Bettrans_BK B WITH (NOLOCK) 
 					ON	B.TransID= BA.TransID 
 			LEFT JOIN	SVRCUST.CUSTDB.dbo.AgentInfo C WITH (NOLOCK)
-					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM @AgentIdList)	 
+					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM #AgentIdList)	 
 			LEFT JOIN BetTrans_Agent_BK D WITH (NOLOCK)
 					ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
 			WHERE	BA.TransId = @TransId 
@@ -78,7 +78,7 @@ WHERE	AgentID = @LoggedId
 	 
 	IF @AgentLevel = 1 
 	BEGIN 
-		INSERT INTO @BetListDetail
+		INSERT INTO #BetListDetail
 			SELECT	DISTINCT 
 					B.TransID,
 					@LoggedId as AgentID,
@@ -92,7 +92,7 @@ WHERE	AgentID = @LoggedId
 			INNER JOIN	Bettrans_BK B WITH (NOLOCK) 
 					ON	B.TransID= BA.TransID 
 			LEFT JOIN	SVRCUST.CUSTDB.dbo.AgentInfo C WITH (NOLOCK)
-					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM @AgentIdList)	 
+					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM #AgentIdList)	 
 			LEFT JOIN BetTrans_BK D WITH (NOLOCK)
 					ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
 			WHERE	BA.TransId = @TransId 
@@ -106,10 +106,14 @@ WHERE	AgentID = @LoggedId
 
  	
 SELECT	B.* , A.Username , A.AgentLevel
-FROM	@BetListDetail B
+FROM	#BetListDetail B
 INNER JOIN AgentInfo A
 	ON	 A.AgentId = B.AgentId
 ORDER BY B.TransID, A.AgentLevel
 	
+		
+DROP TABLE #BetListDetail
+DROP TABLE #AgentIdList
+
 GO
-GRANT EXECUTE ON [dbo].[Age_BetList_AgentDetail] TO [aplweb]
+GRANT EXECUTE ON [dbo].[Age_BetList_AgentDetail_Old] TO [aplweb]

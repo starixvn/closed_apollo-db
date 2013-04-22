@@ -799,6 +799,12 @@ SELECT DISTINCT *, @LoggedAgentLevel as AgentLevel
 FROM #Betlist 
 ORDER BY TransID
 
+
+DROP TABLE #Betlist
+DROP TABLE #DirectChild
+DROP TABLE #StatusId
+
+
 GO
 GRANT EXECUTE ON [dbo].[Age_BetList_SelByDateMemStatus] TO [aplweb]
 GO

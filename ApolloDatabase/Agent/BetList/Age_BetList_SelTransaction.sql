@@ -1544,9 +1544,15 @@ END
 END 
 
 
-SELECT DISTINCT * , @LoggedAgentLevel as AgentLevel
+SELECT DISTINCT TOP 1500 * , @LoggedAgentLevel as AgentLevel
 FROM #Betlist 
 ORDER BY TransID
+
+
+DROP TABLE #Betlist
+DROP TABLE #DirectChild
+DROP TABLE #StatusId
+
 
 GO
 GRANT EXECUTE ON [dbo].[Age_BetList_SelTransaction] TO [aplweb]

@@ -1,7 +1,6 @@
-﻿ALTER PROC [dbo].[Age_BetList_TotalBets_SelRunningByBettype]
-	@AgentId INT,
-	@Bettypes VARCHAR(200) = '',
-	@Language VARCHAR(2) = 'E'
+﻿ALTER PROC [dbo].[Age_BetList_TotalBets_SelRunningByBettype_Xtest]
+	@LoggedId INT,
+	@Bettypes VARCHAR(200) = ''
  AS
 
 /**
@@ -13,7 +12,7 @@
 	- 20130409@Sophia: revise all, change #Bettype to #Bettypes 
  
   Parameters:
- 		@AgentId: agent ID
+ 		@LoggedId: agent ID
   		#Bettypes: string of bettypes , seperate by ^
  		@Language: default English
 
@@ -40,7 +39,7 @@ DECLARE @Betlist TABLE (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 DECLARE @AgentLevel INT
 SELECT	@AgentLevel = AgentLevel
 FROM	AgentInfo WITH (NOLOCK)
-WHERE	AgentId = @AgentID
+WHERE	AgentId = @LoggedId
 
 
 --inlcude mix parlay AND Combination mix parlay
@@ -83,7 +82,7 @@ BEGIN
 	FROM BetTrans AS B  WITH (NOLOCK) 
 		LEFT JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
 	WHERE
-		BA.AgentId = @AgentId 	
+		(BA.AgentId = @LoggedId OR @LoggedId = 0)
 		AND B.CustID = B.CustID  
 		AND B.bettype in (SELECT Bettype FROM #Bettype) AND B.bettype IN (9,29)
 		AND B.StatusId IN (0,1)
@@ -131,7 +130,7 @@ BEGIN
 		INNER JOIN outright AS m WITH (NOLOCK) on  B.matchid=m.orid
 		INNER JOIN league l WITH (NOLOCK) on m.leagueid = l.leagueid	
 	WHERE 
-		BA.AgentId = @AgentId 	
+		(BA.AgentId = @LoggedId OR @LoggedId = 0)
 		AND B.CustID = B.CustID
 		AND B.bettype = 10
 		AND B.StatusId=0 		
@@ -180,19 +179,19 @@ BEGIN
 		LEFT JOIN BetTrans_Agent AS ba WITH (NOLOCK) ON BA.TransId = B.TransId
 		INNER JOIN  Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 				
 	WHERE 
-		BA.AgentId = @AgentId 
+		(BA.AgentId = @LoggedId OR @LoggedId = 0)
 		AND B.CustID = B.CustID  
 		AND B.bettype in (SELECT Bettype FROM #Bettype)
 		AND B.StatusId in (0,1)	
 END
 
 
-SELECT *, @AgentLevel FROM @Betlist
+SELECT *, @AgentLevel as AgentLevel FROM @Betlist
 ORDER BY TransID
 
 
 GO
-GRANT VIEW DEFINITION ON [dbo].[Age_BetList_TotalBets_SelRunningByBettype] TO [aplweb]
+GRANT VIEW DEFINITION ON [dbo].[Age_BetList_TotalBets_SelRunningByBettype_xtest] TO [aplweb]
 
 
 
