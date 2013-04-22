@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_GetUplineInfo]    Script Date: 3/29/2013 9:59:02 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_GetUplineInfo]    Script Date: 4/18/2013 1:37:59 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -9,7 +9,7 @@ GO
 
 ALTER PROCEDURE [dbo].[Age_Agent_GetUplineInfo]
 	@CurrentAgentId		INT,
-	@AgentId			INT	
+	@AgentId			INT
 AS
 
 /**
@@ -43,26 +43,26 @@ BEGIN
 	WHERE AgentId = @CurrentAgentId
 
 	-- Get parent information
-	SELECT 
+	SELECT
 		ai.AgentId,
 		ai.AgentLevel,
 		ai.Username,
-		ai.Currency,		
-		ai.AutoSuspend,
-		ai.Suspended,
+		ai.Currency,
+		ai.Status,
+		ai.BetStatus,
+		ai.UplineStatus,
+		ai.UplineBetStatus,
 		ai.Credit,
-		ai.Closed,
 		ai.MatchLimit,
 		ai.VirtualMultiplier,
-		ai.Enabled,
 		ai.DoubleCommLosing,
 		ai.ParentId,
-		ap.Username				AS ParentUsername
+		ap.Username AS ParentUsername
 	FROM 
 		AgentInfo AS ai WITH (NOLOCK)
 		INNER JOIN AgentInfo AS ap WITH (NOLOCK) ON ai.ParentId = ap.AgentId
 	WHERE ai.AgentId IN (	SELECT AgentId 
 							FROM AgentInfo 
-							WHERE @AgentHId.IsDescendantOf(AgentHId) = 1 AND AgentLevel >= @AgentLevel )		  
+							WHERE @AgentHId.IsDescendantOf(AgentHId) = 1 AND AgentLevel >= @AgentLevel )
 
 END

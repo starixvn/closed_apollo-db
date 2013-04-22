@@ -12,7 +12,7 @@ ALTER PROCEDURE [dbo].[Age_Agent_InsertBetLimit]
 	@Creator	INT				= NUL,
 	@LogDate	DATETIME		= NULL,
 	@ErrCode	INT				= 0			OUTPUT,
-	@ErrMsg		NVARCHAR(1000)	= ''		OUTPUT 		
+	@ErrMsg		NVARCHAR(1000)	= ''		OUTPUT
 AS
 
 /**
@@ -36,12 +36,12 @@ BEGIN
 	SET NOCOUNT ON
 
 	-- For write log
-    DECLARE @startRun			DATETIME  
-			,@endRun			DATETIME  
+	DECLARE @startRun			DATETIME
+			,@endRun			DATETIME
 			,@duration			INT
 			,@logSPData			VARCHAR(5000)
-			,@logSPDataOld		VARCHAR(5000)			
-			,@xml				XML			
+			,@logSPDataOld		VARCHAR(5000)
+			,@xml				XML
 
 	SET @startRun = GETDATE()	
 
@@ -72,8 +72,8 @@ BEGIN
 		BetType,
 		MinBet,
 		MaxBet,
-		MaxPerMatch)		
-	SELECT 			
+		MaxPerMatch)
+	SELECT
 		Data.SportType,
 		Data.BetType,
 		Data.Min,
@@ -103,7 +103,7 @@ BEGIN
 			----Message for each sport type	WITH CASE @sportType
 			SELECT @ErrMsg	= 'Wrong Min bet/ Max bet/ Max per match. Sport Type = ' + COALESCE(CAST(@sportType AS VARCHAR(10)), SPACE(1)) 						
 
-			RETURN			
+			RETURN
 		END
 
 	SET @sportType = NULL
@@ -217,20 +217,20 @@ BEGIN
 		FOR XML PATH('z'), ROOT('r')
 	)
 
-	SET @logSPData = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
+	SET @logSPData = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
 
-	SET @endRun		= GETDATE()  
-	SET @duration	= DATEDIFF(millisecond, @startRun, @endRun) 
+	SET @endRun		= GETDATE()
+	SET @duration	= DATEDIFF(MILLISECOND, @startRun, @endRun) 
 
 	IF @LogDate IS NULL
-		SET @LogDate = GETDATE()	
+		SET @LogDate = GETDATE()
 
 	EXEC LogDB.dbo.Age_LogRunSp_Insert
 		@UserId			= @Creator,
 		@SPName			= 'Age_Agent_InsertBetLimit',
 		@LogDate		= @LogDate,
 		@ObjectId		= @AgentId,
-		@ObjectTypeId	= 1,			--Object type : Agent						
+		@ObjectTypeId	= 1,			--Object type : Agent
 		@Duration		= @Duration,
 		@Data			= @logSPData,
 		@OldData		= @logSPDataOld
