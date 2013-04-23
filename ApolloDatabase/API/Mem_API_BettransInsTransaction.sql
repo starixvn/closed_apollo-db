@@ -1,0 +1,200 @@
+ALTER PROCEDURE [dbo].[Mem_API_BettransInsTransaction]  	
+	@custid int,	
+	@SGS_transid bigint, -- SGS transid
+	@type smallint,
+	@amount money,	
+	@currency varchar(5),
+	@ip	nvarchar(15)='',
+	@ErrCode int = 0 OUTPUT,
+	@ErrMsg nvarchar(200) = '' OUTPUT,		
+	@transid bigint = 0 OUTPUT,		
+	@beforebalance money = 0 OUTPUT,
+	@balance money = 0 OUTPUT	
+AS
+/*
+Creator : Dan
+Date : 2013-04-23
+Task : record transfer in/out
+DB: DBTXN/TransDB
+History:
+
+Param's Explanation:
+• @amount:
+	Deposit, Withdrawal, Bonus: positive value	
+		
+• @type:
+	1 – Fund In (SGS to IBC)
+	2 – Fund Out (IBC to SGS)
+• @ErrCode:
+	= 0: Transaction recorded successfully.
+	> 0: Specific Error.
+	
+• @ErrMsg: Error description.
+*/
+SET NOCOUNT ON
+
+declare @username nvarchar(50),
+	@currencyid tinyint,
+	@currencyName varchar(5),
+	@transdate datetime,
+	@transdesc nvarchar(300),
+	--@balance money,
+	@actualrate float,
+	@winlost money,
+	@actual_stake money,	
+	@agentID int,
+	--@AgentLevel smallint,
+	--@roleid tinyint,
+	@bettype smallint,
+	@RefNo bigint, 
+	@DDEP smallint,
+	@DWIT smallint		
+
+Select @ErrCode = 0,
+		@ErrMsg = '',
+		@RefNo = isnull(@RefNo,0),
+		@amount = @amount,		
+		@DDEP = 22001,
+		@DWIT = 22002
+
+
+
+if ISNULL(@type,0) not in (1,2)
+BEGIN
+	Select @ErrMsg = '@Type param is invalid', @ErrCode = 101	
+	return		
+END
+
+select @bettype = 
+	case @type 
+		when 1 then 22001 
+		when 2 then 22002				
+	end
+
+
+if @amount <= 0
+BEGIN
+	Select @ErrMsg = 'Sorry, amount is invalid.', @ErrCode = 102	
+	return		
+END
+
+Select @username = username, @currencyid = ci.currency, @currencyName = e.currency, @actualrate = e.actualrate	
+from SVRCUST.CustDB.dbo.custinfo as ci with (NOLOCK) 
+LEFT JOIN exchange as e with (NOLOCK) on ci.currency = e.exchangeid
+where ci.custid = @custid
+
+if @@ROWCOUNT=0
+BEGIN
+	Select @ErrMsg = 'Invalid Cust ID.', @ErrCode = 103
+	return
+END
+
+if @currencyName<>@currency
+BEGIN
+	Select @ErrMsg = 'Invalid currency.', @ErrCode = 104
+	return
+END
+
+select @transdesc = @username + ' - ' +
+					case @bettype when @DDEP then 'Trasnfer In'
+									when @DWIT then 'Trasnfer Out'									
+									else '' end					
+select 
+	@winlost = case when @bettype = @DDEP then @amount else 0 end,
+	@actual_stake = case @bettype when @DWIT then abs(@amount) else 0 end
+
+/*
+if @winlost < 0 --then swap the winlost and actual_stake
+BEGIN	
+	select @actual_stake = -@winlost,  @winlost = 0	
+END
+*/
+
+----------------------------------
+--Check enough balance for withdrawing
+select @beforebalance = sum(winlost-actual_stake+playercomm) 
+from bettrans with (NOLOCK) 
+where custid = @custid
+
+select @beforebalance = isnull(@beforebalance, 0)
+select @balance = @beforebalance+@winlost-@actual_stake
+if (@bettype=@DWIT) 
+BEGIN
+	if @balance<0
+	BEGIN
+		Select @ErrMsg = 'Sorry, you do not have enough money to transfer out.'
+			, @ErrCode = 105
+		return		
+	END
+END
+
+------------------Insert trans into DB---------------------------------------------------------------
+if @RefNo = 0
+BEGIN
+	EXEC dbo.Acc_SelRefNo @RefNo = @RefNo OUTPUT
+	select @RefNo = @RefNo + 100000000000
+END
+
+----------------------------------
+---- Checking the balance of customer before updating the amount on Credit or Debit table 
+
+DECLARE @Cust_Balance MONEY,
+		@Cust_Balance_ABS MONEY
+
+SELECT	@Cust_Balance = @winlost - @actual_stake
+SELECT	@Cust_Balance_ABS = abs(@Cust_Balance)		
+
+--Update BalanceDebit 
+IF @Cust_Balance < 0 
+BEGIN
+	EXEC Dot_BalanceUpdDebit @custid = @CustID, @Balance = @Cust_Balance_ABS
+END 
+
+
+select @transdate = current_timestamp
+
+INSERT INTO bettrans 
+	(custid, username, refno, transdate, matchid, bettype, transdesc,winlost, actual_stake, winlostdate, 
+	 creator,currency,actualrate, currencyName, ruben, status, statusID,ip, betid)
+VALUES 
+	(@CustID, @username, @RefNo, @transdate, 0, @bettype, @transdesc,@winlost, @actual_stake, convert(nvarchar(10), current_timestamp, 120), 
+	 @CustID, @Currencyid,@actualrate, @currencyName, 1, 'Completed', 131,@ip, @SGS_transid)
+
+if @@ERROR <> 0
+BEGIN
+	--Manually rollback
+	DELETE FROM bettrans 
+	where custid = @custid 
+		and refno = @RefNo 
+		and matchid = 0
+		and bettype = @bettype
+	
+	SELECT @ErrMsg = 'Insert transaction failed.', @ErrCode = 106	
+
+	--Rollback BalanceDebit 
+	IF @Cust_balance < 0 
+	BEGIN 
+		EXEC Dot_BalanceUpdCredit @custid = @CustID, @Balance = @Cust_Balance_ABS
+	END 
+	RETURN
+END
+
+SELECT @TransID = SCOPE_IDENTITY()
+
+IF @Cust_Balance > 0  --Update BalanceCredit 
+BEGIN
+	EXEC Dot_BalanceUpdCredit @custid = @CustID, @Balance = @Cust_Balance
+END 
+
+----ADD DUMMY TRANSACTION (no need now)
+---------------------------------------------------------------------------------------------------
+
+declare @LogData varchar(300)
+
+Select @LogData = 
+			'Insert trans custid = ' + convert(varchar(20), @custid) + ', bettype = ' + convert(varchar(20), @bettype) + ', amount = ' + convert(varchar(20), @amount)
+
+EXEC dbo.WriteLog_UserLog_T @UserID = @custid, @Doing = @LogData
+
+GO
+--GRANT EXECUTE ON [dbo].[Mem_API_BettransInsTransaction] TO [Dot_Member] AS [dbo]

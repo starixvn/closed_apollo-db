@@ -219,14 +219,15 @@ BEGIN
 	*/	
 
 	SELECT	@eventstatus = CASE	WHEN @action = 'CAL' THEN N'completed'
-							    WHEN @action = 'CAL-HT' AND @matchcode LIKE '%hedge%' THEN eventstatus -- Jamie@20120330: Not change eventstatus='completed' for Hedge Match although 
+							    WHEN @action = 'CAL-HT' AND @matchcode LIKE '%hedge%' THEN mr.eventstatus -- Jamie@20120330: Not change eventstatus='completed' for Hedge Match although 
 								WHEN @action = 'CAL-HT' AND @FTDone = 1 THEN N'completed'
 								WHEN @action = 'CAL-FT' AND @HTDone = 1 THEN N'completed'
-								ELSE eventstatus 
+								ELSE mr.eventstatus 
 							END,
 			@FTDone = CASE WHEN @action = 'CAL-HT' AND @matchcode LIKE '%hedge%' THEN 0 ELSE @FTDone END 
-	FROM	SVRPRO.ProdDB.dbo.match_remark_ex WITH(NOLOCK) --DBPRO.BODB02.dbo.Match WITH(NOLOCK)
-	WHERE	matchid = @matchid
+	FROM	SVRPRO.ProdDB.dbo.Match m WITH(NOLOCK)
+			LEFT JOIN SVRPRO.ProdDB.dbo.match_remark_ex mr WITH(NOLOCK)  ON m.matchid=mr.matchid
+	WHERE	m.matchid = @matchid
 
 
 	EXEC SVRPRO.ProdDB.dbo.Admin_Match_Update @Command	= 'Admin_Settlement_1-CAL', 

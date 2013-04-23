@@ -365,8 +365,10 @@ IF @@SERVERNAME IN ('DB042', 'DB043', 'DB044') RETURN
 		(
 		(prs.runningStake = 0 AND ba.statusID > 0) AND
 			(  ba.winlostdate <> b.winlostdate
+			OR ba.actual_stake <> b.actual_stake
+			OR ba.StatusId <> b.StatusId
 			OR ba.awinlost <> prs.awinlost 
-			OR ba.acomm <> prs.acomm
+			OR ba.acomm <> prs.acomm			
 			)
 		)
 	
