@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_Insert]    Script Date: 4/17/2013 2:49:44 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_Insert]    Script Date: 4/23/2013 12:45:00 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -46,23 +46,42 @@ BEGIN
 	SET NOCOUNT ON
 
 	-- For write log
-    DECLARE @startRun			DATETIME  
-			,@endRun			DATETIME  
-			,@duration			INT
-			,@logSPData			VARCHAR(5000)
-			,@logSPDataOld		VARCHAR(5000)			
-			,@xml				XML			
+	DECLARE 
+		@startRun		DATETIME,
+		@endRun			DATETIME,
+		@duration		INT,
+		@logSPData		VARCHAR(5000),
+		@logSPDataOld	VARCHAR(5000),
+		@xml			XML
 
 	SET @startRun = GETDATE()
 
+	-- Check if agent ID exists
+	IF EXISTS ( SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @AgentId )
+		BEGIN
+			SELECT 
+				@ErrCode = 1102, 
+				@ErrMsg = 'Agent ID duplicated [AgentId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
+			RETURN
+		END	
+
+	-- Check if username exists
+	IF EXISTS ( SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE Username = @Username )
+		BEGIN
+			SELECT 
+				@ErrCode = 1104, 
+				@ErrMsg = 'Username duplicated [Username = ' + COALESCE(@Username, SPACE(1)) + ']'
+			RETURN
+		END	
+
 	-- Begin update
-	DECLARE @UplineNode HIERARCHYID
-	DECLARE	@LastChild HIERARCHYID
-	DECLARE @ExchangeId INT
-	DECLARE @ParentStatus TINYINT
-	DECLARE @ParentBetStatus TINYINT
-	DECLARE @ParentUplineStatus TINYINT
-	DECLARE @ParentUplineBetStatus TINYINT
+	DECLARE @UplineNode				HIERARCHYID
+	DECLARE	@LastChild				HIERARCHYID
+	DECLARE @ExchangeId				INT
+	DECLARE @ParentStatus			TINYINT
+	DECLARE @ParentBetStatus		TINYINT
+	DECLARE @ParentUplineStatus		TINYINT
+	DECLARE @ParentUplineBetStatus	TINYINT
 
 	-- Get parent information
 	SELECT	
@@ -83,7 +102,7 @@ BEGIN
 	FROM [SVRTXN].[TransDB].[dbo].[Exchange] WITH (NOLOCK)
 	WHERE UPPER(Code) = UPPER(@Currency)
 
-	-- Get upline status if not a shareholder
+	-- Get upline status if not a main shareholder
 	IF @ParentId > 0 
 		BEGIN
 			SELECT
@@ -211,9 +230,9 @@ BEGIN
 		SportType,
 		BetType,
 		IsLive,
-		PresetPositionTaking,
-		MaxPositionTaking,
-		MinPositionTaking)
+		MaxUpperPositionTaking,
+		MaxGivenPositionTaking,
+		MinGivenPositionTaking)
 	SELECT
 		@AgentId,
 		SportType,
@@ -227,34 +246,35 @@ BEGIN
 	-- End update			
 
 	SET @xml = (
-		SELECT	@Username			AS '@u'
-				,@ParentId			AS '@p'
-				,@Currency			AS '@c'
-				,@Status			AS '@s'
-				,@BetStatus			AS '@bs'
-				,@UplineStatus		AS '@us'
-				,@UplineBetStatus	AS '@ubs'
-				,@Credit			AS '@cr'
-				,@MatchLimit		AS '@ml'
-				,@VirtualMultiplier	AS '@vm'
-				,@DoubleCommLosing	AS '@dc'
+		SELECT	
+			@Username			AS '@u',
+			@ParentId			AS '@p',
+			@Currency			AS '@c',
+			@Status				AS '@s',
+			@BetStatus			AS '@bs',
+			@UplineStatus		AS '@us',
+			@UplineBetStatus	AS '@ubs',
+			@Credit				AS '@cr',
+			@MatchLimit			AS '@ml',
+			@VirtualMultiplier	AS '@vm',
+			@DoubleCommLosing	AS '@dc'
 		 FOR XML PATH('z'), ROOT('r')
 	)
 
-	SET @logSPData = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
+	SET @logSPData = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
 
-	SET @endRun		= GETDATE()  
-	SET @duration	= DATEDIFF(millisecond, @startRun, @endRun) 
+	SET @endRun = GETDATE()
+	SET @duration = DATEDIFF(MILLISECOND, @startRun, @endRun) 
 
 	IF @LogDate IS NULL
-		SET @LogDate = GETDATE()	
+		SET @LogDate = GETDATE()
 
 	EXEC LogDB.dbo.Age_LogRunSp_Insert
 		@UserId			= @Creator,
 		@SPName			= 'Age_Agent_Insert',
 		@LogDate		= @LogDate,
 		@ObjectId		= @AgentId,
-		@ObjectTypeId	= 1,			--Object type : Agent						
+		@ObjectTypeId	= 1,			--Object type : Agent
 		@Duration		= @Duration,
 		@Data			= @logSPData,
 		@OldData		= @logSPDataOld

@@ -1,19 +1,19 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateStatus]    Script Date: 4/17/2013 3:10:01 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateStatus]    Script Date: 4/23/2013 12:52:56 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 ALTER PROCEDURE [dbo].[Age_Agent_UpdateStatus]
-	@AgentId	INT,	
-	@Type		TINYINT,	
+	@AgentId	INT,
+	@Type		TINYINT,
 	@Status		TINYINT,
 	@Modifier	INT				= NULL,
 	@LogDate	DATETIME		= NULL,
 	@ErrCode	INT				= 0			OUTPUT,
-	@ErrMsg		NVARCHAR(1000)	= ''		OUTPUT	
+	@ErrMsg		NVARCHAR(1000)	= ''		OUTPUT
 AS
 
 /**
@@ -37,21 +37,23 @@ BEGIN
 	SET NOCOUNT ON
 
 	-- For write log
-    DECLARE @startRun			DATETIME  
-			,@endRun			DATETIME  
-			,@duration			INT
-			,@logSPData			VARCHAR(5000)
-			,@logSPDataOld		VARCHAR(5000)			
-			,@xml				XML			
+	DECLARE 
+		@startRun		DATETIME,
+		@endRun			DATETIME,
+		@duration		INT,
+		@logSPData		VARCHAR(5000),
+		@logSPDataOld	VARCHAR(5000),
+		@xml			XML
 
 	SET @startRun = GETDATE()
 
 	SET @xml = (
-		SELECT	@Type		AS '@t'
-				,Status		AS '@as'
-				,BetStatus	AS '@bs'
+		SELECT	
+			@Type		AS '@t',
+			Status		AS '@as',
+			BetStatus	AS '@bs'
 		FROM AgentInfo WITH (NOLOCK)
-		WHERE AgentId = @AgentId			
+		WHERE AgentId = @AgentId
 		FOR XML PATH('z'), ROOT('r')
 	)
 
@@ -179,18 +181,19 @@ BEGIN
 		END
 	
 	SET @xml = (
-		SELECT	@Type		AS '@t'
-				,Status		AS '@as'
-				,BetStatus	AS '@bs'
+		SELECT	
+			@Type		AS '@t',
+			Status		AS '@as',
+			BetStatus	AS '@bs'
 		FROM AgentInfo WITH (NOLOCK)
-		WHERE AgentId = @AgentId			
+		WHERE AgentId = @AgentId
 		FOR XML PATH('z'), ROOT('r')
 	)
 
-	SET @logSPData = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
+	SET @logSPData = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
 
-	SET @endRun		= GETDATE()  
-	SET @duration	= DATEDIFF(millisecond, @startRun, @endRun) 
+	SET @endRun = GETDATE()  
+	SET @duration = DATEDIFF(MILLISECOND, @startRun, @endRun) 
 
 	IF @LogDate IS NULL
 		SET @LogDate = GETDATE()	
@@ -200,7 +203,7 @@ BEGIN
 		@SPName			= 'Age_Agent_UpdateStatus',
 		@LogDate		= @LogDate,
 		@ObjectId		= @AgentId,
-		@ObjectTypeId	= 1,			--Object type : Agent						
+		@ObjectTypeId	= 1,			-- Object type : Agent
 		@Duration		= @Duration,
 		@Data			= @logSPData,
 		@OldData		= @logSPDataOld
