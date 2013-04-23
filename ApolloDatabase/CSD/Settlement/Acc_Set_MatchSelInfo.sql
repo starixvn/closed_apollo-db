@@ -64,43 +64,43 @@ BEGIN
 END
 
 SELECT m.matchid, m.leagueid ,
-		hthomescore_ext AS hthomescore,
-		htawayscore_ext AS htawayscore, 
-		ISNULL(mr.calculate_ext,0) IsCalculated, ISNULL(mr.multiple_ext,0) IsMultiCaled,  
-		ISNULL(mr.refund_ext,0) IsRefund, ISNULL(mr.calrefund_ext,0) IsCalRefund,  
+		mr.hthomescore AS hthomescore,
+		mr.htawayscore AS htawayscore, 
+		ISNULL(mr.calculate,0) IsCalculated, ISNULL(mr.multiple,0) IsMultiCaled,  
+		ISNULL(mr.refund,0) IsRefund, ISNULL(mr.calrefund,0) IsCalRefund,  
 		m.homeid, m.awayid,
 		m.matchcode, m.kickofftime,  
-		m.finalhomescore_ext AS finalhomescore,  
-		m.finalawayscore_ext AS finalawayscore,
-		m.betstatus_ext AS betstatus, 
-		CASE WHEN m.betstatus_ext LIKE 'Refund FT%' THEN 'Refund FT'  
-			WHEN m.betstatus_ext LIKE 'Refund HT%' THEN 'Refund HT'  
-			WHEN m.betstatus_ext LIKE 'Refund%' THEN 'Refund'  
-			ELSE m.eventstatus_ext  
+		mr.finalhomescore AS finalhomescore,  
+		mr.finalawayscore AS finalawayscore,
+		mr.betstatus AS betstatus, 
+		CASE WHEN mr.betstatus LIKE 'Refund FT%' THEN 'Refund FT'  
+			WHEN mr.betstatus LIKE 'Refund HT%' THEN 'Refund HT'  
+			WHEN mr.betstatus LIKE 'Refund%' THEN 'Refund'  
+			ELSE mr.eventstatus  
 		END AS eventstatus,    
 		m.sporttype,  
 		ISNULL(m.isNeutral, CONVERT(BIT,0)) AS IsNeutral,  
 		m.eventdate,  
-		m.GoalRecord_ext AS GoalRecord, 
-		ISNULL(mr.IsHTCal_ext,0) AS IsHTCal,  		
-		CAST(CASE WHEN hthomescore_ext IS NOT NULL AND htawayscore_ext IS NOT NULL AND finalhomescore_ext IS NOT NULL AND finalawayscore_ext IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS IsKeyscore
+		mr.GoalRecord AS GoalRecord, 
+		ISNULL(mr.IsHTCal,0) AS IsHTCal,  		
+		CAST(CASE WHEN mr.hthomescore IS NOT NULL AND mr.htawayscore IS NOT NULL AND mr.finalhomescore IS NOT NULL AND mr.finalawayscore IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS IsKeyscore
 		,0
 FROM dbo.match m WITH(NOLOCK) 
-	LEFT JOIN dbo.match_remark mr WITH(NOLOCK) ON m.matchid = mr.matchid  	
+	LEFT JOIN dbo.match_remark_ex mr WITH(NOLOCK) ON m.matchid = mr.matchid  	
 WHERE m.eventdate BETWEEN @FromDate AND @ToDate  
 	AND m.leagueID = CASE WHEN @LeagueID <> 0 THEN @LeagueID ELSE m.leagueID END  
 	AND m.sporttype = CASE WHEN @sporttype = 0 THEN m.sporttype ELSE @sporttype END  	  		
 	AND (@matchcode = '' OR m.matchcode = @matchcode) 
 	AND (m.matchcode NOT LIKE 'hedge%')
-	AND (@eventstatus='' OR ISNULL(eventstatus_ext, 'running') = @eventstatus) 
+	AND (@eventstatus='' OR ISNULL(mr.eventstatus, 'running') = @eventstatus) 
 	AND (@isRefund IS NULL OR
-			(@isRefund =1 AND betstatus_ext like 'Refund%') or
-			(@isRefund =0 AND ISNULL(betstatus_ext,'') not like 'Refund%') 
+			(@isRefund =1 AND mr.betstatus like 'Refund%') or
+			(@isRefund =0 AND ISNULL(mr.betstatus,'') not like 'Refund%') 
 		)	  
-	AND (@UncalOnly = 0 or (ISNULL(mr.calculate_ext,0) = 0 AND m.eventstatus_ext <> 'Completed'))  
-	AND (@UncalMultiOnly = 0 or ISNULL(mr.multiple_ext,0) = 0)    
+	AND (@UncalOnly = 0 or (ISNULL(mr.calculate,0) = 0 AND mr.eventstatus <> 'Completed'))  
+	AND (@UncalMultiOnly = 0 or ISNULL(mr.multiple,0) = 0)    
 	AND CASE WHEN @UncalMultiOnly = 0 THEN 1   
-			WHEN @UncalMultiOnly = 1 THEN hthomescore_ext*htawayscore_ext*finalhomescore_ext*finalawayscore_ext  
+			WHEN @UncalMultiOnly = 1 THEN mr.hthomescore*mr.htawayscore*mr.finalhomescore*mr.finalawayscore  
 	END IS NOT NULL 
 
 GRANT EXECUTE ON [dbo].[Acc_Set_MatchSelInfo] TO [aplweb]	

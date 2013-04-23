@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking]    Script Date: 4/17/2013 2:53:10 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking]    Script Date: 4/22/2013 8:49:07 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1649,7 +1649,8 @@ BEGIN
 														SELECT TOP(1) @currentCustId = CustId
 														FROM @TableCust																										
 
-														DECLARE @TableCustAgent TABLE(CustId INT, AgentId INT,AgentLevel INT)														
+														DECLARE @TableCustAgent TABLE(CustId INT, AgentId INT,AgentLevel INT)																												
+														
 														
 														INSERT INTO @TableCustAgent(CustId, AgentId,AgentLevel)
 														SELECT DISTINCT 
@@ -1659,15 +1660,13 @@ BEGIN
 														FROM CustPositionTaking AS cpt WITH (NOLOCK)	
 															INNER JOIN AgentInfo AS ai WITH (NOLOCK)
 																ON cpt.AgentId = ai.AgentId																		
-														WHERE cpt.AgentId IN (
-																				SELECT dai.AgentId 
+														WHERE cpt.AgentId IN (	SELECT dai.AgentId 
 																				FROM AgentInfo AS dai WITH (NOLOCK)
-																				WHERE dai.AgentHId.IsDescendantOf(@agentHId) = 1
-																					AND dai.AgentId <> @AgentId
-																				)
-																AND ai.AgentLevel = @agentLevel + 1
+																				WHERE dai.ParentId = @AgentId
+																				)																
 																AND cpt.CustId = @currentCustId
 														ORDER BY ai.AgentLevel
+
 
 														SELECT TOP(1) @tempAgentId = AgentId FROM @TableCustAgent
 

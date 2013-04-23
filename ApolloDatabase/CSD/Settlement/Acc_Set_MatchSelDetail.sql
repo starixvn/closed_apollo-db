@@ -1,5 +1,4 @@
-﻿
-ALTER PROCEDURE [dbo].[Acc_Set_MatchSelDetail]
+﻿ALTER PROCEDURE [dbo].[Acc_Set_MatchSelDetail]
 	@matchid int,
 	@excludeRefundFGLG	bit = 0	
 AS
@@ -107,7 +106,12 @@ IF NOT EXISTS(SELECT * FROM @status WHERE [Group] = 0) INSERT INTO @status VALUE
 IF NOT EXISTS(SELECT * FROM @status WHERE [Group] = 1) INSERT INTO @status VALUES (1,0,0)
 IF NOT EXISTS(SELECT * FROM @status WHERE [Group] = 2) INSERT INTO @status VALUES (2,0,0)
 
-Declare @FTStatus nvarchar(10), @HTStatus nvarchar(10), @FGLGStatus nvarchar(10)
+Declare @FTStatus nvarchar(10), @HTStatus nvarchar(10), @FGLGStatus nvarchar(30)
+DECLARE @ParlayRunning BIT /* NULL no ticket, 1 running, 0 settled*/
+	
+SELECT TOP 1 @ParlayRunning = CASE WHEN statusID = 0 THEN 1 ELSE 0 END
+FROM bettransm WITH(NOLOCK)
+WHERE matchid = @matchid AND bettype = 14 AND statusID NOT IN (101,102)
 
 Select @FTStatus = CASE
 		WHEN betcount  = 0 THEN N'No Ticket'
@@ -118,27 +122,32 @@ Select @HTStatus = CASE
 		WHEN inRunning = 0 THEN N'Calculated'
 		ELSE N'Running' END FROM @status WHERE [Group] = 1
 Select @FGLGStatus = CASE
-		WHEN betcount  = 0 THEN N'No Ticket'
-		WHEN inRunning = 0 THEN N'Calculated'
+		WHEN betcount  = 0 THEN CASE WHEN @ParlayRunning IS NULL THEN N'No Ticket'
+										WHEN @ParlayRunning = 1 THEN N'Parlay Running'	
+										WHEN @ParlayRunning = 0 THEN N'Parlay Settled'
+								END
+		WHEN inRunning = 0 THEN N'SETTLED'
 		ELSE N'Running' END FROM @status WHERE [Group] = 2
 
 IF EXISTS(select top 1 1 from bettrans (nolock) where matchid = @matchid AND liveindicator = 1)
 	Select @IsLive = 1		
 
-SELECT	match.sporttype, match.betstatus_ext betstatus, hthomescore_ext hthomescore,htawayscore_ext htawayscore,
+SELECT	match.sporttype, 
+		mr.betstatus betstatus, 
+		mr.hthomescore hthomescore, mr.htawayscore htawayscore,
 		datediff(minute,kickofftime,CURRENT_TIMESTAMP) playtime,	
 		match.leagueid,
 		match.matchid,  
 		match.homeid,
 		match.awayid,	
 		match.matchcode,match.kickofftime,
-		match.finalhomescore_ext finalhomescore,match.finalawayscore_ext finalawayscore,
-		match.eventstatus_ext eventstatus,
-		isnull(mr.refund_ext,0) IsRefund, isnull(mr.calrefund_ext,0) IsCalRefund,
-		isnull(mr.calculate_ext,0) IsCalculated, isnull(mr.multiple_ext,0) IsMultiCaled,
+		mr.finalhomescore finalhomescore, mr.finalawayscore finalawayscore,
+		mr.eventstatus eventstatus,
+		isnull(mr.refund,0) IsRefund, isnull(mr.calrefund,0) IsCalRefund,
+		isnull(mr.calculate,0) IsCalculated, isnull(mr.multiple,0) IsMultiCaled,
 		isnull(match.isNeutral, CONVERT(BIT,0)) as IsNeutral,
-		mr.ishtcal_ext ishtcal,
-		match.GoalRecord_ext as GoalRecord,
+		mr.ishtcal ishtcal,
+		mr.GoalRecord as GoalRecord,
 		@HTStatus HTStatus,
 		@FTStatus FTStatus,
 		@FGLGStatus fglgstatus,
@@ -148,7 +157,7 @@ SELECT	match.sporttype, match.betstatus_ext betstatus, hthomescore_ext hthomesco
 		@IsLive as IsLive,
 		@DelayTime DelayTime		
 FROM	SVRPRO.ProdDB.dbo.match with (nolock) 	
-		left outer join SVRPRO.ProdDB.dbo.match_remark mr with (nolock) on match.matchid = mr.matchid
+		left outer join SVRPRO.ProdDB.dbo.match_remark_ex mr with (nolock) on match.matchid = mr.matchid
 WHERE match.matchid = @matchid
 
 GO
