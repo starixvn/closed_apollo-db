@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_Insert]    Script Date: 4/17/2013 2:54:02 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_Insert]    Script Date: 4/23/2013 12:46:56 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -22,7 +22,7 @@ ALTER PROCEDURE [dbo].[Age_Customer_Insert]
 	@Creator			INT				= NULL,
 	@LogDate			DATETIME		= NULL,
 	@ErrCode			INT				= 0			OUTPUT,
-	@ErrMsg				NVARCHAR(1000)	= ''		OUTPUT	
+	@ErrMsg				NVARCHAR(1000)	= ''		OUTPUT
 AS
 
 /**
@@ -45,19 +45,36 @@ BEGIN
 	SET NOCOUNT ON
 
 	-- For write log
-    DECLARE @startRun			DATETIME  
-			,@endRun			DATETIME  
-			,@duration			INT
-			,@logSPData			VARCHAR(5000)
-			,@logSPDataOld		VARCHAR(5000)
-			,@logSPData3rd		VARCHAR(5000)
-			,@logSPDataOld3rd	VARCHAR(5000)	        		
-			,@xml				XML			
+	DECLARE 
+		@startRun		DATETIME,
+		@endRun			DATETIME,
+		@duration		INT,
+		@logSPData		VARCHAR(5000),
+		@logSPDataOld	VARCHAR(5000),
+		@xml			XML
 
 	SET @startRun = GETDATE()
 
+	-- Check if customer ID exists
+	IF EXISTS ( SELECT 1 FROM CustInfo WITH (NOLOCK) WHERE CustId = @CustId )
+		BEGIN
+			SELECT 
+				@ErrCode = 1302, 
+				@ErrMsg = 'Customer ID duplicated [CustId = ' + COALESCE(CAST(@CustId AS VARCHAR(10)), SPACE(1)) + ']'
+			RETURN
+		END	
+
+	-- Check if username exists
+	IF EXISTS ( SELECT 1 FROM CustInfo WITH (NOLOCK) WHERE Username = @Username )
+		BEGIN
+			SELECT 
+				@ErrCode = 1304, 
+				@ErrMsg = 'Username duplicated [Username = ' + COALESCE(@Username, SPACE(1)) + ']'
+			RETURN
+		END	
+
 	-- Insert into CustInfo
-	INSERT INTO CustInfo(
+	INSERT INTO CustInfo (
 		CustId,
 		AgentId,
 		Username,
@@ -76,7 +93,7 @@ BEGIN
 		Status,
 		BetStatus,
 		UplineStatus,
-		UplineBetStatus)
+		UplineBetStatus )
 	SELECT	
 		@CustId,
 		@AgentId,
@@ -100,23 +117,23 @@ BEGIN
 	FROM AgentInfo WITH (NOLOCK)
 	WHERE AgentId = @AgentId
 
-	---- Not support for multiple language
+	-- Not support for multiple language
 	IF @@ERROR > 0
 		BEGIN
 			SELECT 
 				@ErrCode = 1305, 
-				@ErrMsg = 'Failed to insert customer [CustId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
+				@ErrMsg = 'Failed to insert customer [CustId = ' + COALESCE(CAST(@CustId AS VARCHAR(10)), SPACE(1)) + ']'
 			RETURN
-		END	
+		END
 
-	---- Insert default customer bet limit (from it's parent)
-	INSERT INTO CustBetLimit(
+	-- Insert default customer bet limit (from it's parent)
+	INSERT INTO CustBetLimit (
 		CustId,
 		SportType,
 		BetType,
 		MinBet,
 		MaxBet,
-		MaxPerMatch)
+		MaxPerMatch )
 	SELECT 	
 		@CustId,
 		SportType,
@@ -127,14 +144,14 @@ BEGIN
 	FROM AgentBetLimit WITH (NOLOCK)
 	WHERE AgentId = @AgentId
 	
-	---- Insert default customer discount (From it's parent)
-	INSERT INTO CustDiscount(
-		CustId,		
+	-- Insert default customer discount (from it's parent)
+	INSERT INTO CustDiscount (
+		CustId,
 		SportType,
 		BetType,
-		Discount)
+		Discount )
 	SELECT 
-		@CustId,	
+		@CustId,
 		SportType,
 		BetType,
 		CASE  
@@ -147,53 +164,61 @@ BEGIN
 	FROM AgentDiscount WITH (NOLOCK)
 	WHERE AgentId = @AgentId
 
-	---- Insert default customer position taking (From it's parent)
-	INSERT INTO CustPositionTaking(
+	-- Insert default customer position taking (from it's parent)
+	INSERT INTO CustPositionTaking (
 		CustId,
 		AgentId,
 		SportType,
 		BetType,
 		IsLive,
-		PositionTaking)
+		PositionTaking )
 	SELECT
 		@CustId,
 		@AgentId,
 		SportType,
 		BetType,
 		IsLive,
-		MaxPositionTaking
+		MaxGivenPositionTaking
 	FROM AgentPositionTaking WITH (NOLOCK)
-	WHERE AgentId = @AgentId		
+	WHERE AgentId = @AgentId	
+	
+	-- Insert into balance tables 	
+	INSERT INTO SVRTXN.TransDB.dbo.BalanceCredit (CustId, Balance)
+	VALUES (@CustId, 0)
+
+	INSERT INTO SVRTXN.TransDB.dbo.BalanceDebit (CustId, Balance)
+	VALUES (@CustId, 0)
 
 	SET @xml = (
-		SELECT	@Username			AS '@u'
-				,@AgentId			AS '@ai'				
-				,@Status			AS '@s'
-				,@BetStatus			AS '@bs'				
-				,@Credit			AS '@cr'
-				,@MatchLimit		AS '@ml'
-				,@VirtualMultiplier	AS '@vm'
-				,@DoubleCommLosing	AS '@dc'
-				,@Danger			AS '@d'
-				,@IPLogin			AS '@il'
-				,@UGroup			AS '@ug'
+		SELECT	
+			@Username			AS '@u',
+			@AgentId			AS '@ai',
+			@Status				AS '@s',
+			@BetStatus			AS '@bs',
+			@Credit				AS '@cr',
+			@MatchLimit			AS '@ml',
+			@VirtualMultiplier	AS '@vm',
+			@DoubleCommLosing	AS '@dc',
+			@Danger				AS '@d',
+			@IPLogin			AS '@il',
+			@UGroup				AS '@ug'
 		 FOR XML PATH('z'), ROOT('r')
 	)
 
-	SET @logSPData = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
+	SET @logSPData = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
 
-	SET @endRun		= GETDATE()  
-	SET @duration	= DATEDIFF(millisecond, @startRun, @endRun) 
+	SET @endRun = GETDATE()
+	SET @duration = DATEDIFF(MILLISECOND, @startRun, @endRun) 
 
 	IF @LogDate IS NULL
-		SET @LogDate = GETDATE()	
+		SET @LogDate = GETDATE()
 
 	EXEC LogDB.dbo.Age_LogRunSp_Insert
 		@UserId			= @Creator,
 		@SPName			= 'Age_Customer_Insert',
 		@LogDate		= @LogDate,
 		@ObjectId		= @CustId,
-		@ObjectTypeId	= 2,			--Object type : Customer						
+		@ObjectTypeId	= 2,			-- Object type : Customer
 		@Duration		= @Duration,
 		@Data			= @logSPData,
 		@OldData		= @logSPDataOld		
