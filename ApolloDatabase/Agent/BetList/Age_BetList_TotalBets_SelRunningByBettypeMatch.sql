@@ -1,5 +1,5 @@
 ﻿
-ALTER PROCEDURE [dbo].[Age_BetList_TotalBets_SelRunningByBettypeMatch_xtest]
+ALTER PROCEDURE [dbo].[Age_BetList_TotalBets_SelRunningByBettypeMatch]
 	@MatchID int,
 	@LoggedId int,
 	@Bettype int,
@@ -127,7 +127,7 @@ BEGIN
 END
 
 GO
-GRANT EXECUTE ON [dbo].[Age_BetList_TotalBets_SelRunningByBettypeMatch_xtest] TO [aplweb]
+GRANT EXECUTE ON [dbo].[Age_BetList_TotalBets_SelRunningByBettypeMatch] TO [aplweb]
 GO
 --GRANT VIEW DEFINITION ON [dbo].[Age_BetList_TotalBets_SelRunningByBettypeMatch] TO [vnteam]
  

@@ -17,13 +17,12 @@ AS
     
 SET NOCOUNT ON
 
-DECLARE @WinLossMember TABLE ( Username NVARCHAR(50), CustID INT, PositionTaking SMALLINT, TurnOver MONEY, ActualTO MONEY, WinLost MONEY, PlayerComm MONEY, MemTotal MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, UplineTotal MONEY)
-
+CREATE TABLE #WinLossMember ( Username NVARCHAR(50), CustID INT, PositionTaking SMALLINT, TurnOver MONEY, ActualTO MONEY, WinLost MONEY, PlayerComm MONEY, MemTotal MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, UplineTotal MONEY)
 
 IF @Todate >= @BalanceUpDay
 BEGIN 
 	
-		INSERT INTO @WinLossMember
+		INSERT INTO #WinLossMember
 	    SELECT  C.Username,
 				C.CustID,
 				PT.PositionTaking, 
@@ -36,8 +35,9 @@ BEGIN
 				
 				SUM(BA.AWinLost) AS AWinLost,	
 				SUM(BA.AComm) - SUM (B.PlayerComm) AS AComm,
-				SUM(BA.AWinLost) + SUM(BA.AComm) - SUM (B.PlayerComm) AS ATotal
+				SUM(BA.AWinLost) + SUM(BA.AComm) - SUM (B.PlayerComm) AS ATotal,
 
+				(SUM(B.WinLost) + SUM(B.PlayerComm)) - (SUM(BA.AWinLost) + SUM(BA.AComm) - SUM (B.PlayerComm))AS UplineTotal
 		FROM		Bettrans B WITH (NOLOCK)
 		INNER JOIN	BetTrans_Agent BA WITH (NOLOCK)
 				ON	BA.TransID = B.TransID
@@ -59,43 +59,54 @@ BEGIN
 	    
 
 		    
---	IF @BalanceUpDay < @FromDate --if this case occurs then there is no data from sum_winloss_old
---		SELECT @BalanceUpDay=@FromDate
+	IF @BalanceUpDay < @FromDate --if this case occurs then there is no data from sum_winloss_old
+		SELECT @BalanceUpDay=@FromDate
 
---    INSERT INTO @WinLossAgent
---	    SELECT	AgentId, 
---				SUM(ABS(CustTurnover)) TurnOver,
---				SUM(GrossComm) as GrossComm,
---				SUM(AgentWinLost) as AWinLost,
---				SUM(AgentComm) as AComm,
---				SUM(AgentWinLost) + SUM(AgentComm) AS ATotal
---	    FROM	Sum_WinLoss_Agent b WITH(NOLOCK) 
---		WHERE	AgentId = @AgentId AND
---				Winlostdate BETWEEN @BalanceUpDay AND @ToDate 
---	    GROUP BY AgentId
+  		INSERT INTO #WinLossMember
+	    SELECT	'' as Username, 0 as CustId, 
+				0 as PositionTaking,				 
+				SUM(Turnover) TurnOver,
+				SUM(Actual_Turnover) ActualTO,	
+				SUM(WinLost) WinLost,
+				SUM(PlayerComm) as PlayerComm,
+				SUM(WinLost) + SUM(PlayerComm) as MemTotal,
+
+				SUM(UplineWinlost) as AWinLost,
+				SUM(UplineComm) as AComm,
+				SUM(UplineWinlost) + SUM(UplineComm) AS ATotal,
+
+				SUM(WinLost + PlayerComm) + SUM(UplineWinlost) + SUM(UplineComm) as UplineTotal
+	    FROM	Sum_WinLoss_Cust b WITH(NOLOCK) 
+		WHERE	AgentId = @AgentId 
+				AND WinLostDate BETWEEN @BalanceUpDay AND @ToDate 
+
 END
 
---IF @FromDate < @BalanceUpDay 
---BEGIN
---	IF @todate >= DATEADD(dd, -1, @BalanceUpDay)
---		SELECT @ToDate = DATEADD(dd, -1, @BalanceUpDay)
+IF @FromDate < @BalanceUpDay 
+BEGIN
+	IF @todate >= DATEADD(dd, -1, @BalanceUpDay)
+		SELECT @ToDate = DATEADD(dd, -1, @BalanceUpDay)
 		
---    INSERT INTO @WinLossAgent
---	    SELECT	AgentId, 
---				SUM(ABS(CustTurnover)) TurnOver,
---				SUM(GrossComm) as GrossComm,
---				SUM(AgentWinLost) as AWinLost,
---				SUM(AgentComm) as AComm,
---				SUM(AgentWinLost) + SUM(AgentComm) AS ATotal
---	    FROM	SVRARC.ArchiveDB.dbo.Sum_WinLoss_Agent_Old b WITH(NOLOCK) 
---	    WHERE
---			recommend = @CustID AND 
---			roleID = 1 AND
---		    Winlostdate BETWEEN @FromDate AND @ToDate
-		    
---	    GROUP BY AgentId
+		INSERT INTO #WinLossMember
+	    SELECT	'' as Username, 0 as AgentID,  
+				0 as PositionTaking,				 
+				SUM(Turnover) TurnOver,
+				SUM(Actual_Turnover) ActualTO,	
+				SUM(WinLost) WinLost,
+				SUM(PlayerComm) as PlayerComm,
+				SUM(WinLost) + SUM(PlayerComm) as MemTotal,	
+				SUM(UplineWinlost) as AWinLost,
+				SUM(UplineComm) as AComm,
+				SUM(UplineWinlost) + SUM(UplineComm) AS ATotal,
+				SUM(WinLost + PlayerComm) + SUM(UplineWinlost) + SUM(UplineComm) as UplineTotal
+	    FROM	SVRARC.ArchiveDB.dbo.Sum_WinLoss_Cust_Old b WITH(NOLOCK) 
+		WHERE	AgentId = @AgentId 
+				AND WinLostDate BETWEEN @BalanceUpDay AND @ToDate 
 	    
-SELECT * FROM @WinLossMember
+END 	    
+SELECT * FROM #WinLossMember
+
+DROP TABLE #WinLossMember
 
 GO
 GRANT EXECUTE ON [dbo].[Age_Rpt_WinLoss_Member] TO [aplWeb]

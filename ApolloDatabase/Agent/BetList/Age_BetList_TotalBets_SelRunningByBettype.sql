@@ -1,4 +1,6 @@
-﻿ALTER PROC [dbo].[Age_BetList_TotalBets_SelRunningByBettype_Xtest]
+﻿
+
+ALTER PROC [dbo].[Age_BetList_TotalBets_SelRunningByBettype]
 	@LoggedId INT,
 	@Bettypes VARCHAR(200) = ''
  AS
@@ -191,7 +193,7 @@ ORDER BY TransID
 
 
 GO
-GRANT VIEW DEFINITION ON [dbo].[Age_BetList_TotalBets_SelRunningByBettype_xtest] TO [aplweb]
+GRANT VIEW DEFINITION ON [dbo].[Age_BetList_TotalBets_SelRunningByBettype] TO [aplweb]
 
 
 
