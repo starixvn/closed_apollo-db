@@ -250,10 +250,27 @@ BEGIN
 END
 
 
-SELECT * FROM #WinLossAgent
+SELECT	Username, AgentId, isAgent, PositionTaking,
+		SUM(TurnOver) as TurnOver,
+		SUM(ActualTO) as ActualTO,
+		SUM(AWinLost) as  AWinLost, 
+		SUM(AComm) as AComm,
+		SUM(ATotal) as ATotal,
+		SUM(GrossTotal) as GrossTotal,
+		SUM(UplineTotal) as UplineTotal
+FROM	#WinLossAgent
+GROUP BY Username, AgentId, isAgent, PositionTaking
 UNION ALL
-SELECT * FROM #WinLossMember 
-
+SELECT	Username, AgentId, isAgent, PositionTaking,
+		SUM(TurnOver) as TurnOver,
+		SUM(ActualTO) as ActualTO,
+		SUM(AWinLost) as  AWinLost, 
+		SUM(AComm) as AComm,
+		SUM(ATotal) as ATotal,
+		SUM(GrossTotal) as GrossTotal,
+		SUM(UplineTotal) as UplineTotal
+FROM	#WinLossMember 
+GROUP BY Username, AgentId, isAgent, PositionTaking
 
 DROP TABLE #WinLossAgent
 DROP TABLE #WinLossMember
