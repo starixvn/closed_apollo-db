@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAllInfo]    Script Date: 4/24/2013 12:28:40 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAllInfo]    Script Date: 4/24/2013 5:30:49 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -42,7 +42,7 @@ BEGIN
 			 UGroup
 		FROM CustInfo p WITH (NOLOCK) 
 		WHERE 
-			((@CustId <> -1 AND CustId = @CustId) OR (@CustId = -1 AND Username = @Username))
+			(CustId = @CustId OR Username = @Username)
 			AND (SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = p.AgentId).IsDescendantOf(
 			(SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @ActorAgentId)) = 1
 	) a
