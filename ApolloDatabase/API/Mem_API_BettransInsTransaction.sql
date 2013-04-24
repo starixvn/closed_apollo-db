@@ -3,7 +3,6 @@ ALTER PROCEDURE [dbo].[Mem_API_BettransInsTransaction]
 	@SGS_transid bigint, -- SGS transid
 	@type smallint,
 	@amount money,	
-	@currency varchar(5),
 	@ip	nvarchar(15)='',
 	@ErrCode int = 0 OUTPUT,
 	@ErrMsg nvarchar(200) = '' OUTPUT,		
@@ -19,8 +18,10 @@ DB: DBTXN/TransDB
 History:
 
 Param's Explanation:
+• @custid: player
+• @SGS_transid: Transaction Id at SGS
 • @amount:
-	Deposit, Withdrawal, Bonus: positive value	
+	Deposit, Withdrawal: positive value	
 		
 • @type:
 	1 – Fund In (SGS to IBC)
@@ -30,6 +31,9 @@ Param's Explanation:
 	> 0: Specific Error.
 	
 • @ErrMsg: Error description.
+• @transid: IBC transaction id
+• @beforebalance: The amount of the player before transfer
+• @balance money: The amount of the player after transfer
 */
 SET NOCOUNT ON
 
@@ -37,14 +41,11 @@ declare @username nvarchar(50),
 	@currencyid tinyint,
 	@currencyName varchar(5),
 	@transdate datetime,
-	@transdesc nvarchar(300),
-	--@balance money,
+	@transdesc nvarchar(300),	
 	@actualrate float,
 	@winlost money,
 	@actual_stake money,	
-	@agentID int,
-	--@AgentLevel smallint,
-	--@roleid tinyint,
+	@agentID int,	
 	@bettype smallint,
 	@RefNo bigint, 
 	@DDEP smallint,
@@ -89,12 +90,6 @@ BEGIN
 	return
 END
 
-if @currencyName<>@currency
-BEGIN
-	Select @ErrMsg = 'Invalid currency.', @ErrCode = 104
-	return
-END
-
 select @transdesc = @username + ' - ' +
 					case @bettype when @DDEP then 'Trasnfer In'
 									when @DWIT then 'Trasnfer Out'									
@@ -123,7 +118,7 @@ BEGIN
 	if @balance<0
 	BEGIN
 		Select @ErrMsg = 'Sorry, you do not have enough money to transfer out.'
-			, @ErrCode = 105
+			, @ErrCode = 104
 		return		
 	END
 END
@@ -169,7 +164,7 @@ BEGIN
 		and matchid = 0
 		and bettype = @bettype
 	
-	SELECT @ErrMsg = 'Insert transaction failed.', @ErrCode = 106	
+	SELECT @ErrMsg = 'Insert transaction failed.', @ErrCode = 105	
 
 	--Rollback BalanceDebit 
 	IF @Cust_balance < 0 
