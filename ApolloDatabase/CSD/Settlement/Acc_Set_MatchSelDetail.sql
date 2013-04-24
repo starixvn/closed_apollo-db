@@ -72,8 +72,7 @@ if
 	exists
 	(
 		select	1 
-		from	SVRPRO.ProdDB.dbo.match m with (nolock) 
-				inner join SVRPRO.ProdDB.dbo.match_remark mr with (nolock) on m.matchid = mr.matchid
+		from	SVRPRO.ProdDB.dbo.match m with (nolock) 				
 		where	m.matchid=@matchid 
 				AND sporttype = 1 
 				AND datediff(minute,kickofftime,CURRENT_TIMESTAMP) < 100
@@ -124,9 +123,9 @@ Select @HTStatus = CASE
 Select @FGLGStatus = CASE
 		WHEN betcount  = 0 THEN CASE WHEN @ParlayRunning IS NULL THEN N'No Ticket'
 										WHEN @ParlayRunning = 1 THEN N'Parlay Running'	
-										WHEN @ParlayRunning = 0 THEN N'Parlay Settled'
+										WHEN @ParlayRunning = 0 THEN N'Parlay Calculated'
 								END
-		WHEN inRunning = 0 THEN N'SETTLED'
+		WHEN inRunning = 0 THEN N'Calculated'
 		ELSE N'Running' END FROM @status WHERE [Group] = 2
 
 IF EXISTS(select top 1 1 from bettrans (nolock) where matchid = @matchid AND liveindicator = 1)

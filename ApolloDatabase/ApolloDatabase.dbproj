@@ -1033,6 +1033,9 @@
     <NotInBuild Include="API\Mem_API_BettransInsTransaction.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="API\Mem_API_GetCustBalance.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">
