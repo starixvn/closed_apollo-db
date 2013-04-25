@@ -50,8 +50,9 @@ BEGIN
 		GROUP BY	C.Username, C.AgentID, PT.MaxUpperPositionTaking
 
 
-		SELECT Username, AgentID, IsAgent, PositionTaking,TurnOver, ActualTO, AWinLost, AComm, ATotal
-		FROM #WinLossAgent
+		SELECT		*
+		FROM		#WinLossAgent
+		ORDER BY	C.Username
 		
 		
 		DROP TABLE #WinLossAgent
