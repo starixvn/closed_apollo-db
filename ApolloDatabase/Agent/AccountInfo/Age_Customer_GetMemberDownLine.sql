@@ -41,7 +41,7 @@ FROM CustInfo p WITH(NOLOCK)
 WHERE AgentId = @AgentId
 
 SELECT 
-	CustId AS Id,
+	CustId,
 	Username,
 	AgentId
 FROM 
