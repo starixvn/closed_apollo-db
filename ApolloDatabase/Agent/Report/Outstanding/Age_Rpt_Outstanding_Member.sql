@@ -27,7 +27,7 @@ SET NOCOUNT ON
 			ON B.CustID = C.CustID AND BA.AgentId = C.AgentId
 	WHERE	BA.AgentId = @AgentID AND BA.StatusId IN (0,1)	 
 	GROUP BY C.Username, B.CustID
-
+	ORDER BY C.Username
 
 GO
 GRANT EXECUTE ON [dbo].[Age_Rpt_Outstanding_Member] TO [aplweb]
