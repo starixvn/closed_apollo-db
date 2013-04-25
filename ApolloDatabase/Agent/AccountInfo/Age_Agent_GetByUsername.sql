@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_GetByUsername]    Script Date: 4/24/2013 12:26:06 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_GetByUsername]    Script Date: 4/25/2013 9:55:41 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -25,7 +25,11 @@ AS
 
 SET NOCOUNT ON
 
+DECLARE @agentHId HIERARCHYID
+
 BEGIN
+	SELECT @agentHId = AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @ActorAgentId
+
 	SELECT 
 		TOP 10
 		AgentId,
@@ -35,7 +39,7 @@ BEGIN
 	WHERE 
 		AgentId <> @ActorAgentId
 		AND Username LIKE @Username + '%'
-		AND AgentHId.IsDescendantOf((SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @ActorAgentId)) = 1
+		AND AgentHId.IsDescendantOf(@agentHId) = 1
 	ORDER BY
 		Username	
 END

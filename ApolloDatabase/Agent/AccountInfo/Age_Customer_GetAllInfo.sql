@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAllInfo]    Script Date: 4/24/2013 5:30:49 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAllInfo]    Script Date: 4/25/2013 10:00:40 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -27,24 +27,21 @@ AS
 
 SET NOCOUNT ON
 
+DECLARE @agentHId HIERARCHYID
+
 BEGIN
+	SELECT @agentHId = AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @ActorAgentId
+
 	SELECT 
 		a.CustId,
 		a.Username,
 		a.AgentId,
 		b.Username AS ParentName,
 		a.UGroup
-	FROM 
-	(	SELECT 
-			 CustId,
-			 Username,
-			 AgentId,
-			 UGroup
-		FROM CustInfo p WITH (NOLOCK) 
-		WHERE 
-			(CustId = @CustId OR Username = @Username)
-			AND (SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = p.AgentId).IsDescendantOf(
-			(SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @ActorAgentId)) = 1
-	) a
-	INNER JOIN AgentInfo b WITH (NOLOCK) ON a.AgentId = b.AgentId
+	FROM CustInfo a WITH (NOLOCK) 
+		INNER JOIN 
+		AgentInfo b WITH (NOLOCK) ON a.AgentId = b.AgentId
+	WHERE 
+		(a.CustId = @CustId OR a.Username = @Username)
+		AND b.AgentHId.IsDescendantOf(@agentHId) = 1
 END

@@ -1,12 +1,12 @@
-﻿USE RepDB
+﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetMemberDownline]    Script Date: 3/26/2013 10:39:54 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetMemberDownLine]    Script Date: 4/25/2013 9:57:22 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- [Age_Customer_GetMemberDownline] 2
-ALTER PROCEDURE [dbo].[Age_Customer_GetMemberDownline]
+
+ALTER PROCEDURE [dbo].[Age_Customer_GetMemberDownLine]
 	@AgentId INT,
 	@PageSize INT = 50,
 	@PageIndex	INT = 1,
@@ -43,15 +43,13 @@ WHERE AgentId = @AgentId
 SELECT 
 	CustId AS Id,
 	Username,
-	AgentId,
-	Enabled  
+	AgentId
 FROM 
 (
 	SELECT 
 		CustId,
 		Username,
 		AgentId,
-		Enabled,
 		ROW_NUMBER() OVER(ORDER BY Username) AS RowNumber 
 	FROM CustInfo WITH (NOLOCK) 
 	WHERE 

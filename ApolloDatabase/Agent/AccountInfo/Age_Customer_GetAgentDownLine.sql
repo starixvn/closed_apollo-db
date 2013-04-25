@@ -1,35 +1,47 @@
-﻿USE RepDB
+﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAgentDownline]    Script Date: 3/25/2013 2:31:10 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAllInfo]    Script Date: 4/25/2013 10:00:40 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- [Age_Customer_GetAgentDownLine] 7
-ALTER PROCEDURE [dbo].[Age_Customer_GetAgentDownline]
-	@AgentId INT
+
+ALTER PROCEDURE [dbo].[Age_Customer_GetAllInfo]
+	@ActorAgentId INT,
+	@CustId INT = -1,
+	@Username NVARCHAR(50) = ''
 AS
 
 /**
  * Created by	: Quinn
- * Date			: 20130309
- * Task			: Retrieve agent of current agent
+ * Date			: 20130307
+ * Task			: Get Customer Info by Id or Username
  * DB			: APL.DB05
  * Revisions	:
  *	•
  * Parameters:
- *	@AgentId: agent ID
+ *	@ActorAgentId: AgentId of login user
+ *	@CustId: Customer ID
+ *  @UserName: Username of Agent
  */
 
 SET NOCOUNT ON
 
-SELECT 
-	AgentId AS Id, 
-	Username,
-	ParentId,
-	Enabled,
-	CASE WHEN (EXISTS (SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE ParentId = a.AgentId)) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS HasChildren
-FROM AgentInfo a WITH (NOLOCK) 
-WHERE 
-	ParentId = @AgentId
-ORDER BY Username
+DECLARE @agentHId HIERARCHYID
+
+BEGIN
+	SELECT @agentHId = AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @ActorAgentId
+
+	SELECT 
+		a.CustId,
+		a.Username,
+		a.AgentId,
+		b.Username AS ParentName,
+		a.UGroup
+	FROM CustInfo a WITH (NOLOCK) 
+		INNER JOIN 
+		AgentInfo b WITH (NOLOCK) ON a.AgentId = b.AgentId
+	WHERE 
+		(a.CustId = @CustId OR a.Username = @Username)
+		AND b.AgentHId.IsDescendantOf(@agentHId) = 1
+END

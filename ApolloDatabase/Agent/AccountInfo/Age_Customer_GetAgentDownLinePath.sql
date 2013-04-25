@@ -1,11 +1,11 @@
-﻿USE [DB05]
+﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAgentDownLinePath]    Script Date: 3/18/2013 11:30:57 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAgentDownLinePath]    Script Date: 4/25/2013 10:15:38 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- [Age_Customer_GetDownLinePath] 3, 8
+
 ALTER PROCEDURE [dbo].[Age_Customer_GetAgentDownlinePath]
 	@ParentId INT,
 	@AgentId INT
@@ -19,22 +19,26 @@ AS
  * Revisions	:
  *	•
  * Parameters:
- *	@CustID: agent id of user login
+ *	@ParentId: agent id of user login
  *	@AgentId: agent ID of agent is searched 
  */
 
 SET NOCOUNT ON
 
+DECLARE @agentHId HIERARCHYID,
+		@parentHId HIERARCHYID
+
+SELECT @agentHId = AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @AgentId
+SELECT @parentHId = AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @ParentId
+
 SELECT 
 	AgentId, 
 	Username,
 	AgentLevel,
-	ParentId,
-	Enabled 
+	ParentId
 FROM 
 	AgentInfo WITH (NOLOCK) 
 WHERE 
-	AgentHId.IsDescendantOf((SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @ParentId)) = 1
-	AND (SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @AgentId).IsDescendantOf(AgentHId) = 1
+	AgentHId.IsDescendantOf(@parentHId) = 1
+	AND @agentHId.IsDescendantOf(AgentHId) = 1
 ORDER BY AgentLevel
-
