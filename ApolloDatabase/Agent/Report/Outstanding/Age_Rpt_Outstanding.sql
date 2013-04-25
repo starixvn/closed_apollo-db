@@ -72,7 +72,7 @@ END
 SELECT * FROM @AgentOutstanding 
 UNION ALL
 SELECT * FROM @MemberOutstanding 
-
+ORDER BY IsAgent DESC, Username ASC
 
 
 

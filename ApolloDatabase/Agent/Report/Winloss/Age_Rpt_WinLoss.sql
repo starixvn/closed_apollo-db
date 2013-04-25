@@ -271,9 +271,11 @@ SELECT	Username, AgentId, isAgent, PositionTaking,
 		SUM(UplineTotal) as UplineTotal
 FROM	#WinLossMember 
 GROUP BY Username, AgentId, isAgent, PositionTaking
+ORDER BY IsAgent DESC, Username ASC
 
 DROP TABLE #WinLossAgent
 DROP TABLE #WinLossMember
+
 
 GO
 GRANT EXECUTE ON [dbo].[Age_Rpt_WinLoss] TO [aplWeb]
