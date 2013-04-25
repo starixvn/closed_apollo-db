@@ -6,7 +6,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-ALTER PROCEDURE [dbo].[Age_Customer_GetMemberDownLine]
+ALTER PROCEDURE [dbo].[Age_Customer_GetMemberDownline]
 	@AgentId INT,
 	@PageSize INT = 50,
 	@PageIndex	INT = 1,
