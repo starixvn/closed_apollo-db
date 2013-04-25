@@ -8,7 +8,7 @@ GO
 
 
 
- ALTER PROCEDURE [dbo].[Age_Betlist_SystemParlay_Details]
+ ALTER PROCEDURE [dbo].[Age_Betlist_SelSystemParlay_Details]
 	@refno			bigint, 
 	@custid			INT,
 	@MoveBetsDay		DATETIME,
@@ -24,7 +24,7 @@ AS
 	Original: IBC.Acc_BetlistCombinationParlay_Details
 	
 	Revision:
-	EX: EXEC Age_Betlist_SystemParlay_Details @refno = 100270791589, @custid =1266464 , @MoveBetsDay= '2013-01-30 00:00:00', @BalanceUpDay = '2013-02-01 00:00:00'
+	EX: EXEC [Age_Betlist_SelSystemParlay_Details] @refno = 100270791589, @custid =1266464 , @MoveBetsDay= '2013-01-30 00:00:00', @BalanceUpDay = '2013-02-01 00:00:00'
 
 */
 BEGIN
@@ -346,7 +346,7 @@ END
 
 
 GO
-GRANT EXECUTE ON [dbo].[Age_Betlist_SystemParlay_Details] TO aplweb
+GRANT EXECUTE ON [dbo].[Age_Betlist_SelSystemParlay_Details] TO aplweb
 GO
-GRANT VIEW DEFINITION ON [dbo].[Age_Betlist_SystemParlay_Details] TO [vnteam] 
+GRANT VIEW DEFINITION ON [dbo].[Age_Betlist_SelSystemParlay_Details] TO [vnteam] 
 
