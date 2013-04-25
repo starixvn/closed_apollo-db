@@ -15,16 +15,46 @@ Original:
 
 Revisions:
   
-Param's Explanation:  
+Param''s Explanation:  
 
 EX: Exec [Age_BetList_SelWinloss_Old] 3,-1, 35, '2013-01-01' , '2013-04-09', '0^1^101^103^111^112'
-
 
 				
 */  
 SET NOCOUNT ON
 
 
+DECLARE @S VARCHAR(8000)
+DECLARE @S1 VARCHAR(8000)
+DECLARE @S2 VARCHAR(8000)
+DECLARE @S3 VARCHAR(8000)
+DECLARE @S4 VARCHAR(8000)
+DECLARE @S5 VARCHAR(8000)
+DECLARE @S6 VARCHAR(8000)
+
+SET @S = '	
+CREATE TABLE #DirectChild ( AgentId INT)
+
+INSERT INTO #DirectChild 
+SELECT * 
+FROM OPENQUERY (SVRCUST, '' SELECT	AgentId
+							FROM	CustDB.dbo.AgentInfo WITH (NOLOCK)
+							WHERE	ParentId = ' + CONVERT (VARCHAR(5),@LoggedId) +''')
+ 
+
+DECLARE @LoggedAgentLevel INT
+SELECT	@LoggedAgentLevel = AgentLevel
+FROM	OPENQUERY (SVRCUST, ''	SELECT	AgentLevel
+								FROM	CustDB.dbo.AgentInfo WITH (NOLOCK)
+								WHERE	AgentId = ' + CONVERT (VARCHAR(5),@LoggedId) +''')  
+
+
+CREATE TABLE #StatusId ( StatusId TINYINT)
+INSERT INTO #StatusId
+SELECT val FROM dbo.strSplit_Key(''' + CONVERT (VARCHAR(200),@StatusIds) +''',''^'')
+'
+
+SET @S1 = ' 
 CREATE TABLE #Betlist  (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVARCHAR(50), 
 						HomeId INT, AwayId INT, SportType TINYINT, LeagueId INT, IsNeutral BIT, Showtime NVARCHAR(50),
 						Username NVARCHAR(50), BetType SMALLINT, CustId INT , Hdp1 SMALLMONEY, Hdp2 SMALLMONEY, Odds SMALLMONEY, MOdds SMALLMONEY,
@@ -34,28 +64,14 @@ CREATE TABLE #Betlist  (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT)
 
 
-CREATE TABLE #DirectChild ( AgentId INT)
-
-INSERT INTO #DirectChild 
-SELECT	AgentId 
-FROM	AgentInfo WITH (NOLOCK)
-WHERE	ParentId = @LoggedId
-
- 
-DECLARE @LoggedAgentLevel INT
-SELECT	@LoggedAgentLevel = AgentLevel
-FROM	AgentInfo WITH (NOLOCK)
-WHERE	AgentId = @LoggedId
- 
-
 	---*****************************  Super View ***************************--
-	IF @LoggedId = 0 
+	IF '+ CONVERT(VARCHAR(10),@LoggedId) +' = 0 
 	BEGIN 
 		----By Agent
-		IF @AgentId <> -1 AND @CustID = -1
+		IF '+ CONVERT(VARCHAR(10),@AgentId) +' <> -1 AND '+ CONVERT(VARCHAR(10),@CustId) +' = -1
 		BEGIN 
 			----- 1: Super View by Super
-			IF @AgentId = 0 
+			IF '+ CONVERT(VARCHAR(10),@AgentId) +' = 0 
 			BEGIN
 				----Sportsbook
 				INSERT INTO #Betlist
@@ -66,7 +82,7 @@ WHERE	AgentId = @LoggedId
 						m.HomeId,
 						m.AwayId,
 						m.SportType,
-						m.league_BKId, 
+						m.leagueId, 
 						m.IsNeutral,
 						m.ShowTime,
 						B.Username,
@@ -76,12 +92,13 @@ WHERE	AgentId = @LoggedId
 						B.Hdp2, 
 						B.Odds,
 						B.MOdds,
-						CASE WHEN B.Status = 'running' AND IsNull(B.SecAcceptFlag, 0) = 1 AND IsNull(B.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
+						CASE WHEN B.Status = ''running'' AND IsNull(B.SecAcceptFlag, 0) = 1 AND IsNull(B.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN ''waiting''
 									ELSE B.Status 
 									END as Status,
 						B.Stake,
 						B.Actual_Stake,
-						B.TransDate,		
+						B.TransDate,	
+						B.WinlostDate,	
 						B.BetTeam,
 						B.BetId,
 						(1 - B.TPositionTaking) AS APositionTaking,
@@ -95,9 +112,9 @@ WHERE	AgentId = @LoggedId
 						B.Oddstype,		
 						B.DoubleCommLosing
  				FROM 	BetTrans_BK AS B  WITH (NOLOCK) 
-						INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId					
+						INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId					
 				WHERE 	B.StatusId in (SELECT StatusId FROM #StatusId ) 
-						AND	B.WinLostDate Between @FromDate AND @ToDate	
+						AND	B.WinLostDate Between '''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 	
 						AND (	B.bettype < 31 
 								OR B.bettype between 121 and 999
 								OR B.bettype between 1301 and 1334 
@@ -111,13 +128,13 @@ WHERE	AgentId = @LoggedId
 				SELECT 	B.TransId,
 						B.RefNo,
 						0 as matchid,
-						'' matchcode,
+						'''' matchcode,
 						0 as homeID,
 						0 as awayID,
 						0 as sporttype,
-						'' as league_BKId,
+						'''' as leagueId,
 						CONVERT(BIT,0) as IsNeutral,
-						'' as ShowTime,
+						'''' as ShowTime,
 						B.Username,				
 						B.BetType,
 						B.CustId,
@@ -128,7 +145,8 @@ WHERE	AgentId = @LoggedId
 						B.Status,
 						B.Stake,
 						B.Actual_Stake,
-						B.TransDate,		
+						B.TransDate,
+						B.WinlostDate,		
 						B.BetTeam,
 						B.BetId,
 						(1 - B.TPositionTaking) AS APositionTaking,
@@ -143,10 +161,10 @@ WHERE	AgentId = @LoggedId
 						B.DoubleCommLosing	
 				FROM BetTrans_BK AS B  WITH (NOLOCK) 
 				WHERE  B.StatusId in (SELECT StatusId FROM #StatusId ) 
-						AND B.WinLostDate Between @FromDate AND @ToDate
+						AND B.WinLostDate Between '''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
 						AND B.BetType IN (9,29)
-
-
+					'
+SET @S2 = '
 				----- outright_BK
 				INSERT INTO #Betlist
 				SELECT 				
@@ -157,9 +175,9 @@ WHERE	AgentId = @LoggedId
 						m.teamID as homeID,
 						0 as awayID,
 						lg.sporttype,
-						m.league_BKID,
+						m.leagueID,
 						CONVERT(BIT,0) as IsNeutral,
-						'' as showtime,
+						'''' as showtime,
 						B.username,
 						B.bettype,	
 						B.custid,
@@ -170,7 +188,8 @@ WHERE	AgentId = @LoggedId
 						B.status,
 						B.stake,
 						B.actual_stake,
-						B.transdate,		
+						B.transdate,	
+						B.WinlostDate,	
 						B.betteam,
 						B.betID,
 						(1 - B.TPositionTaking) AS APositionTaking,
@@ -185,9 +204,9 @@ WHERE	AgentId = @LoggedId
 						B.DoubleCommLosing
 				FROM 	BetTrans_BK B WITH (NOLOCK)
 				INNER JOIN outright_BK as m WITH (NOLOCK) on  B.matchid=m.orid
-				INNER JOIN league_BK lg WITH (NOLOCK) on m.league_BKid = lg.league_BKid	
+				INNER JOIN SVRPRO.ProdDB.dbo.League lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
 				WHERE 	B.StatusId in (SELECT StatusId FROM #StatusId ) 		
-						AND B.WinLostDate Between @FromDate AND @ToDate
+						AND B.WinLostDate Between '''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
 						AND B.bettype = 10
 				
 			END
@@ -202,7 +221,7 @@ WHERE	AgentId = @LoggedId
 						m.HomeId,
 						m.AwayId,
 						m.SportType,
-						m.league_BKId, 
+						m.leagueId, 
 						m.IsNeutral,
 						m.ShowTime,
 						B.Username,
@@ -212,12 +231,13 @@ WHERE	AgentId = @LoggedId
 						B.Hdp2, 
 						B.Odds,
 						B.MOdds,
-						CASE WHEN B.Status = 'running' AND IsNull(B.SecAcceptFlag, 0) = 1 AND IsNull(B.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
+						CASE WHEN B.Status = ''running'' AND IsNull(B.SecAcceptFlag, 0) = 1 AND IsNull(B.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN ''waiting''
 									ELSE B.Status 
 									END as Status,
 						B.Stake,
 						B.Actual_Stake,
-						B.TransDate,		
+						B.TransDate,	
+						B.WinlostDate,	
 						B.BetTeam,
 						B.BetId,
 						(1 - B.TPositionTaking) AS APositionTaking,
@@ -233,12 +253,12 @@ WHERE	AgentId = @LoggedId
  					FROM 	
 						BetTrans_BK AS B  WITH (NOLOCK) 
 						INNER JOIN BetTrans_Agent_BK AS BA WITH (NOLOCK) ON BA.TransId = B.TransId  
-						INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId
+						INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId
 					
 					WHERE 
-						BA.AgentId = @AgentId 
+						BA.AgentId = '+ CONVERT(VARCHAR(10),@AgentId) +'
 						AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 
-						AND BA.WinLostDate Between @FromDate AND @ToDate	
+						AND BA.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 	
 						AND (	BA.bettype < 31 
 								OR BA.bettype between 121 and 999
 								OR BA.bettype between 1301 and 1334 
@@ -251,13 +271,13 @@ WHERE	AgentId = @LoggedId
 				SELECT  B.TransId,
 						B.RefNo,
 						0 as matchid,
-						'' matchcode,
+						'''' matchcode,
 						0 as homeID,
 						0 as awayID,
 						0 as sporttype,
-						'' as league_BKId,
+						'''' as leagueId,
 						CONVERT(BIT,0) as IsNeutral,
-						'' as ShowTime,
+						'''' as ShowTime,
 						B.Username,				
 						B.BetType,
 						B.CustId,
@@ -268,7 +288,8 @@ WHERE	AgentId = @LoggedId
 						B.Status,
 						B.Stake,
 						B.Actual_Stake,
-						B.TransDate,		
+						B.TransDate,	
+						B.WinlostDate,	
 						B.BetTeam,
 						B.BetId,
 						(1 - B.TPositionTaking) AS APositionTaking,
@@ -283,11 +304,12 @@ WHERE	AgentId = @LoggedId
 						B.DoubleCommLosing	
 				FROM BetTrans_BK AS B  WITH (NOLOCK) 		
 				INNER JOIN BetTrans_Agent_BK AS BA WITH (NOLOCK) ON BA.TransId = B.TransId 
-				WHERE	BA.AgentId = @AgentId 			
+				WHERE	BA.AgentId = '+ CONVERT(VARCHAR(10),@AgentId) +'			
 					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
-					AND B.WinLostDate Between @FromDate AND @ToDate
+					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
 					AND B.BetType IN (9,29) 
-
+'
+SET @S3 = '
 
 			----- outright_BK
 			INSERT INTO #Betlist
@@ -298,9 +320,9 @@ WHERE	AgentId = @LoggedId
 						m.teamID as homeID,
 						0 as awayID,
 						lg.sporttype,
-						m.league_BKID,
+						m.leagueID,
 						CONVERT(BIT,0) as IsNeutral,
-						'' as showtime,
+						'''' as showtime,
 						B.username,
 						B.bettype,	
 						B.custid,
@@ -311,7 +333,8 @@ WHERE	AgentId = @LoggedId
 						B.status,
 						B.stake,
 						B.actual_stake,
-						B.transdate,		
+						B.transdate,	
+						B.WinlostDate,	
 						B.betteam,
 						B.betID,
 						(1 - B.TPositionTaking) AS APositionTaking,
@@ -327,17 +350,18 @@ WHERE	AgentId = @LoggedId
 				FROM	BetTrans_BK B WITH (NOLOCK)
 					INNER JOIN BetTrans_Agent_BK AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
 					INNER JOIN outright_BK as m WITH (NOLOCK) on  B.matchid=m.orid
-					INNER JOIN league_BK lg WITH (NOLOCK) on m.league_BKid = lg.league_BKid	
-				WHERE 	BA.AgentId = @AgentId 		
+					INNER JOIN SVRPRO.ProdDB.dbo.League lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
+				WHERE 	BA.AgentId = '+ CONVERT(VARCHAR(10),@AgentId) +' 		
 					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
-					AND B.WinLostDate Between @FromDate AND @ToDate
+					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
 					AND B.bettype = 10
 			END
 						
 		END
+ 
 		ELSE
 		---- 3: Super View By Member
-		IF @CustID <> -1 AND @AgentId = -1
+		IF '+ CONVERT(VARCHAR(10),@CustId) +' <> -1 AND '+ CONVERT(VARCHAR(10),@AgentId) +' = -1
 		BEGIN 
 			INSERT INTO #Betlist
 			SELECT 	B.TransId,
@@ -347,7 +371,7 @@ WHERE	AgentId = @LoggedId
 					m.HomeId,
 					m.AwayId,
 					m.SportType,
-					m.league_BKId, 
+					m.leagueId, 
 					m.IsNeutral,
 					m.ShowTime,
 					B.Username,
@@ -357,12 +381,13 @@ WHERE	AgentId = @LoggedId
 					B.Hdp2, 
 					B.Odds,
 					B.MOdds,
-					CASE WHEN B.Status = 'running' AND IsNull(B.SecAcceptFlag, 0) = 1 AND IsNull(B.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
+					CASE WHEN B.Status = ''running'' AND IsNull(B.SecAcceptFlag, 0) = 1 AND IsNull(B.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN ''waiting''
 								ELSE B.Status 
 								END as Status,
 					B.Stake,
 					B.Actual_Stake,
-					B.TransDate,		
+					B.TransDate,	
+					B.WinlostDate,	
 					B.BetTeam,
 					B.BetId,
 					(1 - B.TPositionTaking) AS APositionTaking,
@@ -377,11 +402,11 @@ WHERE	AgentId = @LoggedId
 					B.DoubleCommLosing
  				FROM 
 					BetTrans_BK AS B  WITH (NOLOCK) 				
-					INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 			
+					INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId 			
 				WHERE 
-					B.CustID = @CustId 
+					B.CustID = '+ CONVERT(VARCHAR(10),@CustId) +'
 					AND B.StatusId in (SELECT StatusId FROM #StatusId )   	
-					AND B.WinLostDate Between @FromDate AND @ToDate	
+					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 	
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
 							OR B.bettype between 1301 and 1334 
@@ -395,13 +420,13 @@ WHERE	AgentId = @LoggedId
 			SELECT 	B.TransId,
 					B.RefNo,
 					0 as matchid,
-					'' matchcode,
+					'''' matchcode,
 					0 as homeID,
 					0 as awayID,
 					0 as sporttype,
-					'' as league_BKId,
+					'''' as leagueId,
 					CONVERT(BIT,0) as IsNeutral,
-					'' as ShowTime,
+					'''' as ShowTime,
 					B.Username,				
 					B.BetType,
 					B.CustId,
@@ -412,7 +437,8 @@ WHERE	AgentId = @LoggedId
 					B.Status,
 					B.Stake,
 					B.Actual_Stake,
-					B.TransDate,		
+					B.TransDate,	
+					B.WinlostDate,	
 					B.BetTeam,
 					B.BetId,
 					(1 - B.TPositionTaking) AS APositionTaking,
@@ -426,11 +452,12 @@ WHERE	AgentId = @LoggedId
 					0 as OddStype,		
 					B.DoubleCommLosing	
 				FROM BetTrans_BK AS B  WITH (NOLOCK) 
-				WHERE B.CustID = @CustId  				
+				WHERE B.CustID = '+ CONVERT(VARCHAR(10),@CustId) +'  				
 					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
-					AND B.WinLostDate Between @FromDate AND @ToDate
+					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
 					AND B.BetType IN (9,29) 
-
+'
+SET @S4= '
 
 			----- outright_BK
 			INSERT INTO #Betlist
@@ -441,9 +468,9 @@ WHERE	AgentId = @LoggedId
 					m.teamID as homeID,
 					0 as awayID,
 					lg.sporttype,
-					m.league_BKID,
+					m.leagueID,
 					CONVERT(BIT,0) as IsNeutral,
-					'' as showtime,
+					'''' as showtime,
 					B.username,
 					B.bettype,	
 					B.custid,
@@ -454,7 +481,8 @@ WHERE	AgentId = @LoggedId
 					B.status,
 					B.stake,
 					B.actual_stake,
-					B.transdate,		
+					B.transdate,
+					B.WinlostDate,		
 					B.betteam,
 					B.betID,
 					(1 - B.TPositionTaking) AS APositionTaking,
@@ -470,11 +498,11 @@ WHERE	AgentId = @LoggedId
 				FROM 		
 					BetTrans_BK B WITH (NOLOCK)
 					INNER JOIN outright_BK as m WITH (NOLOCK) on  B.matchid=m.orid
-					INNER JOIN league_BK lg WITH (NOLOCK) on m.league_BKid = lg.league_BKid	
+					INNER JOIN SVRPRO.ProdDB.dbo.League lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
 				WHERE 
-					B.CustID = @CustId  				
+					B.CustID ='+ CONVERT(VARCHAR(10),@CustId) +' 				
 					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
-					AND B.WinLostDate Between @FromDate AND @ToDate
+					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
 					AND B.bettype = 10
 					
 		END
@@ -483,7 +511,7 @@ WHERE	AgentId = @LoggedId
 	--****************** 2: Agent View******************---
 	BEGIN 
 		----4: Agent view By Agent
-		IF @AgentId <> -1 AND @CustID = -1
+		IF '+ CONVERT(VARCHAR(10),@AgentId) +' <> -1 AND '+ CONVERT(VARCHAR(10),@CustId) +' = -1
 		BEGIN 
 		INSERT INTO #Betlist
 			SELECT 	B.TransId,
@@ -493,7 +521,7 @@ WHERE	AgentId = @LoggedId
 					m.HomeId,
 					m.AwayId,
 					m.SportType,
-					m.league_BKId, 
+					m.leagueId, 
 					m.IsNeutral,
 					m.ShowTime,
 					B.Username,
@@ -503,12 +531,13 @@ WHERE	AgentId = @LoggedId
 					B.Hdp2, 
 					B.Odds,
 					B.MOdds,
-					CASE WHEN B.Status = 'running' AND IsNull(B.SecAcceptFlag, 0) = 1 AND IsNull(B.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
+					CASE WHEN B.Status = ''running'' AND IsNull(B.SecAcceptFlag, 0) = 1 AND IsNull(B.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN ''waiting''
 								ELSE B.Status 
 								END as Status,
 					B.Stake,
 					B.Actual_Stake,
-					B.TransDate,		
+					B.TransDate,	
+					B.WinlostDate,	
 					B.BetTeam,
 					B.BetId,
 					L.APositionTaking ,
@@ -524,31 +553,32 @@ WHERE	AgentId = @LoggedId
  				FROM 	
 					BetTrans_BK AS B  WITH (NOLOCK) 
 					INNER JOIN BetTrans_Agent_BK AS BA WITH (NOLOCK) ON BA.TransId = B.TransId 				
-					INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK )  ON B.TransId = L.TransId AND L.AgentID = @LoggedId
+					INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK )  ON B.TransId = L.TransId AND L.AgentID = '+ CONVERT(VARCHAR(10),@LoggedId) +'
 					LEFT JOIN BetTrans_Agent_BK D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
-					INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 						
-				WHERE BA.AgentId =  @AgentId
+					INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId 						
+				WHERE BA.AgentId =  '+ CONVERT(VARCHAR(10),@AgentId) +'
 					AND B.StatusId in (SELECT StatusId FROM #StatusId )  
-					AND B.WinLostDate Between @FromDate AND @ToDate	
+					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 	
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
 							OR B.bettype between 1301 and 1334 
 							OR B.bettype BETWEEN 81 AND 120 				
 						) 			
-			
+	'
+SET @S5 = '		
 
 			-----Parlay
 			INSERT INTO #Betlist
 			SELECT 	B.TransId,
 					B.RefNo,
 					0 as matchid,
-					'' matchcode,
+					'''' matchcode,
 					0 as homeID,
 					0 as awayID,
 					0 as sporttype,
-					'' as league_BKId,
+					'''' as leagueId,
 					CONVERT(BIT,0) as IsNeutral,
-					'' as ShowTime,
+					'''' as ShowTime,
 					B.Username,				
 					B.BetType,
 					B.CustId,
@@ -559,7 +589,8 @@ WHERE	AgentId = @LoggedId
 					B.Status,
 					B.Stake,
 					B.Actual_Stake,
-					B.TransDate,		
+					B.TransDate,	
+					B.WinlostDate,	
 					B.BetTeam,
 					B.BetId,
 					L.APositionTaking,
@@ -574,11 +605,11 @@ WHERE	AgentId = @LoggedId
 					B.DoubleCommLosing	
 				FROM BetTrans_BK AS B  WITH (NOLOCK) 		
 					INNER JOIN BetTrans_Agent_BK AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
-					INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
+					INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = '+ CONVERT(VARCHAR(10),@LoggedId) +'
 					LEFT JOIN BetTrans_Agent_BK D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
-				WHERE BA.AgentId =  @AgentId				
+				WHERE BA.AgentId = '+ CONVERT(VARCHAR(10),@AgentId) +'				
 					AND B.StatusId in (SELECT StatusId FROM #StatusId )  	
-					AND B.WinLostDate Between @FromDate AND @ToDate
+					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
 					AND B.BetType IN (9,29) 
 
 			----- outright_BK
@@ -591,9 +622,9 @@ WHERE	AgentId = @LoggedId
 					m.teamID as homeID,
 					0 as awayID,
 					lg.sporttype,
-					m.league_BKID,
+					m.leagueID,
 					CONVERT(BIT,0) as IsNeutral,
-					'' as showtime,
+					'''' as showtime,
 					B.username,
 					B.bettype,	
 					B.custid,
@@ -604,7 +635,8 @@ WHERE	AgentId = @LoggedId
 					B.status,
 					B.stake,
 					B.actual_stake,
-					B.transdate,		
+					B.transdate,	
+					B.WinlostDate,	
 					B.betteam,
 					B.betID,
 					L.APositionTaking,
@@ -620,20 +652,22 @@ WHERE	AgentId = @LoggedId
 				FROM 		
 					BetTrans_BK B WITH (NOLOCK)
 					INNER JOIN BetTrans_Agent_BK AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
-					INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
+					INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = '+ CONVERT(VARCHAR(10),@LoggedId) +'
 					LEFT JOIN BetTrans_Agent_BK D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
 					INNER JOIN outright_BK as m WITH (NOLOCK) on  B.matchid=m.orid
-					INNER JOIN league_BK lg WITH (NOLOCK) on m.league_BKid = lg.league_BKid	
+					INNER JOIN SVRPRO.ProdDB.dbo.League lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
 				WHERE 
-					BA.AgentId = @AgentId 		
+					BA.AgentId = '+ CONVERT(VARCHAR(10),@AgentId) +'
 					AND B.StatusId in (SELECT StatusId FROM #StatusId )  
-					AND B.WinLostDate Between @FromDate AND @ToDate
+					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
 					AND B.bettype = 10
 
-		END
+		END'
+	
+SET @S6 = '
 		ELSE
 		----- 5: Agent view By Member
-		IF @CustID <> -1 AND @AgentId = -1
+		IF '+ CONVERT(VARCHAR(10),@CustId) +' <> -1 AND '+ CONVERT(VARCHAR(10),@AgentId) +' = -1
 		BEGIN 
 			INSERT INTO #Betlist
 			SELECT 	B.TransId,
@@ -643,7 +677,7 @@ WHERE	AgentId = @LoggedId
 					m.HomeId,
 					m.AwayId,
 					m.SportType,
-					m.league_BKId, 
+					m.leagueId, 
 					m.IsNeutral,
 					m.ShowTime,
 					B.Username,
@@ -653,12 +687,13 @@ WHERE	AgentId = @LoggedId
 					B.Hdp2, 
 					B.Odds,
 					B.MOdds,
-					CASE WHEN B.Status = 'running' AND IsNull(B.SecAcceptFlag, 0) = 1 AND IsNull(B.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
+					CASE WHEN B.Status = ''running'' AND IsNull(B.SecAcceptFlag, 0) = 1 AND IsNull(B.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN ''waiting''
 								ELSE B.Status 
 								END as Status,
 					B.Stake,
 					B.Actual_Stake,
-					B.TransDate,		
+					B.TransDate,	
+					B.WinlostDate,	
 					B.BetTeam,
 					B.BetId,
 					L.APositionTaking ,
@@ -673,12 +708,12 @@ WHERE	AgentId = @LoggedId
 					B.DoubleCommLosing
  				FROM 	
 					BetTrans_BK AS B  WITH (NOLOCK)				
-					INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
+					INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = '+ CONVERT(VARCHAR(10),@LoggedId) +'
 					LEFT JOIN BetTrans_Agent_BK D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
-					INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 		
-				WHERE	B.CustID = @CustId  
+					INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId 		
+				WHERE	B.CustID = '+ CONVERT(VARCHAR(10),@CustId) +'
 					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
-					AND B.WinLostDate Between @FromDate AND @ToDate	
+					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 	
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
 							OR B.bettype between 1301 and 1334 
@@ -691,13 +726,13 @@ WHERE	AgentId = @LoggedId
 			SELECT  B.TransId,
 					B.RefNo,
 					0 as matchid,
-					'' matchcode,
+					'''' matchcode,
 					0 as homeID,
 					0 as awayID,
 					0 as sporttype,
-					'' as league_BKId,
+					'''' as leagueId,
 					CONVERT(BIT,0) as IsNeutral,
-					'' as ShowTime,
+					'''' as ShowTime,
 					B.Username,				
 					B.BetType,
 					B.CustId,
@@ -708,7 +743,8 @@ WHERE	AgentId = @LoggedId
 					B.Status,
 					B.Stake,
 					B.Actual_Stake,
-					B.TransDate,		
+					B.TransDate,	
+					B.WinlostDate,	
 					B.BetTeam,
 					B.BetId,
 					L.APositionTaking,
@@ -723,11 +759,11 @@ WHERE	AgentId = @LoggedId
 					B.DoubleCommLosing	
 				FROM BetTrans_BK AS B  WITH (NOLOCK) 		
 					INNER JOIN BetTrans_Agent_BK AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
-					INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
+					INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = '+ CONVERT(VARCHAR(10),@LoggedId) +'
 					LEFT JOIN BetTrans_Agent_BK D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
-				WHERE   B.CustID = @CustId 				
+				WHERE   B.CustID = '+ CONVERT(VARCHAR(10),@CustId) +'			
 					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
-					AND B.WinLostDate Between @FromDate AND @ToDate
+					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
 					AND B.BetType IN (9,29) 
 
 
@@ -741,9 +777,9 @@ WHERE	AgentId = @LoggedId
 					m.teamID as homeID,
 					0 as awayID,
 					lg.sporttype,
-					m.league_BKID,
+					m.leagueID,
 					CONVERT(BIT,0) as IsNeutral,
-					'' as showtime,
+					'''' as showtime,
 					B.username,
 					B.bettype,	
 					B.custid,
@@ -754,7 +790,8 @@ WHERE	AgentId = @LoggedId
 					B.status,
 					B.stake,
 					B.actual_stake,
-					B.transdate,		
+					B.transdate,	
+					B.WinlostDate,	
 					B.betteam,
 					B.betID,
 					L.APositionTaking,
@@ -770,13 +807,13 @@ WHERE	AgentId = @LoggedId
 				FROM 		
 					BetTrans_BK B WITH (NOLOCK)
 					INNER JOIN BetTrans_Agent_BK AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
-					INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
+					INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = '+ CONVERT(VARCHAR(10),@LoggedId) +'
 					LEFT JOIN BetTrans_Agent_BK D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
 					INNER JOIN outright_BK as m WITH (NOLOCK) on  B.matchid=m.orid
-					INNER JOIN league_BK lg WITH (NOLOCK) on m.league_BKid = lg.league_BKid	
-				WHERE  B.CustID = @CustId 				
+					INNER JOIN SVRPRO.ProdDB.dbo.League lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
+				WHERE  B.CustID = '+ CONVERT(VARCHAR(10),@CustId) +' 				
 					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
-					AND B.WinLostDate Between @FromDate AND @ToDate
+					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
 					AND B.bettype = 10
 
 		END 
@@ -791,6 +828,16 @@ ORDER BY TransID DESC
 DROP TABLE #Betlist
 DROP TABLE #DirectChild
 DROP TABLE #StatusId
+
+'
+PRINT @S 
+PRINT @S1
+PRINT @S2
+PRINT @S3
+PRINT @S4
+PRINT @S5
+PRINT @S6
+EXEC (@S+@S1+@S2+@S3+@S4+@S5+@S6)
 
 GO
 GRANT EXECUTE ON [dbo].[Age_BetList_SelWinloss_Old] TO [aplweb]
