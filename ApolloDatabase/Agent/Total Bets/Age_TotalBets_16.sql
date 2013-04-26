@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_TotalBets_16]    Script Date: 4/2/2013 8:47:39 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_TotalBets_16]    Script Date: 4/26/2013 11:18:32 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -14,7 +14,7 @@ AS
  * Created by	: Terry.Nguyen
  * Date			: 20130228
  * Task			: Get Total Bets(halfTime AND FullTime) data for Agent
- * DB			: APL.TransDB
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	• 20132801@Terry.Nguyen	: Implement
  * Parameters:
@@ -33,16 +33,16 @@ BEGIN
 		m.AwayId,
 		MatchCode,
 	
-		SUM((CASE WHEN hdp1 = 1 AND hdp2 = 1 THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS totalHH,
-		SUM((CASE WHEN hdp1 = 1 AND hdp2 = 0 THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS totalHD,
-		SUM((CASE WHEN hdp1 = 1 AND hdp2 = 2 THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS totalHA,
-		SUM((CASE WHEN hdp1 = 0 AND hdp2 = 1 THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS totalDH,
+		SUM((CASE WHEN hdp1 = 1 AND hdp2 = 1 THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS TotalHH,
+		SUM((CASE WHEN hdp1 = 1 AND hdp2 = 0 THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS TotalHD,
+		SUM((CASE WHEN hdp1 = 1 AND hdp2 = 2 THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS TotalHA,
+		SUM((CASE WHEN hdp1 = 0 AND hdp2 = 1 THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS TotalDH,
 	
-		SUM((CASE WHEN hdp1 = 0 AND hdp2 = 0 THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS totalDD,
-		SUM((CASE WHEN hdp1 = 0 AND hdp2 = 2 THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS totalDA,
-		SUM((CASE WHEN hdp1 = 2 AND hdp2 = 1 THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS totalAH,
-		SUM((CASE WHEN hdp1 = 2 AND hdp2 = 0 THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS totalAD,
-		SUM((CASE WHEN hdp1 = 2 AND hdp2 = 2 THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS totalAA,
+		SUM((CASE WHEN hdp1 = 0 AND hdp2 = 0 THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS TotalDD,
+		SUM((CASE WHEN hdp1 = 0 AND hdp2 = 2 THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS TotalDA,
+		SUM((CASE WHEN hdp1 = 2 AND hdp2 = 1 THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS TotalAH,
+		SUM((CASE WHEN hdp1 = 2 AND hdp2 = 0 THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS TotalAD,
+		SUM((CASE WHEN hdp1 = 2 AND hdp2 = 2 THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS TotalAA,
 
 		ISNULL(m.isNeutral, CONVERT(BIT, 0)) as IsNeutral
 	FROM  
