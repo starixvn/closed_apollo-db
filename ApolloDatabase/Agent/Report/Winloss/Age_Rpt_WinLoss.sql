@@ -251,6 +251,26 @@ BEGIN
 END
 
 
+DELETE	#WinLossAgent 
+WHERE	TurnOver IS NULL 
+		AND ActualTO IS NULL
+		AND AWinLost IS NULL
+		AND AComm IS NULL
+		AND ATotal IS NULL
+		AND GrossTotal IS NULL
+		AND UplineTotal IS NULL
+
+
+DELETE	#WinLossMember 
+WHERE	TurnOver IS NULL 
+		AND ActualTO IS NULL
+		AND AWinLost IS NULL
+		AND AComm IS NULL
+		AND ATotal IS NULL
+		AND GrossTotal IS NULL
+		AND UplineTotal IS NULL
+
+
 SELECT	Username, AgentId, isAgent, PositionTaking,
 		SUM(TurnOver) as TurnOver,
 		SUM(ActualTO) as ActualTO,
