@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_GetAllInfo]    Script Date: 4/25/2013 9:16:06 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_GetAllInfo]    Script Date: 4/26/2013 11:05:52 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -9,7 +9,8 @@ GO
 ALTER PROCEDURE [dbo].[Age_Agent_GetAllInfo]
 	@ActorAgentId INT,
 	@AgentId INT = -1,
-	@Username NVARCHAR(50) = ''
+	@Username NVARCHAR(50) = '',
+	@ExcludeActor BIT = 1
 AS
 
 /**
@@ -23,6 +24,7 @@ AS
  *	@ActorAgentId: agentId of login user
  *	@AgentId: agent ID
  *  @UserName: username of Agent
+ *	@ExcludeActor: not get Actor
  */
 
 SET NOCOUNT ON
@@ -44,8 +46,6 @@ BEGIN
 		INNER JOIN AgentInfo b WITH (NOLOCK) ON a.ParentId = b.AgentId
 	WHERE 
 		(a.AgentId = @AgentId OR a.Username = @Username)
-		AND a.AgentId <> @ActorAgentId
+		AND (@ExcludeActor = 0 OR a.AgentId <> @ActorAgentId)
 		AND a.AgentHId.IsDescendantOf(@agentHId) = 1
 END
-
-

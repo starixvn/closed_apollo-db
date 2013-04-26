@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_GetByUsername]    Script Date: 4/25/2013 9:55:41 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_GetByUsername]    Script Date: 4/26/2013 11:00:48 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -8,7 +8,8 @@ GO
 
 ALTER PROCEDURE [dbo].[Age_Agent_GetByUsername]
 	@ActorAgentId INT,
-	@Username NVARCHAR(50)
+	@Username NVARCHAR(50),
+	@ExcludeActor BIT = 1
 AS
 
 /**
@@ -21,6 +22,8 @@ AS
  * Parameters:
  *	@ActorAgentId: agentId of login user
  *  @Username: username of agent
+ *	@ExcludeActor: not get Actor
+ *	[dbo].[Age_Agent_GetByUsername] 2, 'testcs', 0
  */
 
 SET NOCOUNT ON
@@ -37,7 +40,7 @@ BEGIN
 	FROM 
 		AgentInfo WITH (NOLOCK) 
 	WHERE 
-		AgentId <> @ActorAgentId
+		(@ExcludeActor = 0 OR AgentId <> @ActorAgentId)
 		AND Username LIKE @Username + '%'
 		AND AgentHId.IsDescendantOf(@agentHId) = 1
 	ORDER BY
