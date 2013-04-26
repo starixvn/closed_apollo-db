@@ -46,7 +46,7 @@ BEGIN
 				ON	B.TransID = BA.TransID		
 		INNER JOIN  AgentPositionTaking PT WITH (NOLOCK) 
 				ON  PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
-		WHERE		C.ParentId = @AgentID
+		WHERE		C.ParentId = @AgentID AND B.StatusID NOT IN (0,1)
 		GROUP BY	C.Username, C.AgentID, PT.MaxUpperPositionTaking
 
 

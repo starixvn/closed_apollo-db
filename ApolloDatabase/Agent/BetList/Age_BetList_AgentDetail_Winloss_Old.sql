@@ -4,7 +4,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[Age_BetList_AgentDetail_Winloss_Old]
+ALTER PROCEDURE [dbo].[Age_BetList_AgentDetail_Winloss_Old]
 	@TransId BIGINT,
 	@LoggedId INT,
 	@FromDate SMALLDATETIME,
@@ -35,7 +35,7 @@ SET @S = '	SELECT *
 										FROM	CUSTDB.dbo.AgentInfo P WITH (NOLOCK)
 										INNER JOIN CUSTDB.dbo.AgentInfo C WITH (NOLOCK)
 											ON	C.AgentHId.IsDescendantOf(P.AgentHId) = 1 AND C.AgentLevel >=P.AgentLevel
-										WHERE	P.AgentID =' + CONVERT (VARCHAR(5),@LoggedId) +''')'
+										WHERE	P.AgentID =' + CONVERT (VARCHAR(20),@LoggedId) +''')'
 
 --EXEC (@s)
 --SELECT @s
@@ -57,14 +57,14 @@ CREATE TABLE #AgentIdList ( AgentId INT)
 INSERT INTO #AgentIdList 
 SELECT	AgentId 
 FROM	BetTrans_Agent_BK WITH (NOLOCK)
-WHERE	TransID = '+ Convert(varchar(10),@TransId )+'
+WHERE	TransID = '+ Convert(varchar(20),@TransId )+'
 
 
 DECLARE @AgentLevel INT, @Username NVARCHAR(50)
 
 SELECT	@AgentLevel = AgentLevel +1, @Username = Username
 FROM	#AgentInfo  WITH (NOLOCK)
-WHERE	AgentID = ' + CONVERT (VARCHAR(5),@LoggedId) +'
+WHERE	AgentID = ' + CONVERT (VARCHAR(20),@LoggedId) +'
  
 
 		
@@ -85,8 +85,8 @@ WHERE	AgentID = ' + CONVERT (VARCHAR(5),@LoggedId) +'
 			ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM #AgentIdList)	 
 	LEFT JOIN BetTrans_Agent_BK D WITH (NOLOCK)
 			ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
-	WHERE	BA.TransId = '+ Convert(varchar(10),@TransId )+' 
-			AND BA.WinlostDate BETWEEN '''+ Convert(varchar(10),@Fromdate )+''' AND '''+ Convert(varchar(10),@Todate )+''' 
+	WHERE	BA.TransId = '+ Convert(varchar(20),@TransId )+' 
+			AND BA.WinlostDate BETWEEN '''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
 			AND (BA.bettype < 31 
 				OR BA.bettype BETWEEN 121 AND 999 
 				OR BA.bettype BETWEEN 1301 AND 1334   
@@ -100,7 +100,7 @@ WHERE	AgentID = ' + CONVERT (VARCHAR(5),@LoggedId) +'
 		INSERT INTO #BetListDetail
 			SELECT	DISTINCT
 					B.TransID,
-					' + CONVERT (VARCHAR(5),@LoggedId) +' as AgentID,
+					' + CONVERT (VARCHAR(20),@LoggedId) +' as AgentID,
 					--@Username as Username,
 					B.Status,
 					(1 - B.TPositionTaking) AS APositionTaking,
@@ -114,8 +114,8 @@ WHERE	AgentID = ' + CONVERT (VARCHAR(5),@LoggedId) +'
 					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM #AgentIdList)	 
 			LEFT JOIN BetTrans_Agent_BK D WITH (NOLOCK)
 					ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
-			WHERE	BA.TransId = '+ Convert(varchar(10),@TransId )+'
-					AND BA.WinlostDate BETWEEN '''+ Convert(varchar(10),@Fromdate )+''' AND '''+ Convert(varchar(10),@Todate )+''' 
+			WHERE	BA.TransId = '+ Convert(varchar(20),@TransId )+'
+					AND BA.WinlostDate BETWEEN '''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
 					AND (BA.bettype < 31 
 						OR BA.bettype BETWEEN 121 AND 999 
 						OR BA.bettype BETWEEN 1301 AND 1334   
@@ -144,5 +144,5 @@ GO
 GRANT EXECUTE ON [dbo].[Age_BetList_AgentDetail_Winloss_Old] TO [aplweb]
 
 GO
-GRANT VIEW DEFINITION ON [dbo].[Age_BetList_AgentDetail_Winloss_Old] TO vnteam
+ 
  
