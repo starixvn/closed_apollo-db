@@ -97,6 +97,7 @@
     <Folder Include="CSD\Admin\User" />
     <Folder Include="API" />
     <Folder Include="CSD\Write Log" />
+    <Folder Include="CSD\Others" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1071,6 +1072,9 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\AccountInfo\Age_Agent_GetMemberDownline.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Others\Acc_SelRefNo.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
