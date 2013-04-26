@@ -1,7 +1,7 @@
 ALTER PROCEDURE [dbo].[Mem_API_GetFundTrans]
 	@trans_id bigint,	
 	@ErrCode int = 0 OUTPUT,
-	@ErrMsg nvarchar(200) = '' OUTPUT,
+	@ErrMsg nvarchar(2000) = '' OUTPUT,
 	@SGS_trans_id bigint OUTPUT,					
 	@trans_date datetime OUTPUT,
 	@amount money = 0 OUTPUT,		
@@ -17,12 +17,19 @@ DB: DBTXN/TransDB
 History:
 
 Param's Explanation:
+• @transid: IBC transaction id
+• @amount: amount to transfer 
+	>0: transfer in
+	=0: rejected (fail); 
+	<0: transfer out
 • @ErrCode:
 	= 0: Transaction recorded successfully.
 	> 0: Specific Error.
 • @ErrMsg: Error description.
+• @SGS_transid: Transaction Id at SGS
 • @beforebalance: The amount of the player before transfer
 • @balance money: The amount of the player after transfer
+• @status: 1 – Success ; 2 – Failed
 */
 declare @custid int, @location tinyint, @bettype smallint, @currencyid tinyint
 

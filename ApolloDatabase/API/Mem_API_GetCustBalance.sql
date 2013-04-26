@@ -1,7 +1,7 @@
 ALTER PROCEDURE [dbo].[Mem_API_GetCustBalance]  	
 	@custid int,	
 	@ErrCode int = 0 OUTPUT,
-	@ErrMsg nvarchar(200) = '' OUTPUT,				
+	@ErrMsg nvarchar(2000) = '' OUTPUT,				
 	@osbalance money = 0 OUTPUT,
 	@balance money = 0 OUTPUT
 AS
