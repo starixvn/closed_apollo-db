@@ -96,6 +96,7 @@
     <Folder Include="CSD\Admin\Site" />
     <Folder Include="CSD\Admin\User" />
     <Folder Include="API" />
+    <Folder Include="CSD\Write Log" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1052,6 +1053,21 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="API\Mem_API_GetFundTrans.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Write Log\WriteLog_UserLog_T.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Write Log\WriteLog_UserLog_P.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Write Log\WriteLog_ExchangeRate.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Write Log\WriteLog_Settlement_Checking.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Write Log\WriteLog_Settlement_Settle.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
