@@ -1,7 +1,7 @@
 ALTER PROCEDURE [dbo].[Mem_API_BettransInsTransaction]  	
 	@custid int,	
 	@SGS_transid bigint, -- SGS transid
-	@type smallint,
+	@type tinyint,
 	@amount money,	
 	@ip	nvarchar(15)='',
 	@ErrCode int = 0 OUTPUT,
@@ -20,9 +20,7 @@ History:
 Param's Explanation:
 • @custid: player
 • @SGS_transid: Transaction Id at SGS
-• @amount:
-	Deposit, Withdrawal: positive value	
-		
+• @amount: amount to transfer (>0)		
 • @type:
 	1 – Fund In (SGS to IBC)
 	2 – Fund Out (IBC to SGS)
@@ -32,8 +30,8 @@ Param's Explanation:
 	
 • @ErrMsg: Error description.
 • @transid: IBC transaction id
-• @beforebalance: The amount of the player before transfer
-• @balance money: The amount of the player after transfer
+• @beforebalance: The balance of the player before transfer
+• @balance money: The balance of the player after transfer
 */
 SET NOCOUNT ON
 
@@ -62,7 +60,7 @@ Select @ErrCode = 0,
 
 if ISNULL(@type,0) not in (1,2)
 BEGIN
-	Select @ErrMsg = '@Type param is invalid', @ErrCode = 101	
+	Select @ErrMsg = 'Type is invalid', @ErrCode = 101	
 	return		
 END
 
@@ -75,7 +73,7 @@ select @bettype =
 
 if @amount <= 0
 BEGIN
-	Select @ErrMsg = 'Sorry, amount is invalid.', @ErrCode = 102	
+	Select @ErrMsg = 'Amount is invalid.', @ErrCode = 102	
 	return		
 END
 
@@ -117,7 +115,7 @@ if (@bettype=@DWIT)
 BEGIN
 	if @balance<0
 	BEGIN
-		Select @ErrMsg = 'Sorry, you do not have enough money to transfer out.'
+		Select @ErrMsg = 'You do not have enough money to transfer out.'
 			, @ErrCode = 104
 		return		
 	END
