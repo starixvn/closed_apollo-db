@@ -31,7 +31,7 @@ BEGIN
 		----Super view
 		INSERT INTO #WinLossAgent
 		SELECT  C.Username, C.AgentID, 1 as IsAgent,
-				PT.MaxUpperPositionTaking/1000 as PositionTaking,				
+				PT.MaxUpperPositionTaking/100 as PositionTaking,				
 		   		SUM(ABS(B.Stake)) AS TurnOver,
 				SUM(CASE WHEN ABS(B.MOdds) > 0.25 THEN ABS(B.Stake) ELSE CASE WHEN B.MOdds IN (0.25,-0.25) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS ActualTO,
 				SUM(-(B.Winlost - B.Actual_Stake + B.TWinlost)) AS AWinlost,	
@@ -50,8 +50,9 @@ BEGIN
 		GROUP BY	C.Username, C.AgentID, PT.MaxUpperPositionTaking
 
 
-		SELECT Username, AgentID, IsAgent, PositionTaking,TurnOver, ActualTO, AWinLost, AComm, ATotal
-		FROM #WinLossAgent
+		SELECT		*
+		FROM		#WinLossAgent
+		ORDER BY	Username
 		
 		
 		DROP TABLE #WinLossAgent
@@ -95,7 +96,7 @@ BEGIN
 
 
 
-		SELECT  C.Username, C.AgentID, PT.MaxUpperPositionTaking as PositionTaking,				 
+		SELECT  C.Username, C.AgentID, PT.MaxUpperPositionTaking/100 as PositionTaking,				 
 		   		SUM(ABS(B.Stake)) AS TurnOver,
 				SUM(CASE WHEN ABS(B.MOdds)> 0.25 THEN ABS(B.Stake) ELSE CASE WHEN B.MOdds IN (0.25,-0.25) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS ActualTO,
 				SUM(BP.AWinlost) AS AWinlost,	
@@ -125,7 +126,7 @@ BEGIN
 
 
 		INSERT INTO #WinLossAgent
-		SELECT	T.Username, T.AgentID, 1 as IsAgent, T.PositionTaking,	
+		SELECT	T.Username, T.AgentID, 1 as IsAgent, T.PositionTaking/100 as PositionTaking,	
 				T.TurnOver, T.ActualTO, T.AWinlost, T.AComm, T.ATotal, 
 				SUM(BA.AWINLOST) + T.ChildWinlost + T.ChildAComm AS GrossTotal,  
 				SUM(BA.AWINLOST) + T.ChildWinlost + T.ChildAComm - T.ATotal AS UplineTotal
@@ -177,7 +178,7 @@ BEGIN
 
         INSERT INTO #WinLossAgent
 	    SELECT	AgentUsername as Username, A.AgentId, 1 as IsAgent,
-				PT.MaxUpperPositionTaking as PositionTaking,				 
+				PT.MaxUpperPositionTaking/100 as PositionTaking,				 
 				SUM(Turnover) TurnOver,
 				SUM(Actual_Turnover) ActualTO,		
 				SUM(UplineWinlost) as AWinLost,
@@ -217,7 +218,7 @@ BEGIN
 		
 		INSERT INTO #WinLossAgent
 	    SELECT	AgentUsername as Username, A.AgentId, 1 as IsAgent,
-				PT.MaxUpperPositionTaking as PositionTaking,				 
+				PT.MaxUpperPositionTaking/100 as PositionTaking,				 
 				SUM(Turnover) TurnOver,
 				SUM(Actual_Turnover) ActualTO,		
 				SUM(UplineWinlost) as AWinLost,
@@ -271,9 +272,11 @@ SELECT	Username, AgentId, isAgent, PositionTaking,
 		SUM(UplineTotal) as UplineTotal
 FROM	#WinLossMember 
 GROUP BY Username, AgentId, isAgent, PositionTaking
+ORDER BY IsAgent DESC, Username ASC
 
 DROP TABLE #WinLossAgent
 DROP TABLE #WinLossMember
+
 
 GO
 GRANT EXECUTE ON [dbo].[Age_Rpt_WinLoss] TO [aplWeb]

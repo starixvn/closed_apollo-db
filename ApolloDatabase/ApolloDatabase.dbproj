@@ -1039,7 +1039,16 @@
     <NotInBuild Include="API\Mem_API_GetCustBalance.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="API\Mem_API_GetFundTrans.sql">
+    <NotInBuild Include="Agent\BetList\Age_BetList_AgentDetail_Winloss.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\Age_BetList_AgentDetail_Winloss_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\Age_Betlist_SelSystemParlay_Details.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\Age_BetList_SelParlayDetail.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>

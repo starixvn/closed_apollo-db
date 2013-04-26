@@ -1,12 +1,12 @@
-﻿USE RepDB
+﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetMemberDownline]    Script Date: 3/26/2013 10:39:54 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetMemberDownLine]    Script Date: 4/26/2013 10:30:03 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- [Age_Customer_GetMemberDownline] 2
-ALTER PROCEDURE [dbo].[Age_Customer_GetMemberDownline]
+
+ALTER PROCEDURE [dbo].[Age_Agent_GetMemberDownline]
 	@AgentId INT,
 	@PageSize INT = 50,
 	@PageIndex	INT = 1,
@@ -16,12 +16,15 @@ AS
 /**
  * Created by	: Quinn
  * Date			: 20130314
- * Task			: Retrieve members of agent which is searched
- * DB			: APL.DB05
+ * Task			: Retrieve direct members of agent
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	•
  * Parameters:
  *	@AgentId: agent ID
+ *	@PageSize: Page Size
+ *	@PageIndex: Page Index
+ *	@TotalPages: Total Pages
  */
 
 SET NOCOUNT ON
@@ -37,21 +40,19 @@ SELECT	@PageIndex = @PageIndex - 1,
 SELECT 
 	@TotalItems = COUNT(CustId), 
 	@TotalPages = @TotalItems/@PageSize + CASE WHEN @TotalItems % @PageSize > 0 THEN 1 ELSE 0 END
-FROM CustInfo p WITH(NOLOCK) 				 
+FROM CustInfo WITH(NOLOCK) 				 
 WHERE AgentId = @AgentId
 
 SELECT 
-	CustId AS Id,
+	CustId,
 	Username,
-	AgentId,
-	Enabled  
+	AgentId
 FROM 
 (
 	SELECT 
 		CustId,
 		Username,
 		AgentId,
-		Enabled,
 		ROW_NUMBER() OVER(ORDER BY Username) AS RowNumber 
 	FROM CustInfo WITH (NOLOCK) 
 	WHERE 

@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetByUsername]    Script Date: 4/24/2013 12:26:58 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetByUsername]    Script Date: 4/26/2013 10:53:11 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -15,7 +15,7 @@ AS
  * Created by	: Quinn
  * Date			: 20130314
  * Task			: get Customer by username
- * DB			: APL.DB05
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	•
  * Parameters:
@@ -25,16 +25,20 @@ AS
 
 SET NOCOUNT ON
 
+DECLARE @agentHId HIERARCHYID
+
 BEGIN
+	SELECT @agentHId = AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @ActorAgentId
+
 	SELECT 
 		TOP 10
-		p.CustId,
-		p.Username 
-	FROM CustInfo p WITH (NOLOCK) 
+		a.CustId,
+		a.Username 
+	FROM CustInfo a WITH (NOLOCK)
+		INNER JOIN AgentInfo b WITH (NOLOCK) ON a.AgentId = b.AgentId
 	WHERE 
-		Username LIKE @Username + '%'
-		AND (SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = p.AgentId).IsDescendantOf(
-		(SELECT AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @ActorAgentId)) = 1
+		a.Username LIKE @Username + '%'
+		AND b.AgentHId.IsDescendantOf(@agentHId) = 1
 	ORDER BY
 		Username	
 END

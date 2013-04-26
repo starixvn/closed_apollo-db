@@ -110,12 +110,16 @@ END
 SELECT	Username, CustId, PositionTaking,
 		SUM(TurnOver) as TurnOver,
 		SUM(ActualTO) as ActualTO,
+		SUM(AWinLost) as  WinLost, 
+		SUM(AComm) as PlayerComm,
+		SUM(ATotal) as MemTotal,
 		SUM(AWinLost) as  AWinLost, 
 		SUM(AComm) as AComm,
 		SUM(ATotal) as ATotal,
 		SUM(UplineTotal) as UplineTotal
 FROM	#WinLossMember 
 GROUP BY Username, CustId, PositionTaking
+ORDER BY Username
  
 DROP TABLE #WinLossMember
 

@@ -4,7 +4,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[Age_BetList_AgentDetail_Winloss]
+ALTER PROCEDURE [dbo].[Age_BetList_AgentDetail_Winloss]
 	@TransId BIGINT,
 	@LoggedId INT,
 	@FromDate SMALLDATETIME,
@@ -14,7 +14,7 @@ CREATE PROCEDURE [dbo].[Age_BetList_AgentDetail_Winloss]
 
 /*
 Created: 20130301@Sophia
-Task : Detail Betlist for Transdate
+Task : Detail Betlist for WinlostDate
 DB:  SVRAGE.RepDB
 Original:  
 
@@ -25,7 +25,7 @@ AS
 SET NOCOUNT ON
 
 
-DECLARE @BetListDetail TABLE(
+CREATE TABLE  #BetListDetail (
 		TransID BIGINT,
 		AgentID INT,		
 		--Username VARCHAR(50),
@@ -35,9 +35,9 @@ DECLARE @BetListDetail TABLE(
 		AWinlost MONEY,
 		AComm MONEY)
 
-DECLARE @AgentIdList TABLE ( AgentId INT)
+CREATE TABLE  #AgentIdList ( AgentId INT)
 
-INSERT INTO @AgentIdList 
+INSERT INTO #AgentIdList 
 SELECT	AgentId 
 FROM	BetTrans_Agent WITH (NOLOCK)
 WHERE	TransID = @TransId
@@ -53,7 +53,7 @@ WHERE	AgentID = @LoggedId
 IF @Todate > @MoveBetsDay
 BEGIN 
 	
-	INSERT INTO @BetListDetail
+	INSERT INTO #BetListDetail
 	SELECT	DISTINCT
 			BA.TransID,
 			BA.AgentID,
@@ -67,11 +67,11 @@ BEGIN
 	INNER JOIN	Bettrans B WITH (NOLOCK) 
 			ON	B.TransID= BA.TransID 
 	LEFT JOIN	AgentInfo C WITH (NOLOCK)
-			ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM @AgentIdList)	 
+			ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM #AgentIdList)	 
 	LEFT JOIN BetTrans_Agent D WITH (NOLOCK)
 			ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
 	WHERE	BA.TransId = @TransId 
-			AND BA.TransDate BETWEEN @fromdate AND @todate 
+			AND BA.WinlostDate BETWEEN @fromdate AND @todate 
 			AND (BA.bettype < 31 
 				OR BA.bettype BETWEEN 121 AND 999 
 				OR BA.bettype BETWEEN 1301 AND 1334   
@@ -82,7 +82,7 @@ BEGIN
 	-----Super View add 1 more row of Super
 	IF @AgentLevel = 1 
 	BEGIN 
-		INSERT INTO @BetListDetail
+		INSERT INTO #BetListDetail
 			SELECT	DISTINCT
 					B.TransID,
 					@LoggedId as AgentID,
@@ -96,11 +96,11 @@ BEGIN
 			INNER JOIN	Bettrans B WITH (NOLOCK) 
 					ON	B.TransID= BA.TransID 
 			LEFT JOIN	AgentInfo C WITH (NOLOCK)
-					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM @AgentIdList)	 
+					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM #AgentIdList)	 
 			LEFT JOIN BetTrans_Agent D WITH (NOLOCK)
 					ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
 			WHERE	BA.TransId = @TransId 
-					AND BA.TransDate BETWEEN @fromdate AND @todate 
+					AND BA.WinlostDate BETWEEN @fromdate AND @todate 
 					AND (BA.bettype < 31 
 						OR BA.bettype BETWEEN 121 AND 999 
 						OR BA.bettype BETWEEN 1301 AND 1334   
@@ -113,7 +113,7 @@ END
 
 IF @Fromdate <= @MoveBetsDay
 BEGIN
-			INSERT INTO @BetListDetail
+			INSERT INTO #BetListDetail
 			SELECT	DISTINCT
 					BA.TransID,
 					BA.AgentID,
@@ -127,11 +127,11 @@ BEGIN
 			INNER JOIN	Bettrans14 B WITH (NOLOCK) 
 					ON	B.TransID= BA.TransID 
 			LEFT JOIN	AgentInfo C WITH (NOLOCK)
-					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM @AgentIdList)	 
+					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM #AgentIdList)	 
 			LEFT JOIN BetTrans14_Agent D WITH (NOLOCK)
 					ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
 			WHERE	BA.TransId = @TransId 
-					AND BA.TransDate BETWEEN @fromdate AND @todate 
+					AND BA.WinlostDate BETWEEN @fromdate AND @todate 
 					AND (BA.bettype < 31 
 						OR BA.bettype BETWEEN 121 AND 999 
 						OR BA.bettype BETWEEN 1301 AND 1334  
@@ -141,7 +141,7 @@ BEGIN
 	-----Super View add 1 more row of Super
 	IF @AgentLevel = 1 
 	BEGIN 
-		INSERT INTO @BetListDetail
+		INSERT INTO #BetListDetail
 			SELECT	DISTINCT 
 					B.TransID,
 					@LoggedId as AgentID,
@@ -155,11 +155,11 @@ BEGIN
 			INNER JOIN	Bettrans14 B WITH (NOLOCK) 
 					ON	B.TransID= BA.TransID 
 			LEFT JOIN	AgentInfo C WITH (NOLOCK)
-					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM @AgentIdList)	 
+					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM #AgentIdList)	 
 			LEFT JOIN BetTrans14_Agent D WITH (NOLOCK)
 					ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
 			WHERE	BA.TransId = @TransId 
-					AND BA.TransDate BETWEEN @fromdate AND @todate 
+					AND BA.WinlostDate BETWEEN @fromdate AND @todate 
 					AND (BA.bettype < 31 
 						OR BA.bettype BETWEEN 121 AND 999 
 						OR BA.bettype BETWEEN 1301 AND 1334   
@@ -169,12 +169,17 @@ BEGIN
 	
 END		
  	
-SELECT	B.* , A.Username , A.Agentlevel
-FROM	@BetListDetail B
+SELECT	B.* , A.Username, A.AgentLevel
+FROM	#BetListDetail B
 INNER JOIN AgentInfo A
 	ON	 A.AgentId = B.AgentId
 ORDER BY B.TransID, A.AgentLevel
 
+
+DROP TABLE #BetListDetail
+DROP TABLE #AgentIdList
 	
 GO
 GRANT EXECUTE ON [dbo].[Age_BetList_AgentDetail_Winloss] TO [aplweb]
+GO 
+GRANT VIEW DEFINITION ON [dbo].[Age_BetList_AgentDetail_Winloss] TO vnteam
