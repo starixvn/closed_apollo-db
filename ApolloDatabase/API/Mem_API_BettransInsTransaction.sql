@@ -5,7 +5,7 @@ ALTER PROCEDURE [dbo].[Mem_API_BettransInsTransaction]
 	@amount money,	
 	@ip	nvarchar(15)='',
 	@ErrCode int = 0 OUTPUT,
-	@ErrMsg nvarchar(200) = '' OUTPUT,		
+	@ErrMsg nvarchar(2000) = '' OUTPUT,		
 	@transid bigint = 0 OUTPUT,		
 	@beforebalance money = 0 OUTPUT,
 	@balance money = 0 OUTPUT	
@@ -91,8 +91,8 @@ BEGIN
 END
 
 select @transdesc = @username + ' - ' +
-					case @bettype when @DDEP then 'Trasnfer In'
-									when @DWIT then 'Trasnfer Out'									
+					case @bettype when @DDEP then 'Transfer In'
+									when @DWIT then 'Transfer Out'									
 									else '' end					
 select 
 	@winlost = case when @bettype = @DDEP then @amount else 0 end,
@@ -145,18 +145,22 @@ BEGIN
 	EXEC Dot_BalanceUpdDebit @custid = @CustID, @Balance = @Cust_Balance_ABS
 END 
 
+declare @LogData varchar(300)
 
 select @transdate = current_timestamp
 
-INSERT INTO bettrans 
-	(custid, username, refno, transdate, matchid, bettype, transdesc,winlost, actual_stake, winlostdate, 
-	 creator,currency,actualrate, currencyName, ruben, status, statusID,ip, betid)
-VALUES 
-	(@CustID, @username, @RefNo, @transdate, 0, @bettype, @transdesc,@winlost, @actual_stake, convert(nvarchar(10), current_timestamp, 120), 
-	 @CustID, @Currencyid,@actualrate, @currencyName, 1, 'Completed', 131,@ip, @SGS_transid)
+BEGIN TRY
+	INSERT INTO bettrans 
+		(custid, username, refno, transdate, matchid, bettype, transdesc,winlost, actual_stake, winlostdate, 
+		 creator,currency,actualrate, currencyName, ruben, status, statusID,ip, betid, balance)
+	VALUES 
+		(@CustID, @username, @RefNo, @transdate, 0, @bettype, @transdesc,@winlost, @actual_stake, convert(nvarchar(10), current_timestamp, 120), 
+		 @CustID, @Currencyid,@actualrate, @currencyName, 1, 'Completed', 131,@ip, @SGS_transid,@beforebalance)
 
-if @@ERROR <> 0
-BEGIN
+	SELECT @TransID = SCOPE_IDENTITY()
+
+END TRY
+BEGIN CATCH
 	--Manually rollback
 	DELETE FROM bettrans 
 	where custid = @custid 
@@ -164,17 +168,36 @@ BEGIN
 		and matchid = 0
 		and bettype = @bettype
 	
-	SELECT @ErrMsg = 'Insert transaction failed.', @ErrCode = 105	
+	SELECT @ErrMsg = 'Insert transaction failed (' + CAST (ERROR_MESSAGE() AS nvarchar(1000)) + ' )'
+			, @ErrCode = 105	
 
 	--Rollback BalanceDebit 
 	IF @Cust_balance < 0 
 	BEGIN 
 		EXEC Dot_BalanceUpdCredit @custid = @CustID, @Balance = @Cust_Balance_ABS
 	END 
-	RETURN
-END
 
-SELECT @TransID = SCOPE_IDENTITY()
+	-- reset param
+	set @balance = @beforebalance
+
+	--keep track fail record with rejected status
+	INSERT INTO bettrans 
+	(custid, username, refno, transdate, matchid, bettype, transdesc,winlost, actual_stake, winlostdate, 
+	 creator,currency,actualrate, currencyName, ruben, status, statusID,ip, betid, balance)
+	VALUES 
+		(@CustID, @username, @RefNo, @transdate, 0, @bettype, @transdesc, @amount, @amount, convert(nvarchar(10), current_timestamp, 120), 
+		 @CustID, @Currencyid,@actualrate, @currencyName, 1, 'Reject', 101,@ip, @SGS_transid, @beforebalance)
+
+	SELECT @TransID = SCOPE_IDENTITY()
+
+	--write log
+	Select @LogData = 
+			'Insert trans = ' + convert(varchar(30), @TransID) + ', custid = ' + convert(varchar(20), @custid) + ', bettype = ' + convert(varchar(20), @bettype) + ', amount = ' + convert(varchar(20), @amount) + ', type = ' + convert(varchar(10), @type) +
+			  '.Error: ' + CAST (ERROR_MESSAGE() AS nvarchar(200))
+	EXEC dbo.WriteLog_UserLog_T @UserID = @custid, @Doing = @LogData
+
+	RETURN
+END CATCH
 
 IF @Cust_Balance > 0  --Update BalanceCredit 
 BEGIN
@@ -184,10 +207,8 @@ END
 ----ADD DUMMY TRANSACTION (no need now)
 ---------------------------------------------------------------------------------------------------
 
-declare @LogData varchar(300)
-
 Select @LogData = 
-			'Insert trans custid = ' + convert(varchar(20), @custid) + ', bettype = ' + convert(varchar(20), @bettype) + ', amount = ' + convert(varchar(20), @amount)
+			'Insert trans = ' + convert(varchar(30), @TransID) + ', custid = ' + convert(varchar(20), @custid) + ', bettype = ' + convert(varchar(20), @bettype) + ', amount = ' + convert(varchar(20), @amount) + ', type = ' + convert(varchar(10), @type)
 
 EXEC dbo.WriteLog_UserLog_T @UserID = @custid, @Doing = @LogData
 
