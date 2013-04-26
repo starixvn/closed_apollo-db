@@ -27,8 +27,8 @@ SELECT
 	AgentId, 
 	Username,
 	ParentId,
-	CASE WHEN (EXISTS (SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE ParentId = AgentId)) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS HasAgentDownline
-FROM AgentInfo WITH (NOLOCK) 
+	CASE WHEN (EXISTS (SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE ParentId = a.AgentId)) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS HasAgentDownline
+FROM AgentInfo a WITH (NOLOCK) 
 WHERE 
 	ParentId = @AgentId
 ORDER BY Username

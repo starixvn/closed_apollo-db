@@ -10,7 +10,7 @@ ALTER PROCEDURE [dbo].[Age_Agent_GetAllInfo]
 	@ActorAgentId INT,
 	@AgentId INT = -1,
 	@Username NVARCHAR(50) = '',
-	@ExcludeActor BIT = 1
+	@ExcludeActor BIT = 0
 AS
 
 /**
