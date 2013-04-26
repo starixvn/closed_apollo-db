@@ -1,12 +1,12 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAgentDownLinePath]    Script Date: 4/25/2013 10:15:38 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAgentDownLinePath]    Script Date: 4/26/2013 10:44:30 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-ALTER PROCEDURE [dbo].[Age_Customer_GetAgentDownlinePath]
+ALTER PROCEDURE [dbo].[Age_Agent_GetAgentDownlinePath]
 	@ParentId INT,
 	@AgentId INT
 AS
@@ -14,13 +14,13 @@ AS
 /**
  * Created by	: Quinn
  * Date			: 20130314
- * Task			: Retrieve agent path between current agent login and agent which is searched
- * DB			: APL.DB05
+ * Task			: Retrieve list agent in relationship between parent agent and current agent
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	•
  * Parameters:
- *	@ParentId: agent id of user login
- *	@AgentId: agent ID of agent is searched 
+ *	@ParentId: agent Id from
+ *	@AgentId: agent ID to
  */
 
 SET NOCOUNT ON

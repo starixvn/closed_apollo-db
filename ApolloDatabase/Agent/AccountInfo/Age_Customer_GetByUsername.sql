@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetByUsername]    Script Date: 4/25/2013 10:19:51 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetByUsername]    Script Date: 4/26/2013 10:53:11 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -15,7 +15,7 @@ AS
  * Created by	: Quinn
  * Date			: 20130314
  * Task			: get Customer by username
- * DB			: APL.DB05
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	•
  * Parameters:
