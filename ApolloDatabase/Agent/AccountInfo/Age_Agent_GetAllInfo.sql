@@ -16,7 +16,7 @@ AS
  * Created by	: Quinn
  * Date			: 20130307
  * Task			: Get Agent Info by Id or Username
- * DB			: APL.DB05
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	•
  * Parameters:

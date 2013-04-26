@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAllInfo]    Script Date: 4/25/2013 10:00:40 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAllInfo]    Script Date: 4/26/2013 10:50:15 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -16,7 +16,7 @@ AS
  * Created by	: Quinn
  * Date			: 20130307
  * Task			: Get Customer Info by Id or Username
- * DB			: APL.DB05
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	•
  * Parameters:
@@ -39,8 +39,7 @@ BEGIN
 		b.Username AS ParentName,
 		a.UGroup
 	FROM CustInfo a WITH (NOLOCK) 
-		INNER JOIN 
-		AgentInfo b WITH (NOLOCK) ON a.AgentId = b.AgentId
+		INNER JOIN AgentInfo b WITH (NOLOCK) ON a.AgentId = b.AgentId
 	WHERE 
 		(a.CustId = @CustId OR a.Username = @Username)
 		AND b.AgentHId.IsDescendantOf(@agentHId) = 1

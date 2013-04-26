@@ -15,7 +15,7 @@ AS
  * Created by	: Quinn
  * Date			: 20130314
  * Task			: get Agent by username
- * DB			: APL.DB05
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	•
  * Parameters:
