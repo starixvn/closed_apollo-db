@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_TotalBets_6]    Script Date: 4/2/2013 9:01:41 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_TotalBets_6]    Script Date: 4/26/2013 11:20:14 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -13,7 +13,7 @@ AS
  * Created by	: Terry.Nguyen
  * Date			: 20130228
  * Task			: Get Total Bets(Total Goal Bettype) data for Agent
- * DB			: APL.TransDB
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	• 20132801@Terry.Nguyen	: Implement
  * Parameters:
