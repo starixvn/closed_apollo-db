@@ -28,7 +28,7 @@ SELECT
 	l.IP
 FROM Settlement l WITH(NOLOCK)	
 	LEFT JOIN LogAction la WITH (NOLOCK) ON l.ActionID = la.ActionID
-	LEFT JOIN SVRAGE.CustDB.dbo.AdminInfo o WITH(NOLOCK) ON o.AdminId = l.userid
+	LEFT JOIN SVRCUST.CustDB.dbo.AdminInfo o WITH(NOLOCK) ON o.AdminId = l.userid
 WHERE l.matchid = @matchid
 ORDER BY logdate ASC
 GRANT EXECUTE ON [dbo].[Acc_UserLog_Settle_MatchSelByID] TO [aplweb]
