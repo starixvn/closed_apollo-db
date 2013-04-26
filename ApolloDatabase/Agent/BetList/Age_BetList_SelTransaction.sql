@@ -1546,7 +1546,7 @@ END
 
 SELECT DISTINCT TOP 1500 * , @LoggedAgentLevel as AgentLevel
 FROM #Betlist 
-ORDER BY TransID
+ORDER BY TransID DESC
 
 
 DROP TABLE #Betlist

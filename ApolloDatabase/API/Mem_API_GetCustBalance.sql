@@ -1,10 +1,9 @@
 ALTER PROCEDURE [dbo].[Mem_API_GetCustBalance]  	
 	@custid int,	
 	@ErrCode int = 0 OUTPUT,
-	@ErrMsg nvarchar(200) = '' OUTPUT,				
+	@ErrMsg nvarchar(2000) = '' OUTPUT,				
 	@osbalance money = 0 OUTPUT,
-	@balance money = 0 OUTPUT,
-	@currency varchar(5) = 0 OUTPUT
+	@balance money = 0 OUTPUT
 AS
 /*
 Creator : Dan
@@ -23,29 +22,18 @@ Param's Explanation:
 • @ErrMsg: Error description.
 */
 
-Select @currency = e.currency
-from SVRCUST.CustDB.dbo.custinfo as ci with (NOLOCK) 
-LEFT JOIN exchange as e with (NOLOCK) on ci.currency = e.exchangeid
-where ci.custid = @custid
-
-if @@ROWCOUNT=0
+if NOT EXISTS(
+		Select 1
+		from SVRCUST.CustDB.dbo.custinfo as ci with (NOLOCK) 
+		where ci.custid = @custid)
 BEGIN
 	Select @ErrMsg = 'Invalid Cust ID.', @ErrCode = 101
 	return
 END
 
-DECLARE @Credit MONEY, @Debit MONEY
-SELECT @Credit = SUM(Balance)
-FROM BalanceCredit credit WITH (NOLOCK) 
-WHERE custid=@custid
-	
-SELECT @Debit = SUM(Balance)
-FROM BalanceDebit debit WITH (NOLOCK) 
-WHERE custid=@custid	
-	
-SET @Balance = ISNULL(@Credit,0) -  ISNULL(@Debit,0)
-
-SELECT @osbalance = ISNULL(SUM(winlost-actual_stake+playercomm),0) 
+SELECT  
+	@Balance = ISNULL(SUM(winlost-actual_stake+playercomm),0),
+	@osbalance = ISNULL(SUM(case when bettype < 19000  and ruben=0 then actual_stake else 0 end),0) 
 FROM bettrans WITH (NOLOCK) 
-WHERE custid = @custid and Ruben=0
+WHERE custid = @custid 
 

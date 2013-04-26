@@ -18,7 +18,7 @@ BEGIN
 	declare @BalanceUpDay smalldatetime, @MoveBetsDay smalldatetime
 	SELECT TOP 1 @BalanceUpDay = winlostdate
 	FROM Bettrans WITH(NOLOCK)
-	WHERE bettype = 20000 and matchid = 0 and custid = 3
+	WHERE bettype = 20000 and matchid = 0 and custid = 0
 	
 	SELECT @MoveBetsDay = MAX(eventdate)  
 	FROM match14 WITH(NOLOCK)  

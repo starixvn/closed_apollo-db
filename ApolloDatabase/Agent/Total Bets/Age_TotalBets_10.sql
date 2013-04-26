@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_TotalBets_10]    Script Date: 4/2/2013 8:42:07 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_TotalBets_10]    Script Date: 4/26/2013 11:16:00 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -13,7 +13,7 @@ AS
  * Created by	: Quinn
  * Date			: 20130228
  * Task			: Retrieve Total Bet values for bettype 10
- * DB			: APL.REPDB
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	•
  * Parameters:
@@ -26,7 +26,7 @@ SET NOCOUNT ON
 SELECT
 	m.leagueid, 
 	m.matchcode, 
-	m.orid,
+	m.orid AS MatchId,
 	m.teamid,
 	SUM(bta.APositionTaking * bta.Stake) AS balance,
 	SUM(1) AS BetCount,
