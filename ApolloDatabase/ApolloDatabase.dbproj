@@ -209,15 +209,6 @@
     <NotInBuild Include="Agent\AccountInfo\Age_Customer_GetAllInfo.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\AccountInfo\Age_Customer_GetAgentDownline.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\AccountInfo\Age_Customer_GetAgentDownLinePath.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\AccountInfo\Age_Customer_GetMemberDownLine.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="CSD\Settlement\Admin_Match_Update.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1071,6 +1062,15 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="CSD\Write Log\Age_LogRunSp_Insert.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\AccountInfo\Age_Agent_GetAgentDownline.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\AccountInfo\Age_Agent_GetAgentDownlinePath.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\AccountInfo\Age_Agent_GetMemberDownline.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
