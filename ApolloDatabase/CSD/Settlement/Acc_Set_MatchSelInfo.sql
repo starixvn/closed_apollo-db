@@ -97,7 +97,7 @@ WHERE m.eventdate BETWEEN @FromDate AND @ToDate
 			(@isRefund =1 AND mr.betstatus like 'Refund%') or
 			(@isRefund =0 AND ISNULL(mr.betstatus,'') not like 'Refund%') 
 		)	  
-	AND (@UncalOnly = 0 or (ISNULL(mr.calculate,0) = 0 AND mr.eventstatus <> 'Completed'))  
+	AND (@UncalOnly = 0 or ISNULL(mr.calculate,0) = 0)  --AND mr.eventstatus <> 'Completed')			
 	AND (@UncalMultiOnly = 0 or ISNULL(mr.multiple,0) = 0)    
 	AND CASE WHEN @UncalMultiOnly = 0 THEN 1   
 			WHEN @UncalMultiOnly = 1 THEN mr.hthomescore*mr.htawayscore*mr.finalhomescore*mr.finalawayscore  
