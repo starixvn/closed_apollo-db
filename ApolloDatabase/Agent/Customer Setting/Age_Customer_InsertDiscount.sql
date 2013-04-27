@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_InsertDiscount]    Script Date: 3/29/2013 10:43:25 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_InsertDiscount]    Script Date: 4/17/2013 2:54:24 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -11,6 +11,8 @@ ALTER PROCEDURE [dbo].[Age_Customer_InsertDiscount]
 	@AgentId	INT,
 	@UGroup		VARCHAR(3),
 	@Discount	VARCHAR(MAX)	= '',
+	@Creator	INT				= NULL,
+	@LogDate	DATETIME		= NULL,
 	@ErrCode	INT				= 0			OUTPUT,
 	@ErrMsg		NVARCHAR(1000)	= ''		OUTPUT 		
 AS
@@ -21,7 +23,7 @@ AS
  * Task			: Insert customer discount
  * DB			: APL.CustDB
  * Revisions	:
- *	• 
+ *	•	20130417@Edward	: Write log and add @Creator, @LogDate 
  * Parameters:
  *	• @Discount : 		
 		<ROOT>
@@ -35,6 +37,16 @@ BEGIN
 	
 	SET NOCOUNT ON
 	
+	-- For write log
+    DECLARE @startRun			DATETIME  
+			,@endRun			DATETIME  
+			,@duration			INT
+			,@logSPData			VARCHAR(5000)
+			,@logSPDataOld		VARCHAR(5000)			
+			,@xml				XML			
+
+	SET @startRun = GETDATE()
+
 	DECLARE @DiscountTable TABLE(
 		SportType SMALLINT,
 		BetType SMALLINT,
@@ -154,5 +166,31 @@ BEGIN
 		BetType,
 		Discount
 	FROM @DiscountTable
-	  	
+	
+	 
+	SET @xml = (
+		SELECT SportType	AS '@s' 
+				,BetType	AS '@b'
+				,Discount	AS '@d'				
+		FROM @DiscountTable
+		FOR XML PATH('z'), ROOT('r')
+	)
+
+	SET @logSPData = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
+
+	SET @endRun		= GETDATE()  
+	SET @duration	= DATEDIFF(millisecond, @startRun, @endRun) 
+
+	IF @LogDate IS NULL
+		SET @LogDate = GETDATE()	
+
+	EXEC LogDB.dbo.Age_LogRunSp_Insert
+		@UserId			= @Creator,
+		@SPName			= 'Age_Customer_InsertDiscount',
+		@LogDate		= @LogDate,
+		@ObjectId		= @CustId,
+		@ObjectTypeId	= 2,			--Object type : Customer						
+		@Duration		= @Duration,
+		@Data			= @logSPData,
+		@OldData		= @logSPDataOld  	
 END

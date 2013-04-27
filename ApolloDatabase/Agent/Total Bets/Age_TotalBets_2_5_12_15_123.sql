@@ -1,6 +1,6 @@
-﻿USE [DB05]
+﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_TotalBets_2_5_12_15_123]    Script Date: 3/5/2013 11:07:53 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_TotalBets_2_5_12_15_123]    Script Date: 4/26/2013 11:19:08 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -13,7 +13,7 @@ AS
  * Created by	: Quinn
  * Date			: 20130228
  * Task			: Retrieve Total Bet values for bettype 2, 5, 12, 15, 123
- * DB			: APL.DB05
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	•
  * Parameters:
@@ -22,6 +22,7 @@ AS
  */
 
 SET NOCOUNT ON
+
 SELECT
 	m.ShowTime, 
 	m.LeagueId,
@@ -32,38 +33,40 @@ SELECT
 	m.MatchId,
 	m.HomeId,
 	m.AwayId,
-	SUM((CASE WHEN bt.BetType=2 AND betteam = 'h' THEN (bta.APositionTaking)*bta.Stake ELSE 0 END)*(CASE WHEN ABS(bt.Odds) <1 THEN 1 ELSE ABS(bt.Odds) END)) AS home_odds_OE,
-	SUM((CASE WHEN bt.BetType=2 AND betteam = 'a' THEN (bta.APositionTaking)*bta.Stake ELSE 0 END)*(CASE WHEN ABS(bt.Odds) <1 THEN 1 ELSE ABS(bt.Odds) END)) AS away_odds_OE,
-	
-	SUM((CASE WHEN bt.BetType=12 AND betteam = 'h' THEN (bta.APositionTaking)*bta.Stake ELSE 0 END)*(CASE WHEN ABS(bt.Odds) <1 THEN 1 ELSE ABS(bt.Odds) END)) AS home_odds_OE_1st,
-	SUM((CASE WHEN bt.BetType=12 AND betteam = 'a' THEN (bta.APositionTaking)*bta.Stake ELSE 0 END)*(CASE WHEN ABS(bt.Odds) <1 THEN 1 ELSE ABS(bt.Odds) END)) AS away_odds_OE_1st,
-	
-	SUM(CASE WHEN bt.BetType=5 AND betteam = '1' THEN (bta.APositionTaking)*bta.Stake ELSE 0 END) AS odds_1,
-	SUM(CASE WHEN bt.BetType=5 AND betteam = 'x' THEN (bta.APositionTaking)*bta.Stake ELSE 0 END) AS odds_x,
-	SUM(CASE WHEN bt.BetType=5 AND betteam = '2' THEN (bta.APositionTaking)*bta.Stake ELSE 0 END) AS odds_2,
 
-	SUM(CASE WHEN bt.BetType=15 AND betteam = '1' THEN (bta.APositionTaking)*bta.Stake ELSE 0 END) AS odds_1_1st,
-	SUM(CASE WHEN bt.BetType=15 AND betteam = 'x' THEN (bta.APositionTaking)*bta.Stake ELSE 0 END) AS odds_x_1st,
-	SUM(CASE WHEN bt.BetType=15 AND betteam = '2' THEN (bta.APositionTaking)*bta.Stake ELSE 0 END) AS odds_2_1st,
+	SUM((CASE WHEN bt.BetType = 2 AND betteam = 'h' THEN bta.APositionTaking * bta.Stake ELSE 0 END) * (CASE WHEN ABS(bt.Odds) < 1 THEN 1 ELSE ABS(bt.Odds) END)) AS HomeOddsOE,
+	SUM((CASE WHEN bt.BetType = 2 AND betteam = 'a' THEN bta.APositionTaking * bta.Stake ELSE 0 END) * (CASE WHEN ABS(bt.Odds) < 1 THEN 1 ELSE ABS(bt.Odds) END)) AS AwayOddsOE,
 	
-	SUM(CASE WHEN bt.BetType=123 AND betteam = 'h' THEN (bta.APositionTaking)*bta.Stake ELSE 0 END) AS home_odds_DND,
-	SUM(CASE WHEN bt.BetType=123 AND betteam = 'a' THEN (bta.APositionTaking)*bta.Stake ELSE 0 END) AS away_odds_DND,
+	SUM((CASE WHEN bt.BetType = 12 AND betteam = 'h' THEN bta.APositionTaking * bta.Stake ELSE 0 END) * (CASE WHEN ABS(bt.Odds) < 1 THEN 1 ELSE ABS(bt.Odds) END)) AS HomeOddsOE1st,
+	SUM((CASE WHEN bt.BetType = 12 AND betteam = 'a' THEN bta.APositionTaking * bta.Stake ELSE 0 END) * (CASE WHEN ABS(bt.Odds) < 1 THEN 1 ELSE ABS(bt.Odds) END)) AS AwayOddsOE1st,
+	
+	SUM(CASE WHEN bt.BetType = 5 AND betteam = '1' THEN bta.APositionTaking * bta.Stake ELSE 0 END) AS Odds1,
+	SUM(CASE WHEN bt.BetType = 5 AND betteam = 'x' THEN bta.APositionTaking * bta.Stake ELSE 0 END) AS OddsX,
+	SUM(CASE WHEN bt.BetType = 5 AND betteam = '2' THEN bta.APositionTaking * bta.Stake ELSE 0 END) AS Odds2,
 
-	SUM(CASE WHEN bt.BetType=2 THEN 1 ELSE 0 END) AS BetCount_OE,
-	SUM(CASE WHEN bt.BetType=12 THEN 1 ELSE 0 END) AS BetCount_OE_1st,
-	SUM(CASE WHEN bt.BetType=5 THEN 1 ELSE 0 END) AS BetCount_1x2,
-	SUM(CASE WHEN bt.BetType=15 THEN 1 ELSE 0 END) AS BetCount_1x2_1st,
-	SUM(CASE WHEN bt.BetType=123 THEN 1 ELSE 0 END) AS BetCount_DND,
-	ISNULL(m.IsNeutral, CONVERT(BIT,0)) AS IsNeutral
+	SUM(CASE WHEN bt.BetType = 15 AND betteam = '1' THEN bta.APositionTaking * bta.Stake ELSE 0 END) AS Odds11st,
+	SUM(CASE WHEN bt.BetType = 15 AND betteam = 'x' THEN bta.APositionTaking * bta.Stake ELSE 0 END) AS OddsX1st,
+	SUM(CASE WHEN bt.BetType = 15 AND betteam = '2' THEN bta.APositionTaking * bta.Stake ELSE 0 END) AS Odds21st,
+	
+	SUM(CASE WHEN bt.BetType = 123 AND betteam = 'h' THEN bta.APositionTaking * bta.Stake ELSE 0 END) AS HomeOddsDND,
+	SUM(CASE WHEN bt.BetType = 123 AND betteam = 'a' THEN bta.APositionTaking * bta.Stake ELSE 0 END) AS AwayOddsDND,
+
+	SUM(CASE WHEN bt.BetType = 2 THEN 1 ELSE 0 END) AS BetCountOE,
+	SUM(CASE WHEN bt.BetType = 12 THEN 1 ELSE 0 END) AS BetCountOE1st,
+	SUM(CASE WHEN bt.BetType = 5 THEN 1 ELSE 0 END) AS BetCount1x2,
+	SUM(CASE WHEN bt.BetType = 15 THEN 1 ELSE 0 END) AS BetCount1x21st,
+	SUM(CASE WHEN bt.BetType = 123 THEN 1 ELSE 0 END) AS BetCountDND,
+
+	ISNULL(m.IsNeutral, CONVERT(BIT, 0)) AS IsNeutral
 FROM
 	BetTrans_Agent AS bta WITH (NOLOCK)
-	INNER JOIN BetTrans AS bt  WITH (NOLOCK) ON bta.TransId = bt.TransId
+	INNER JOIN BetTrans AS bt WITH (NOLOCK) ON bta.TransId = bt.TransId
 	INNER JOIN Match AS m  WITH (NOLOCK) ON m.MatchId = bt.MatchId
-WHERE  	
+WHERE
 	bta.AgentId = @AgentId 
-	AND m.EventStatus='running'
+	AND m.EventStatus = 'running'
 	AND bt.BetType IN (2, 12, 5, 15, 123)
-	AND bt.StatusId IN (0,1) -- status is waiting or running
+	AND bt.StatusId IN (0, 1) -- status is waiting or running
 	AND bt.Ruben = 0	-- match not yet settle
 GROUP BY
 	bt.LiveIndicator, 
@@ -77,5 +80,5 @@ GROUP BY
 	m.ShowTime,
 	m.IsNeutral
 ORDER BY
-	bt.LiveIndicator DESC, m.MatchCode
-
+	bt.LiveIndicator DESC, 
+	m.MatchCode

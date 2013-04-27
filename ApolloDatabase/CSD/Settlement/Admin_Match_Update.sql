@@ -27,149 +27,127 @@ AS
 */
 BEGIN
 	SET @betstatus = ISNULL(@betstatus, N'')
-	
-	IF @Command = 'Admin_Settlement_1-UNDO'
-	BEGIN
-		declare @posUndo int
 
-		UPDATE dbo.match WITH(ROWLOCK,UPDLOCK)
-		SET eventstatus_APL = 'running', finalhomescore_APL = NULL, finalawayscore_APL = NULL, hthomescore_APL = NULL, htawayscore_APL = NULL, betstatus_APL = N'', GoalRecord_APL = ''
-			, changetime_APL = GETDATE(), settleTime_APL = GETDATE()			
-		WHERE matchid = @MatchID-- and eventstatus_APL = 'completed'
-	END
-	IF @Command = 'Admin_Settlement_1-CAL'
+	IF NOT EXISTS (SELECT 1 FROM match_remark_ex WITH (NOLOCK) WHERE matchid = @matchid)
+	INSERT INTO match_remark_ex (matchid) 
+			VALUES (@matchid)
+
+	-- for web to change status hedge match to complete (ignore hedge match)
+	IF @Command = 'Hedge-Update'
 	BEGIN
-		UPDATE dbo.match with (ROWLOCK,UPDLOCK)
-		SET
-			finalhomescore_APL = @FTHome, finalawayscore_APL = @FTAway,
-			hthomescore_APL = @HTHome, htawayscore_APL = @HTAway,
-			betstatus_APL = CASE WHEN @action = 'CAL-FT' AND CHARINDEX('Refund HT;',betstatus_APL)>0 THEN 'Refund HT;' + ISNULL(@betstatus,'') ELSE @betstatus END,
-			GoalRecord_APL = CASE WHEN @GoalRecord IS NULL OR @GoalRecord = '' THEN GoalRecord_APL ELSE @GoalRecord END,
-			eventstatus_APL = CASE	WHEN @action = 'CAL' THEN N'completed'
-								WHEN @action = 'CAL-HT' AND @FTDone = 1 THEN N'completed'
-								WHEN @action = 'CAL-FT' AND @HTDone = 1 THEN N'completed'
-							ELSE eventstatus_APL END,
-			changetime_APL = GETDATE(),
-			settleTime_APL = CASE 
-							WHEN @action = 'CAL' THEN GETDATE()
-							WHEN @action = 'CAL-FT' THEN GETDATE()
-							ELSE settleTime_APL END	
+		UPDATE dbo.match_remark_ex with (ROWLOCK,UPDLOCK)
+		SET			
+			eventstatus = N'completed',								
+			changetime = GETDATE(),
+			settleTime = GETDATE()							
 		WHERE matchid = @MatchID
 	END
-	IF @Command = 'Admin_Settlement_Refund_All'
+	ELSE
+	IF @Command = 'Admin_Settlement_1-UNDO'
+	BEGIN		
+		UPDATE dbo.match_remark_ex WITH(ROWLOCK,UPDLOCK)
+		SET eventstatus = 'running', finalhomescore = NULL, finalawayscore = NULL, hthomescore = NULL, htawayscore = NULL, betstatus = N'', GoalRecord = ''
+			, changetime = GETDATE(), settleTime = GETDATE()			
+		WHERE matchid = @MatchID-- and eventstatus = 'completed'
+
+		-- delete disabled actions before the undo action
+		DELETE [dbo].[match_log] with (ROWLOCK,UPDLOCK)
+		WHERE matchid = @MatchID AND (Disabled=1 or ActionId=0)
+	END
+	ELSE IF @Command = 'Admin_Settlement_1-CAL'
 	BEGIN
-		UPDATE match WITH(ROWLOCK,UPDLOCK) 
-		SET eventstatus_APL='Completed', --ruben=1, 
-			finalhomescore_APL=0, finalawayscore_APL=0, hthomescore_APL=0, htawayscore_APL=0,betstatus_APL='Refund', GoalRecord_APL =''
-			, changetime_APL = GETDATE(), settleTime_APL = GETDATE()
+		UPDATE dbo.match_remark_ex with (ROWLOCK,UPDLOCK)
+		SET
+			finalhomescore = @FTHome, finalawayscore = @FTAway,
+			hthomescore = @HTHome, htawayscore = @HTAway,
+			betstatus = CASE WHEN @action = 'CAL-FT' AND CHARINDEX('Refund HT;',betstatus)>0 THEN 'Refund HT;' + ISNULL(@betstatus,'') ELSE @betstatus END,
+			GoalRecord = CASE WHEN @GoalRecord IS NULL OR @GoalRecord = '' THEN GoalRecord ELSE @GoalRecord END,
+			eventstatus = CASE	WHEN @action = 'CAL' THEN N'completed'
+								WHEN @action = 'CAL-HT' AND @FTDone = 1 THEN N'completed'
+								WHEN @action = 'CAL-FT' AND @HTDone = 1 THEN N'completed'
+							ELSE eventstatus END,
+			changetime = GETDATE(),
+			settleTime = CASE 
+							WHEN @action = 'CAL' THEN GETDATE()
+							WHEN @action = 'CAL-FT' THEN GETDATE()
+							ELSE settleTime END	
+		WHERE matchid = @MatchID
+	END
+	ELSE IF @Command = 'Admin_Settlement_Refund_All'
+	BEGIN				
+		UPDATE match_remark_ex WITH(ROWLOCK,UPDLOCK) 
+		SET eventstatus='Completed', ruben=1, finalhomescore=0, finalawayscore=0, hthomescore=0, htawayscore=0,
+			--betstatus= 'Refund' + CASE WHEN CHARINDEX('FL:',ISNULL(betstatus,'')) = 0 THEN '' ELSE ';' + SUBSTRING(ISNULL(betstatus,''),CHARINDEX('FL:',ISNULL(betstatus,'')),6) END	
+			betstatus= 'Refund'
+			,GoalRecord =''
+			,changetime = GETDATE(), settleTime = GETDATE()
 		WHERE matchid=@MatchID
 	END
-	IF @Command = 'Admin_Settlement_RefundFT'
+	ELSE IF @Command = 'Admin_Settlement_RefundFT'
 	BEGIN
-		UPDATE dbo.match WITH(ROWLOCK,UPDLOCK) 
-		SET finalhomescore_APL=0, finalawayscore_APL=0, 
-			betstatus_APL = CASE WHEN CHARINDEX('Refund;', betstatus_APL) > 0 THEN betstatus_APL ELSE 'Refund FT;' + replace(ISNULL(betstatus_APL,''), 'Refund FT;', '') END ,
-			eventstatus_APL = 'Completed', changetime_APL = GETDATE(), settleTime_APL = GETDATE()
+		UPDATE dbo.match_remark_ex WITH(ROWLOCK,UPDLOCK) 
+		SET finalhomescore=0, finalawayscore=0, 
+			betstatus = CASE WHEN CHARINDEX('Refund;', betstatus) > 0 THEN betstatus ELSE 'Refund FT;' + replace(ISNULL(betstatus,''), 'Refund FT;', '') END ,
+			eventstatus = 'Completed', changetime = GETDATE(), settleTime = GETDATE()
 		WHERE matchid=@MatchID AND @HTDone = 1
 
 		--- get rowcount
 		SET @RowCount = @@ROWCOUNT
 	END
-	IF @Command = 'Admin_Settlement_RefundHT'
+	ELSE IF @Command = 'Admin_Settlement_RefundHT'
 	BEGIN
-		UPDATE dbo.match WITH(ROWLOCK,UPDLOCK) 
-		SET hthomescore_APL=0, htawayscore_APL=0, 
-			betstatus_APL = CASE WHEN CHARINDEX('Refund;', betstatus_APL) > 0 THEN betstatus_APL ELSE 'Refund HT;' + replace(ISNULL(betstatus_APL,''), 'Refund HT;', '') END,
-			changetime_APL = GETDATE()
+		UPDATE dbo.match_remark_ex WITH(ROWLOCK,UPDLOCK) 
+		SET hthomescore=0, htawayscore=0, 
+			betstatus = CASE WHEN CHARINDEX('Refund;', betstatus) > 0 THEN betstatus ELSE 'Refund HT;' + replace(ISNULL(betstatus,''), 'Refund HT;', '') END,
+			changetime = GETDATE()
 		WHERE matchid=@MatchID
 
 		--- get rowcount
 		SET @RowCount = @@ROWCOUNT
 	END
-	IF @Command = 'Admin_Settlement_FGLG'
+	ELSE IF @Command = 'Admin_Settlement_FGLG'
 	BEGIN
-		UPDATE match WITH(ROWLOCK,UPDLOCK)
-		SET	betstatus_APL = @betstatus, GoalRecord_APL = @GoalRecord, changetime_APL = GETDATE()
+		UPDATE dbo.match_remark_ex WITH(ROWLOCK,UPDLOCK)
+		SET	betstatus = @betstatus, GoalRecord = @GoalRecord, changetime = GETDATE()
 		WHERE matchid = @MatchID
 	END
-	IF @Command = 'Admin_Settlement_Parlay'
+	IF @Command = 'Admin_Settlement_Refund_FGLG'
 	BEGIN
-		UPDATE match WITH(ROWLOCK,UPDLOCK) SET multiple=multiple, changetime_APL = GETDATE() WHERE matchid=@MatchID
-	END
-	IF @Command = 'Admin_Settlement_s161-Refund'
-	BEGIN
-		UPDATE dbo.match WITH(ROWLOCK,UPDLOCK)
-		SET betstatus_APL = 'Refund',
-			eventstatus_APL = 'Completed', changetime_APL = CURRENT_TIMESTAMP, settleTime_APL = CURRENT_TIMESTAMP
+		UPDATE dbo.match_remark_ex WITH(ROWLOCK,UPDLOCK) 
+		SET betstatus = @BetStatus, changetime = GETDATE() 
 		WHERE matchid=@MatchID
 	END
-	IF @Command = 'Admin_Settlement_s161-Refund_FT'
+	ELSE IF @Command = 'Admin_Settlement_Parlay'
 	BEGIN
-		UPDATE dbo.match WITH(ROWLOCK,UPDLOCK)
-		SET eventstatus_APL = 'Completed',
-			betstatus_APL = 'Refund FT',
-			changetime_APL = CURRENT_TIMESTAMP
+		UPDATE dbo.match_remark_ex WITH(ROWLOCK,UPDLOCK) SET multiple=multiple, changetime = GETDATE() WHERE matchid=@MatchID
+	END
+	ELSE IF @Command = 'Admin_Settlement_s161-Refund'
+	BEGIN
+		UPDATE dbo.match_remark_ex WITH(ROWLOCK,UPDLOCK)
+		SET betstatus = 'Refund',
+			eventstatus = 'Completed', changetime = CURRENT_TIMESTAMP, settleTime = CURRENT_TIMESTAMP
+		WHERE matchid=@MatchID
+	END
+	ELSE IF @Command = 'Admin_Settlement_s161-Refund_FT'
+	BEGIN
+		UPDATE dbo.match_remark_ex WITH(ROWLOCK,UPDLOCK)
+		SET eventstatus = 'Completed',
+			betstatus = 'Refund FT',
+			changetime = CURRENT_TIMESTAMP
 
 		WHERE matchid=@MatchID
 	END
-	IF @Command = 'Admin_Settlement_s161-CAL'
+	ELSE IF @Command = 'Admin_Settlement_s161-CAL'
 	BEGIN
-		UPDATE dbo.match WITH(ROWLOCK,UPDLOCK)
+		UPDATE dbo.match_remark_ex WITH(ROWLOCK,UPDLOCK)
 		SET		
-			betstatus_APL = '',
-			eventstatus_APL = 'Completed',
-			changetime_APL = CURRENT_TIMESTAMP,
-			settleTime_APL = CURRENT_TIMESTAMP
+			betstatus = '',
+			eventstatus = 'Completed',
+			changetime = CURRENT_TIMESTAMP,
+			settleTime = CURRENT_TIMESTAMP
 		WHERE matchid = @MatchID
 	END
-	--IF @Command = 'Admin_Settlement_s162-Refund'
-	--BEGIN
-	--	UPDATE dbo.match WITH(ROWLOCK,UPDLOCK)
-	--	SET betstatus_APL = 'Refund',
-	--		eventstatus_APL = 'Completed', changetime_APL = CURRENT_TIMESTAMP, settleTime_APL = CURRENT_TIMESTAMP
-	--	WHERE matchid=@MatchID
-	--END
-	--IF @Command = 'Admin_Settlement_s162-CAL'
-	--BEGIN
-	--	UPDATE dbo.match WITH(ROWLOCK,UPDLOCK)
-	--	SET		
-	--		eventstatus_APL = 'Completed',
-	--		changetime_APL = CURRENT_TIMESTAMP,
-	--		settleTime_APL = CURRENT_TIMESTAMP
-	--	WHERE matchid = @MatchID
-	--END
-	--IF @Command = 'Admin_Settlement_s162-1102-CAL'
-	--BEGIN
-	--	select @betstatus_APL = Resource_en from RefResource with (rowlock) 
-	--	where refid ='RouNumProperty' and 
-	--	resourceid in (select finalhomescore_APL from  match with (rowlock) where matchid = @MatchID)
-		
-	--	UPDATE dbo.match WITH(ROWLOCK,UPDLOCK)
-	--	SET		
-	--		betstatus_APL = @betstatus_APL,
-	--		eventstatus_APL = 'Completed',
-	--		changetime_APL = CURRENT_TIMESTAMP,
-	--		settleTime_APL = CURRENT_TIMESTAMP
-	--	WHERE matchid = @MatchID
-	--END
-	--IF @Command = 'Admin_Settlement_SS-CAL'
-	--BEGIN
-	--	UPDATE dbo.match WITH(ROWLOCK,UPDLOCK)
-	--	SET		
-	--		eventstatus_APL = 'Completed',
-	--		changetime_APL = CURRENT_TIMESTAMP,
-	--		settleTime_APL = CURRENT_TIMESTAMP
-	--	WHERE matchid = @MatchID
-	--END
-/*
-	IF @Command = 'Admin_Settlement_SS-Refund'
-	BEGIN
-		UPDATE dbo.match WITH(ROWLOCK,UPDLOCK)
-		SET betstatus_APL = 'Refund',
-			eventstatus_APL = 'Completed', changetime_APL = CURRENT_TIMESTAMP, settleTime_APL = CURRENT_TIMESTAMP
-		WHERE matchid=@MatchID
-	END
-*/
+
 END
 
 GO

@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetDiscountForUpdate]    Script Date: 3/29/2013 10:06:32 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetDiscountForUpdate]    Script Date: 4/17/2013 2:58:40 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -53,23 +53,5 @@ BEGIN
 			AND pd.BetType = ad.BetType
 	WHERE pd.CustId		= @CustId
 		AND ad.AgentId	= @agentId 
-			
-	UNION
-	
-	SELECT 
-		pd.SportType,
-		pd.BetType,
-		pd.Discount,
-		ad.DiscountA AS UplineMinDiscountA,
-		ad.DiscountB AS UplineMinDiscountB,
-		ad.DiscountC AS UplineMinDiscountC,
-		ad.DiscountD AS UplineMinDiscountD
-	FROM 
-		CustDiscount3rd AS pd WITH (NOLOCK)					-- customer discount
-		INNER JOIN AgentDiscount3rd AS ad WITH (NOLOCK)		-- upline discount
-			ON pd.SportType = ad.SportType 
-			AND pd.BetType = ad.BetType
-	WHERE pd.CustId = @CustId
-		AND ad.AgentId = @agentId
 	
 END

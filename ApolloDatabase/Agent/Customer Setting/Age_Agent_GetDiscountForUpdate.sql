@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_GetDiscountForUpdate]    Script Date: 3/29/2013 9:57:30 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_GetDiscountForUpdate]    Script Date: 4/17/2013 2:57:08 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -14,7 +14,7 @@ AS
 /**
  * Created by	: Kos
  * Date			: 20130227
- * Task			: Get agent and its parent discount and discount 3rd
+ * Task			: Get agent and its parent discount 
  * DB			: APL.CustDB
  * Revisions	:
  *	•  20132802@Edward : Implement
@@ -29,7 +29,7 @@ BEGIN
 	SET NOCOUNT ON 
 	
 	DECLARE @agentHId			HIERARCHYID
-			,@parentAgentId		INT
+			,@parentAgentId		INT								
 
 	-- Get agent hierarchy ID
 	SELECT 
@@ -38,7 +38,7 @@ BEGIN
 	FROM 
 		AgentInfo WITH (NOLOCK)
 	WHERE 
-		AgentId = @AgentId		
+		AgentId = @AgentId			
 
 	SELECT 
 		ad.SportType,
@@ -53,32 +53,12 @@ BEGIN
 		adp.DiscountD	AS UplineMinDiscountD
 	FROM 
 		AgentDiscount AS ad WITH (NOLOCK)					-- agent discount
-		INNER JOIN AgentDiscount AS adp	WITH (NOLOCK)		-- parent discount
-			ON ad.SportType = adp.SportType	
-			AND ad.BetType = adp.BetType
+		LEFT JOIN AgentDiscount AS adp	WITH (NOLOCK)		-- parent discount
+			ON ad.SportType	= adp.SportType	
+			AND ad.BetType	= adp.BetType
+			AND adp.AgentId = @parentAgentId
 	WHERE 
 		ad.AgentId		= @AgentId
-		AND adp.AgentId = @parentAgentId		
-	UNION
-	
-	SELECT 
-		ad.SportType,
-		ad.BetType,
-		ad.DiscountA,
-		ad.DiscountB,
-		ad.DiscountC,
-		ad.DiscountD,
-		adp.DiscountA	AS UplineMinDiscountA,
-		adp.DiscountB	AS UplineMinDiscountB,
-		adp.DiscountC	AS UplineMinDiscountC,
-		adp.DiscountD	AS UplineMinDiscountD
-	FROM 
-		AgentDiscount3rd AS ad WITH (NOLOCK)					-- agent discount
-		INNER JOIN AgentDiscount3rd AS adp	WITH (NOLOCK)		-- parent discount
-			ON ad.SportType = adp.SportType	
-			AND ad.BetType = adp.BetType
-	WHERE 
-		ad.AgentId = @AgentId	
-		AND adp.AgentId = @parentAgentId
-	
+		
+					
 END

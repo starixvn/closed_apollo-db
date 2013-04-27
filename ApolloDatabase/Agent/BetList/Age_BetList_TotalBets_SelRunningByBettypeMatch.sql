@@ -1,9 +1,8 @@
 ﻿
 ALTER PROCEDURE [dbo].[Age_BetList_TotalBets_SelRunningByBettypeMatch]
 	@MatchID int,
-	@AgentId int,
+	@LoggedId int,
 	@Bettype int,
-	@Language varchar(2) = 'E',
 	@liveindicator int = 0,
 	@Betteam nvarchar(20) = NULL
 AS
@@ -18,6 +17,14 @@ Revisions:
 */
 
 SET NOCOUNT ON
+
+
+DECLARE @AgentLevel INT
+SELECT	@AgentLevel = AgentLevel
+FROM	AgentInfo WITH (NOLOCK)
+WHERE	AgentId = @LoggedId
+
+
 if @bettype in (10)
 BEGIN
 	SELECT 
@@ -43,89 +50,31 @@ BEGIN
 		0 as Liveindicator, 
 		0 as Livehomescore, 
 		0 as Liveawayscore, 		 				
-		BA.APositiontaking,  		
+		ISNULL(BA.APositionTaking, 1-B.TPositionTaking) AS APositionTaking,  		
 		BA.ADiscount ,
-		--BA.AWinlost,
-		--(BA.AComm - D.AComm) as AComm ,
 		B.IP as IP,
 		CONVERT(BIT,0) as isNeutral,
 		0 as oddstype,
 		B.betid,
 		'' as showtime,
 		B.refno,
-		B.DoubleCommLosing									
-	FROM	Bettrans B WITH (NOLOCK)
-	INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) On B.TransID = BA.TransID
-	--INNER JOIN AgentInfo AS A WITH (NOLOCK)
-	--		ON A.AgentID = BA.AgentID
-	--INNER JOIN AgentInfo AS C WITH (NOLOCK)
-	--		ON C.AgentHId.IsDescendantOf(A.AgentHId) = 1 ---AND C.ParentId = BA.AgentID
-	--		 AND  C.AgentLevel = A.Agentlevel + 1	
-	--INNER JOIN BetTrans_Agent D WITH (NOLOCK)
-	--		ON C.AgentID = D.AgentID AND D.TransID = BA.TransID 		
-	INNER JOIN outright m WITH (NOLOCK) ON B.matchid=m.orid
-	INNER JOIN league l WITH (NOLOCK) ON m.leagueid = l.leagueid		
+		B.DoubleCommLosing,
+		@AgentLevel as AgentLevel
+	FROM Bettrans B WITH (NOLOCK)
+	LEFT JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
+		ON B.TransID = BA.TransID
+	INNER JOIN outright m WITH (NOLOCK) 
+		ON B.matchid=m.orid
+	INNER JOIN league l WITH (NOLOCK) 
+		ON m.leagueid = l.leagueid		
 	WHERE
-		BA.AgentId = @AgentId and
+		(BA.AgentId = @LoggedId OR @LoggedId = 0) and
 		B.matchid=@matchid and 
 		B.bettype=@bettype and
 		B.statusID = 0		
 	
-
-	UNION ALL
-	SELECT 
-		m.sporttype,
-		B.Username,      		
-		B.Bettype,     
-		B.TransID,     
-		m.matchid,
-		m.Matchcode,   
-		'' as Race,
-		m.leagueid, 
-		m.HomeID,
-		m.AwayID, 
-		convert(float, B.hdp1) as hdp1, 
-		convert(float, B.hdp2) as hdp2, 
-		B.odds,
-		B.modds,
-		CASE WHEN B.status = 'running' AND IsNull(B.SecAcceptFlag, 0) = 1 and IsNull(B.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
-				 ELSE B.status 
-				 END as status,    
-		B.stake,  
-		B.actual_stake,
-		B.Transdate,   		
-		B.Betteam,    
-		B.Liveindicator,
-		B.Livehomescore, 
-		B.Liveawayscore, 		 	
-		BA.APositiontaking,  		
-		BA.ADiscount ,
-		--BA.AWinlost,
-		--(BA.AComm - B.PlayerComm) as AComm, 
-		B.IP as IP,
-		isnull(m.isNeutral, CONVERT(BIT,0)) as IsNeutral,
-		B.OddsType,
-		B.betid,
-		m.showtime,
-		B.refno,
-		B.DoubleCommLosing	
-	FROM Bettrans B WITH (NOLOCK)
-	INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) On B.TransID = BA.TransID
-	--INNER JOIN CustInfo AS C WITH (NOLOCK)
-	--		ON C.CustID = B.CustID	AND C.AgentID = @AgentID 
-	INNER JOIN Match m  WITH (NOLOCK) ON B.matchid=m.matchid 	
-	WHERE
-		BA.AgentId = @AgentId and
-		B.matchid=@matchid and 
-		B.bettype=@bettype and
-		B.statusID = 0			
-	ORDER BY status, B.transid
-
-
-	RETURN
 END
-
-
+ELSE
 IF @bettype< 19001
 BEGIN
 	SELECT 
@@ -153,89 +102,27 @@ BEGIN
 		B.Liveindicator,
 		B.Livehomescore, 
 		B.Liveawayscore, 		 	
-		BA.APositiontaking,  		
+		ISNULL(BA.APositionTaking, 1-B.TPositionTaking) AS APositionTaking,	
 		BA.ADiscount ,
-		BA.AWinlost,
-		(BA.AComm - D.AComm) as AComm, 
 		B.IP as IP,
 		isnull(m.isNeutral, CONVERT(BIT,0)) as IsNeutral,
 		B.OddsType,
 		B.betid,
 		m.showtime,
 		B.refno,
-		B.DoubleCommLosing
-	
+		B.DoubleCommLosing,
+		@AgentLevel	as AgentLevel
 	FROM Bettrans B WITH (NOLOCK)
-	INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) On B.TransID = BA.TransID
-	INNER JOIN AgentInfo AS A WITH (NOLOCK)
-			ON A.AgentID = BA.AgentID
-	INNER JOIN AgentInfo AS C WITH (NOLOCK)
-			ON C.AgentHId.IsDescendantOf(A.AgentHId) = 1 ---AND C.ParentId = BA.AgentID
-			 AND  C.AgentLevel = A.Agentlevel + 1	
-	INNER JOIN BetTrans_Agent D WITH (NOLOCK)
-			ON C.AgentID = D.AgentID AND D.TransID = BA.TransID 		
+	LEFT JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
+		ON B.TransID = BA.TransID
 	INNER JOIN Match m  WITH (NOLOCK) ON B.matchid=m.matchid 	
 	WHERE
-		BA.AgentID =@AgentId AND
+		(BA.AgentId = @LoggedId OR @LoggedId = 0) AND 
 		B.matchid=@matchid and 
 		B.bettype=@bettype and
 		B.statusID in (0,1) and 
 		B.Liveindicator= CASE WHEN m.sporttype = 161 THEN @liveindicator ELSE B.liveindicator END AND
 		ISNULL(B.betteam,'') = CASE WHEN m.sporttype = 161 AND ISNULL(@Betteam, '') <> '' THEN @betteam ELSE ISNULL(B.betteam,'') END
-
-	UNION ALL
-	SELECT 
-		m.sporttype,
-		B.Username,      		
-		B.Bettype,     
-		B.TransID,     
-		m.matchid,
-		m.Matchcode,   
-		'' as Race,
-		m.leagueid, 
-		m.HomeID,
-		m.AwayID, 
-		convert(float, B.hdp1) as hdp1, 
-		convert(float, B.hdp2) as hdp2, 
-		B.odds,
-		B.modds,
-		CASE WHEN B.status = 'running' AND IsNull(B.SecAcceptFlag, 0) = 1 and IsNull(B.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
-				 ELSE B.status 
-				 END as status,    
-		B.stake,  
-		B.actual_stake,
-		B.Transdate,   		
-		B.Betteam,    
-		B.Liveindicator,
-		B.Livehomescore, 
-		B.Liveawayscore, 		 	
-		BA.APositiontaking,  		
-		BA.ADiscount ,
-		BA.AWinlost,
-		(BA.AComm - B.PlayerComm) as AComm, 
-		B.IP as IP,
-		isnull(m.isNeutral, CONVERT(BIT,0)) as IsNeutral,
-		B.OddsType,
-		B.betid,
-		m.showtime,
-		B.refno,
-		B.DoubleCommLosing	
-	FROM Bettrans B WITH (NOLOCK)
-	INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) On B.TransID = BA.TransID
-	INNER JOIN CustInfo AS C WITH (NOLOCK)
-			ON C.CustID = B.CustID	AND C.AgentID = @AgentID 
-	INNER JOIN Match m  WITH (NOLOCK) ON B.matchid=m.matchid 	
-	WHERE
-		BA.AgentID =@AgentId AND
-		C.AgentID = @AgentID AND
-		B.matchid=@matchid and 
-		B.bettype=@bettype and
-		B.statusID in (0,1) and 
-		B.Liveindicator= CASE WHEN m.sporttype = 161 THEN @liveindicator ELSE B.liveindicator END AND
-		ISNULL(B.betteam,'') = CASE WHEN m.sporttype = 161 AND ISNULL(@Betteam, '') <> '' THEN @betteam ELSE ISNULL(B.betteam,'') END
-	ORDER BY status, B.transid
-
- 
 
 END
 

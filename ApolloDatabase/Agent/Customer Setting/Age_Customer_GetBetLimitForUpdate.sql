@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetBetLimitForUpdate]    Script Date: 3/29/2013 10:05:40 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetBetLimitForUpdate]    Script Date: 4/17/2013 2:58:15 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -28,7 +28,10 @@ BEGIN
 
 	SET NOCOUNT ON
 
-	DECLARE @agentHId HIERARCHYID
+	DECLARE @agentHId		HIERARCHYID
+			,@SUPERLEVEL	INT
+
+	SET @SUPERLEVEL = 0
 
 	-- Get agent hierarchy ID
 	SELECT @agentHId = AgentHId
@@ -61,44 +64,11 @@ BEGIN
 			FROM AgentBetLimit WITH (NOLOCK)
 			WHERE AgentId IN (	SELECT AgentId 
 								FROM AgentInfo 
-								WHERE @AgentHId.IsDescendantOf(AgentHId) = 1)
+								WHERE @AgentHId.IsDescendantOf(AgentHId) = 1
+								AND AgentLevel <> @SUPERLEVEL)
 			GROUP BY SportType, BetType
 		) AS ubl	-- upline bet limit including its parent
 		ON pbl.SportType = ubl.SportType AND pbl.BetType = ubl.BetType	
 	WHERE pbl.CustId = @CustId
 
-	UNION
-	
-	SELECT 
-		pbl.SportType,
-		pbl.BetType,
-		pbl.MinBet,
-		pbl.MaxBet,
-		pbl.MaxPerMatch,
-		pbl.MaxPerBall,
-		ubl.MaxMinBet,
-		ubl.MinMaxBet,
-		ubl.MinMaxPerMatch,
-		ubl.MinMaxPerBall
-	FROM 
-		CustBetLimit3rd pbl WITH (NOLOCK)
-		INNER JOIN 
-		(
-			SELECT 
-				SportType,
-				BetType,
-				MAX(MinBet)	AS MaxMinBet,
-				MIN(MaxBet)	AS MinMaxBet,
-				MIN(MaxPerMatch) AS MinMaxPerMatch,
-				MIN(MaxPerBall) AS MinMaxPerBall
-			FROM AgentBetLimit3rd WITH (NOLOCK)
-			WHERE AgentId IN (	SELECT AgentId 
-								FROM AgentInfo 
-								WHERE @AgentHId.IsDescendantOf(AgentHId) = 1)
-			GROUP BY SportType, BetType
-		) AS ubl	-- upline bet limit including its parent
-		ON pbl.SportType = ubl.SportType AND pbl.BetType = ubl.BetType	
-	WHERE pbl.CustId = @CustId
-		
-END
-
+END	

@@ -100,7 +100,7 @@ END
 
 ---===============================================
 --Check if match already Refund HT => refund whole match
-if exists(select 1 from SVRPRO.ProdDB.dbo.Match with (nolock) where matchid = @matchid AND betstatus like '%Refund HT%')
+if exists(select 1 from SVRPRO.ProdDB.dbo.match_remark_ex with (nolock) where matchid = @matchid AND betstatus like '%Refund HT%')
 	AND @HTDone = 1
 BEGIN
 	-----
@@ -221,7 +221,7 @@ BEGIN
 			@htawayscore = htawayscore,
 			@goalrecord = goalrecord,
 			@betstatus = betstatus
-	 FROM	SVRPRO.ProdDB.dbo.match WITH(NOLOCK) WHERE matchid = @matchid
+	 FROM	SVRPRO.ProdDB.dbo.match_remark_ex WITH(NOLOCK) WHERE matchid = @matchid
 
 	BEGIN TRY
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Settle

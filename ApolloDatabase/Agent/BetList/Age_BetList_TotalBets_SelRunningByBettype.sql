@@ -1,122 +1,201 @@
-﻿ALTER PROC [dbo].[Age_BetList_TotalBets_SelRunningByBettype]
-	@AgentId INT,
-	@Bettype int,
-	@Language varchar(2) = 'E'
+﻿
+
+ALTER PROC [dbo].[Age_BetList_TotalBets_SelRunningByBettype]
+	@LoggedId INT,
+	@Bettypes VARCHAR(200) = ''
  AS
 
 /**
- * Created by	: Kaden
- * Date			: 20130301
- * Task			: Retrieve total bet of Parlay, Clean Sheet, Double Chance, Both/One/Neither Team To Score, To Win To Nil, 3-Way Handicap
- * DB			: SVRAGE.RepDB
- * Revisions	:
- *
- * Parameters:
- *	@AgentId: agent ID
-  *	@Bettype: bettype ID
- *	@Language: default English
- *  
+  Created by	: Kaden
+  Date			: 20130301
+  TASk			: Retrieve total bet of Parlay, Clean Sheet, Double Chance, Both/One/Neither Team To Score, To Win To Nil, 3-Way Handicap
+  DB			: SVRAGE.RepDB
+  Revisions	:
+	- 20130409@Sophia: revise all, change #Bettype to #Bettypes 
+ 
+  Parameters:
+ 		@LoggedId: agent ID
+  		#Bettypes: string of bettypes , seperate by ^
+ 		@Language: default English
+
+  EX: EXEC [Age_BetList_TotalBets_SelRunningByBettype] 3, '1^0^9^29^10'
+
+   
  */
 
 SET NOCOUNT ON
-IF @bettype IN ( 9, 29)--inlcude mix parlay AND Combination mix parlay
+CREATE TABLE #Bettype (bettype INT)
+
+INSERT INTO #Bettype
+SELECT val FROM dbo.strSplit_Key(@Bettypes,'^')
+
+DECLARE @Betlist TABLE (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, MatchCode NVARCHAR(50), 
+						HomeId INT, AwayId INT, SportType TINYINT, LeagueId INT, IsNeutral BIT,  Showtime NVARCHAR(50),
+						Username NVARCHAR(50), BetType SMALLINT, CustId INT , Hdp1 SMALLMONEY, Hdp2 SMALLMONEY, Odds SMALLMONEY, MOdds SMALLMONEY,
+						Status VARCHAR(10), Stake MONEY, Actual_Stake MONEY, TransDate DATETIME, BetTeam VARCHAR(10), BetId BIGINT, 
+						APositionTaking SMALLMONEY, ADiscount DECIMAL (9,8),  LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
+						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT)
+
+
+
+DECLARE @AgentLevel INT
+SELECT	@AgentLevel = AgentLevel
+FROM	AgentInfo WITH (NOLOCK)
+WHERE	AgentId = @LoggedId
+
+
+--inlcude mix parlay AND Combination mix parlay
+IF EXISTS (SELECT TOP 1 1  FROM #Bettype WHERE Bettype IN (9,29))
 BEGIN
-	SELECT 
-		0 as sporttype,
-		bt.Username,				
-		bt.CustId,
-		bt.BetType,
-		bt.TransId,
-		bt.RefNo,
-		0 as matchid,
+	INSERT INTO @Betlist
+	SELECT 			
+		B.transid,
+		B.refno,
+		0 AS matchid,
 		'' matchcode,
-		0 as homeID,
-		0 as awayID,
-		'' hdp1,
-		'' hdp2,
-		bt.Odds,
-		bt.MOdds,
-		bt.Status,
-		bt.Stake,
-		bt.Actual_Stake,
-		bt.TransDate,		
-		bt.BetTeam,
-		bt.BetId,
+		0 AS homeID,
+		0 AS awayID,
+		0 AS sporttype,
+		'' as LeagueID,
+		CONVERT(BIT,0) AS IsNeutral,
+		'' AS ShowTime,
+		B.Username,				
+		B.bettype,	
+		B.custid,	
+		0 AS hdp1,
+		0 AS hdp2,
+		B.Odds,
+		B.MOdds,
+		B.Status,
+		B.Stake,
+		B.Actual_Stake,
+		B.TransDate,		
+		B.BetTeam,
+		B.BetId,
+		ISNULL(BA.APositionTaking, 1-B.TPositionTaking) AS APositionTaking,
+		BA.ADiscount,
+		
 		0 AS LiveHomeScore, 
 		0 AS LiveAwayScore,
 		0 AS LiveIndicator ,
-		bta.APositionTaking,
-		bta.ADiscount,
-		bt.IP,
-		CONVERT(BIT,0) as IsNeutral,
-		0 as OddStype,
-		'' as ShowTime,
-		bt.DoubleCommLosing	
-	FROM BetTrans AS bt  WITH (NOLOCK) 
-		INNER JOIN BetTrans_Agent AS bta WITH (NOLOCK) ON bta.TransId = bt.TransId
+		B.IP,		
+		0 AS OddStype,		
+		B.DoubleCommLosing	
+	FROM BetTrans AS B  WITH (NOLOCK) 
+		LEFT JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
 	WHERE
-		bta.AgentId = @AgentId AND
-		bt.BetType = @bettype AND
-		bt.matchid = @bettype AND
-		bt.Status='running' AND
-		bt.statusID BETWEEN 0 AND 1 AND 
-		bt.ruben=0 
-		
-	order by bt.status, bt.transid
-	RETURN
+		(BA.AgentId = @LoggedId OR @LoggedId = 0)
+		AND B.CustID = B.CustID  
+		AND B.bettype in (SELECT Bettype FROM #Bettype) AND B.bettype IN (9,29)
+		AND B.StatusId IN (0,1)
 END
 
-if @bettype<=19000
+--- Outright
+IF EXISTS (SELECT TOP 1 1  FROM #Bettype WHERE Bettype = 10)
 BEGIN
-	SELECT 
-		m.SportType,
-		bt.Username,
-		m.LeagueId, 
-		bt.BetType,
-		bt.CustId,		
-		bt.TransId,
-		bt.RefNo,
+	INSERT INTO @Betlist
+	SELECT 				
+		B.transid,
+		B.refno,
+		0 AS matchid,
+		m.matchcode,
+		m.teamID AS homeID,
+		0 AS awayID,
+		l.sporttype,
+		m.LeagueID,
+		CONVERT(BIT,0) AS IsNeutral,
+		'' AS showtime,
+		B.username,
+		B.bettype,	
+		B.custid,	
+		B.hdp1, 
+		B.hdp2, 
+		B.odds,
+		B.modds,
+		B.Status,
+		B.stake,
+		B.actual_stake,
+		B.transdate,		
+		B.betteam,
+		B.betID,
+		ISNULL(BA.APositionTaking, 1-B.TPositionTaking) AS APositionTaking,
+		BA.ADiscount,		
+		B.livehomescore,
+		B.liveawayscore,
+		B.liveindicator, 
+		B.IP AS IP,		
+		0 AS oddstype,		
+		B.DoubleCommLosing
+	FROM 		
+		bettrans b WITH (NOLOCK)
+		LEFT JOIN BetTrans_Agent AS ba WITH (NOLOCK) ON BA.TransId = B.TransId
+		INNER JOIN outright AS m WITH (NOLOCK) on  B.matchid=m.orid
+		INNER JOIN league l WITH (NOLOCK) on m.leagueid = l.leagueid	
+	WHERE 
+		(BA.AgentId = @LoggedId OR @LoggedId = 0)
+		AND B.CustID = B.CustID
+		AND B.bettype = 10
+		AND B.StatusId=0 		
+END
+ 
+IF EXISTS (SELECT TOP 1 1  FROM #Bettype WHERE Bettype NOT IN (10,9,29))
+BEGIN
+	INSERT INTO @Betlist
+	SELECT
+				
+		B.TransId,
+		B.RefNo,
 		m.MatchId,
-		m.MatchCode,
+		m.MatchCode ,
 		m.HomeId,
 		m.AwayId,
-		convert(float, bt.Hdp1) as Hdp1, 
-		convert(float, bt.Hdp2) as Hdp2, 
-		bt.Odds,
-		bt.MOdds,
-		CASE WHEN bt.Status = 'running' AND IsNull(bt.SecAcceptFlag, 0) = 1 AND IsNull(bt.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
-				 ELSE bt.Status 
-				 END as Status,
-		bt.Stake,
-		bt.Actual_Stake,
-		bt.TransDate,		
-		bt.BetTeam,
-		bt.BetId,
-		bta.APositionTaking,
-		bta.ADiscount,
-		bt.LiveHomeScore,
-		bt.LiveAwayScore,
-		bt.LiveIndicator, 
-		bt.IP,
-		isnull(m.isNeutral, CONVERT(BIT,0)) as IsNeutral,
-		bt.OddStype,
+		m.SportType,
+		m.LeagueId,
+		m.IsNeutral,
 		m.ShowTime,
-		DoubleCommLosing
- 	from 	
-		BetTrans AS bt  WITH (NOLOCK) 
-		INNER JOIN BetTrans_Agent AS bta WITH (NOLOCK) ON bta.TransId = bt.TransId
-		INNER JOIN  Match m WITH (NOLOCK) ON  bt.MatchId = m.MatchId 				
-	where 
-		bta.AgentId = @AgentId 
-		AND bt.BetType=@bettype 
-		AND bt.Status='running'
-		AND bt.StatusId in (0,1)
-		
-	order by bt.Status, bt.TransId
+		B.Username,
+		B.BetType,
+		B.CustId,
+		B.Hdp1, 
+		B.Hdp2, 
+		B.Odds,
+		B.MOdds,
+		CASE WHEN B.Status = 'running' AND IsNull(B.SecAcceptFlag, 0) = 1 AND IsNull(B.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
+				 ELSE B.Status 
+				 END AS Status,
+		B.Stake,
+		B.Actual_Stake,
+		B.TransDate,		
+		B.BetTeam,
+		B.BetId,
+		ISNULL(BA.APositionTaking, 1-B.TPositionTaking) AS APositionTaking,
+		BA.ADiscount,		 
+		B.LiveHomeScore,
+		B.LiveAwayScore,
+		B.LiveIndicator, 
+		B.IP,		
+		B.Oddstype,		
+		B.DoubleCommLosing
+ 	FROM 	
+		BetTrans AS b  WITH (NOLOCK) 
+		LEFT JOIN BetTrans_Agent AS ba WITH (NOLOCK) ON BA.TransId = B.TransId
+		INNER JOIN  Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 				
+	WHERE 
+		(BA.AgentId = @LoggedId OR @LoggedId = 0)
+		AND B.CustID = B.CustID  
+		AND B.bettype in (SELECT Bettype FROM #Bettype)
+		AND B.StatusId in (0,1)	
 END
+
+
+SELECT *, @AgentLevel as AgentLevel FROM @Betlist
+ORDER BY TransID
+
 
 GO
 GRANT VIEW DEFINITION ON [dbo].[Age_BetList_TotalBets_SelRunningByBettype] TO [aplweb]
+
+
 
 
 

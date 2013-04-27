@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateDiscount]    Script Date: 3/29/2013 10:10:45 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateDiscount]    Script Date: 4/17/2013 2:52:55 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -31,8 +31,7 @@ SELECT	'Return Value' = @return_value
 ALTER PROCEDURE [dbo].[Age_Agent_UpdateDiscount]
 	@ActorAgentId	INT				= NULL,
 	@AgentId		INT,
-	@Discount		VARCHAR(MAX)	= '',
-	@Discount3rd	VARCHAR(MAX)	= '',
+	@Discount		VARCHAR(MAX)	= '',	
 	@Language		VARCHAR(2)		= 'E',
 	@LogDate		DATETIME		= NULL,
 	@ErrCode		INT				= 0		OUTPUT,
@@ -80,9 +79,7 @@ BEGIN
 			,@endRun			DATETIME  
 			,@duration			INT
 			,@logSPData			VARCHAR(5000)
-			,@logSPDataOld		VARCHAR(5000)
-			,@logSPData3rd		VARCHAR(5000)
-			,@logSPDataOld3rd	VARCHAR(5000)	        		
+			,@logSPDataOld		VARCHAR(5000)			
 			,@xml				XML
 
 	SET @startRun = GETDATE()			
@@ -93,6 +90,9 @@ BEGIN
 	BEGIN		
 		DECLARE @agentHId			HIERARCHYID
 				,@parentAgentId		INT
+				,@SUPERLEVEL		INT
+
+		SET @SUPERLEVEL = 0
 
 		DECLARE @TableAgent	TABLE( AgentId INT)
 
@@ -152,7 +152,7 @@ BEGIN
 		) AS Data
 
 		EXEC sp_xml_removedocument @DocHandler
-		-- end read xml	
+		-- end read xml			
 
 		IF EXISTS (
 			SELECT TOP(1) *
@@ -163,14 +163,14 @@ BEGIN
 				AND ad.BetType = dt.BetType
 			WHERE ad.AgentId = @AgentId
 			AND (
-				ad.DiscountA <> dt.DiscountA
+				ad.DiscountA	<> dt.DiscountA
 				OR ad.DiscountB <> dt.DiscountB
-				OR dt.DiscountC <> dt.DiscountC
+				OR ad.DiscountC <> dt.DiscountC
 				OR ad.DiscountD <> dt.DiscountD
 			)
 		)
 			BEGIN		
-				
+						   
 				DECLARE @sportType INT
 
 				-- Check validate	range		
@@ -197,12 +197,15 @@ BEGIN
 				-- Check validate min bet must be equal to or greater than parent
 				SELECT @sportType = ad.SportType
 				FROM 
-					AgentDiscount AS ad
+					AgentDiscount AS ad	WITH (NOLOCK)
 					INNER JOIN @TableDiscount AS dt 
-					ON 	ad.SportType	= dt.SportType 
-						AND ad.BetType	= dt.BetType	
+						ON ad.SportType	= dt.SportType 
+						AND ad.BetType	= dt.BetType
+					INNER JOIN AgentInfo AS ai WITH (NOLOCK)						
+						ON ad.AgentId	= ai.AgentId
 				WHERE
 					ad.AgentId = @parentAgentId
+					AND ai.AgentLevel	<> @SUPERLEVEL
 					AND (dt.DiscountA > ad.DiscountA
 						OR dt.DiscountB > ad.DiscountB
 						OR dt.DiscountC > ad.DiscountC
@@ -233,7 +236,7 @@ BEGIN
 								ON ad.SportType		= td.SportType
 								AND ad.BetType		= td.BetType
 						WHERE ad.AgentId			= @AgentId				
-						FOR XML PATH('z')
+						FOR XML PATH('z'),ROOT('r')
 				)
 
 				SET @logSPDataOld = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
@@ -405,7 +408,7 @@ BEGIN
 							,ad.DiscountC		AS '@gc'
 							,ad.DiscountD		AS '@gd'
 						FROM @TableDiscount AS ad						
-						FOR XML PATH('z')
+						FOR XML PATH('z'),ROOT('r')
 				)
 
 				SET @logSPData = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
@@ -413,23 +416,14 @@ BEGIN
 				-- end write log
 			END	
 				 
-	END	
-
-	/*-------------Update 3rd----------------*/
-	
-	EXEC Age_Agent_UpdateDiscount3rd @ActorAgentId, @AgentId, @Discount3rd, @Language, @ErrCode OUTPUT, @ErrMsg OUTPUT, @logSPData3rd OUTPUT, @logSPDataOld3rd OUTPUT  	
-
-	/*---------------------------------------*/
+	END		
 
 	SET @endRun		= GETDATE()  
 	SET @duration	= DATEDIFF(millisecond, @startRun, @endRun) 
 
 	IF @LogDate IS NULL
 		SET @LogDate = GETDATE()
-
-	SELECT @logSPData = CONCAT('<r>',@logSPData,@logSPData3rd,'</r>')
-	SELECT @logSPDataOld = CONCAT('<r>',@logSPDataOld,@logSPDataOld3rd,'</r>')
-
+	
 	EXEC LogDB.dbo.Age_LogRunSp_Insert
 		@UserId			= @ActorAgentId,
 		@SPName			= 'Age_Agent_UpdateDiscount',
