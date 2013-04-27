@@ -1077,6 +1077,9 @@
     <NotInBuild Include="CSD\Others\Acc_SelRefNo.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="Agent\AccountInfo\Age_Agent_GetAllMainShareHolder.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">
