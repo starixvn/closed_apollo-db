@@ -1,28 +1,28 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAllInfo]    Script Date: 4/26/2013 10:50:15 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAllInfo]    Script Date: 5/2/2013 1:40:37 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 ALTER PROCEDURE [dbo].[Age_Customer_GetAllInfo]
-	@ActorAgentId INT,
-	@CustId INT = -1,
-	@Username NVARCHAR(50) = ''
+	@ActorAgentId	INT,
+	@CustId			INT				= -1,
+	@Username		NVARCHAR(50)	= ''
 AS
 
 /**
  * Created by	: Quinn
  * Date			: 20130307
- * Task			: Get Customer Info by Id or Username
+ * Task			: Get downline customer information by ID or Username
  * DB			: SVRAGE.RepDB
  * Revisions	:
  *	•
  * Parameters:
- *	@ActorAgentId: AgentId of login user
- *	@CustId: Customer ID
- *  @UserName: Username of Agent
+ *	@ActorAgentId	: AgentId of login user
+ *	@CustId			: Customer ID
+ *  @UserName		: Username of Agent
  */
 
 SET NOCOUNT ON
@@ -30,7 +30,9 @@ SET NOCOUNT ON
 DECLARE @agentHId HIERARCHYID
 
 BEGIN
-	SELECT @agentHId = AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @ActorAgentId
+	SELECT @agentHId = AgentHId 
+	FROM AgentInfo WITH (NOLOCK) 
+	WHERE AgentId = @ActorAgentId
 
 	SELECT 
 		a.CustId,
@@ -38,7 +40,8 @@ BEGIN
 		a.AgentId,
 		b.Username AS ParentName,
 		a.UGroup
-	FROM CustInfo a WITH (NOLOCK) 
+	FROM 
+		CustInfo a WITH (NOLOCK) 
 		INNER JOIN AgentInfo b WITH (NOLOCK) ON a.AgentId = b.AgentId
 	WHERE 
 		(a.CustId = @CustId OR a.Username = @Username)
