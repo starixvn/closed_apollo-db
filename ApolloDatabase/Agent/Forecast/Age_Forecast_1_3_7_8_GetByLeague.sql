@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Forecast_1_3_7_8_GetByLeague]    Script Date: 4/1/2013 3:05:04 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Forecast_1_3_7_8_GetByLeague]    Script Date: 4/26/2013 1:04:51 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -19,7 +19,7 @@ AS
  * Created by	: Quinn
  * Date			: 20130301
  * Task			: Forecast for HDP/OU bettype
- * DB			: APL.DB05
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	•
  * Parameters:
@@ -232,10 +232,10 @@ FROM
 					(
 						SELECT 
 							b.currency, b.hdp2 - b.hdp1 hdp, b.livehomescore - b.liveawayscore AS score, b.liveindicator,
-							SUM(CASE WHEN betteam='h' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS homewin,
-							SUM(CASE WHEN betteam='a' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS awaywin,
-							SUM(CASE WHEN betteam='h' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS homelose,
-							SUM(CASE WHEN betteam='a' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS awaylose,
+							SUM(CASE WHEN betteam = 'h' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS homewin,
+							SUM(CASE WHEN betteam = 'a' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS awaywin,
+							SUM(CASE WHEN betteam = 'h' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS homelose,
+							SUM(CASE WHEN betteam = 'a' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS awaylose,
 							M.MatchID,
 							ISNULL(o.livehomescore, 0) - ISNULL(o.liveawayscore, 0) AS VScoreHDP,
 							ISNULL(o.livehomescore, 0) + ISNULL(o.liveawayscore, 0) AS VScoreOU
@@ -296,9 +296,9 @@ FROM
 						FROM 
 							BetTrans_Agent AS ba WITH (NOLOCK)
 							INNER JOIN BetTrans AS b WITH (NOLOCK) ON ba.TransId = b.TransId
-							INNER JOIN Match AS M with (NOLOCK) ON b.MatchID = M.MatchID
-							INNER JOIN Odds AS O with (NOLOCK) ON b.OddsID = O.OddsID
-							INNER JOIN League AS L with (NOLOCK) ON M.LeagueID = L.LeagueID
+							INNER JOIN Match AS M WITH (NOLOCK) ON b.MatchID = M.MatchID
+							INNER JOIN Odds AS O WITH (NOLOCK) ON b.OddsID = O.OddsID
+							INNER JOIN League AS L WITH (NOLOCK) ON M.LeagueID = L.LeagueID
 						WHERE 
 							ba.AgentId = @AgentId
 							AND b.bettype = @BetTypeHTOU

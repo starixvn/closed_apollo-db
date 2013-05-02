@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_TotalBets_1_3_7_8]    Script Date: 4/2/2013 8:44:23 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_TotalBets_1_3_7_8]    Script Date: 4/26/2013 11:14:38 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -13,11 +13,11 @@ AS
  * Created by	: Quinn
  * Date			: 20130228
  * Task			: Retrieve Total Bet values for bettype 1,3,7,8
- * DB			: APL.REPDB
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	•
- * Parameters:
- *	@AgentId: agent ID
+ * Parameters :
+ *	@AgentId : agent ID
  *  
  */
 
@@ -33,18 +33,21 @@ SELECT
 	m.AwayId,
 	b.LiveHomeScore,
 	b.LiveAwayScore,
-	SUM(CASE WHEN bettype = 1 AND betteam = 'h' THEN Stake ELSE 0 END) AS home_odds_HDP,
-	SUM(CASE WHEN bettype = 1 AND betteam = 'a' THEN Stake ELSE 0 END) AS away_odds_HDP,
-	SUM(CASE WHEN bettype = 7 AND betteam = 'h' THEN Stake ELSE 0 END) AS home_odds_HTHDP,
-	SUM(CASE WHEN bettype = 7 AND betteam = 'a' THEN Stake ELSE 0 END) AS away_odds_HTHDP,
-	SUM(CASE WHEN bettype = 3 AND betteam = 'h' THEN Stake ELSE 0 END) AS home_odds_OU,
-	SUM(CASE WHEN bettype = 3 AND betteam = 'a' THEN Stake ELSE 0 END) AS away_odds_OU,
-	SUM(CASE WHEN bettype = 8 AND betteam = 'h' THEN Stake ELSE 0 END) AS home_odds_HTOU,
-	SUM(CASE WHEN bettype = 8 AND betteam = 'a' THEN Stake ELSE 0 END) AS away_odds_HTOU,
-	SUM(CASE WHEN bettype = 1 THEN BetCount ELSE 0 END) AS BetCount_HDP,
-	SUM(CASE WHEN bettype = 7 THEN BetCount ELSE 0 END) AS BetCount_HTHDP,
-	SUM(CASE WHEN bettype = 3 THEN BetCount ELSE 0 END) AS BetCount_OU,
-	SUM(CASE WHEN bettype = 8 THEN BetCount ELSE 0 END) AS BetCount_HTOU,
+	
+	SUM(CASE WHEN bettype = 1 AND betteam = 'h' THEN Stake ELSE 0 END) AS HomeOddsHDP,
+	SUM(CASE WHEN bettype = 1 AND betteam = 'a' THEN Stake ELSE 0 END) AS AwayOddsHDP,
+	SUM(CASE WHEN bettype = 7 AND betteam = 'h' THEN Stake ELSE 0 END) AS HomeOddsHTHDP,
+	SUM(CASE WHEN bettype = 7 AND betteam = 'a' THEN Stake ELSE 0 END) AS AwayOddsHTHDP,
+	SUM(CASE WHEN bettype = 3 AND betteam = 'h' THEN Stake ELSE 0 END) AS HomeOddsOU,
+	SUM(CASE WHEN bettype = 3 AND betteam = 'a' THEN Stake ELSE 0 END) AS AwayOddsOU,
+	SUM(CASE WHEN bettype = 8 AND betteam = 'h' THEN Stake ELSE 0 END) AS HomeOddsHTOU,
+	SUM(CASE WHEN bettype = 8 AND betteam = 'a' THEN Stake ELSE 0 END) AS AwayOddsHTOU,
+
+	SUM(CASE WHEN bettype = 1 THEN BetCount ELSE 0 END) AS BetCountHDP,
+	SUM(CASE WHEN bettype = 7 THEN BetCount ELSE 0 END) AS BetCountHTHDP,
+	SUM(CASE WHEN bettype = 3 THEN BetCount ELSE 0 END) AS BetCountOU,
+	SUM(CASE WHEN bettype = 8 THEN BetCount ELSE 0 END) AS BetCountHTOU,
+
 	ISNULL(m.IsNeutral, CONVERT(BIT, 0)) AS IsNeutral
 FROM
 	(SELECT
@@ -62,7 +65,7 @@ FROM
 	WHERE
 		bt.BetType IN (1, 3, 7, 8)
 		AND bta.AgentId = @AgentId
-		AND bt.StatusId IN (0,1) -- status is waiting or running
+		AND bt.StatusId IN (0, 1) -- status is waiting or running
 		AND bt.Ruben = 0	-- match not yet settle
 	GROUP BY 
 		bt.MatchId, 
@@ -72,9 +75,8 @@ FROM
 		bt.LiveHomeScore, 
 		bt.LiveAwayScore
 	) AS b
-	INNER JOIN Match AS m WITH (NOLOCK) ON m.MatchId = b.MatchId 	
-WHERE	
-	m.EventStatus = 'running'
+	INNER JOIN Match AS m WITH (NOLOCK) ON m.MatchId = b.MatchId
+WHERE m.EventStatus = 'running'
 GROUP BY
 	m.ShowTime, 
 	m.LeagueId,
@@ -89,5 +91,3 @@ GROUP BY
 ORDER BY	
 	b.LiveIndicator DESC, 
 	m.MatchCode
-
-

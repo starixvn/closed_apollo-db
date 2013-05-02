@@ -1,11 +1,4 @@
-﻿USE [LogDB]
-GO
-/****** Object:  StoredProcedure [dbo].[WriteLog_Settlement_Settle]    Script Date: 4/26/2013 4:44:34 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-ALTER PROCEDURE [dbo].[WriteLog_Settlement_Settle]
+alter PROCEDURE [dbo].[WriteLog_Settlement_Settle]
 	@UserID int, 
 	@MatchID int, 
 	@ActionID int=0, 
