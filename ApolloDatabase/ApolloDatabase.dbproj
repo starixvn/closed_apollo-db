@@ -273,9 +273,6 @@
     <NotInBuild Include="CSD\Settlement\Admin_Settlement_3.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\WriteLog_Settlement_Settle.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="CSD\Settlement\Admin_Calculate_RefundFGLG.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
