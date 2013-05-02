@@ -107,7 +107,7 @@ BEGIN
 	    GROUP BY A.Username, A.CustId, PT.PositionTaking
 END 
 	    
-SELECT	Username, CustId, PositionTaking/100 as PositionTaking,
+SELECT	Username, CustId,  PositionTaking,
 		SUM(TurnOver) as TurnOver,
 		SUM(ActualTO) as ActualTO,
 		SUM(AWinLost) as  WinLost, 

@@ -225,7 +225,7 @@ WHERE	TurnOver IS NULL
 		AND UplineTotal IS NULL
 
 
-SELECT	Username, AgentId, isAgent, PositionTaking/100 as PositionTaking,
+SELECT	Username, AgentId, isAgent, PositionTaking,
 		SUM(TurnOver) as TurnOver,
 		SUM(ActualTO) as ActualTO,
 		SUM(AWinLost) as  AWinLost, 
@@ -236,7 +236,7 @@ SELECT	Username, AgentId, isAgent, PositionTaking/100 as PositionTaking,
 FROM	#WinLossAgent
 GROUP BY Username, AgentId, isAgent, PositionTaking
 UNION ALL
-SELECT	Username, AgentId, isAgent, PositionTaking/100 as PositionTaking,
+SELECT	Username, AgentId, isAgent, PositionTaking,
 		SUM(TurnOver) as TurnOver,
 		SUM(ActualTO) as ActualTO,
 		SUM(AWinLost) as  AWinLost, 
