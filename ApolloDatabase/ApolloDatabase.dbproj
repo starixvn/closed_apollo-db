@@ -1083,6 +1083,9 @@
     <NotInBuild Include="CSD\Write Log\WriteLog_RunSpCust.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="Agent\BetList\Age_BetList_SelMatchResultParlay.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">

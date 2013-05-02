@@ -27,6 +27,7 @@ FROM
 	  FROM		Match WITH (NOLOCK)  
 	  WHERE		Match.EventDate between @FROMDate and @ToDate  
 				and Match.eventstatus NOT IN ( 'closed'  ,'internal')
+				and Match.sporttype <= 99
 	  GROUP BY 	leagueid, EventDate, matchid 	 
 		  
  ) as Match  

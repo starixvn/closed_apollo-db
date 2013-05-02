@@ -52,7 +52,7 @@ BEGIN
 				(	BA.bettype < 31 
 					OR BA.bettype between 121 and 999
 					OR BA.bettype between 1301 and 1334 
-					OR BA.bettype BETWEEN 81 AND 120 				
+					--OR BA.bettype BETWEEN 81 AND 120 				
 				) 
 		GROUP BY C.Username, C.CustID, PT.PositionTaking
 
@@ -107,7 +107,7 @@ BEGIN
 	    GROUP BY A.Username, A.CustId, PT.PositionTaking
 END 
 	    
-SELECT	Username, CustId, PositionTaking,
+SELECT	Username, CustId,  PositionTaking,
 		SUM(TurnOver) as TurnOver,
 		SUM(ActualTO) as ActualTO,
 		SUM(AWinLost) as  WinLost, 

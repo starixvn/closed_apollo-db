@@ -1,30 +1,30 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_GetAllInfo]    Script Date: 4/26/2013 11:05:52 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_GetAllInfo]    Script Date: 5/2/2013 1:25:51 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 ALTER PROCEDURE [dbo].[Age_Agent_GetAllInfo]
-	@ActorAgentId INT,
-	@AgentId INT = -1,
-	@Username NVARCHAR(50) = '',
-	@ExcludeActor BIT = 0
+	@ActorAgentId	INT,
+	@AgentId		INT				= -1,
+	@Username		NVARCHAR(50)	= '',
+	@ExcludeActor	BIT				= 0
 AS
 
 /**
  * Created by	: Quinn
  * Date			: 20130307
- * Task			: Get Agent Info by Id or Username
+ * Task			: Get downline agent information by ID or Username
  * DB			: SVRAGE.RepDB
  * Revisions	:
  *	•
  * Parameters:
- *	@ActorAgentId: agentId of login user
- *	@AgentId: agent ID
- *  @UserName: username of Agent
- *	@ExcludeActor: not get Actor
+ *	@ActorAgentId	: agent ID of login user
+ *	@AgentId		: agent ID
+ *  @Username		: username of Agent
+ *	@ExcludeActor	: not get Actor
  */
 
 SET NOCOUNT ON
@@ -32,7 +32,9 @@ SET NOCOUNT ON
 DECLARE @agentHId HIERARCHYID
 
 BEGIN
-	SELECT @agentHId = AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @ActorAgentId
+	SELECT @agentHId = AgentHId 
+	FROM AgentInfo WITH (NOLOCK) 
+	WHERE AgentId = @ActorAgentId
 
 	SELECT 
 		a.AgentId, 
@@ -40,10 +42,17 @@ BEGIN
 		a.AgentLevel,
 		a.ParentId,
 		b.Username AS ParentName,
-		CASE WHEN (EXISTS (SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE ParentId = a.AgentId)) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS HasAgentDownline,
-		CASE WHEN (EXISTS (SELECT 1 FROM CustInfo WITH (NOLOCK) WHERE AgentId = a.AgentId)) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS HasMemberDownline
-	FROM AgentInfo a WITH (NOLOCK) 
-		INNER JOIN AgentInfo b WITH (NOLOCK) ON a.ParentId = b.AgentId
+		CASE 
+			WHEN (EXISTS (SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE ParentId = a.AgentId)) THEN CAST(1 AS BIT) 
+			ELSE CAST(0 AS BIT) 
+		END AS HasAgentDownline,
+		CASE 
+			WHEN (EXISTS (SELECT 1 FROM CustInfo WITH (NOLOCK) WHERE AgentId = a.AgentId)) THEN CAST(1 AS BIT) 
+			ELSE CAST(0 AS BIT) 
+		END AS HasMemberDownline
+	FROM 
+		AgentInfo AS a WITH (NOLOCK) 
+		INNER JOIN AgentInfo AS b WITH (NOLOCK) ON a.ParentId = b.AgentId
 	WHERE 
 		(a.AgentId = @AgentId OR a.Username = @Username)
 		AND (@ExcludeActor = 0 OR a.AgentId <> @ActorAgentId)

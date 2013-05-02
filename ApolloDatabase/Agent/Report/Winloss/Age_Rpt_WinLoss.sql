@@ -31,7 +31,7 @@ BEGIN
 		----Super view
 		INSERT INTO #WinLossAgent
 		SELECT  C.Username, C.AgentID, 1 as IsAgent,
-				PT.MaxUpperPositionTaking/100 as PositionTaking,				
+				PT.MaxUpperPositionTaking as PositionTaking,				
 		   		SUM(ABS(B.Stake)) AS TurnOver,
 				SUM(CASE WHEN ABS(B.MOdds) > 0.25 THEN ABS(B.Stake) ELSE CASE WHEN B.MOdds IN (0.25,-0.25) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS ActualTO,
 				SUM(-(B.Winlost - B.Actual_Stake + B.TWinlost)) AS AWinlost,	
@@ -46,57 +46,17 @@ BEGIN
 				ON	B.TransID = BA.TransID		
 		INNER JOIN  AgentPositionTaking PT WITH (NOLOCK) 
 				ON  PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
-		WHERE		C.ParentId = @AgentID AND B.StatusID NOT IN (0,1)
+		WHERE		C.ParentId = @AgentID 
+					AND B.StatusID NOT IN (0,1)
+					AND B.Winlostdate BETWEEN @FromDate AND @ToDate 
 		GROUP BY	C.Username, C.AgentID, PT.MaxUpperPositionTaking
 
-
-		SELECT		*
-		FROM		#WinLossAgent
-		ORDER BY	Username
-		
-		
-		DROP TABLE #WinLossAgent
-		DROP TABLE #WinLossMember
-
-		RETURN
 
 	END
 	ELSE 
 	BEGIN
 		---- Agent Winloss
-		--INSERT INTO #WinLossAgent
-		--SELECT  C.Username, C.AgentID, 1 as IsAgent,
-		--		PT.MaxPositionTaking / 1000 as PositionTaking,				
-		--   		SUM(ABS(B.Stake)) AS TurnOver,
-		--		SUM(CASE WHEN ABS(B.MOdds)> 0.25 THEN ABS(B.Stake) ELSE CASE WHEN B.MOdds IN (0.25,-0.25) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS ActualTO,
-		--		SUM(BP.AWinlost) AS AWinlost,	
-		--		ISNULL(SUM(BP.AComm) - SUM(BA.AComm),0) AS AComm,
-		--		ISNULL(SUM(BP.AWinlost) + SUM (BP.AComm) - SUM (BA.AComm),0) AS ATotal,
-		--		0,
-		--		0	
-		--FROM	AgentInfo C  WITH (NOLOCK)
-		--INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK)
-		--		ON BA.AgentID = C.AgentID
-		--INNER JOIN Bettrans B WITH (NOLOCk)
-		--		ON B.TransId = BA.TransId
-		--INNER JOIN BetTrans_Agent AS BP WITH (NOLOCK)
-		--		ON BP.TransID = BA.TransID AND BP.AgentID = @AgentID
-		--INNER JOIN  AgentPositionTaking PT WITH (NOLOCK) 
-		--		ON PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
-		--WHERE	C.ParentId = @AgentID 
-		--		AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
-		--		AND BA.StatusID NOT IN (0,1)	
-		--		AND 
-		--		(	BA.bettype < 31 
-		--			OR BA.bettype between 121 and 999
-		--			OR BA.bettype between 1301 and 1334 
-		--			OR BA.bettype BETWEEN 81 AND 120 				
-		--		) 	
-		--GROUP BY C.Username, C.AgentID, PT.MaxPositionTaking
-
-
-
-		SELECT  C.Username, C.AgentID, PT.MaxUpperPositionTaking/100 as PositionTaking,				 
+		SELECT  C.Username, C.AgentID, PT.MaxUpperPositionTaking as PositionTaking,				 
 		   		SUM(ABS(B.Stake)) AS TurnOver,
 				SUM(CASE WHEN ABS(B.MOdds)> 0.25 THEN ABS(B.Stake) ELSE CASE WHEN B.MOdds IN (0.25,-0.25) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS ActualTO,
 				SUM(BP.AWinlost) AS AWinlost,	
@@ -119,14 +79,14 @@ BEGIN
 				(	B.bettype < 31 
 					OR B.bettype between 121 and 999
 					OR B.bettype between 1301 and 1334 
-					OR B.bettype BETWEEN 81 AND 120 				
+					--OR B.bettype BETWEEN 81 AND 120 				
 				) 
 			
 		GROUP BY C.Username, C.AgentID ,  PT.MaxUpperPositionTaking
 
 
 		INSERT INTO #WinLossAgent
-		SELECT	T.Username, T.AgentID, 1 as IsAgent, T.PositionTaking/100 as PositionTaking,	
+		SELECT	T.Username, T.AgentID, 1 as IsAgent, T.PositionTaking as PositionTaking,	
 				T.TurnOver, T.ActualTO, T.AWinlost, T.AComm, T.ATotal, 
 				SUM(BA.AWINLOST) + T.ChildWinlost + T.ChildAComm AS GrossTotal,  
 				SUM(BA.AWINLOST) + T.ChildWinlost + T.ChildAComm - T.ATotal AS UplineTotal
@@ -161,12 +121,6 @@ BEGIN
 	INNER JOIN CustInfo C WITH (NOLOCK)
 		ON	B.CustID = C.CustID AND C.AgentId = @AgentID
 	WHERE	BA.AgentId = @AgentID 
-			--AND 
-			--	(	B.bettype < 31 
-			--		OR B.bettype between 121 and 999
-			--		OR B.bettype between 1301 and 1334 
-			--		OR B.bettype BETWEEN 81 AND 120 				
-			--	) 	
 			AND BA.StatusID NOT IN (0,1)
 			AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
 	---GROUP BY C.AgentId
@@ -178,7 +132,7 @@ BEGIN
 
         INSERT INTO #WinLossAgent
 	    SELECT	AgentUsername as Username, A.AgentId, 1 as IsAgent,
-				PT.MaxUpperPositionTaking/100 as PositionTaking,				 
+				PT.MaxUpperPositionTaking as PositionTaking,				 
 				SUM(Turnover) TurnOver,
 				SUM(Actual_Turnover) ActualTO,		
 				SUM(UplineWinlost) as AWinLost,
@@ -218,7 +172,7 @@ BEGIN
 		
 		INSERT INTO #WinLossAgent
 	    SELECT	AgentUsername as Username, A.AgentId, 1 as IsAgent,
-				PT.MaxUpperPositionTaking/100 as PositionTaking,				 
+				PT.MaxUpperPositionTaking as PositionTaking,				 
 				SUM(Turnover) TurnOver,
 				SUM(Actual_Turnover) ActualTO,		
 				SUM(UplineWinlost) as AWinLost,

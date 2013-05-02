@@ -3,8 +3,8 @@
 	@LeagueID INT,
 	@Language NVARCHAR(2) = 'E',
 	@sporttype smallint = 0,
-	@isShowAll bit = 1, -- 1: Show All; 0: is NOT show Test	
-	@CustID int = 0 
+	@isShowAll bit = 1 -- 1: Show All; 0: is NOT show Test	
+
 AS
 /*
 Created: Sophia
