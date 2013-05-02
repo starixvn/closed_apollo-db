@@ -1,14 +1,14 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetAgentDownLinePath]    Script Date: 4/26/2013 10:44:30 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_GetAgentDownlinePath]    Script Date: 5/2/2013 1:23:08 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 ALTER PROCEDURE [dbo].[Age_Agent_GetAgentDownlinePath]
-	@ParentId INT,
-	@AgentId INT
+	@ParentId	INT,
+	@AgentId	INT
 AS
 
 /**
@@ -25,19 +25,24 @@ AS
 
 SET NOCOUNT ON
 
-DECLARE @agentHId HIERARCHYID,
-		@parentHId HIERARCHYID
+DECLARE 
+	@agentHId	HIERARCHYID,
+	@parentHId	HIERARCHYID
 
-SELECT @agentHId = AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @AgentId
-SELECT @parentHId = AgentHId FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @ParentId
+SELECT @agentHId = AgentHId 
+FROM AgentInfo WITH (NOLOCK) 
+WHERE AgentId = @AgentId
+
+SELECT @parentHId = AgentHId 
+FROM AgentInfo WITH (NOLOCK) 
+WHERE AgentId = @ParentId
 
 SELECT 
 	AgentId, 
 	Username,
 	AgentLevel,
 	ParentId
-FROM 
-	AgentInfo WITH (NOLOCK) 
+FROM AgentInfo WITH (NOLOCK) 
 WHERE 
 	AgentHId.IsDescendantOf(@parentHId) = 1
 	AND @agentHId.IsDescendantOf(AgentHId) = 1
