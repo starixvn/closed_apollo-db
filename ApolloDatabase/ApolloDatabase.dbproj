@@ -1080,6 +1080,12 @@
     <NotInBuild Include="Agent\AccountInfo\Age_Agent_GetAllMainShareHolder.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="CSD\Write Log\WriteLog_RunSpAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Write Log\WriteLog_RunSpCust.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">
