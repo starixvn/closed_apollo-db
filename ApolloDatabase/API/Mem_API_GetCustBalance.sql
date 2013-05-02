@@ -3,7 +3,8 @@ ALTER PROCEDURE [dbo].[Mem_API_GetCustBalance]
 	@ErrCode int = 0 OUTPUT,
 	@ErrMsg nvarchar(2000) = '' OUTPUT,				
 	@osbalance money = 0 OUTPUT,
-	@balance money = 0 OUTPUT
+	@balance money = 0 OUTPUT,
+	@currency varchar(3) = '' OUTPUT
 AS
 /*
 Creator : Dan
@@ -22,14 +23,20 @@ Param's Explanation:
 • @ErrMsg: Error description.
 */
 
-if NOT EXISTS(
-		Select 1
-		from SVRCUST.CustDB.dbo.custinfo as ci with (NOLOCK) 
-		where ci.custid = @custid)
+declare @currencyid int
+Select @currencyid = [Currency]
+from SVRCUST.CustDB.dbo.custinfo as ci with (NOLOCK) 
+where ci.custid = @custid
+
+if @@ROWCOUNT=0
 BEGIN
 	Select @ErrMsg = 'Invalid Cust ID.', @ErrCode = 101
 	return
 END
+
+SELECT @currency = [Code]
+FROM [Exchange] WITH (NOLOCK) 
+WHERE [exchangeid] = @currencyid
 
 SELECT  
 	@Balance = ISNULL(SUM(winlost-actual_stake+playercomm),0),
