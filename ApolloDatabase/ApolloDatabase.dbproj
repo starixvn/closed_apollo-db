@@ -891,9 +891,6 @@
     <NotInBuild Include="CSD\Admin\DBA_Exec.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_SelBalanceUpDay.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="CSD\Settlement\Acc_SelSports.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
