@@ -37,7 +37,7 @@ Param's Explanation:
 SET NOCOUNT ON
 
 
-CREATE TABLE #Betlist (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVARCHAR(50), 
+CREATE TABLE #Betlist ( TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVARCHAR(50), 
 						HomeId INT, AwayId INT, SportType TINYINT, LeagueId INT, IsNeutral BIT, BetStatus NVARCHAR(50),
 						Username NVARCHAR(50), BetType SMALLINT, CustId INT , Hdp1 SMALLMONEY, Hdp2 SMALLMONEY, Odds SMALLMONEY, MOdds SMALLMONEY,
 						Status VARCHAR(10), Stake MONEY, Actual_Stake MONEY, TransDate DATETIME, BetTeam VARCHAR(10), BetId BIGINT, 
@@ -83,7 +83,7 @@ BEGIN
 					m.SportType,
 					m.LeagueId, 
 					m.IsNeutral,
-					m.BetStatus,
+					ISNULL(e.BetStatus,'') AS BetStatus ,
 					B.Username,
 					B.BetType,
 					B.CustId,
@@ -113,13 +113,14 @@ BEGIN
 					B.Oddstype,		
 					B.DoubleCommLosing
  			FROM 	BetTrans AS B  WITH (NOLOCK) 
-					INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId					
+				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId					
+				LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
 			WHERE 	B.StatusId in (SELECT StatusId FROM #StatusId ) 
 					AND	B.TransDate Between @FromDate AND @ToDate	
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
 							OR B.bettype between 1301 and 1334 
-							OR B.bettype BETWEEN 81 AND 120 				
+							--OR B.bettype BETWEEN 81 AND 120 				
 						) 		
 					
 
@@ -228,7 +229,7 @@ BEGIN
 					m.SportType,
 					m.LeagueId, 
 					m.IsNeutral,
-					m.BetStatus,
+					ISNULL(e.BetStatus,'') AS BetStatus,
 					B.Username,
 					B.BetType,
 					B.CustId,
@@ -261,7 +262,7 @@ BEGIN
 					BetTrans AS B  WITH (NOLOCK) 
 					INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId  
 					INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId
-					
+					LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
 				WHERE 
 					BA.AgentId = @AgentId 
 					AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 
@@ -269,7 +270,7 @@ BEGIN
 					AND (	BA.bettype < 31 
 							OR BA.bettype between 121 and 999
 							OR BA.bettype between 1301 and 1334 
-							OR BA.bettype BETWEEN 81 AND 120 				
+							--OR BA.bettype BETWEEN 81 AND 120 				
 						) 		
 					
 
@@ -382,7 +383,7 @@ BEGIN
 				m.SportType,
 				m.LeagueId, 
 				m.IsNeutral,
-				m.BetStatus,
+				ISNULL(e.BetStatus,'') AS BetStatus,
 				B.Username,
 				B.BetType,
 				B.CustId,
@@ -413,7 +414,8 @@ BEGIN
 				B.DoubleCommLosing
  			FROM 
 				BetTrans AS B  WITH (NOLOCK) 				
-				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 			
+				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 
+				LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId			
 			WHERE 
 				B.CustID = @CustId 
 				AND B.StatusId in (SELECT StatusId FROM #StatusId )   	
@@ -421,7 +423,7 @@ BEGIN
 				AND (	B.bettype < 31 
 						OR B.bettype between 121 and 999
 						OR B.bettype between 1301 and 1334 
-						OR B.bettype BETWEEN 81 AND 120 				
+						--OR B.bettype BETWEEN 81 AND 120 				
 					) 		
 				
 
@@ -537,7 +539,7 @@ BEGIN
 				m.SportType,
 				m.LeagueId, 
 				m.IsNeutral,
-				m.BetStatus,
+				ISNULL(e.BetStatus,'') AS BetStatus,
 				B.Username,
 				B.BetType,
 				B.CustId,
@@ -572,13 +574,14 @@ BEGIN
 				INNER JOIN BetTrans_Agent AS L WITH (NOLOCK )  ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 				LEFT JOIN Bettrans_Agent D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
 				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 						
+				LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
 			WHERE BA.AgentId =  @AgentId
 				AND B.StatusId in (SELECT StatusId FROM #StatusId )  
 				AND B.TransDate Between @FromDate AND @ToDate	
 				AND (	B.bettype < 31 
 						OR B.bettype between 121 and 999
 						OR B.bettype between 1301 and 1334 
-						OR B.bettype BETWEEN 81 AND 120 				
+						--OR B.bettype BETWEEN 81 AND 120 				
 					) 			
 			
 
@@ -696,7 +699,7 @@ BEGIN
 				m.SportType,
 				m.LeagueId, 
 				m.IsNeutral,
-				m.BetStatus,
+				ISNULL(e.BetStatus,'') AS BetStatus,
 				B.Username,
 				B.BetType,
 				B.CustId,
@@ -730,13 +733,14 @@ BEGIN
 				INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 				LEFT JOIN Bettrans_Agent D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
 				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 		
+				LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
 			WHERE	B.CustID = @CustId  
 				AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
 				AND B.TransDate Between @FromDate AND @ToDate	
 				AND (	B.bettype < 31 
 						OR B.bettype between 121 and 999
 						OR B.bettype between 1301 and 1334 
-						OR B.bettype BETWEEN 81 AND 120 				
+						--OR B.bettype BETWEEN 81 AND 120 				
 					) 		
 				
 			

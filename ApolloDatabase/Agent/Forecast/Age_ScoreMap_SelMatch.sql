@@ -29,18 +29,19 @@ BEGIN
 	SET NOCOUNT ON
 
 	SELECT 
-		MatchId, 
+		m.MatchId, 
 		HomeId, 
 		AwayId
-	FROM Match WITH (NOLOCK)
+	FROM Match m WITH (NOLOCK)
+	LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
 	WHERE 
 		LeagueId = @LeagueId
-		AND EventStatus <> 'completed'
-		AND MatchId IN (	SELECT DISTINCT MatchId
+		AND e.EventStatus <> 'completed'
+		AND m.MatchId IN (	SELECT DISTINCT MatchId
 							FROM BetTrans_Agent WITH (NOLOCK)
 							WHERE 
 								AgentId = @AgentId
 								AND StatusId IN (0,1)
-								AND Ruben = 0 
+								AND e.Ruben = 0 
 								AND BetType IN (1, 2, 3, 4, 5, 6, 7, 8, 12, 13, 15, 20, 21, 24, 25, 26, 27, 28, 30, 121, 122, 123) )
 END

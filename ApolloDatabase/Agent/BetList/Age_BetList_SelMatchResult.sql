@@ -19,9 +19,11 @@ SET NOCOUNT ON
 		BEGIN	
 			SELECT 
 				m.sporttype, 
-				m.betstatus, 
-				hthomescore,
-				htawayscore,
+				ISNULL(e.betstatus, '') AS betstatus,
+				ISNULL(e.hthomescore,0) AS hthomescore,
+				ISNULL(e.htawayscore,0) AS htawayscore,
+				ISNULL(e.finalhomescore,0) AS finalhomescore ,
+				ISNULL(e.finalawayscore,0) AS finalawayscore,
 				datediff(minute,kickofftime,CURRENT_TIMESTAMP) playtime,
 				m.LeagueID,
 				m.matchid, 
@@ -29,23 +31,22 @@ SET NOCOUNT ON
 				m.awayID,
 				m.matchcode,
 				m.kickofftime,
-				m.eventdate,
-				m.finalhomescore,
-				m.finalawayscore,
-				case when m.betstatus like 'Refund FT%' then 'Refund FT' 
-							 when m.betstatus like 'Refund HT%' then 'Refund HT'
-							 when m.betstatus like 'Refund%' then 'Refund' 
-							else m.eventstatus end as eventstatus,
-				isnull(mr.refund,0) IsRefund, 
-				isnull(mr.calrefund,0) IsCalRefund,
+				m.eventdate,				
+				CASE WHEN ISNULL(e.betstatus,'') like 'Refund FT%' THEN 'Refund FT' 
+							 WHEN ISNULL(e.betstatus,'') like 'Refund HT%' THEN 'Refund HT'
+							 WHEN ISNULL(e.betstatus,'') like 'Refund%' THEN 'Refund' 
+							ELSE ISNULL(e.eventstatus,'') END as eventstatus,
+				isnull(e.refund,0) IsRefund, 
+				isnull(e.calrefund,0) IsCalRefund,
 				isnull(m.isNeutral, CONVERT(BIT,0)) as IsNeutral,
-				m.goalrecord,
-				ISNULL(mr.IsHTCal,0) as IsHTCal,
-				ISNULL(mr.calculate,0) as calculate	,
+				ISNULL(e.goalrecord, '') AS goalrecord,
+				ISNULL(e.IsHTCal,0) as IsHTCal,
+				ISNULL(e.calculate,0) as calculate	,
 				ISNULL(mr.IsPending,0) as IsPending	,
 				m.showtime
 			FROM match m WITH(NOLOCK)
 				LEFT OUTER JOIN match_remark mr WITH(NOLOCK) ON m.matchid = mr.matchid
+				LEFT OUTER JOIN match_remark_ex e WITH(NOLOCK) ON m.matchid = e.matchid
 			WHERE m.matchid = @matchid
 			ORDER BY m.eventdate,m.matchcode
 			RETURN
@@ -55,9 +56,11 @@ SET NOCOUNT ON
 		BEGIN
 			SELECT 
 				m.sporttype, 
-				m.betstatus, 
-				hthomescore,
-				htawayscore,
+				ISNULL(e.betstatus, '') AS betstatus,
+				ISNULL(e.hthomescore,0) AS hthomescore,
+				ISNULL(e.htawayscore,0) AS htawayscore,
+				ISNULL(e.finalhomescore,0) AS finalhomescore ,
+				ISNULL(e.finalawayscore,0) AS finalawayscore,
 				datediff(minute,kickofftime,CURRENT_TIMESTAMP) playtime,
 				m.LeagueID,
 				m.matchid, 
@@ -66,60 +69,60 @@ SET NOCOUNT ON
 				m.matchcode,
 				m.kickofftime,
 				m.eventdate,
-				m.finalhomescore,
-				m.finalawayscore,
-				case when m.betstatus like 'Refund FT%' then 'Refund FT' 
-							 when m.betstatus like 'Refund HT%' then 'Refund HT'
-							 when m.betstatus like 'Refund%' then 'Refund' 
-							else m.eventstatus end as eventstatus,
-				isnull(mr.refund,0) IsRefund, 
-				isnull(mr.calrefund,0) IsCalRefund,
+				CASE WHEN ISNULL(e.betstatus,'') like 'Refund FT%' THEN 'Refund FT' 
+							 WHEN ISNULL(e.betstatus,'') like 'Refund HT%' THEN 'Refund HT'
+							 WHEN ISNULL(e.betstatus,'') like 'Refund%' THEN 'Refund' 
+							ELSE ISNULL(e.eventstatus,'') END as eventstatus,
+				isnull(e.refund,0) IsRefund, 
+				isnull(e.calrefund,0) IsCalRefund,
 				isnull(m.isNeutral, CONVERT(BIT,0)) as IsNeutral,
-				m.goalrecord,
-				ISNULL(mr.IsHTCal,0) as IsHTCal,
-				ISNULL(mr.calculate,0) as calculate,
+				ISNULL(e.goalrecord, '') AS goalrecord,
+				ISNULL(e.IsHTCal,0) as IsHTCal,
+				ISNULL(e.calculate,0) as calculate	,
 				ISNULL(mr.IsPending,0) as IsPending	,
 				m.showtime
 			FROM match14 m WITH(NOLOCK)		
 				LEFT OUTER JOIN match_remark mr WITH(NOLOCK) ON m.matchid = mr.matchid
+				LEFT OUTER JOIN match_remark_ex e WITH(NOLOCK) ON m.matchid = e.matchid
 			WHERE m.matchid = @matchid
 			ORDER BY m.eventdate,m.matchcode
 			RETURN
 		END
-		--ELSE
-		--BEGIN
-		--	SELECT 
-		--		m.sporttype, 
-		--		m.betstatus, 
-		--		hthomescore,
-		--		htawayscore,
-		--		datediff(minute,kickofftime,CURRENT_TIMESTAMP) playtime,
-		--		m.LeagueID,
-		--		m.matchid, 
-		--		m.homeID,
-		--		m.awayID,
-		--		m.matchcode,
-		--		m.eventdate,
-		--		m.kickofftime,
-		--		m.finalhomescore,
-		--		m.finalawayscore,
-		--		case when m.betstatus like 'Refund FT%' then 'Refund FT' 
-		--					 when m.betstatus like 'Refund HT%' then 'Refund HT'
-		--					 when m.betstatus like 'Refund%' then 'Refund' 
-		--					else m.eventstatus end as eventstatus,
-		--		isnull(mr.refund,0) IsRefund,  
-		--		isnull(mr.calrefund,0) IsCalRefund,
-		--		isnull(m.isNeutral, CONVERT(BIT,0)) as IsNeutral,
-		--		m.goalrecord,
-		--		ISNULL(mr.IsHTCal,0) as IsHTCal,
-		--		ISNULL(mr.calculate,0) as calculate,
-		--		ISNULL(mr.IsPending,0) as IsPending,
-		--		m.showtime 
-		--	FROM SVRARC.bodb_archive.dbo.Match_BK m WITH(NOLOCK)		
-		--		LEFT OUTER JOIN match_remark mr WITH(NOLOCK) ON m.matchid = mr.matchid
-		--	WHERE m.matchid = @matchid
-		--	ORDER BY m.eventdate,m.matchcode
-		--END						
+		ELSE
+		BEGIN
+			SELECT 
+				m.sporttype, 
+				ISNULL(e.betstatus, '') AS betstatus,
+				ISNULL(e.hthomescore,0) AS hthomescore,
+				ISNULL(e.htawayscore,0) AS htawayscore,
+				ISNULL(e.finalhomescore,0) AS finalhomescore ,
+				ISNULL(e.finalawayscore,0) AS finalawayscore,
+				datediff(minute,kickofftime,CURRENT_TIMESTAMP) playtime,
+				m.LeagueID,
+				m.matchid, 
+				m.homeID,
+				m.awayID,
+				m.matchcode,
+				m.kickofftime,
+				m.eventdate,
+				CASE WHEN ISNULL(e.betstatus,'') like 'Refund FT%' THEN 'Refund FT' 
+							 WHEN ISNULL(e.betstatus,'') like 'Refund HT%' THEN 'Refund HT'
+							 WHEN ISNULL(e.betstatus,'') like 'Refund%' THEN 'Refund' 
+							ELSE ISNULL(e.eventstatus,'') END as eventstatus,
+				isnull(e.refund,0) IsRefund, 
+				isnull(e.calrefund,0) IsCalRefund,
+				isnull(m.isNeutral, CONVERT(BIT,0)) as IsNeutral,
+				ISNULL(e.goalrecord, '') AS goalrecord,
+				ISNULL(e.IsHTCal,0) as IsHTCal,
+				ISNULL(e.calculate,0) as calculate	,
+				ISNULL(mr.IsPending,0) as IsPending	,
+				m.showtime
+			FROM SVRARC.ArchiveDB.dbo.Match_BK m WITH (NOLOCK)		
+				LEFT OUTER JOIN match_remark mr WITH (NOLOCK) ON m.matchid = mr.matchid
+				LEFT OUTER JOIN match_remark_ex e WITH (NOLOCK) ON m.matchid = e.matchid
+			WHERE m.matchid = @matchid
+			ORDER BY m.eventdate,m.matchcode
+		END						
 	END
 	
 

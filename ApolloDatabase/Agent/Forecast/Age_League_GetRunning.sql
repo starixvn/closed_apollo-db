@@ -39,8 +39,9 @@ SELECT
 FROM 
 	League AS l WITH (NOLOCK) 
 	INNER JOIN Match AS m WITH (NOLOCK) ON l.leagueid = m.LeagueId
+	LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
 WHERE  
-	m.EventStatus = 'running'
+	e.EventStatus = 'running'
 	AND m.MatchId IN (	SELECT DISTINCT bt.MatchId 
 						FROM 
 							BetTrans_Agent AS bta WITH (NOLOCK)

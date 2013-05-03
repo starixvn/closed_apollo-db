@@ -31,11 +31,12 @@ BEGIN
 		m.LeagueId, 
 		m.SportType
 	FROM 
-		match AS m WITH (NOLOCK) 
+		match AS m WITH (NOLOCK)
+		LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId 
 		INNER JOIN BetTrans_Agent AS ba WITH (NOLOCK) ON m.MatchId = ba.MatchId
 	WHERE 
 		ba.AgentId = @AgentId 
-		AND m.eventstatus <> 'completed' 
+		AND e.eventstatus <> 'completed' 
 		AND	m.matchid IN (	SELECT DISTINCT matchid 
 							FROM bettrans WITH (NOLOCK)
 							WHERE 

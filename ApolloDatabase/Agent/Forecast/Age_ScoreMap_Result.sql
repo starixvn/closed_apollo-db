@@ -435,13 +435,14 @@ BEGIN
 	
 		-- get matchs to refer in score map
 	SELECT 
-		matchid, 
+		m.matchid, 
 		homeid, 
 		awayid
-	FROM match WITH (NOLOCK)
+	FROM match m WITH (NOLOCK)
+	LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
 	WHERE 
-		eventstatus <> 'completed'
-		AND matchid IN (SELECT val FROM strSplit(@matchids, ','))
+		e.eventstatus <> 'completed'
+		AND m.matchid IN (SELECT val FROM strSplit(@matchids, ','))
 
 END
 
