@@ -963,9 +963,6 @@
     <NotInBuild Include="Agent\BetList\Age_BetList_SelWinloss_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_AgentDetail_Old.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="Agent\Customer Setting\Age_Customer_UpdatePositionTaking.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
