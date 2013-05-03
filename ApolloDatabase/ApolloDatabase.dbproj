@@ -315,9 +315,6 @@
     <NotInBuild Include="Agent\BetList\Age_BetList_TotalBets_SelRunningByBettypeMatch.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\AccountInfo\Age_Customer_GetByAgent.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="Agent\Function\StrSplit.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -439,9 +436,6 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetPositionTakingForUpdate.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetUplineInfo.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Customer Setting\Age_Agent_Insert.sql">
