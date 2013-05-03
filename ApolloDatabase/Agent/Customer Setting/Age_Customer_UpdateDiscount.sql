@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateDiscount]    Script Date: 3/29/2013 10:45:18 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateDiscount]    Script Date: 4/17/2013 2:55:07 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -10,8 +10,7 @@ ALTER PROCEDURE [dbo].[Age_Customer_UpdateDiscount]
 	@ActorAgentId	INT				= NULL,
 	@CustId			INT,	
 	@UGroup			VARCHAR(3),
-	@Discount		VARCHAR(MAX)	= '',
-	@Discount3rd	VARCHAR(MAX)	= '',
+	@Discount		VARCHAR(MAX)	= '',	
 	@LogDate		DATETIME		= NULL,
 	@ErrCode		INT				= 0			OUTPUT,
 	@ErrMsg			NVARCHAR(1000)	= ''		OUTPUT 		
@@ -59,9 +58,7 @@ BEGIN
 			,@endRun			DATETIME  
 			,@duration			INT
 			,@logSPData			VARCHAR(5000)
-			,@logSPDataOld		VARCHAR(5000)
-			,@logSPData3rd		VARCHAR(5000)
-			,@logSPDataOld3rd	VARCHAR(5000)	        		
+			,@logSPDataOld		VARCHAR(5000)		
 			,@xml				XML
 
 	SET @startRun = GETDATE()			
@@ -194,7 +191,7 @@ BEGIN
 							ON cd.SportType		= td.SportType
 							AND cd.BetType		= td.BetType
 					WHERE cd.CustId			= @CustId				
-					FOR XML PATH('z')
+					FOR XML PATH('z'), ROOT('r')
 			)
 
 			SET @logSPDataOld = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
@@ -232,28 +229,19 @@ BEGIN
 						,td.BetType			AS '@b'
 						,td.Discount		AS '@d'						
 					FROM @DiscountTable AS td						
-					FOR XML PATH('z')
+					FOR XML PATH('z'), ROOT('r')
 			)
 
 			SET @logSPData = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
 
 			-- end write log 
 		END
-	
-	/*------- Update 3rd--------*/
-
-	EXEC Age_Customer_UpdateDiscount3rd @ActorAgentId, @CustId, @Discount3rd, @ErrCode OUTPUT, @ErrMsg OUTPUT, @logSPData3rd OUTPUT, @logSPDataOld3rd OUTPUT  	
-
-	/*--------------------------*/	  	
 
 	SET @endRun		= GETDATE()  
 	SET @duration	= DATEDIFF(millisecond, @startRun, @endRun) 
 
 	IF @LogDate IS NULL
 		SET @LogDate = GETDATE()
-
-	SELECT @logSPData = CONCAT('<r g="'+@UGroup+'">',@logSPData,@logSPData3rd,'</r>')
-	SELECT @logSPDataOld = CONCAT('<r g="'+@OldUGroup+'">',@logSPDataOld,@logSPDataOld3rd,'</r>')
 
 	EXEC LogDB.dbo.Age_LogRunSp_Insert
 		@UserId			= @ActorAgentId,

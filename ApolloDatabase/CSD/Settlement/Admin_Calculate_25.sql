@@ -25,7 +25,7 @@ Declare @modds smallmoney, @commWinRate smallmoney, @commLostRate smallmoney, @D
 		AWinLost,AComm,APositionTaking, ADiscount, cast(0 as smallmoney) as DownlinePT, 
 		hdp1, hdp2,	livehomescore, 	liveawayscore, betteam, ba.bettype, ba.Status, ba.StatusId
 	INTO #ba 
-	FROM BetTrans B WITH (NOLOCK) JOIN BetTrans_Agent ba WITH (NOLOCK,INDEX=CIX_MatchId_AgentId_BetType) ON 
+	FROM BetTrans B WITH (NOLOCK) JOIN BetTrans_Agent ba WITH (NOLOCK) ON 
 		b.TransId=ba.TransId and ba.matchid=b.matchid AND ba.bettype=b.bettype 
 		JOIN AgentInfo a WITH (NOLOCK) ON a.AgentID=ba.AgentID
 	WHERE
@@ -113,7 +113,7 @@ Declare @modds smallmoney, @commWinRate smallmoney, @commLostRate smallmoney, @D
 		aComm = #ba.aComm,			
 		Status = #BA.Status,
 		StatusID = #ba.StatusId			
-	FROM BetTrans_Agent with (INDEX=CIX_MatchId_AgentId_BetType)
+	FROM BetTrans_Agent 
 			join #ba ON BetTrans_Agent.TransId = #ba.TransId AND BetTrans_Agent.AgentId = #ba.AgentId
 	WHERE BetTrans_Agent.matchid=@matchid AND
 		BetTrans_Agent.bettype=@bettype AND

@@ -6,8 +6,6 @@ ALTER PROCEDURE  [dbo].[Acc_Set_ConfirmedAction]
 @fta smallint = NULL,
 @hth smallint = NULL,
 @hta smallint = NULL,
-@ballSeq tinyint = NULL,
-@ballNumber tinyint = NULL,
 @goalrecord varchar(50)= NULL,
 @betstatus nvarchar(50) = NULL
 AS	
@@ -15,7 +13,7 @@ AS
  * Created by	: Kaden
  * Date			: 20130318
  * Task			: Update Confirmed Action value
- * DB			: APL.ProdDB
+ * DB			: SVRPRO/ProdDB
  * Revisions	:
  *	•
  * Parameters:
@@ -37,7 +35,7 @@ BEGIN
 		UPDATE match_log WITH(ROWLOCK, UPDLOCK) SET [Disabled] = 1	WHERE matchid = @matchid
 	END
 	-- Insert into match_log
-	INSERT INTO match_log(Matchid, Hthomescore, Htawayscore, FinalHomeScore, FinalAwayScore, BetStatus, GoalRecord, ActionId, BallSeq, BallNumber)
-	VALUES(@matchid, @hth, @hta, @fth, @fta, @betstatus, @goalrecord, @action, @ballSeq, @ballNumber)
+	INSERT INTO match_log(Matchid, Hthomescore, Htawayscore, FinalHomeScore, FinalAwayScore, BetStatus, GoalRecord, ActionId)
+	VALUES(@matchid, @hth, @hta, @fth, @fta, @betstatus, @goalrecord, @action)
 END
 GRANT EXECUTE ON [dbo].[Acc_Set_ConfirmedAction] TO [aplweb]	

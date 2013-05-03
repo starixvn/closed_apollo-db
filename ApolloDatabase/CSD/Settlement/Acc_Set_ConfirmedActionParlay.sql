@@ -20,7 +20,7 @@ BEGIN
 
 	INSERT INTO match_log(Matchid, ActionId)
 	SELECT	matchid, @actionid	
-	FROM SVRPRO.ProdDB.dbo.Match WITH (ROWLOCK)
+	FROM dbo.Match WITH (ROWLOCK)
 	WHERE matchid IN (SELECT val FROM dbo.strSplit(@matchids,','))
 END
 GRANT EXECUTE ON [dbo].[Acc_Set_ConfirmedActionParlay] TO [aplweb]	

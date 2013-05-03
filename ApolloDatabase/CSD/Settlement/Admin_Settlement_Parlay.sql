@@ -94,10 +94,11 @@ BEGIN
 	)
 
 	INSERT INTO @match(matchid,matchcode, eventdate,fth, fta, hth, hta, SportType, betstatus, GoalRecord)
-			SELECT	matchid,matchcode, eventdate,	finalhomescore_ext, finalawayscore_ext, hthomescore_ext, htawayscore_ext,
-					SportType, betstatus_ext, GoalRecord_ext
-			FROM SVRPRO.ProdDB.dbo.Match with (rowlock)
-			WHERE matchid IN (SELECT val FROM dbo.strSplit(@matchids,','))
+			SELECT	m.matchid, m.matchcode, m.eventdate, mr.finalhomescore, mr.finalawayscore, mr.hthomescore, mr.htawayscore,
+					m.SportType, mr.betstatus, mr.GoalRecord
+			FROM SVRPRO.ProdDB.dbo.match m 
+				LEFT JOIN SVRPRO.ProdDB.dbo.match_remark_ex mr with (rowlock) ON m.matchid=mr.matchid
+			WHERE m.matchid IN (SELECT val FROM dbo.strSplit(@matchids,','))
 
 	IF EXISTS (SELECT 1 FROM @match	WHERE fth is null or fta is null or hth is null or hta is null)
 	BEGIN			

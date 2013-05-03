@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_TotalBets_20_21]    Script Date: 4/2/2013 8:55:31 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_TotalBets_20_21]    Script Date: 4/26/2013 11:19:37 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -14,7 +14,7 @@ AS
  * Created by	: Terry.Nguyen
  * Date			: 20130228
  * Task			: Get Total Bets(Money Line Bettype) data for Agent
- * DB			: APL.TransDB
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	• 20132801@Terry.Nguyen	: Implement
  * Parameters:
@@ -36,22 +36,22 @@ SELECT
 	bt.LiveHomeScore,
 	bt.LiveAwayScore,
 	
-	SUM((CASE WHEN bt.BetType = 20 THEN (CASE WHEN bt.BetTeam = 'h' THEN bt.APositionTaking * bt.Stake ELSE 0 END) * (CASE WHEN ABS(bt.Odds) < 1 THEN 1 ELSE ABS(bt.Odds) END) ELSE 0 END)) AS Home_Odds,
-	SUM((CASE WHEN bt.BetType = 20 THEN (CASE WHEN bt.BetTeam = 'a' THEN bt.APositionTaking * bt.Stake ELSE 0 END) * (CASE WHEN ABS(bt.Odds) < 1 THEN 1 ELSE ABS(bt.Odds) END) ELSE 0 END)) AS Away_Odds,
+	SUM((CASE WHEN bt.BetType = 20 THEN (CASE WHEN bt.BetTeam = 'h' THEN bt.APositionTaking * bt.Stake ELSE 0 END) * (CASE WHEN ABS(bt.Odds) < 1 THEN 1 ELSE ABS(bt.Odds) END) ELSE 0 END)) AS HomeOdds,
+	SUM((CASE WHEN bt.BetType = 20 THEN (CASE WHEN bt.BetTeam = 'a' THEN bt.APositionTaking * bt.Stake ELSE 0 END) * (CASE WHEN ABS(bt.Odds) < 1 THEN 1 ELSE ABS(bt.Odds) END) ELSE 0 END)) AS AwayOdds,
 	
-	SUM(CASE WHEN bt.BetType = 20 THEN (CASE WHEN bt.BetTeam = 'h' THEN bt.Stake * (CASE WHEN bt.Odds < 0 THEN 1 ELSE bt.Odds END) * bt.APositionTaking ELSE - bt.Actual_Stake * bt.APositionTaking END) ELSE 0 END ) AS WinLost_Home,
-	SUM(CASE WHEN bt.BetType = 20 THEN (CASE WHEN bt.BetTeam = 'a' THEN bt.Stake * (CASE WHEN bt.Odds < 0 THEN 1 ELSE bt.Odds END) * bt.APositionTaking ELSE - bt.Actual_Stake * bt.APositionTaking END) ELSE 0 END) AS WinLost_Away,
+	SUM(CASE WHEN bt.BetType = 20 THEN (CASE WHEN bt.BetTeam = 'h' THEN bt.Stake * (CASE WHEN bt.Odds < 0 THEN 1 ELSE bt.Odds END) * bt.APositionTaking ELSE - bt.Actual_Stake * bt.APositionTaking END) ELSE 0 END ) AS HomeWinLost,
+	SUM(CASE WHEN bt.BetType = 20 THEN (CASE WHEN bt.BetTeam = 'a' THEN bt.Stake * (CASE WHEN bt.Odds < 0 THEN 1 ELSE bt.Odds END) * bt.APositionTaking ELSE - bt.Actual_Stake * bt.APositionTaking END) ELSE 0 END) AS AwayWinLost,
 	
-	SUM((CASE WHEN bt.BetType = 21 THEN (CASE WHEN bt.BetTeam = 'h' THEN bt.APositionTaking * bt.Stake ELSE 0 END) * (CASE WHEN ABS(bt.Odds) < 1 THEN 1 ELSE ABS(bt.Odds) END) ELSE 0 END)) AS Home_Odds_HT,
-	SUM((CASE WHEN bt.BetType = 21 THEN (CASE WHEN bt.BetTeam = 'a' THEN bt.APositionTaking * bt.Stake ELSE 0 END) * (CASE WHEN ABS(bt.Odds) < 1 THEN 1 ELSE ABS(bt.Odds) END) ELSE 0 END)) AS Away_Odds_HT,
+	SUM((CASE WHEN bt.BetType = 21 THEN (CASE WHEN bt.BetTeam = 'h' THEN bt.APositionTaking * bt.Stake ELSE 0 END) * (CASE WHEN ABS(bt.Odds) < 1 THEN 1 ELSE ABS(bt.Odds) END) ELSE 0 END)) AS HomeOddsHT,
+	SUM((CASE WHEN bt.BetType = 21 THEN (CASE WHEN bt.BetTeam = 'a' THEN bt.APositionTaking * bt.Stake ELSE 0 END) * (CASE WHEN ABS(bt.Odds) < 1 THEN 1 ELSE ABS(bt.Odds) END) ELSE 0 END)) AS AwayOddsHT,
 	
-	SUM(CASE WHEN bt.BetType = 21 THEN (CASE WHEN bt.BetTeam = 'h' THEN bt.Stake * (CASE WHEN bt.Odds < 0 THEN 1 ELSE bt.Odds END)* bt.APositionTaking ELSE - bt.Actual_Stake * bt.APositionTaking END) ELSE 0 END) AS WinLost_Home_HT,
-	SUM(CASE WHEN bt.BetType = 21 THEN (CASE WHEN bt.BetTeam = 'a' THEN bt.Stake * (CASE WHEN bt.Odds < 0 THEN 1 ELSE bt.Odds END)* bt.APositionTaking ELSE - bt.Actual_Stake * bt.APositionTaking END) ELSE 0 END) AS WinLost_Away_HT,
+	SUM(CASE WHEN bt.BetType = 21 THEN (CASE WHEN bt.BetTeam = 'h' THEN bt.Stake * (CASE WHEN bt.Odds < 0 THEN 1 ELSE bt.Odds END)* bt.APositionTaking ELSE - bt.Actual_Stake * bt.APositionTaking END) ELSE 0 END) AS HomeWinLostHT,
+	SUM(CASE WHEN bt.BetType = 21 THEN (CASE WHEN bt.BetTeam = 'a' THEN bt.Stake * (CASE WHEN bt.Odds < 0 THEN 1 ELSE bt.Odds END)* bt.APositionTaking ELSE - bt.Actual_Stake * bt.APositionTaking END) ELSE 0 END) AS AwayWinLostHT,
 
-	SUM(CASE WHEN bt.BetType = 20 AND bt.BetTeam = 'h' THEN BetCount ELSE 0 END) AS BetCount_Home,
-	SUM(CASE WHEN bettype = 20 AND bt.BetTeam = 'a'  THEN BetCount ELSE 0 END) AS BetCount_Away,
-	SUM(CASE WHEN bt.BetType = 21 AND bt.BetTeam = 'h' THEN BetCount ELSE 0 END) AS BetCount_Home_HT,
-	SUM(CASE WHEN bettype = 21 AND bt.BetTeam = 'a'  THEN BetCount ELSE 0 END) AS BetCount_Away_HT,
+	SUM(CASE WHEN bt.BetType = 20 AND bt.BetTeam = 'h' THEN BetCount ELSE 0 END) AS HomeBetCount,
+	SUM(CASE WHEN bettype = 20 AND bt.BetTeam = 'a'  THEN BetCount ELSE 0 END) AS AwayBetCount,
+	SUM(CASE WHEN bt.BetType = 21 AND bt.BetTeam = 'h' THEN BetCount ELSE 0 END) AS HomeBetCountHT,
+	SUM(CASE WHEN bettype = 21 AND bt.BetTeam = 'a'  THEN BetCount ELSE 0 END) AS AwayBetCountHT,
 
 	ISNULL(m.isNeutral, CONVERT(BIT, 0)) AS IsNeutral
 FROM

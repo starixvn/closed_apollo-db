@@ -19,23 +19,40 @@ SET NOCOUNT ON
  
 
 SELECT DISTINCT 
-		league.sporttype, outright.leagueid, outright.eventdate, outright.teamid, 
-		outright.status
-	FROM         
-		(SELECT leagueid, eventdate, teamid, status
-		 FROM dbo.outright AS o1 with (nolock)
-		 where oddsstatus = 'completed' and [status] IN ('WON','REFUND')
-			and eventdate >= @FromDate and eventdate <= @ToDate
-		 UNION ALL
-		 SELECT leagueid, eventdate, teamid, status
-		 FROM dbo.outright14 AS o14 with (nolock)
-		 where oddsstatus = 'completed' and [status] IN ('WON','REFUND')
-			and eventdate >= @FromDate and eventdate <= @ToDate
-		) AS outright 
-		 INNER JOIN dbo.league with (nolock) on outright.leagueid = league.leagueid
-	WHERE (league.sporttype <=99 ) ---OR league.sporttype = 161)
-		  and (league.isTest = 0 OR @isShowAll = 1)
-	ORDER BY outright.leagueid,outright.eventdate, outright.teamid
+       league.sporttype,
+       outright.leagueid,
+       outright.eventdate,
+       outright.teamid,
+       outright.status
+FROM   (
+           SELECT leagueid,
+                  eventdate,
+                  teamid,
+                  STATUS
+           FROM   dbo.outright AS o1 WITH (NOLOCK)
+           WHERE  oddsstatus = 'completed'
+                  AND [status] IN ('WON', 'REFUND')
+                  AND eventdate >= @FromDate
+                  AND eventdate <= @ToDate
+           UNION ALL
+           SELECT leagueid,
+                  eventdate,
+                  teamid,
+                  STATUS
+           FROM   dbo.outright14 AS o14 WITH (NOLOCK)
+           WHERE  oddsstatus = 'completed'
+                  AND [status] IN ('WON', 'REFUND')
+                  AND eventdate >= @FromDate
+                  AND eventdate <= @ToDate
+       ) AS outright
+       INNER JOIN dbo.league WITH (NOLOCK)
+            ON  outright.leagueid = league.leagueid
+WHERE  (league.sporttype <= 99) ---OR league.sporttype = 161)
+       AND (league.isTest = 0 OR @isShowAll = 1)
+ORDER BY
+       outright.leagueid,
+       outright.eventdate,
+       outright.teamid
 	
 	
 GO

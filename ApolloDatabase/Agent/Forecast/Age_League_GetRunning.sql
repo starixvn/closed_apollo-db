@@ -1,13 +1,13 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_League_GetRunning]    Script Date: 4/4/2013 9:08:35 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_League_GetRunning]    Script Date: 5/2/2013 12:46:34 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 ALTER PROCEDURE [dbo].[Age_League_GetRunning]
-	@AgentID		INT,	
+	@AgentID	INT,
 	@Bettypes	VARCHAR(100) = '0'--0: all, 1:1,3,7,8; 5:5,15 
 AS
 
@@ -15,12 +15,12 @@ AS
  * Created by	: Quinn
  * Date			: 20130301
  * Task			: SELECT running Leagues for 1,3,5,7,8,15 bet types
- * DB			: APL.DB05
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	•
  * Parameters:
- *	@AgID: agent ID
- *	@Bettypes: bet types
+ *	@AgentID	: agent ID
+ *	@Bettypes	: bet types
  *  
  */
 
@@ -39,8 +39,9 @@ SELECT
 FROM 
 	League AS l WITH (NOLOCK) 
 	INNER JOIN Match AS m WITH (NOLOCK) ON l.leagueid = m.LeagueId
+	LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
 WHERE  
-	m.EventStatus = 'running'
+	e.EventStatus = 'running'
 	AND m.MatchId IN (	SELECT DISTINCT bt.MatchId 
 						FROM 
 							BetTrans_Agent AS bta WITH (NOLOCK)
@@ -54,4 +55,3 @@ GROUP BY
 	l.leaguename, 
 	m.sporttype
 ORDER BY l.leaguename
-

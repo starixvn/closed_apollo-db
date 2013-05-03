@@ -7,7 +7,7 @@ AS
  * Created by	: Kaden
  * Date			: 20130402
  * Task			: Update Match Hedge
- * DB			: APL.ProdDB
+ * DB			: SVRPRO/ProdDB
  * Revisions	:
  *	•
  * Parameters:
@@ -25,14 +25,15 @@ BEGIN
 	WHERE
 		matchid = @matchid
 
-	SELECT @hedgeMatchId = matchid FROM match WITH (NOLOCK)
+	SELECT @hedgeMatchId = match.matchid 
+	FROM match WITH (NOLOCK) LEFT JOIN match_remark_ex mr WITH (NOLOCK) ON match.matchid = mr.matchid
 	WHERE leagueid = @leagueid
 		AND homeid = @homeid
 		AND awayid = @awayid
 		AND eventdate = @eventdate
-		AND matchid <> @matchid
+		AND match.matchid <> @matchid
 		AND matchcode LIKE '%hedge%'
-		AND (eventstatus_ext IS NULL OR eventstatus_ext <> N'completed')
+		AND (mr.eventstatus IS NULL OR mr.eventstatus <> N'completed')
 
 	IF(@hedgeMatchId>0)
 	BEGIN 

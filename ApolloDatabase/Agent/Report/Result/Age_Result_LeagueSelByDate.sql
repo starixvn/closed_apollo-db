@@ -19,33 +19,34 @@ Revisions:
 
 SET NOCOUNT ON
 
-declare @toDate datetime
-Select @toDate = dateadd(s,-1, dateadd(d, 1, @EventDate))
+DECLARE @toDate datetime
+SELECT @toDate = dateadd(s,-1, dateadd(d, 1, @EventDate))
 
 IF @sporttype <= 99 --- OR @sporttype = 161
 BEGIN
-	select distinct league.leaguename,
-		league.leagueid, match.eventdate, match.sporttype
-	from league (nolock)
-	inner join 
-	(
-		select matchid, leagueid, eventdate, eventstatus, sporttype
-		from match (nolock)
-		UNION ALL
-		select matchid, leagueid, eventdate, eventstatus, sporttype
-		from match14 (nolock)
-	) match on match.leagueid = league.leagueid
-	LEFT OUTER JOIN match_remark mr WITH(NOLOCK) ON match.matchid = mr.matchid
-	where
-		match.eventdate >= @EventDate
-		and match.eventdate <= @toDate
-		and (match.eventstatus not in ('internal','closed','running')
-				OR ( mr.IsPending=1 AND match.eventstatus IN ('running','closed') )
-				OR ( mr.IsHTCal = 1 AND match.eventstatus ='running')
-			)
-		and match.sporttype = case when @sporttype = 0 then match.sporttype else @sporttype end
-		and (league.isTest = 0 OR @isShowAll = 1)
-	order by match.sporttype, league.leaguename
+	SELECT	DISTINCT league.leaguename,
+			league.leagueid, match.eventdate, match.sporttype
+	FROM	league WITH (NOLOCK)
+	INNER JOIN (
+				SELECT	m.matchid, m.leagueid, m.eventdate, m.sporttype
+				FROM	match m WITH (NOLOCK)	
+				WHERE	m.eventdate BETWEEN @EventDate AND @toDate	
+						and m.sporttype = case when @sporttype = 0 then m.sporttype else @sporttype end	
+				UNION ALL
+				SELECT  m.matchid, m.leagueid, m.eventdate, m.sporttype
+				FROM	match14 m WITH (NOLOCK)
+				WHERE	m.eventdate BETWEEN @EventDate AND @toDate	
+						and m.sporttype = case when @sporttype = 0 then m.sporttype else @sporttype end	
+				) match 
+			ON match.leagueid = league.leagueid
+	LEFT OUTER JOIN match_remark mr WITH (NOLOCK) ON match.matchid = mr.matchid
+	LEFT OUTER JOIN match_remark_ex e WITH (NOLOCK) ON match.matchid = e.matchid
+	WHERE	( e.eventstatus not in ('internal','closed','running')
+					OR ( mr.IsPending=1 AND e.eventstatus IN ('running','closed') )
+					OR ( e.IsHTCal = 1 AND e.eventstatus ='running')
+				)
+			and (league.isTest = 0 OR @isShowAll = 1)
+	ORDER BY match.sporttype, league.leaguename
 END
 
 

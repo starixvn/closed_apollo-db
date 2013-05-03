@@ -26,13 +26,17 @@ Revisions:
 		@matchCode nvarchar(50)
 
 	SELECT
-			@fth = FinalHomeScore_ext, @fta = FinalAwayScore_ext,
-			@hth = HTHomeScore_ext, @HTA = HTAwayScore_ext,
 			@sporttype = SportType,
-			@betstatus = betstatus_ext,
-			@GoalRecord = IsNull(GoalRecord_ext, ''),
 			@matchCode = IsNull(matchCode, '')
 	FROM	SVRPRO.ProdDB.dbo.Match with (nolock) WHERE matchid = @matchid
+
+	SELECT
+			@fth = FinalHomeScore, @fta = FinalAwayScore,
+			@hth = HTHomeScore, @HTA = HTAwayScore,			
+			@betstatus = betstatus,
+			@GoalRecord = IsNull(GoalRecord, '')			
+	FROM	SVRPRO.ProdDB.dbo.match_remark_ex with (nolock) WHERE matchid = @matchid
+
 
 	Declare @TennisTotal smallint, @T_Home smallint, @T_Away smallint
 	IF @SportType IN (5, 6, 9, 30) -- Tennis/VolleyBall/Badminton/Squash : get TotalGamesPlayed

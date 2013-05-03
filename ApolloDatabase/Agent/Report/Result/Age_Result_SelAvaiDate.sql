@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE [dbo].[Age_Result_SelAvaiDate]
+ALTER PROCEDURE [dbo].[Age_Result_SelAvaiDate]
 AS
 
 /*
@@ -16,17 +16,18 @@ Revisions:
 SET NOCOUNT ON
 
 
-select distinct eventdate
-from match (nolock)
-where match.eventstatus not in ('internal','closed','running')
+SELECT DISTINCT m.eventdate
+FROM   match m WITH (NOLOCK)
+LEFT OUTER JOIN match_remark_ex e WITH (NOLOCK) ON m.matchid = e.matchid
+WHERE  e.eventstatus NOT IN ('internal', 'closed', 'running')
 
 UNION ALL
 
-select distinct eventdate
-from match14 match (nolock)
-where match.eventstatus not in ('internal','closed','running')
-
-order by eventdate desc
+SELECT DISTINCT m.eventdate
+FROM   match14 m WITH (NOLOCK)
+LEFT OUTER JOIN match_remark_ex e WITH (NOLOCK) ON m.matchid = e.matchid
+WHERE  e.eventstatus NOT IN ('internal', 'closed', 'running')
+ORDER BY m.eventdate DESC
 
 	
 GO

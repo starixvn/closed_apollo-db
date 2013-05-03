@@ -1,16 +1,13 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_GetPositionTaking]    Script Date: 3/29/2013 9:58:25 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_GetPositionTaking]    Script Date: 5/3/2013 5:04:12 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-
-
-
 ALTER PROCEDURE [dbo].[Age_Agent_GetPositionTaking]
-	@AgentId		INT	
+	@AgentId	INT
 AS
 
 /**
@@ -30,22 +27,16 @@ BEGIN
 	
 	SET NOCOUNT ON
 	
-	SELECT apt.SportType,
-			apt.BetType,
-			apt.IsLive,
-			apt.PresetPositionTaking,
-			apt.MaxPositionTaking			
-	FROM AgentPositionTaking AS apt WITH (NOLOCK)
-	WHERE apt.AgentId = @AgentId
-	UNION
-	SELECT apt.SportType,
-			apt.BetType,
-			apt.IsLive,
-			apt.PresetPositionTaking,
-			apt.MaxPositionTaking			
-	FROM AgentPositionTaking3rd AS apt WITH (NOLOCK)
-	WHERE apt.AgentId = @AgentId
-
+	SELECT 
+		SportType,
+		BetType,
+		IsLive,
+		MaxUpperPositionTaking,
+		MaxGivenPositionTaking,
+		MinGivenPositionTaking
+	FROM AgentPositionTaking WITH (NOLOCK)
+	WHERE AgentId = @AgentId
+	
 END
 
 GRANT EXECUTE ON [dbo].[Age_Agent_GetPositionTaking] TO [aplweb] AS [dbo]

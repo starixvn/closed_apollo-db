@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetBetLimit]    Script Date: 3/29/2013 10:05:24 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetBetLimit]    Script Date: 5/3/2013 4:58:03 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -14,8 +14,8 @@ AS
 /**
  * Created by	: Kos
  * Date			: 20130302
- * Task			: Get customer bet limit and bet limit 3rd
- * DB			: APL.CustDB
+ * Task			: Get customer bet limit
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	•	
  * Parameters:
@@ -31,22 +31,8 @@ BEGIN
 		BetType,
 		MinBet,
 		MaxBet,
-		MaxPerMatch,
-		0 AS MaxPerBall	 
+		MaxPerMatch
 	FROM CustBetLimit WITH (NOLOCK)
 	WHERE CustId = @CustId	
 
-	UNION
-
-	SELECT 
-		SportType,
-		BetType,
-		MinBet,
-		MaxBet,
-		MaxPerMatch,
-		MaxPerBall	 
-	FROM CustBetLimit3rd WITH (NOLOCK)
-	WHERE CustId = @CustId
-	
-END
-
+END	 

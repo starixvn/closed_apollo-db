@@ -82,6 +82,8 @@ WHERE	matchid = @matchid
 GROUP BY custid
 
 EXEC SVRPRO.ProdDB.dbo.Admin_Match_Update @Command = 'Admin_Settlement_Refund_All', @MatchID = @matchid, @creator = @creator , @betstatus = @betstatus
+-- in IBC, web call this after refund. But we update it in apollo as refund FT/HT
+EXEC SVRPRO.ProdDB.dbo.Admin_Match_UpdateMatchRemark @matchid, 'F'
 
 EXEC dbo.Admin_Calculate_RefundAll @matchid = @matchid
 

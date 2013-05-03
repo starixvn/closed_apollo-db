@@ -62,7 +62,7 @@ CREATE TABLE #tmp_bettrans  (
 	[winlostdate] [smalldatetime] NULL ,  	
 	[playerdiscount] [float] NULL ,  	
 	[playercomm] [money] NULL ,  	
-	[TPositionTaking] [smallmoney] NOT NULL ,
+	[TPositionTaking] [smallmoney] NULL ,
 	Tdiscount [float] NULL,  
 	[TWinLost] [money] NULL ,  
 	TComm [money] NULL,  

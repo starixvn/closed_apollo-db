@@ -83,10 +83,13 @@ DECLARE
 	@hthomescore INT, @htawayscore INT,
 	@goalrecord varchar(50), @betstatus nvarchar(50),
 	@matchdate datetime
+
+SELECT	@matchdate = eventdate		
+FROM SVRPRO.ProdDB.dbo.match WITH(NOLOCK)
+WHERE matchid=@matchid
 	
-SELECT	@matchdate = eventdate,
-		@betstatus = betstatus
-FROM match WITH(NOLOCK)
+SELECT	@betstatus = betstatus
+FROM SVRPRO.ProdDB.dbo.match_remark_ex WITH(NOLOCK)
 WHERE matchid=@matchid
 
 IF @LGOnly = 1 ---refund last goal
@@ -167,7 +170,7 @@ SELECT
 	@htawayscore = htawayscore,
 	@goalrecord = goalrecord,
 	@betstatus = betstatus
- FROM SVRPRO.ProdDB.dbo.match WITH(NOLOCK) WHERE matchid = @matchid
+ FROM SVRPRO.ProdDB.dbo.match_remark_ex WITH(NOLOCK) WHERE matchid = @matchid
 
 SELECT @Remark = 'RefundLGOnly=' + convert(char(1), @LGOnly)
 
