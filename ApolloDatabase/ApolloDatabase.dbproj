@@ -441,9 +441,6 @@
     <NotInBuild Include="Agent\Customer Setting\Age_Agent_Insert.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_SearchByUsername.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdateBetLimit.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1084,6 +1081,12 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Customer Setting\Age_Customer_GetUplineInfo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\DBA_Agent_GetPTToAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\DBA_Agent_GetPTToCustomer.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
