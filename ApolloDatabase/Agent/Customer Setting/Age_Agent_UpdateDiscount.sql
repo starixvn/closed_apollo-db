@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateDiscount]    Script Date: 5/6/2013 10:32:04 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateDiscount]    Script Date: 5/6/2013 11:25:27 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON

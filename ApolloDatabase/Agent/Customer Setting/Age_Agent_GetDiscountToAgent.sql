@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_GetDiscountToAgent]    Script Date: 5/3/2013 1:18:29 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_GetDiscountToAgent]    Script Date: 5/6/2013 12:45:14 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -46,31 +46,25 @@ BEGIN
 
 	SELECT
 		ai.AgentId,
-		ai.Username,
-		ad.DiscountA,
-		ad.DiscountB,
-		ad.DiscountC,
-		ad.DiscountD,
-		ad1x2.DiscountA	AS Discount1x2,
-		ado.DiscountA AS DiscountOthers
+		ai.Username,	
+		ai.AgentLevel,		
+		MAX(CASE WHEN ad.BetType = 1 AND ad.SportType = 1 THEN ad.DiscountA ELSE 0 END) AS DiscountA,
+		MAX(CASE WHEN ad.BetType = 1 AND ad.SportType = 1 THEN ad.DiscountB ELSE 0 END) AS DiscountB,
+		MAX(CASE WHEN ad.BetType = 1 AND ad.SportType = 1 THEN ad.DiscountC ELSE 0 END) AS DiscountC,
+		MAX(CASE WHEN ad.BetType = 1 AND ad.SportType = 1 THEN ad.DiscountD ELSE 0 END) AS DiscountD,					
+		MAX(CASE WHEN ad.Bettype = 5 AND ad.SportType = 1 THEN ad.DiscountA ELSE 0 END) AS Discount1x2,					
+		MAX(CASE WHEN ad.Bettype = 4 AND ad.SportType = 1 THEN ad.DiscountA ELSE 0 END) AS DiscountOthers
 	FROM 
-		AgentDiscount AS ad WITH (NOLOCK)
-		INNER JOIN AgentDiscount AS ad1x2 WITH (NOLOCK)	ON ad.AgentId = ad1x2.AgentId
-		INNER JOIN AgentDiscount AS ado WITH (NOLOCK) ON ad.AgentId	= ado.AgentId
+		AgentDiscount AS ad WITH (NOLOCK)		
 		INNER JOIN AgentInfo AS ai WITH (NOLOCK) ON ad.AgentId = ai.AgentId
-	WHERE
-		ad.SportType		= 1
-		AND ad.BetType		= 1
-		AND ad1x2.SportType	= 1 
-		AND ad1x2.BetType	= 5
-		AND ado.SportType	= 1
-		AND ado.BetType		= 4
-		AND ai.AgentLevel BETWEEN @actorAgentLevel AND @agentLevel
+	WHERE		
+		ai.AgentLevel BETWEEN @actorAgentLevel AND @agentLevel
 		AND @agentHId.IsDescendantOf(ai.AgentHId) = 1
 		AND ai.AgentLevel	<> 0
+	GROUP BY ai.AgentId
+			,ai.Username
+			,ai.AgentLevel
 	ORDER BY ai.AgentLevel
 	
+	
 END
-
-GRANT EXECUTE ON [dbo].[Age_Agent_GetDiscountToAgent] TO [aplweb] AS [dbo]
-

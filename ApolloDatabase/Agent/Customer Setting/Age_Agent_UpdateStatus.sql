@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateStatus]    Script Date: 4/23/2013 12:52:56 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateStatus]    Script Date: 5/6/2013 11:31:31 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -11,7 +11,6 @@ ALTER PROCEDURE [dbo].[Age_Agent_UpdateStatus]
 	@Type		TINYINT,
 	@Status		TINYINT,
 	@Modifier	INT				= NULL,
-	@LogDate	DATETIME		= NULL,
 	@ErrCode	INT				= 0			OUTPUT,
 	@ErrMsg		NVARCHAR(1000)	= ''		OUTPUT
 AS
@@ -22,7 +21,7 @@ AS
  * Task			: Update agent status
  * DB			: APL.CustDB
  * Revisions	:
- *	• 20130417@Edward : Add @LogDate and Write log
+ *	• 20130417@Edward : Write log
  * Parameters:
  *	• @Type		:	1 : Account status
  *					2 : Bet status
@@ -35,6 +34,24 @@ AS
 BEGIN
 	
 	SET NOCOUNT ON
+
+	-- Check if agent ID exists
+	IF NOT EXISTS ( SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @AgentId )
+		BEGIN
+			SELECT 
+				@ErrCode = 5100, 
+				@ErrMsg = 'Agent ID not exist [AgentId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
+			RETURN
+		END	
+
+	-- Check if agent user ID exists
+	IF NOT EXISTS ( SELECT 1 FROM AgentUser WITH (NOLOCK) WHERE AgentUserId = @AgentId )
+		BEGIN
+			SELECT 
+				@ErrCode = 5300, 
+				@ErrMsg = 'Agent user ID not exist [AgentUserId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
+			RETURN
+		END	
 
 	-- For write log
 	DECLARE 
@@ -57,7 +74,7 @@ BEGIN
 		FOR XML PATH('z'), ROOT('r')
 	)
 
-	SET @logSPDataOld = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
+	SET @logSPDataOld = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
 
 	DECLARE @AgentHId HIERARCHYID
 	DECLARE @CurrentStatus TINYINT
@@ -66,6 +83,7 @@ BEGIN
 	DECLARE @CurrentUplineBetStatus TINYINT
 	DECLARE @CurrentAgentUserStatus TINYINT
 
+	-- Get information
 	SELECT 
 		@AgentHId = AgentHId,
 		@CurrentStatus = Status,
@@ -91,7 +109,7 @@ BEGIN
 					IF @@ERROR > 0
 						BEGIN
 							SELECT 
-								@ErrCode = 1107, 
+								@ErrCode = 6100, 
 								@ErrMsg = 'Failed to update agent status [AgentId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
 							RETURN
 						END	
@@ -124,7 +142,7 @@ BEGIN
 							IF @@ERROR > 0
 								BEGIN
 									SELECT 
-										@ErrCode = 1207, 
+										@ErrCode = 6300, 
 										@ErrMsg = 'Failed to update agent user status [AgentUserId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
 									RETURN
 								END	
@@ -140,7 +158,7 @@ BEGIN
 					IF @@ERROR > 0
 						BEGIN
 							SELECT 
-								@ErrCode = 1207, 
+								@ErrCode = 6300, 
 								@ErrMsg = 'Failed to update agent user status [AgentUserId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
 							RETURN
 						END	
@@ -156,7 +174,7 @@ BEGIN
 			IF @@ERROR > 0
 				BEGIN
 					SELECT 
-						@ErrCode = 1107, 
+						@ErrCode = 6100, 
 						@ErrMsg = 'Failed to update agent status [AgentId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
 					RETURN
 				END	
@@ -194,18 +212,26 @@ BEGIN
 
 	SET @endRun = GETDATE()  
 	SET @duration = DATEDIFF(MILLISECOND, @startRun, @endRun) 
-
-	IF @LogDate IS NULL
-		SET @LogDate = GETDATE()	
-
-	EXEC LogDB.dbo.Age_LogRunSp_Insert
-		@UserId			= @Modifier,
-		@SPName			= 'Age_Agent_UpdateStatus',
-		@LogDate		= @LogDate,
-		@ObjectId		= @AgentId,
-		@ObjectTypeId	= 1,			-- Object type : Agent
-		@Duration		= @Duration,
-		@Data			= @logSPData,
-		@OldData		= @logSPDataOld
 		
+	IF @@Error = 0
+		BEGIN TRY
+			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
+			@UserId			= @Modifier,
+			@SPName			= 'Age_Agent_UpdateStatus',
+			@LogDate		= @startRun,
+			@AgentId		= @AgentId,
+			@Duration		= @Duration,
+			@Data			= @logSPData,
+			@OldData		= @logSPDataOld
+		END	TRY
+		BEGIN CATCH
+			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
+			@UserId			= @Modifier,
+			@SPName			= 'Age_Agent_UpdateStatus',
+			@LogDate		= @startRun,
+			@AgentId		= @AgentId,
+			@Duration		= @Duration,
+			@Data			= @logSPData,
+			@OldData		= @logSPDataOld
+		END CATCH 	
 END

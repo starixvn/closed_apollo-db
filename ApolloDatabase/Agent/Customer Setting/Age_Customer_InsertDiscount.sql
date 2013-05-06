@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_InsertDiscount]    Script Date: 4/17/2013 2:54:24 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_InsertDiscount]    Script Date: 5/6/2013 12:42:03 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -11,8 +11,7 @@ ALTER PROCEDURE [dbo].[Age_Customer_InsertDiscount]
 	@AgentId	INT,
 	@UGroup		VARCHAR(3),
 	@Discount	VARCHAR(MAX)	= '',
-	@Creator	INT				= NULL,
-	@LogDate	DATETIME		= NULL,
+	@Creator	INT				= NULL,	
 	@ErrCode	INT				= 0			OUTPUT,
 	@ErrMsg		NVARCHAR(1000)	= ''		OUTPUT 		
 AS
@@ -87,12 +86,12 @@ BEGIN
 	SELECT @sportType = SportType 
 	FROM @DiscountTable 
 	WHERE 
-		(Discount NOT BETWEEN 0 AND 0.0025 AND SportType = 1 AND BetType = 1 AND @UGroup = 'a')		-- Group A
-		OR (Discount NOT BETWEEN 0 AND 0.005 AND SportType = 1 AND BetType = 1 AND @UGroup = 'b')	-- Group B
+		(Discount NOT BETWEEN 0 AND 0.0225 AND SportType = 1 AND BetType = 1 AND @UGroup = 'a')		-- Group A
+		OR (Discount NOT BETWEEN 0 AND 0.0125 AND SportType = 1 AND BetType = 1 AND @UGroup = 'b')	-- Group B
 		OR (Discount NOT BETWEEN 0 AND 0.0075 AND SportType = 1 AND BetType = 1 AND @UGroup = 'c')	-- Group C
-		OR (Discount NOT BETWEEN 0 AND 0.01 AND SportType = 1 AND BetType = 1 AND @UGroup = 'd')	-- Group D
-		OR (Discount NOT BETWEEN 0 AND 0.0025 AND SportType = 1 AND BetType = 5)					-- 1x2
-		OR (Discount NOT BETWEEN 0 AND 0.01 AND SportType = 1 AND BetType = 4)						-- Others
+		OR (Discount NOT BETWEEN 0 AND 0 AND SportType = 1 AND BetType = 1 AND @UGroup = 'd')	-- Group D
+		OR (Discount NOT BETWEEN 0 AND 0 AND SportType = 1 AND BetType = 5)					-- 1x2
+		OR (Discount NOT BETWEEN 0 AND 0 AND SportType = 1 AND BetType = 4)						-- Others
 
 	IF @sportType IS NOT NULL 
 		BEGIN
@@ -122,10 +121,10 @@ BEGIN
 			WHEN SportType = 1 AND BetType = 4 THEN MIN(DiscountA)		-- Others
 			ELSE
 				CASE 
-					WHEN @UGroup = 'a' THEN MIN(DiscountA)
-					WHEN @UGroup = 'b' THEN MIN(DiscountB)
-					WHEN @UGroup = 'c' THEN MIN(DiscountC)
-					WHEN @UGroup = 'd' THEN MIN(DiscountD)
+					WHEN @UGroup = 'A' THEN MIN(DiscountA)
+					WHEN @UGroup = 'B' THEN MIN(DiscountB)
+					WHEN @UGroup = 'C' THEN MIN(DiscountC)
+					WHEN @UGroup = 'D' THEN MIN(DiscountD)
 				END
 		END
 	FROM AgentDiscount WITH (NOLOCK)
@@ -180,17 +179,26 @@ BEGIN
 
 	SET @endRun		= GETDATE()  
 	SET @duration	= DATEDIFF(millisecond, @startRun, @endRun) 
-
-	IF @LogDate IS NULL
-		SET @LogDate = GETDATE()	
-
-	EXEC LogDB.dbo.Age_LogRunSp_Insert
-		@UserId			= @Creator,
-		@SPName			= 'Age_Customer_InsertDiscount',
-		@LogDate		= @LogDate,
-		@ObjectId		= @CustId,
-		@ObjectTypeId	= 2,			--Object type : Customer						
-		@Duration		= @Duration,
-		@Data			= @logSPData,
-		@OldData		= @logSPDataOld  	
+	
+	IF @@Error = 0
+		BEGIN TRY
+			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
+			@UserId			= @Creator,
+			@SPName			= 'Age_Customer_InsertDiscount',
+			@LogDate		= @startRun,
+			@CustId			= @CustId,
+			@Duration		= @Duration,
+			@Data			= @logSPData,
+			@OldData		= @logSPDataOld
+		END	TRY
+		BEGIN CATCH
+			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpCust
+			@UserId			= @Creator,
+			@SPName			= 'Age_Customer_InsertDiscount',
+			@LogDate		= @startRun,
+			@CustId			= @CustId,
+			@Duration		= @Duration,
+			@Data			= @logSPData,
+			@OldData		= @logSPDataOld
+		END CATCH  	
 END

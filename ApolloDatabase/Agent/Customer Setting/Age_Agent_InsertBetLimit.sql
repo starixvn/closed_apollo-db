@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_InsertBetLimit]    Script Date: 4/17/2013 2:50:14 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_InsertBetLimit]    Script Date: 5/6/2013 11:24:35 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -9,8 +9,7 @@ GO
 ALTER PROCEDURE [dbo].[Age_Agent_InsertBetLimit]
 	@AgentId	INT,
 	@BetLimit	VARCHAR(MAX)	= '',
-	@Creator	INT				= NUL,
-	@LogDate	DATETIME		= NULL,
+	@Creator	INT				= NUL,	
 	@ErrCode	INT				= 0			OUTPUT,
 	@ErrMsg		NVARCHAR(1000)	= ''		OUTPUT
 AS
@@ -221,17 +220,29 @@ BEGIN
 
 	SET @endRun		= GETDATE()
 	SET @duration	= DATEDIFF(MILLISECOND, @startRun, @endRun) 
-
-	IF @LogDate IS NULL
-		SET @LogDate = GETDATE()
-
-	EXEC LogDB.dbo.Age_LogRunSp_Insert
-		@UserId			= @Creator,
-		@SPName			= 'Age_Agent_InsertBetLimit',
-		@LogDate		= @LogDate,
-		@ObjectId		= @AgentId,
-		@ObjectTypeId	= 1,			--Object type : Agent
-		@Duration		= @Duration,
-		@Data			= @logSPData,
-		@OldData		= @logSPDataOld
+	
+	IF @@Error = 0
+		BEGIN TRY
+			EXEC SVRAGE.LogDB.dbo.Age_LogRunSp_Insert
+				@UserId			= @Creator,
+				@SPName			= 'Age_Agent_InsertBetLimit',
+				@LogDate		= @startRun,
+				@ObjectId		= @AgentId,
+				@ObjectTypeId	= 1,			
+				@Duration		= @Duration,
+				@Data			= @logSPData,
+				@OldData		= @logSPDataOld
+		END	TRY
+		BEGIN CATCH
+			EXEC SVRTXN.LogDB.dbo.Age_LogRunSp_Insert
+				@UserId			= @Creator,
+				@SPName			= 'Age_Agent_InsertBetLimit',
+				@LogDate		= @startRun,
+				@ObjectId		= @AgentId,
+				@ObjectTypeId	= 1,			
+				@Duration		= @Duration,
+				@Data			= @logSPData,
+				@OldData		= @logSPDataOld
+		END CATCH	
+	
 END

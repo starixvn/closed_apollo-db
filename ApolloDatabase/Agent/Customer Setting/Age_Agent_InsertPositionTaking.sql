@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_InsertPositionTaking]    Script Date: 4/17/2013 2:51:28 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_InsertPositionTaking]    Script Date: 5/6/2013 11:25:01 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -9,8 +9,7 @@ GO
 ALTER PROCEDURE [dbo].[Age_Agent_InsertPositionTaking]
 	@AgentId			INT,
 	@PositionTaking		VARCHAR(MAX)	= '',
-	@Creator			INT				= NULL,
-	@LogDate			DATETIME		= NULL,
+	@Creator			INT				= NULL,	
 	@ErrCode			INT				= 0			OUTPUT,
 	@ErrMsg				NVARCHAR(1000)	= ''		OUTPUT 			
 AS
@@ -92,9 +91,9 @@ BEGIN
 		SportType,
 		BetType,
 		IsLive,
-		PresetPositionTaking,
-		MaxPositionTaking,
-		MinPositionTaking
+		MaxUpperPositionTaking,
+		MaxGivenPositionTaking,
+		MinGivenPositionTaking
 	)
 	SELECT
 		@AgentId,
@@ -120,18 +119,27 @@ BEGIN
 	SET @logSPData = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
 
 	SET @endRun		= GETDATE()  
-	SET @duration	= DATEDIFF(millisecond, @startRun, @endRun) 
-
-	IF @LogDate IS NULL
-		SET @LogDate = GETDATE()	
-
-	EXEC LogDB.dbo.Age_LogRunSp_Insert
-		@UserId			= @Creator,
-		@SPName			= 'Age_Agent_InsertPositionTaking',
-		@LogDate		= @LogDate,
-		@ObjectId		= @AgentId,
-		@ObjectTypeId	= 1,			--Object type : Agent						
-		@Duration		= @Duration,
-		@Data			= @logSPData,
-		@OldData		= @logSPDataOld	   
+	SET @duration	= DATEDIFF(millisecond, @startRun, @endRun) 	
+	
+	IF @@Error = 0
+		BEGIN TRY
+			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
+			@UserId			= @Creator,
+			@SPName			= 'Age_Agent_InsertPositionTaking',
+			@LogDate		= @startRun,
+			@AgentId		= @AgentId,
+			@Duration		= @Duration,
+			@Data			= @logSPData,
+			@OldData		= @logSPDataOld
+		END	TRY
+		BEGIN CATCH
+			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
+			@UserId			= @Creator,
+			@SPName			= 'Age_Agent_InsertPositionTaking',
+			@LogDate		= @startRun,
+			@AgentId		= @AgentId,
+			@Duration		= @Duration,
+			@Data			= @logSPData,
+			@OldData		= @logSPDataOld
+		END CATCH 
 END

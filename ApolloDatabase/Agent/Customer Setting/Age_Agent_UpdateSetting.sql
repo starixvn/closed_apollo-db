@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateSetting]    Script Date: 5/6/2013 9:29:03 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateSetting]    Script Date: 5/6/2013 11:31:14 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -35,7 +35,7 @@ AS
 			</ROOT>	
 *	•	@PositionTaking : 
 			<ROOT>
-				<ROOT><PositionTaking SportType="4" BetType="4" IsLive="1" Preset="10" Max="1" Min="1"></PositionTaking></ROOT>
+				<PositionTaking SportType="1" BetType="1" IsLive="0" MaxUpper="122" MaxGiven="7761" MinGiven="0"></PositionTaking>
 			</ROOT>
  */
 
@@ -63,8 +63,16 @@ BEGIN
 
 	EXEC Age_Agent_UpdateBetLimit @ActorAgentId, @AgentId, @BetLimit, @Language, @ErrCode OUTPUT, @ErrMsg OUTPUT
 
+	IF @ErrCode > 0		
+		RETURN		
+
 	EXEC Age_Agent_UpdateDiscount @ActorAgentId, @AgentId, @Discount, @Language, @ErrCode OUTPUT, @ErrMsg OUTPUT
 
-	EXEC Age_Agent_UpdatePositionTaking_xtest @ActorAgentId, @AgentId, @PositionTaking, @Language, @ErrCode OUTPUT, @ErrMsg OUTPUT
+	IF @ErrCode > 0		
+		RETURN		
 
+	EXEC Age_Agent_UpdatePositionTaking @ActorAgentId, @AgentId, @PositionTaking, @Language, @ErrCode OUTPUT, @ErrMsg OUTPUT
+
+	IF @ErrCode > 0		
+		RETURN		
 END
