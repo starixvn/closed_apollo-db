@@ -5,9 +5,9 @@ ALTER PROCEDURE [dbo].[Admin_Settlement_Checking]
 	@ErrMsg nvarchar(200) = '' OUTPUT
 AS
 /*
-Created: 20090215@Khoa
-Task : Settlement checking for Next Goal Bettype
-DB: DBTXN/BODB02 
+Created: 2013/05/06
+Task : Settlement checking 
+DB: SVRTXN/TransDB 
 
 Revisions:    
 	
@@ -35,6 +35,7 @@ IF (EXISTS(
 	from bettrans (nolock) b LEFT JOIN CustDB.[dbo].[CustInfo] (nolock) c ON c.CustId =b.CustId
 		LEFT JOIN AgentInfo (nolock) ag ON ag.AgentId = c.AgentId
 		LEFT JOIN [dbo].[BetTrans_Agent] (nolock) ba on ba.TransId = b.TransId	
+	where b.matchid = @matchid
 	GROUP BY b.TransId
 	HAVING ISNULL(MAX(ag.AgentLevel),0) <> count(ba.TransId)
 	))
@@ -50,7 +51,6 @@ declare @tempBettrans as table(db varchar(10), betCNT int, runningCNT int, waiti
 declare @tempBettransAgent as table(db varchar(10), betCNT int, runningCNT int, waitingCNT int)
 
 declare @min1b int, @min2b int, @max1b int, @max2b int, @maxWaitingb int
-declare @min1ba int, @min2ba int, @max1ba int, @max2ba int, @maxWaitingba int
 
 IF (@action = 'CAL-HT')
 BEGIN
@@ -143,9 +143,11 @@ BEGIN
 	return                    
 END
 
+delete @tempBettrans
+
 IF (@action = 'CAL-HT')
 BEGIN
-	INSERT INTO @tempBettransAgent (db, betCNT, runningCNT, waitingCNT)
+	INSERT INTO @tempBettrans (db, betCNT, runningCNT, waitingCNT)
 	select 'DBTrans', 
 		count(transid), 
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
@@ -169,7 +171,7 @@ BEGIN
 END
 ELSE IF (@action = 'CAL-FT')
 BEGIN
-	INSERT INTO @tempBettransAgent (db, betCNT, runningCNT, waitingCNT)
+	INSERT INTO @tempBettrans (db, betCNT, runningCNT, waitingCNT)
 	select 'DBTrans', 
 		count(transid), 
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
@@ -196,7 +198,7 @@ BEGIN
 END
 ELSE IF (@action = 'CAL')
 BEGIN
-	INSERT INTO @tempBettransAgent (db, betCNT, runningCNT, waitingCNT)
+	INSERT INTO @tempBettrans (db, betCNT, runningCNT, waitingCNT)
 	select 'DBTrans', 
 		count(transid), 
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
@@ -222,11 +224,11 @@ BEGIN
 		and bettype not between 1301 and 1334 -- exclude sporting solution product
 END
 
-select @min1ba= min(betCNT), @max1ba = max(betCNT), @min2ba= min(runningCNT), @max2ba=max(runningCNT), @maxWaitingba = max(waitingCNT)
-from @tempBettransAgent
+select @min1b= min(betCNT), @max1b = max(betCNT), @min2b= min(runningCNT), @max2b=max(runningCNT), @maxWaitingb = max(waitingCNT)
+from @tempBettrans
 --where db <> 'DB052'
 
-IF @max1ba > @min1ba OR @max2ba > @min2ba OR @maxWaitingba > 0
+IF @max1b > @min1b OR @max2b > @min2b OR @maxWaitingb > 0
 BEGIN
 	select 
 		@ErrCode = 104, 
