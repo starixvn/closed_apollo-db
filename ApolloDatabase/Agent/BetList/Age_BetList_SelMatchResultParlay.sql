@@ -12,7 +12,7 @@ Revisions:
 BEGIN
 	SET NOCOUNT ON
 	DECLARE	@tmpParlay TABLE(
-		sporttype	INT,
+		sporttype	TINYINT,
 		leagueid	INT,
 		matchid		INT,
 		homeID		INT,
@@ -202,5 +202,4 @@ BEGIN
 END
 GO 
 GRANT EXECUTE ON [dbo].[Age_BetList_SelMatchResultParlay] TO [aplweb]
-GO
-GRANT VIEW DEFINITION ON [dbo].[Age_BetList_SelMatchResultParlay] TO [vnteam]
+GO 
