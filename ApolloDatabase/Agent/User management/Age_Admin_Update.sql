@@ -1,13 +1,13 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Admin_Update]    Script Date: 3/29/2013 10:07:32 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Admin_Update]    Script Date: 5/6/2013 4:04:47 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 ALTER PROCEDURE [dbo].[Age_Admin_Update]
-	@AdminId		INT,			
+	@AdminId		INT,
 	@FirstName		VARCHAR(50),
 	@LastName		VARCHAR(50),
 	@Username		VARCHAR(50),
@@ -22,7 +22,7 @@ AS
  * Created by	: Kos
  * Date			: 20130305
  * Task			: Update admin 
- * DB			: APL.CustDB
+ * DB			: SVRCUST.CustDB
  * Revisions	:
  *	• 
  * Parameters:
