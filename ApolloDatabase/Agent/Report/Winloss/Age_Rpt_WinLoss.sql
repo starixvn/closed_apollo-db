@@ -34,9 +34,9 @@ BEGIN
 				PT.MaxUpperPositionTaking as PositionTaking,				
 		   		SUM(ABS(B.Stake)) AS TurnOver,
 				SUM(CASE WHEN ABS(B.MOdds) > 0.25 THEN ABS(B.Stake) ELSE CASE WHEN B.MOdds IN (0.25,-0.25) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS ActualTO,
-				SUM(-(B.Winlost - B.Actual_Stake + B.TWinlost)) AS AWinlost,	
-				SUM(- B.TComm) AS AComm,
-				SUM(-(B.Winlost - B.Actual_Stake + B.TWinlost))  + SUM (- B.TComm) AS ATotal,
+				- SUM(B.Winlost - B.Actual_Stake + B.TWinlost) AS AWinlost,	
+				- SUM (B.TComm) AS AComm,
+				- (SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS ATotal,
 				0 AS GrossTotal,
 				0 AS UplineTotal	
 		FROM		AgentInfo C WITH (NOLOCK)
@@ -91,7 +91,7 @@ BEGIN
 				SUM(BA.AWINLOST) + T.ChildWinlost + T.ChildAComm AS GrossTotal,  
 				SUM(BA.AWINLOST) + T.ChildWinlost + T.ChildAComm - T.ATotal AS UplineTotal
 		FROM AgentInfo P with (nolock)  
-		INNER JOIN AgentInfo C WITH(NOLOCK) ON C.AgentHId.IsDescendantOf(P.AgentHId ) =1  AND C.AgentLevel > P.AgentLevel  --- Children of k+1 
+		INNER JOIN AgentInfo C WITH(NOLOCK) ON C.AgentHId.IsDescendantOf(P.AgentHId ) =1  AND C.AgentLevel >= P.AgentLevel  --- Children of k+1 (k+1 -> k+...)
 		INNER JOIN Bettrans_Agent BA WITH (NOLOCK) ON BA.AgentID = C.AgentID
 		INNER JOIN #T T ON T.AgentID = P.AgentID
 		WHERE	BA.StatusID NOT IN (0,1) 
@@ -104,7 +104,7 @@ BEGIN
 	END
 
 	
------Member Outstanding
+-----Member winloss
 	INSERT INTO #WinLossMember  
 	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,
 			0 as PositionTaking,				
@@ -254,8 +254,7 @@ DROP TABLE #WinLossMember
 
 GO
 GRANT EXECUTE ON [dbo].[Age_Rpt_WinLoss] TO [aplWeb]
-Go
-GRANT VIEW DEFINITION ON [dbo].[Age_Rpt_WinLoss] TO [vnteam]
+Go 
 
 
 

@@ -1,21 +1,19 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Admin_GetAll]    Script Date: 3/29/2013 9:49:30 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Admin_GetAll]    Script Date: 5/6/2013 4:06:04 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-
-ALTER PROCEDURE [dbo].[Age_Admin_GetAll]
-	
+ALTER PROCEDURE [dbo].[Age_Admin_GetAll]	
 AS
 
 /**
  * Created by	: Kos
  * Date			: 20130305
  * Task			: Get all admin 
- * DB			: APL.CustDB
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	• 
  * Parameters:
@@ -26,10 +24,10 @@ AS
 
 BEGIN
 	
-	SET NOCOUNT ON	
+	SET NOCOUNT ON
 
 	SELECT 
-		AdminId,			
+		AdminId,
 		FirstName,
 		LastName,
 		CreateDate,
@@ -41,4 +39,4 @@ BEGIN
 		IPLogin
 	FROM AdminInfo WITH (NOLOCK)
 		
-END	
+END

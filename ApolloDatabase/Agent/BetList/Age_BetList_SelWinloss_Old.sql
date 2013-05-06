@@ -103,7 +103,7 @@ CREATE TABLE #Betlist  (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						B.BetTeam,
 						B.BetId,
 						B.PlayerDiscount,
-						B.WinLost,
+						B.WinLost - B.Actual_Stake as WinLost,
 						B.PlayerComm,
 						(1 - B.TPositionTaking) AS APositionTaking,
 						NULL AS ADiscount,
@@ -155,7 +155,7 @@ CREATE TABLE #Betlist  (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						B.BetTeam,
 						B.BetId,
 						B.PlayerDiscount,
-						B.WinLost,
+						B.WinLost - B.Actual_Stake as WinLost,
 						B.PlayerComm,
 						(1 - B.TPositionTaking) AS APositionTaking,
 						NULL AS ADiscount,
@@ -201,7 +201,7 @@ SET @S2 = '
 						B.betteam,
 						B.betID,
 						B.PlayerDiscount,
-						B.WinLost,
+						B.WinLost - B.Actual_Stake as WinLost,
 						B.PlayerComm,
 						(1 - B.TPositionTaking) AS APositionTaking,
 						NULL AS ADiscount,
@@ -252,7 +252,7 @@ SET @S2 = '
 						B.BetTeam,
 						B.BetId,
 						B.PlayerDiscount,
-						B.WinLost,
+						B.WinLost - B.Actual_Stake as WinLost,
 						B.PlayerComm,
 						(1 - B.TPositionTaking) AS APositionTaking,
 						NULL AS ADiscount,
@@ -307,7 +307,7 @@ SET @S2 = '
 						B.BetTeam,
 						B.BetId,
 						B.PlayerDiscount,
-						B.WinLost,
+						B.WinLost - B.Actual_Stake as WinLost,
 						B.PlayerComm,
 						(1 - B.TPositionTaking) AS APositionTaking,
 						NULL AS ADiscount,
@@ -355,7 +355,7 @@ SET @S3 = '
 						B.betteam,
 						B.betID,
 						B.PlayerDiscount,
-						B.WinLost,
+						B.WinLost - B.Actual_Stake as WinLost,
 						B.PlayerComm,
 						(1 - B.TPositionTaking) AS APositionTaking,
 						NULL AS ADiscount,
@@ -411,7 +411,7 @@ SET @S3 = '
 					B.BetTeam,
 					B.BetId,
 					B.PlayerDiscount,
-					B.WinLost,
+					B.WinLost - B.Actual_Stake as WinLost,
 					B.PlayerComm,
 					(1 - B.TPositionTaking) AS APositionTaking,
 					NULL AS ADiscount,
@@ -466,7 +466,7 @@ SET @S3 = '
 					B.BetTeam,
 					B.BetId,
 					B.PlayerDiscount,
-					B.WinLost,
+					B.WinLost - B.Actual_Stake as WinLost,
 					B.PlayerComm,
 					(1 - B.TPositionTaking) AS APositionTaking,
 					NULL AS ADiscount,
@@ -513,7 +513,7 @@ SET @S4= '
 					B.betteam,
 					B.betID,
 					B.PlayerDiscount,
-					B.WinLost,
+					B.WinLost - B.Actual_Stake as WinLost,
 					B.PlayerComm,
 					(1 - B.TPositionTaking) AS APositionTaking,
 					NULL AS ADiscount,
@@ -571,7 +571,7 @@ SET @S4= '
 					B.BetTeam,
 					B.BetId,
 					B.PlayerDiscount,
-					B.WinLost,
+					B.WinLost - B.Actual_Stake as WinLost,
 					B.PlayerComm,
 					L.APositionTaking ,
 					L.ADiscount ,
@@ -628,7 +628,7 @@ SET @S5 = '
 					B.BetTeam,
 					B.BetId,
 					B.PlayerDiscount,
-					B.WinLost,
+					B.WinLost - B.Actual_Stake as WinLost,
 					B.PlayerComm,
 					L.APositionTaking,
 					L.ADiscount,
@@ -677,7 +677,7 @@ SET @S5 = '
 					B.betteam,
 					B.betID,
 					B.PlayerDiscount,
-					B.WinLost,
+					B.WinLost - B.Actual_Stake as WinLost,
 					B.PlayerComm,
 					L.APositionTaking,
 					L.ADiscount,
@@ -737,7 +737,7 @@ SET @S6 = '
 					B.BetTeam,
 					B.BetId,
 					B.PlayerDiscount,
-					B.WinLost,
+					B.WinLost - B.Actual_Stake as WinLost,
 					B.PlayerComm,
 					L.APositionTaking ,
 					L.ADiscount ,
@@ -792,7 +792,7 @@ SET @S6 = '
 					B.BetTeam,
 					B.BetId,
 					B.PlayerDiscount,
-					B.WinLost,
+					B.WinLost - B.Actual_Stake as WinLost,
 					B.PlayerComm,
 					L.APositionTaking,
 					L.ADiscount,
@@ -842,7 +842,7 @@ SET @S6 = '
 					B.betteam,
 					B.betID,
 					B.PlayerDiscount,
-					B.WinLost,
+					B.WinLost - B.Actual_Stake as WinLost,
 					B.PlayerComm,
 					L.APositionTaking,
 					L.ADiscount,
@@ -880,13 +880,13 @@ DROP TABLE #DirectChild
 DROP TABLE #StatusId
 
 '
-PRINT @S 
-PRINT @S1
-PRINT @S2
-PRINT @S3
-PRINT @S4
-PRINT @S5
-PRINT @S6
+--PRINT @S 
+--PRINT @S1
+--PRINT @S2
+--PRINT @S3
+--PRINT @S4
+--PRINT @S5
+--PRINT @S6
 EXEC (@S+@S1+@S2+@S3+@S4+@S5+@S6)
 
 GO

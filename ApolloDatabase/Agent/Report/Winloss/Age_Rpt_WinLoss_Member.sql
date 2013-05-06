@@ -29,15 +29,15 @@ BEGIN
 		   		SUM(ABS(B.Stake)) AS TurnOver,
 				SUM(CASE WHEN ABS(B.MOdds)> 0.25 THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as ActualTO,
 
-				SUM(B.WinLost) AS WinLost,
+				SUM(B.WinLost - B.Actual_Stake) AS WinLost,
 				SUM(B.PlayerComm) AS PlayerComm,
-				SUM(B.WinLost) + SUM(B.PlayerComm) AS MemTotal,
+				SUM(B.WinLost - B.Actual_Stake) + SUM(B.PlayerComm) AS MemTotal,
 				
 				SUM(BA.AWinLost) AS AWinLost,	
 				SUM(BA.AComm) - SUM (B.PlayerComm) AS AComm,
 				SUM(BA.AWinLost) + SUM(BA.AComm) - SUM (B.PlayerComm) AS ATotal,
 
-				(SUM(B.WinLost) + SUM(B.PlayerComm)) - (SUM(BA.AWinLost) + SUM(BA.AComm) - SUM (B.PlayerComm))AS UplineTotal
+				- (SUM(B.WinLost - B.Actual_Stake)  + SUM(BA.AWinLost) + SUM(BA.AComm)) AS UplineTotal
 		FROM		Bettrans B WITH (NOLOCK)
 		INNER JOIN	BetTrans_Agent BA WITH (NOLOCK)
 				ON	BA.TransID = B.TransID
@@ -57,7 +57,7 @@ BEGIN
 		GROUP BY C.Username, C.CustID, PT.PositionTaking
 
 		    
-	IF @BalanceUpDay < @FromDate --if this case occurs then there is no data from sum_winloss_old
+	IF @BalanceUpDay < @FromDate --if this case occurs then there is no data from Sum_WinLoss_Cust_Old
 		SELECT @BalanceUpDay=@FromDate
 
   		INSERT INTO #WinLossMember
@@ -73,7 +73,7 @@ BEGIN
 				SUM(UplineComm) as AComm,
 				SUM(UplineWinlost) + SUM(UplineComm) AS ATotal,
 
-				SUM(WinLost + PlayerComm) + SUM(UplineWinlost) + SUM(UplineComm) as UplineTotal
+				- (SUM(WinLost) + SUM(UplineWinlost) + SUM(UplineComm)) as UplineTotal
 	    FROM	Sum_WinLoss_Cust A WITH(NOLOCK) 
 		INNER JOIN	CustPositionTaking PT WITH (NOLOCK) 
 				ON	PT.CustID = A.CustID AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
@@ -98,7 +98,7 @@ BEGIN
 				SUM(UplineWinlost) as AWinLost,
 				SUM(UplineComm) as AComm,
 				SUM(UplineWinlost) + SUM(UplineComm) AS ATotal,
-				SUM(WinLost + PlayerComm) + SUM(UplineWinlost) + SUM(UplineComm) as UplineTotal
+				- (SUM(WinLost) + SUM(UplineWinlost) + SUM(UplineComm)) as UplineTotal
 	    FROM	SVRARC.ArchiveDB.dbo.Sum_WinLoss_Cust_Old A WITH(NOLOCK) 
 		INNER JOIN	CustPositionTaking PT WITH (NOLOCK) 
 				ON	PT.CustID = A.CustID AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
@@ -106,16 +106,19 @@ BEGIN
 				AND WinLostDate BETWEEN @BalanceUpDay AND @ToDate 
 	    GROUP BY A.Username, A.CustId, PT.PositionTaking
 END 
-	    
+ 
 SELECT	Username, CustId,  PositionTaking,
 		SUM(TurnOver) as TurnOver,
 		SUM(ActualTO) as ActualTO,
-		SUM(AWinLost) as  WinLost, 
-		SUM(AComm) as PlayerComm,
-		SUM(ATotal) as MemTotal,
+
+		SUM(WinLost) as  WinLost, 
+		SUM(PlayerComm) as PlayerComm,
+		SUM(MemTotal) as MemTotal,
+
 		SUM(AWinLost) as  AWinLost, 
 		SUM(AComm) as AComm,
 		SUM(ATotal) as ATotal,
+
 		SUM(UplineTotal) as UplineTotal
 FROM	#WinLossMember 
 GROUP BY Username, CustId, PositionTaking

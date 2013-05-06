@@ -26,7 +26,7 @@ AS
  * Created by	: Kos
  * Date			: 20130305
  * Task			: Add new admin 
- * DB			: APL.CustDB
+ * DB			: SVRCUST.CustDB
  * Revisions	:
  *	• 
  * Parameters:
@@ -37,10 +37,10 @@ AS
 
 BEGIN
 	
-	SET NOCOUNT ON	
+	SET NOCOUNT ON
 
 	INSERT INTO AdminInfo (
-		AdminId,			
+		AdminId,
 		FirstName,
 		LastName,
 		CreateDate,
@@ -52,7 +52,7 @@ BEGIN
 		LoginCount,
 		IPLogin)
 	VALUES (
-		@AdminId,			
+		@AdminId,
 		@FirstName,
 		@LastName,
 		@CreateDate,
@@ -73,4 +73,4 @@ BEGIN
 			RETURN
 		END
 		
-END	
+END
