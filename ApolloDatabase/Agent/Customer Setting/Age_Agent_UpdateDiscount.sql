@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateDiscount]    Script Date: 4/17/2013 2:52:55 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateDiscount]    Script Date: 5/6/2013 10:32:04 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -31,30 +31,24 @@ SELECT	'Return Value' = @return_value
 ALTER PROCEDURE [dbo].[Age_Agent_UpdateDiscount]
 	@ActorAgentId	INT				= NULL,
 	@AgentId		INT,
-	@Discount		VARCHAR(MAX)	= '',	
-	@Language		VARCHAR(2)		= 'E',
-	@LogDate		DATETIME		= NULL,
+	@Discount		VARCHAR(MAX)	= '',
+	@Language		VARCHAR(5)		= 'en-US',
 	@ErrCode		INT				= 0		OUTPUT,
-	@ErrMsg			NVARCHAR(1000)	= ''	OUTPUT 		
+	@ErrMsg			NVARCHAR(1000)	= ''	OUTPUT 
 AS
 
 /**
  * Created by	: Kos
  * Date			: 20130227
  * Task			: Update agent discount
- * DB			: APL.CustDB
+ * DB			: SVRCUST.CustDB
  * Revisions	:
  *	• 20132702@Edward	: Implement
  * Parameters:
- *	• @Discount : 		
+ *	• @Discount :
 		<ROOT>
 			<Discount SportType="4" BetType="4" DiscountA="1" DiscountB="1" DiscountC="1" DiscountD="1"></Discount>
-		</ROOT>		
- *	• @Discount3rd : 		
-			<ROOT>
-				<Discount SportType="4" BetType="4" DiscountA="1" DiscountB="1" DiscountC="1" DiscountD="1"></Discount>
-			</ROOT>		
- *  
+		</ROOT>
  */
 
 BEGIN
@@ -63,374 +57,370 @@ BEGIN
 	
 	-- Check update permission
 	DECLARE @hasPermission BIT
-	EXEC dbo.Age_Agent_CheckUpdatePermission @ActorAgentId, @AgentId, 1, @hasPermission OUTPUT 
-	SELECT @hasPermission
+
+	EXEC dbo.Age_Agent_CheckUpdatePermission @ActorAgentId, @AgentId, 1, @hasPermission OUTPUT
+
 	IF @hasPermission = 0
 		BEGIN
-			SELECT @ErrCode = 1
-			
-			SELECT @ErrMsg	= 'Do not permission for update.'
+			SELECT 
+				@ErrCode	= 1000,
+				@ErrMsg		= 
+					CASE @Language
+						WHEN 'en-US' THEN 'You do not have permission to update setting'
+						ELSE [dbo].f_Msg_GetContentById (1000, @Language)
+					END
 
-			RETURN			
+			RETURN
 		END	
 
 	-- For write log
-    DECLARE @startRun			DATETIME  
-			,@endRun			DATETIME  
+	DECLARE @startRun			DATETIME
+			,@endRun			DATETIME
 			,@duration			INT
 			,@logSPData			VARCHAR(5000)
-			,@logSPDataOld		VARCHAR(5000)			
+			,@logSPDataOld		VARCHAR(5000)
 			,@xml				XML
 
-	SET @startRun = GETDATE()			
+	SET @startRun = GETDATE()
 		
 	-- begin update	 
 
 	IF @Discount <> ''
-	BEGIN		
-		DECLARE @agentHId			HIERARCHYID
-				,@parentAgentId		INT
-				,@SUPERLEVEL		INT
+		BEGIN
+			DECLARE 
+				@agentHId		HIERARCHYID,
+				@parentAgentId	INT,
+				@SUPERLEVEL		INT
 
-		SET @SUPERLEVEL = 0
+			SET @SUPERLEVEL = 0
 
-		DECLARE @TableAgent	TABLE( AgentId INT)
+			-- Get agent hierarchy ID
+			SELECT 
+				@agentHId = AgentHId,
+				@parentAgentId = ParentId
+			FROM AgentInfo WITH (NOLOCK)
+			WHERE AgentId = @AgentId
 
-		-- Get agent hierarchy ID
-		SELECT 
-			@agentHId		= AgentHId
-			,@parentAgentId	= ParentId
-		FROM 
-			AgentInfo WITH (NOLOCK)
-		WHERE 
-			AgentId = @AgentId
+			DECLARE @TableDiscount TABLE(
+				SportType	SMALLINT,
+				BetType		SMALLINT,
+				DiscountA	DECIMAL(9,8),
+				DiscountB	DECIMAL(9,8),
+				DiscountC	DECIMAL(9,8),
+				DiscountD	DECIMAL(9,8))
 
-		DECLARE @TableDiscount TABLE(
-			SportType	SMALLINT,
-			BetType		SMALLINT,
-			DiscountA	DECIMAL(9,8),
-			DiscountB	DECIMAL(9,8),
-			DiscountC	DECIMAL(9,8),
-			DiscountD	DECIMAL(9,8))
-
-		DECLARE @TableStackDiscountUpdate TABLE(
-			AgentId		INT,			
-			SportType	SMALLINT,
-			BetType		SMALLINT,
-			DiscountA	DECIMAL(9,8),
-			DiscountB	DECIMAL(9,8),
-			DiscountC	DECIMAL(9,8),
-			DiscountD	DECIMAL(9,8))		
+			DECLARE @TableStackDiscountUpdate TABLE(
+				AgentId		INT,
+				SportType	SMALLINT,
+				BetType		SMALLINT,
+				DiscountA	DECIMAL(9,8),
+				DiscountB	DECIMAL(9,8),
+				DiscountC	DECIMAL(9,8),
+				DiscountD	DECIMAL(9,8))
 	
-		-- For read xml
-		DECLARE @DocHandler int
+			-- For read xml
+			DECLARE @DocHandler int
 
-		EXEC sp_xml_preparedocument @DocHandler OUTPUT, @Discount
+			EXEC sp_xml_preparedocument @DocHandler OUTPUT, @Discount
 
-		INSERT INTO @TableDiscount (
-			SportType,
-			BetType,
-			DiscountA,
-			DiscountB,
-			DiscountC,
-			DiscountD)			
-		SELECT 			
-			Data.SportType,
-			Data.BetType,
-			Data.DiscountA,
-			Data.DiscountB,
-			Data.DiscountC,
-			Data.DiscountD
-		FROM OPENXML (@DocHandler, '/ROOT/Discount',1) 
-		WITH (			
-			SportType		SMALLINT,
-			BetType			SMALLINT,
-			DiscountA		DECIMAL(9,8),
-			DiscountB		DECIMAL(9,8),
-			DiscountC		DECIMAL(9,8),
-			DiscountD		DECIMAL(9,8)
-		) AS Data
+			INSERT INTO @TableDiscount (
+				SportType,
+				BetType,
+				DiscountA,
+				DiscountB,
+				DiscountC,
+				DiscountD)
+			SELECT
+				Data.SportType,
+				Data.BetType,
+				Data.DiscountA,
+				Data.DiscountB,
+				Data.DiscountC,
+				Data.DiscountD
+			FROM OPENXML (@DocHandler, '/ROOT/Discount',1) 
+			WITH (
+				SportType	SMALLINT,
+				BetType		SMALLINT,
+				DiscountA	DECIMAL(9,8),
+				DiscountB	DECIMAL(9,8),
+				DiscountC	DECIMAL(9,8),
+				DiscountD	DECIMAL(9,8)
+			) AS Data
 
-		EXEC sp_xml_removedocument @DocHandler
-		-- end read xml			
+			EXEC sp_xml_removedocument @DocHandler
+			-- end read xml
 
-		IF EXISTS (
-			SELECT TOP(1) *
-			FROM 
-				AgentDiscount AS ad WITH (NOLOCK)
-			INNER JOIN @TableDiscount AS dt
-				ON ad.SportType = dt.SportType
-				AND ad.BetType = dt.BetType
-			WHERE ad.AgentId = @AgentId
-			AND (
-				ad.DiscountA	<> dt.DiscountA
-				OR ad.DiscountB <> dt.DiscountB
-				OR ad.DiscountC <> dt.DiscountC
-				OR ad.DiscountD <> dt.DiscountD
-			)
-		)
-			BEGIN		
-						   
-				DECLARE @sportType INT
+			IF EXISTS ( SELECT 1
+						FROM 
+							AgentDiscount AS ad WITH (NOLOCK)
+							INNER JOIN @TableDiscount AS dt
+							ON ad.SportType = dt.SportType
+							AND ad.BetType = dt.BetType
+						WHERE 
+							ad.AgentId = @AgentId
+							AND (
+								ad.DiscountA	<> dt.DiscountA
+								OR ad.DiscountB <> dt.DiscountB
+								OR ad.DiscountC <> dt.DiscountC
+								OR ad.DiscountD <> dt.DiscountD
+							) )
+				BEGIN
 
-				-- Check validate	range		
-				SELECT @sportType = SportType 
-				FROM @TableDiscount
-				WHERE 
-					(DiscountA NOT BETWEEN 0 AND 0.0025 AND SportType = 1 AND BetType = 1)		-- Group A
-					OR (DiscountB NOT BETWEEN 0 AND 0.005 AND SportType = 1 AND BetType = 1)	-- Group B
-					OR (DiscountC NOT BETWEEN 0 AND 0.0075 AND SportType = 1 AND BetType = 1)	-- Group C
-					OR (DiscountD NOT BETWEEN 0 AND 0.01 AND SportType = 1 AND BetType = 1)		-- Group D
-					OR (DiscountA NOT BETWEEN 0 AND 0.0025 AND SportType = 1 AND BetType = 5)	-- 1x2
-					OR (DiscountA NOT BETWEEN 0 AND 0.01 AND SportType = 1 AND BetType = 4)		-- Others		
+					DECLARE
+						@sportType	INT,
+						@groupCode	INT
 
-				IF @sportType IS NOT NULL 
-					BEGIN
-						SELECT @ErrCode = 1
+					-- Check validate range
+					SELECT	
+						@sportType = SportType ,
+						@groupCode = 
+						CASE
+							WHEN DiscountA NOT BETWEEN 0 AND 0.0225 AND SportType = 1 AND BetType = 1 THEN 2001
+							WHEN DiscountB NOT BETWEEN 0 AND 0.0125 AND SportType = 1 AND BetType = 1 THEN 2002
+							WHEN DiscountC NOT BETWEEN 0 AND 0.0075 AND SportType = 1 AND BetType = 1 THEN 2003
+							WHEN DiscountD NOT BETWEEN 0 AND 0 AND SportType = 1 AND BetType = 1 THEN 2004
+							WHEN DiscountA NOT BETWEEN 0 AND 0 AND SportType = 1 AND BetType = 5 THEN 2005
+							WHEN DiscountA NOT BETWEEN 0 AND 0 AND SportType = 1 AND BetType = 4 THEN 2006
+						END
+					FROM @TableDiscount
+					WHERE 
+						(DiscountA NOT BETWEEN 0 AND 0.0225 AND SportType = 1 AND BetType = 1)		-- Group A
+						OR (DiscountB NOT BETWEEN 0 AND 0.0125 AND SportType = 1 AND BetType = 1)	-- Group B
+						OR (DiscountC NOT BETWEEN 0 AND 0.0075 AND SportType = 1 AND BetType = 1)	-- Group C
+						OR (DiscountD NOT BETWEEN 0 AND 0 AND SportType = 1 AND BetType = 1)		-- Group D
+						OR (DiscountA NOT BETWEEN 0 AND 0 AND SportType = 1 AND BetType = 5)		-- 1x2
+						OR (DiscountA NOT BETWEEN 0 AND 0 AND SportType = 1 AND BetType = 4)		-- Others
 
-						----Message for each sport type	WITH CASE @sportType
-						SELECT @ErrMsg	= 'Invalid commission rate.' + ' (' + dbo.f_Get_SportNameBySporttype(@sportType,@Language) + ')'
-
-						RETURN			
-					END
-
-				-- Check validate min bet must be equal to or greater than parent
-				SELECT @sportType = ad.SportType
-				FROM 
-					AgentDiscount AS ad	WITH (NOLOCK)
-					INNER JOIN @TableDiscount AS dt 
-						ON ad.SportType	= dt.SportType 
-						AND ad.BetType	= dt.BetType
-					INNER JOIN AgentInfo AS ai WITH (NOLOCK)						
-						ON ad.AgentId	= ai.AgentId
-				WHERE
-					ad.AgentId = @parentAgentId
-					AND ai.AgentLevel	<> @SUPERLEVEL
-					AND (dt.DiscountA > ad.DiscountA
-						OR dt.DiscountB > ad.DiscountB
-						OR dt.DiscountC > ad.DiscountC
-						OR dt.DiscountD > ad.DiscountD)
-
-				IF @sportType IS NOT NULL 
-					BEGIN
-						SELECT @ErrCode = 1
-
-						----Message for each sport type	WITH CASE @sportType
-						SELECT @ErrMsg	= 'Min bet must be equal to or greater than Paret Agent discount.' + ' (' + dbo.f_Get_SportNameBySporttype(@sportType,@Language) + ')'						 												
-
-						RETURN	
-					END
-
-				-- write log before update
+					IF @sportType IS NOT NULL 
+						BEGIN
+							SELECT 
+								@ErrCode	= 2000,
+								@ErrMsg		= 
+									CASE @Language
+										WHEN 'en-US' THEN 'Invalid commission rate'
+										ELSE [dbo].f_Msg_GetContentById (2000, @Language)  
+									END	+ '(' + [dbo].f_Msg_GetContentById (@groupCode, @Language) + ')'
+							RETURN
+						END
 				
-				SET @xml = (
+					-- End check validate range
+
+					-- Check validate min bet must be equal to or greater than parent
+					SELECT
+						@sportType = ad.SportType,
+						@groupCode = 
+							CASE
+								WHEN dt.DiscountA > ad.DiscountA AND ad.SportType = 1 AND ad.BetType = 1 THEN 2001
+								WHEN dt.DiscountB > ad.DiscountB THEN 2002
+								WHEN dt.DiscountC > ad.DiscountC THEN 2003
+								WHEN dt.DiscountD > ad.DiscountD THEN 2004
+								WHEN dt.DiscountA > ad.DiscountA AND ad.SportType = 1 AND ad.BetType = 5 THEN 2005
+								WHEN dt.DiscountA > ad.DiscountA AND ad.SportType = 1 AND ad.BetType = 4 THEN 2006
+							END
+					FROM 
+						AgentDiscount AS ad WITH (NOLOCK)
+						INNER JOIN @TableDiscount AS dt 
+							ON ad.SportType	= dt.SportType 
+							AND ad.BetType	= dt.BetType
+						INNER JOIN AgentInfo AS ai WITH (NOLOCK) ON ad.AgentId	= ai.AgentId
+					WHERE
+						ad.AgentId = @parentAgentId
+						AND ai.AgentLevel	<> @SUPERLEVEL
+						AND (dt.DiscountA > ad.DiscountA
+							OR dt.DiscountB > ad.DiscountB
+							OR dt.DiscountC > ad.DiscountC
+							OR dt.DiscountD > ad.DiscountD)
+
+					IF @sportType IS NOT NULL 
+						BEGIN
+							SELECT 
+								@ErrCode	= 2007,
+								@ErrMsg		= 
+									CASE @Language
+										WHEN 'en-US' THEN 'Discount must be equal to or greater than Paret Agent discount'
+										ELSE [dbo].f_Msg_GetContentById (2007, @Language)  
+									END	+ '(' + [dbo].f_Msg_GetContentById (@groupCode, @Language) + ')'
+
+							RETURN	
+						END
+
+					-- write log before update
+				
+					SET @xml = (
 						SELECT  
-							ad.SportType		AS '@s'
-							,ad.BetType			AS '@b'
-							,ad.DiscountA		AS '@ga'
-							,ad.DiscountB		AS '@gb'
-							,ad.DiscountC		AS '@gc'
-							,ad.DiscountD		AS '@gd'
-						FROM AgentDiscount AS ad WITH (NOLOCK)
+							ad.SportType	AS '@s'
+							,ad.BetType		AS '@b'
+							,ad.DiscountA	AS '@ga'
+							,ad.DiscountB	AS '@gb'
+							,ad.DiscountC	AS '@gc'
+							,ad.DiscountD	AS '@gd'
+						FROM 
+							AgentDiscount AS ad WITH (NOLOCK)
 							INNER JOIN @TableDiscount AS td
 								ON ad.SportType		= td.SportType
 								AND ad.BetType		= td.BetType
-						WHERE ad.AgentId			= @AgentId				
+						WHERE ad.AgentId = @AgentId
 						FOR XML PATH('z'),ROOT('r')
-				)
+					)
 
-				SET @logSPDataOld = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
+					SET @logSPDataOld = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
 
-				-- end write log
+					-- end write log
 
-				---- Update for current agent, and for all line
-				UPDATE 
-					ad WITH (ROWLOCK, UPDLOCK)
-				SET 
-					ad.DiscountA	= dt.DiscountA,
-					ad.DiscountB	= dt.DiscountB,
-					ad.DiscountC	= dt.DiscountC,
-					ad.DiscountD	= dt.DiscountD
-				FROM 
-					AgentDiscount AS ad
-					INNER JOIN @TableDiscount AS dt 
-						ON ad.SportType = dt.SportType 
-						AND ad.BetType	= dt.BetType
-				WHERE AgentId = @AgentId    
-
-				INSERT INTO @TableAgent(AgentId)
-				VALUES(@AgentId)
-
-				-- Get discount up line
-				INSERT INTO @TableStackDiscountUpdate(
-					AgentId,					
-					SportType,
-					BetType,
-					DiscountA,
-					DiscountB,
-					DiscountC,
-					DiscountD)
-				SELECT 
-					ad.AgentId,					
-					ad.SportType,
-					ad.BetType,
-					ad.DiscountA,
-					ad.DiscountB,
-					ad.DiscountC,
-					ad.DiscountD
-				FROM 
-					AgentDiscount AS ad WITH (NOLOCK)
-					INNER JOIN AgentInfo AS ai WITH (NOLOCK)
-						ON ai.AgentId = ad.AgentId
-					INNER JOIN @TableDiscount AS td
-						ON ad.SportType = td.SportType
-						AND ad.BetType	= td.BetType					
-				WHERE 
-					ai.ParentId = @AgentId
-					AND (ad.DiscountA > td.DiscountA
-						OR ad.DiscountB > td.DiscountB
-						OR ad.DiscountC > td.DiscountC
-						OR ad.DiscountD > td.DiscountD)				
+					---- Update for current agent, and for all line
+					UPDATE ad WITH (ROWLOCK, UPDLOCK)
+					SET 
+						ad.DiscountA = dt.DiscountA,
+						ad.DiscountB = dt.DiscountB,
+						ad.DiscountC = dt.DiscountC,
+						ad.DiscountD = dt.DiscountD
+					FROM 
+						AgentDiscount AS ad
+						INNER JOIN @TableDiscount AS dt 
+							ON ad.SportType = dt.SportType 
+							AND ad.BetType	= dt.BetType
+					WHERE AgentId = @AgentId
 				
-				-- Update for upline						
-				DECLARE @TempTableAgent TABLE (AgentId INT)
+					-- Get discount up line
+					INSERT INTO @TableStackDiscountUpdate(
+						AgentId,
+						SportType,
+						BetType,
+						DiscountA,
+						DiscountB,
+						DiscountC,
+						DiscountD)
+					SELECT 
+						ad.AgentId,
+						ad.SportType,
+						ad.BetType,
+						td.DiscountA,
+						td.DiscountB,
+						td.DiscountC,
+						td.DiscountD
+					FROM 
+						AgentDiscount AS ad WITH (NOLOCK)
+						INNER JOIN AgentInfo AS ai WITH (NOLOCK) ON ai.AgentId = ad.AgentId
+						INNER JOIN @TableDiscount AS td
+							ON ad.SportType = td.SportType
+							AND ad.BetType	= td.BetType
+					WHERE 
+						ai.AgentHId.IsDescendantOf(@agentHId) = 1
+						AND ai.AgentId <> @AgentId
+						AND (ad.DiscountA > td.DiscountA
+							OR ad.DiscountB > td.DiscountB
+							OR ad.DiscountC > td.DiscountC
+							OR ad.DiscountD > td.DiscountD)
 
-				WHILE EXISTS (
-					SELECT TOP(1) * FROM @TableStackDiscountUpdate	
-				)
-					BEGIN
+					UPDATE ad WITH (ROWLOCK, UPDLOCK)
+					SET ad.DiscountA = tad.DiscountA
+					FROM AgentDiscount AS ad
+						INNER JOIN @TableStackDiscountUpdate AS tad
+							ON ad.AgentId		= tad.AgentId
+							AND ad.SportType	= tad.SportType
+							AND ad.BetType		= tad.BetType
+					WHERE ad.DiscountA > tad.DiscountA
 
-						UPDATE  
-							ad WITH (ROWLOCK, UPDLOCK)
-						SET 
-							ad.DiscountA	= pad.DiscountA,
-							ad.DiscountB	= pad.DiscountB,
-							ad.DiscountC	= pad.DiscountC,
-							ad.DiscountD	= pad.DiscountD
-						FROM AgentDiscount AS ad
-							INNER JOIN @TableStackDiscountUpdate AS tad
-								ON ad.AgentId		= tad.AgentId
-								AND ad.SportType	= tad.SportType
-								AND ad.BetType		= tad.BetType
-							INNER JOIN AgentInfo AS ai WITH (NOLOCK)
-								ON tad.AgentId		= ai.AgentId
-							INNER JOIN AgentDiscount AS pad WITH (NOLOCK)
-								ON ai.ParentId		= pad.AgentId
-								AND ad.SportType	= pad.SportType
-								AND ad.BetType		= pad.BetType								
+					UPDATE ad WITH (ROWLOCK, UPDLOCK)
+					SET ad.DiscountB	= tad.DiscountB
+					FROM 
+						AgentDiscount AS ad
+						INNER JOIN @TableStackDiscountUpdate AS tad
+							ON ad.AgentId		= tad.AgentId
+							AND ad.SportType	= tad.SportType
+							AND ad.BetType		= tad.BetType
 					
-						INSERT INTO @TableAgent(AgentId)
-						SELECT AgentId FROM @TableStackDiscountUpdate
+					UPDATE ad WITH (ROWLOCK, UPDLOCK)
+					SET ad.DiscountC	= tad.DiscountC
+					FROM 
+						AgentDiscount AS ad
+						INNER JOIN @TableStackDiscountUpdate AS tad
+							ON ad.AgentId		= tad.AgentId
+							AND ad.SportType	= tad.SportType
+							AND ad.BetType		= tad.BetType
+					
+					UPDATE ad WITH (ROWLOCK, UPDLOCK)
+					SET ad.DiscountD = tad.DiscountD
+					FROM 
+						AgentDiscount AS ad
+						INNER JOIN @TableStackDiscountUpdate AS tad
+							ON ad.AgentId		= tad.AgentId
+							AND ad.SportType	= tad.SportType
+							AND ad.BetType		= tad.BetType
 
-						DELETE @TempTableAgent
-						INSERT INTO @TempTableAgent(AgentId)
-						SELECT AgentId FROM @TableStackDiscountUpdate
-
-						DELETE @TableStackDiscountUpdate
-
-						INSERT INTO @TableStackDiscountUpdate(
-							AgentId,					
-							SportType,
-							BetType,
-							DiscountA,
-							DiscountB,
-							DiscountC,
-							DiscountD)
-						SELECT 
-							ad.AgentId,					
-							ad.SportType,
-							ad.BetType,
-							ad.DiscountA,
-							ad.DiscountB,
-							ad.DiscountC,
-							ad.DiscountD
-						FROM 
-							AgentDiscount AS ad WITH (NOLOCK)
-							INNER JOIN AgentInfo AS ai WITH (NOLOCK)
-								ON ad.AgentId		= ai.AgentId
-							INNER JOIN @TableDiscount AS td
-								ON ad.SportType		= td.SportType
-								AND ad.BetType		= td.BetType					
-							INNER JOIN AgentDiscount AS pad WITH (NOLOCK)
-								ON ai.ParentId		= pad.AgentId
-								AND ad.SportType	= pad.SportType
-								AND ad.BetType		= pad.BetType
-						WHERE	ai.ParentId IN (SELECT t.AgentId FROM @TempTableAgent AS t)
-								AND (pad.DiscountA < ad.DiscountA
-								OR pad.DiscountB < ad.DiscountB
-								OR pad.DiscountC < ad.DiscountC
-								OR pad.DiscountD < ad.DiscountD)	
-													
-					END	
-
-				IF EXISTS (
-					SELECT TOP(1) * FROM @TableAgent
-				)
-					BEGIN
-						UPDATE 
-							cd
-						SET
-							cd.Discount = CASE
-												WHEN ad.SportType = 1 AND ad.BetType = 5 THEN ad.DiscountA		-- 1x2
-												WHEN ad.SportType = 1 AND ad.BetType = 4 THEN ad.DiscountA		-- Others 
-												ELSE
-												CASE
-													WHEN ci.UGroup = 'a' THEN ad.DiscountA
-													WHEN ci.UGroup = 'b' THEN ad.DiscountB
-													WHEN ci.UGroup = 'c' THEN ad.DiscountC
-													WHEN ci.UGroup = 'd' THEN ad.DiscountD
+					IF EXISTS (
+						SELECT TOP(1) * FROM @TableStackDiscountUpdate
+					)
+						BEGIN
+							UPDATE cd
+							SET cd.Discount =	CASE
+													WHEN ad.SportType = 1 AND ad.BetType = 5 THEN ad.DiscountA		-- 1x2
+													WHEN ad.SportType = 1 AND ad.BetType = 4 THEN ad.DiscountA		-- Others 
+													ELSE
+														CASE
+															WHEN ci.UGroup = 'a' THEN ad.DiscountA
+															WHEN ci.UGroup = 'b' THEN ad.DiscountB
+															WHEN ci.UGroup = 'c' THEN ad.DiscountC
+															WHEN ci.UGroup = 'd' THEN ad.DiscountD
+														END
 												END
-											END
-						FROM 
-							CustDiscount AS cd
-							INNER JOIN @TableDiscount AS td
-								ON cd.SportType = td.SportType
-								AND cd.BetType = td.BetType
-							INNER JOIN CustInfo AS ci WITH (NOLOCK)
-								ON cd.CustId = ci.CustId
-							INNER JOIN AgentDiscount AS ad WITH (NOLOCK)
-								ON ci.AgentId = ad.AgentId
-								AND ad.SportType = cd.SportType
-								AND ad.BetType = cd.BetType
-						WHERE ad.AgentId IN (
-											SELECT AgentId FROM @TableAgent)							
+							FROM 
+								CustDiscount AS cd
+								INNER JOIN @TableDiscount AS td
+									ON cd.SportType = td.SportType
+									AND cd.BetType = td.BetType
+								INNER JOIN CustInfo AS ci WITH (NOLOCK) ON cd.CustId = ci.CustId
+								INNER JOIN AgentDiscount AS ad WITH (NOLOCK)
+									ON ci.AgentId = ad.AgentId
+									AND ad.SportType = cd.SportType
+									AND ad.BetType = cd.BetType
+							WHERE ad.AgentId IN ( SELECT DISTINCT AgentId FROM @TableStackDiscountUpdate )
 						
-					END
+						END
 
-				-- write log before update
+					-- write log before update
 				
-				SET @xml = (
+					SET @xml = (
 						SELECT  
-							ad.SportType		AS '@s'
-							,ad.BetType			AS '@b'
-							,ad.DiscountA		AS '@ga'
-							,ad.DiscountB		AS '@gb'
-							,ad.DiscountC		AS '@gc'
-							,ad.DiscountD		AS '@gd'
-						FROM @TableDiscount AS ad						
+							ad.SportType	AS '@s'
+							,ad.BetType		AS '@b'
+							,ad.DiscountA	AS '@ga'
+							,ad.DiscountB	AS '@gb'
+							,ad.DiscountC	AS '@gc'
+							,ad.DiscountD	AS '@gd'
+						FROM @TableDiscount AS ad
 						FOR XML PATH('z'),ROOT('r')
-				)
+					)
 
-				SET @logSPData = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
+					SET @logSPData = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
 
-				-- end write log
-			END	
-				 
-	END		
+					-- end write log
+				END
+
+		END
 
 	SET @endRun		= GETDATE()  
-	SET @duration	= DATEDIFF(millisecond, @startRun, @endRun) 
-
-	IF @LogDate IS NULL
-		SET @LogDate = GETDATE()
-	
-	EXEC LogDB.dbo.Age_LogRunSp_Insert
-		@UserId			= @ActorAgentId,
-		@SPName			= 'Age_Agent_UpdateDiscount',
-		@LogDate		= @LogDate,
-		@ObjectId		= @AgentId,
-		@ObjectTypeId	= 1,			--Object type : Agent						
-		@Duration		= @Duration,
-		@Data			= @logSPData,
-		@OldData		= @logSPDataOld
+	SET @duration	= DATEDIFF(MILLISECOND, @startRun, @endRun) 
+		
+	IF @@Error = 0
+		BEGIN TRY
+			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
+			@UserId		= @ActorAgentId,
+			@SPName		= 'Age_Agent_UpdateDiscount',
+			@LogDate	= @startRun,
+			@AgentId	= @AgentId,
+			@Duration	= @Duration,
+			@Data		= @logSPData,
+			@OldData	= @logSPDataOld
+		END	TRY
+		BEGIN CATCH
+			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
+			@UserId		= @ActorAgentId,
+			@SPName		= 'Age_Agent_UpdateDiscount',
+			@LogDate	= @startRun,
+			@AgentId	= @AgentId,
+			@Duration	= @Duration,
+			@Data		= @logSPData,
+			@OldData	= @logSPDataOld
+		END CATCH 
 END

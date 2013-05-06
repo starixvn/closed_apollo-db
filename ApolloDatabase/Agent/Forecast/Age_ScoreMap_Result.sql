@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_ScoreMap_Result]    Script Date: 4/2/2013 8:38:39 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_ScoreMap_Result]    Script Date: 5/2/2013 12:49:16 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -21,7 +21,7 @@ AS
  * Created by	: Terry.Nguyen
  * Date			: 20130228
  * Task			: Get data for ScoreMap
- * DB			: APL.TransDB
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	• 20132801@Terry.Nguyen	: Implement
  * Parameters:
@@ -34,11 +34,11 @@ BEGIN
 
 	SET NOCOUNT ON
 
-	DECLARE @tmpScores TABLE(
+	DECLARE @tmpScores TABLE (
 		home INT, 
 		away INT)
 
-	DECLARE @tmpBettrans TABLE(
+	DECLARE @tmpBettrans TABLE (
 		transid			BIGINT			PRIMARY KEY, 
 		betteam			NVARCHAR(10), 
 		matchid			INT, 
@@ -51,7 +51,7 @@ BEGIN
 		liveindicator	BIT, 
 		livehomescore	SMALLINT, 
 		liveawayscore	SMALLINT, 
-		apositiontaking SMALLMONEY)
+		apositiontaking SMALLMONEY )
 
 	-- get scores template
 	INSERT INTO @tmpScores (home, away) 
@@ -114,9 +114,9 @@ BEGIN
 					ELSE 0
 				END * risk)	+ 
 				SUM(CASE
-					WHEN r = 1 AND bt IN (2, 4, 5, 6, 12, 13, 15, 20, 21, 24, 25, 26, 27, 28, 30, 121, 122, 123)THEN 1
+					WHEN r = 1 AND bt IN (2, 4, 5, 6, 12, 13, 15, 20, 21, 24, 25, 26, 27, 28, 30, 121, 122, 123) THEN 1
 					ELSE 0
-				END * risk * trueodds),0) AS total
+				END * risk * trueodds), 0) AS total
 	FROM
 		(
 			SELECT 
@@ -149,9 +149,9 @@ BEGIN
 					WHEN betteam = '12' AND (home <> away) AND bt = 24 THEN 1
 					WHEN betteam = 'h' AND (home > away) AND bt = 25 THEN 1
 					WHEN betteam = 'a' AND (away > home) AND bt = 25 THEN 1
-					WHEN betteam = 'n' AND home = 0 AND away = 0 AND bt= 26 THEN 1
-					WHEN betteam = 'o' AND (home = 0 or away = 0) AND home + away >= 1 AND bt= 26 THEN 1
-					WHEN betteam = 'b' AND home + away >= 2 AND home <> 0 AND away <> 0  AND bt= 26 THEN 1
+					WHEN betteam = 'n' AND home = 0 AND away = 0 AND bt = 26 THEN 1
+					WHEN betteam = 'o' AND (home = 0 or away = 0) AND home + away >= 1 AND bt = 26 THEN 1
+					WHEN betteam = 'b' AND home + away >= 2 AND home <> 0 AND away <> 0  AND bt = 26 THEN 1
 					WHEN betteam = 'h' AND away = 0 AND home >= 1 AND bt = 27 THEN 1
 					WHEN betteam = 'a' AND home = 0 AND away >= 1 AND bt = 27 THEN 1
 					WHEN betteam = '1' AND hc + home - away > 0 AND  bt = 28 THEN 1 
@@ -199,12 +199,12 @@ BEGIN
 				SELECT
 					matchid, 
 					betteam,
-					SUM( (stake * apositiontaking * CASE WHEN odds < 0 THEN -odds ELSE 1 END ) * CASE WHEN odds <0 THEN 1/-CAST(odds AS FLOAT) ELSE odds END ) / SUM(stake * apositiontaking * CASE WHEN odds < 0 THEN -odds ELSE 1 END) trueodds,
+					SUM( (stake * apositiontaking * CASE WHEN odds < 0 THEN -odds ELSE 1 END ) * CASE WHEN odds < 0 THEN 1/-CAST(odds AS FLOAT) ELSE odds END ) / SUM(stake * apositiontaking * CASE WHEN odds < 0 THEN -odds ELSE 1 END) trueodds,
 					SUM(stake * apositiontaking * CASE WHEN odds < 0 THEN -odds ELSE 1 END) AS risk,
 					0 AS hc,
 					0 AS hd,
 					bettype AS bt
-				FROM @tmpBettrans b 
+				FROM @tmpBettrans
 				WHERE bettype IN (2, 12)
 				GROUP BY 
 					betteam, 
@@ -222,7 +222,7 @@ BEGIN
 					hdp1,
 					0 AS hd,
 					bettype AS bt
-				FROM @tmpBettrans b 
+				FROM @tmpBettrans 
 				WHERE bettype IN (3, 8)
 				GROUP BY 
 					betteam, 
@@ -343,7 +343,7 @@ BEGIN
 					matchid, 
 					betteam, 
 					SUM(stake * apositiontaking * (odds - 1)) / SUM(stake * apositiontaking) AS trueodds,
-					SUM(stake * apositiontaking ) AS risk,
+					SUM(stake * apositiontaking) AS risk,
 					0 AS hc,
 					0 AS hd,
 					25 AS bt
@@ -394,7 +394,7 @@ BEGIN
 					SUM(stake * apositiontaking) AS risk,
 					CASE 
 						WHEN betteam = '1' THEN hdp2 - hdp1
-						ELSE hdp1 - hdp2	 
+						ELSE hdp1 - hdp2
 					END AS hc,
 					0 AS hd,
 					28 AS bt
@@ -435,13 +435,14 @@ BEGIN
 	
 		-- get matchs to refer in score map
 	SELECT 
-		matchid, 
+		m.matchid, 
 		homeid, 
 		awayid
-	FROM match WITH (NOLOCK)
+	FROM match m WITH (NOLOCK)
+	LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
 	WHERE 
-		eventstatus <> 'completed'
-		AND matchid IN (SELECT val FROM strSplit(@matchids, ','))
+		e.eventstatus <> 'completed'
+		AND m.matchid IN (SELECT val FROM strSplit(@matchids, ','))
 
 END
 

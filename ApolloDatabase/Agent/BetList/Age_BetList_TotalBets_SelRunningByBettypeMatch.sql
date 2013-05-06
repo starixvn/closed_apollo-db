@@ -1,5 +1,5 @@
 ﻿
-ALTER PROCEDURE [dbo].[Age_BetList_TotalBets_SelRunningByBettypeMatch_xtest]
+ALTER PROCEDURE [dbo].[Age_BetList_TotalBets_SelRunningByBettypeMatch]
 	@MatchID int,
 	@LoggedId int,
 	@Bettype int,
@@ -120,14 +120,14 @@ BEGIN
 		(BA.AgentId = @LoggedId OR @LoggedId = 0) AND 
 		B.matchid=@matchid and 
 		B.bettype=@bettype and
-		B.statusID in (0,1) and 
-		B.Liveindicator= CASE WHEN m.sporttype = 161 THEN @liveindicator ELSE B.liveindicator END AND
-		ISNULL(B.betteam,'') = CASE WHEN m.sporttype = 161 AND ISNULL(@Betteam, '') <> '' THEN @betteam ELSE ISNULL(B.betteam,'') END
+		B.statusID in (0,1)  
+		---B.Liveindicator= CASE WHEN m.sporttype = 161 THEN @liveindicator ELSE B.liveindicator END AND
+		---ISNULL(B.betteam,'') = CASE WHEN m.sporttype = 161 AND ISNULL(@Betteam, '') <> '' THEN @betteam ELSE ISNULL(B.betteam,'') END
 
 END
 
 GO
-GRANT EXECUTE ON [dbo].[Age_BetList_TotalBets_SelRunningByBettypeMatch_xtest] TO [aplweb]
+GRANT EXECUTE ON [dbo].[Age_BetList_TotalBets_SelRunningByBettypeMatch] TO [aplweb]
 GO
 --GRANT VIEW DEFINITION ON [dbo].[Age_BetList_TotalBets_SelRunningByBettypeMatch] TO [vnteam]
  

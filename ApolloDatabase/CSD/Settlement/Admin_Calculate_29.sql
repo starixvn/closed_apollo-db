@@ -317,8 +317,8 @@ IF @@SERVERNAME IN ('DB042', 'DB043', 'DB044') RETURN
 		ruben    = CASE @statusID WHEN 0 THEN 0 ELSE 1 END,
 		winlost  = CASE @statusID WHEN 0 THEN 0 ELSE prs.winlost END,		
 		playercomm = CASE @statusID WHEN 0 THEN 0 ELSE prs.playercomm END,
-		[TWinLost] = PRS.TWinlost,
-		[TComm] =  PRS.TComm
+		[TWinLost] = CASE @statusID WHEN 0 THEN 0 ELSE PRS.TWinlost END,	
+		[TComm] = CASE @statusID WHEN 0 THEN 0 ELSE PRS.TComm END		
 				
 	FROM dbo.bettrans B with (rowlock)
 		INNER JOIN PRS with (nolock) ON B.transid = PRS.transid
@@ -365,8 +365,10 @@ IF @@SERVERNAME IN ('DB042', 'DB043', 'DB044') RETURN
 		(
 		(prs.runningStake = 0 AND ba.statusID > 0) AND
 			(  ba.winlostdate <> b.winlostdate
+			OR ba.actual_stake <> b.actual_stake
+			OR ba.StatusId <> b.StatusId
 			OR ba.awinlost <> prs.awinlost 
-			OR ba.acomm <> prs.acomm
+			OR ba.acomm <> prs.acomm			
 			)
 		)
 	

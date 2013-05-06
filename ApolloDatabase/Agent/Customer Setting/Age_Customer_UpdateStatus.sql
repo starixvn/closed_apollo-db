@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateStatus]    Script Date: 4/17/2013 3:11:10 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateStatus]    Script Date: 4/23/2013 12:55:40 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -37,25 +37,27 @@ BEGIN
 	SET NOCOUNT ON
 
 	-- For write log
-    DECLARE @startRun			DATETIME  
-			,@endRun			DATETIME  
-			,@duration			INT
-			,@logSPData			VARCHAR(5000)
-			,@logSPDataOld		VARCHAR(5000)			
-			,@xml				XML			
+    DECLARE 
+		@startRun		DATETIME,
+		@endRun			DATETIME,
+		@duration		INT,
+		@logSPData		VARCHAR(5000),
+		@logSPDataOld	VARCHAR(5000),
+		@xml			XML			
 
 	SET @startRun = GETDATE()
 
 	SET @xml = (
-		SELECT	@Type		AS '@t'
-				,Status		AS '@as'
-				,BetStatus	AS '@bs'
+		SELECT	
+			@Type		AS '@t',
+			Status		AS '@as',
+			BetStatus	AS '@bs'
 		FROM CustInfo WITH (NOLOCK)
 		WHERE CustId = @CustId
 		FOR XML PATH('z'), ROOT('r')
 	)
 
-	SET @logSPDataOld = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
+	SET @logSPDataOld = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
 
 	IF @Type = 1  			-- Account status
 		BEGIN
@@ -91,18 +93,19 @@ BEGIN
 		END
 	
 	SET @xml = (
-		SELECT	@Type		AS '@t'
-				,Status		AS '@as'
-				,BetStatus	AS '@bs'
+		SELECT	
+			@Type		AS '@t',
+			Status		AS '@as',
+			BetStatus	AS '@bs'
 		FROM CustInfo WITH (NOLOCK)
 		WHERE CustId = @CustId
 		FOR XML PATH('z'), ROOT('r')
 	)
 
-	SET @logSPData = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
+	SET @logSPData = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
 
-	SET @endRun		= GETDATE()  
-	SET @duration	= DATEDIFF(millisecond, @startRun, @endRun) 
+	SET @endRun = GETDATE()
+	SET @duration = DATEDIFF(MILLISECOND, @startRun, @endRun) 
 
 	IF @LogDate IS NULL
 		SET @LogDate = GETDATE()	
@@ -112,7 +115,7 @@ BEGIN
 		@SPName			= 'Age_Customer_UpdateStatus',
 		@LogDate		= @LogDate,
 		@ObjectId		= @CustId,
-		@ObjectTypeId	= 2,			--Object type : Customer						
+		@ObjectTypeId	= 2,			-- Object type : Customer
 		@Duration		= @Duration,
 		@Data			= @logSPData,
 		@OldData		= @logSPDataOld	

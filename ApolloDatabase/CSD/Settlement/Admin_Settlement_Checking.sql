@@ -34,8 +34,7 @@ IF (EXISTS(
 	select 1 -- b.TransId, ISNULL(MAX(ag.AgentLevel),0), count(ba.TransId)
 	from bettrans (nolock) b LEFT JOIN CustDB.[dbo].[CustInfo] (nolock) c ON c.CustId =b.CustId
 		LEFT JOIN AgentInfo (nolock) ag ON ag.AgentId = c.AgentId
-		LEFT JOIN [dbo].[BetTrans_Agent] (nolock) ba on ba.TransId = b.TransId
-	where b.matchid=3936707
+		LEFT JOIN [dbo].[BetTrans_Agent] (nolock) ba on ba.TransId = b.TransId	
 	GROUP BY b.TransId
 	HAVING ISNULL(MAX(ag.AgentLevel),0) <> count(ba.TransId)
 	))

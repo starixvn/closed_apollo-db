@@ -194,11 +194,11 @@ DECLARE
 		@finalhomescore INT, @finalawayscore INT,
 		@hthomescore INT, @htawayscore INT
 SELECT 
-		@finalhomescore = finalhomescore_ext,
-		@finalawayscore = finalawayscore_ext,
-		@hthomescore = hthomescore_ext, 
-		@htawayscore = htawayscore_ext
- FROM	SVRPRO.ProdDB.dbo.match WITH(NOLOCK) WHERE matchid = @matchid
+		@finalhomescore = finalhomescore,
+		@finalawayscore = finalawayscore,
+		@hthomescore = hthomescore, 
+		@htawayscore = htawayscore
+ FROM	SVRPRO.ProdDB.dbo.match_remark_ex WITH(NOLOCK) WHERE matchid = @matchid
  
 DECLARE	@LogData VARCHAR(200)
 SELECT @LogData = 'Calculate FGLG for matchid:' + CAST(@matchid as nvarchar(10)) 

@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetPositionTaking]    Script Date: 4/17/2013 3:02:48 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetPositionTaking]    Script Date: 5/3/2013 4:58:47 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -14,8 +14,8 @@ AS
 /**
  * Created by	: Kos
  * Date			: 20130302
- * Task			: Get customer position taking and position taking 3rd
- * DB			: APL.CustDB
+ * Task			: Get customer position taking
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	•	
  * Parameters:
@@ -26,12 +26,6 @@ BEGIN
 	
 	SET NOCOUNT ON
 	
-	DECLARE @AgentId INT
-
-	SELECT @AgentId = pli.CustId
-	FROM CustInfo AS pli WITH (NOLOCK)
-	WHERE pli.CustId = @CustId
-
 	SELECT 
 		AgentId,
 		SportType,
@@ -39,8 +33,6 @@ BEGIN
 		IsLive,
 		PositionTaking
 	FROM CustPositionTaking WITH (NOLOCK)
-	WHERE 
-		CustId = @CustId
-		AND (@AgentId IS NULL OR AgentId = @AgentId)
+	WHERE CustId = @CustId
 
 END	

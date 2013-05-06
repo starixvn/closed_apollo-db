@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_AgentUser_Insert]    Script Date: 4/17/2013 3:10:28 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_AgentUser_Insert]    Script Date: 4/23/2013 12:46:05 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -10,8 +10,8 @@ ALTER PROCEDURE [dbo].[Age_AgentUser_Insert]
 	@AgentUserId	INT,	
 	@Username		NVARCHAR(50),
 	@AgentId		INT,	
-	@PageAccess		VARCHAR(50)		= '',		
-	@Status			TINYINT			= 1,			
+	@PageAccess		VARCHAR(50)		= '',
+	@Status			TINYINT			= 1,
 	@Creator		INT				= NULL,
 	@LogDate		DATETIME		= NULL,
 	@ErrCode		INT				= 0			OUTPUT,
@@ -37,24 +37,43 @@ BEGIN
 	SET NOCOUNT ON	
 
 	-- For write log
-    DECLARE @startRun			DATETIME  
-			,@endRun			DATETIME  
-			,@duration			INT
-			,@logSPData			VARCHAR(5000)
-			,@logSPDataOld		VARCHAR(5000)			
-			,@xml				XML			
+	DECLARE 
+		@startRun		DATETIME,
+		@endRun			DATETIME,
+		@duration		INT,
+		@logSPData		VARCHAR(5000),
+		@logSPDataOld	VARCHAR(5000),
+		@xml			XML
 
 	SET @startRun = GETDATE()
 
+	-- Check if agent user ID exists
+	IF EXISTS ( SELECT 1 FROM AgentUser WITH (NOLOCK) WHERE AgentUserId = @AgentUserId )
+		BEGIN
+			SELECT 
+				@ErrCode = 1202, 
+				@ErrMsg = 'Agent user ID duplicated [AgentUserId = ' + COALESCE(CAST(@AgentUserId AS VARCHAR(10)), SPACE(1)) + ']'
+			RETURN
+		END	
+
+	-- Check if username exists
+	IF EXISTS ( SELECT 1 FROM AgentUser WITH (NOLOCK) WHERE Username = @Username )
+		BEGIN
+			SELECT 
+				@ErrCode = 1204, 
+				@ErrMsg = 'Username duplicated [Username = ' + COALESCE(@Username, SPACE(1)) + ']'
+			RETURN
+		END	
+
 	-- Insert into AgentUser
-	INSERT INTO AgentUser(
+	INSERT INTO AgentUser (
 		AgentUserId,
 		AgentId,
 		Username,
 		IsMaster,
-		PageAccess,		
+		PageAccess,
 		CreateDate,
-		Creator,		
+		Creator,
 		LoginCount,
 		Status)
 	VALUES(
@@ -78,28 +97,29 @@ BEGIN
 		END
 	
 	SET @xml = (
-		SELECT	@Username		AS '@u'
-				,@AgentId		AS '@ai'
-				,@PageAccess	AS '@pa'
-				,@Status		AS '@s'				
+		SELECT	
+			@Username	AS '@u',
+			@AgentId	AS '@ai',
+			@PageAccess	AS '@pa',
+			@Status		AS '@s'
 		 FOR XML PATH('z'), ROOT('r')
 	)
 
-	SET @logSPData = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
+	SET @logSPData = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
 
-	SET @endRun		= GETDATE()  
-	SET @duration	= DATEDIFF(millisecond, @startRun, @endRun) 
+	SET @endRun	= GETDATE()  
+	SET @duration = DATEDIFF(MILLISECOND, @startRun, @endRun) 
 
 	IF @LogDate IS NULL
-		SET @LogDate = GETDATE()	
+		SET @LogDate = GETDATE()
 
 	EXEC LogDB.dbo.Age_LogRunSp_Insert
 		@UserId			= @Creator,
 		@SPName			= 'Age_AgentUser_Insert',
 		@LogDate		= @LogDate,
 		@ObjectId		= @AgentUserId,
-		@ObjectTypeId	= 1,			--Object type : Agent						
+		@ObjectTypeId	= 1,			-- Object type : Agent user
 		@Duration		= @Duration,
 		@Data			= @logSPData,
-		@OldData		= @logSPDataOld		
+		@OldData		= @logSPDataOld
 END	

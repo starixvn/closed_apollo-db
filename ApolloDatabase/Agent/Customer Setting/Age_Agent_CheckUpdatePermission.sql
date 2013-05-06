@@ -1,13 +1,13 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_CheckUpdatePermission]    Script Date: 3/29/2013 10:07:51 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_CheckUpdatePermission]    Script Date: 5/6/2013 10:29:48 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 ALTER PROCEDURE [dbo].[Age_Agent_CheckUpdatePermission]
-	@ActorAgentId		INT,			
-	@ObjectId			INT,	
+	@ActorAgentId		INT,
+	@ObjectId			INT,
 	@ObjectTypeId		INT,
 	@HasPermission		BIT		OUTPUT
 AS
@@ -15,8 +15,8 @@ AS
 /**
  * Created by	: Edward
  * Date			: 20130328
- * Task			: Check permission update of agents
- * DB			: APL.CustDB
+ * Task			: Check permission update of agent
+ * DB			: SVRCUST.CustDB
  * Revisions	:
  *	• 
  * Parameters:
@@ -27,7 +27,7 @@ AS
 
 BEGIN
 	
-	SET NOCOUNT ON	
+	SET NOCOUNT ON
 
 	SET @HasPermission = 0
 
@@ -42,29 +42,30 @@ BEGIN
 			
 			IF EXISTS (
 				SELECT *
-				FROM AgentInfo AS ai WITH (NOLOCK)
-				WHERE ai.AgentHId.IsDescendantOf(@agentHId) = 1
-				AND ai.AgentId	<> @ActorAgentId
-			)
-				SET @HasPermission = 1		
-
-			RETURN
-		END
-
-	IF @ObjectTypeId = 2	-- Cust
-		BEGIN
-			IF EXISTS (
-				SELECT *
-				FROM CustInfo AS ci WITH (NOLOCK)
-				WHERE ci.AgentId IN (
-					SELECT ai.AgentId
-					FROM AgentInfo AS ai WITH (NOLOCK)
-					WHERE ai.AgentHId.IsDescendantOf(@agentHId) = 1
-				)
-					AND ci.CustId	= @ObjectId
+				FROM AgentInfo WITH (NOLOCK)
+				WHERE 
+					AgentHId.IsDescendantOf(@agentHId) = 1
+					AND AgentId	<> @ActorAgentId
+					AND AgentId	= @ObjectId
 			)
 				SET @HasPermission = 1
 
 			RETURN
 		END
-END	
+
+	IF @ObjectTypeId = 2	-- Customer
+		BEGIN
+			IF EXISTS (
+				SELECT *
+				FROM CustInfo WITH (NOLOCK)
+				WHERE 
+					CustId = @ObjectId
+					AND AgentId IN (	SELECT AgentId
+										FROM AgentInfo WITH (NOLOCK)
+										WHERE AgentHId.IsDescendantOf(@agentHId) = 1 )
+			)
+				SET @HasPermission = 1
+
+			RETURN
+		END
+END
