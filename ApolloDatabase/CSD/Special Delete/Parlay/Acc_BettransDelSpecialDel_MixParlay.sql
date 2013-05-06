@@ -54,7 +54,9 @@ BEGIN
 		RETURN
 	END
 			
-	IF EXISTS(SELECT 1 FROM dbo.match WITH(NOLOCK) WHERE matchid=@matchid AND eventstatus='completed')
+	IF EXISTS(	SELECT 1 FROM dbo.match m WITH(NOLOCK)
+				LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.matchID = m.matchID
+				WHERE m.matchid=@matchid AND e.eventstatus='completed')
 	BEGIN
 		SELECT @ErrCode = 100, @ErrMsg = 'You can not delete completed match.'
 		RETURN

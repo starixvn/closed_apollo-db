@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateBetLimit]    Script Date: 4/17/2013 2:54:51 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateBetLimit]    Script Date: 5/6/2013 12:42:27 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -9,29 +9,23 @@ GO
 ALTER PROCEDURE [dbo].[Age_Customer_UpdateBetLimit]
 	@ActorAgentId	INT				= NULL,
 	@CustId			INT,	
-	@BetLimit		VARCHAR(MAX)	= '',	
-	@LogDate		DATETIME		= NULL,
-	@Language		VARCHAR(2)		= 'E',
+	@BetLimit		VARCHAR(MAX)	= '',
+	@Language		VARCHAR(5)		= 'en-US',
 	@ErrCode		INT				= 0			OUTPUT,
-	@ErrMsg			NVARCHAR(1000)	= ''		OUTPUT 		
+	@ErrMsg			NVARCHAR(1000)	= ''		OUTPUT
 AS
 
 /**
  * Created by	: Kos
  * Date			: 20130302
  * Task			: Update customer bet limit
- * DB			: APL.CustDB
+ * DB			: SVRCUST.CustDB
  * Revisions	:
  *	• 
  * Parameters:
  *	• @BetLimit : 
 		<ROOT>
 			<BetLimit SportType="4" BetType="4" Min="1" Max="1" MaxPerMatch="1"></BetLimit>
-		</ROOT>
- *	•
- *	• @BetLimit3rd : 
-		<ROOT>
-			<BetLimit SportType="4" BetType="4" Min="1" Max="1" MaxPerMatch="1" MaxPerBall="1"></BetLimit>
 		</ROOT>
  *	•
  *  
@@ -43,51 +37,57 @@ BEGIN
 
 	-- Check update permission
 	DECLARE @hasPermission BIT
-	EXEC dbo.Age_Agent_CheckUpdatePermission @ActorAgentId, @CustId, 2, @hasPermission OUTPUT 
-	SELECT @hasPermission
+
+	EXEC dbo.Age_Agent_CheckUpdatePermission @ActorAgentId, @CustId, 2, @hasPermission OUTPUT
+
 	IF @hasPermission = 0
 		BEGIN
-			SELECT @ErrCode = 1
-			
-			SELECT @ErrMsg	= 'Do not permission for update.'
-
-			RETURN			
+			SELECT 
+				@ErrCode = 1000,
+				@ErrMsg	= 
+					CASE @Language
+						WHEN 'en-US' THEN 'You do not have permission to update setting'
+						ELSE [dbo].f_Msg_GetContentById (1000, @Language)
+					END
+			RETURN
 		END	
 
 	-- For write log
-    DECLARE @startRun			DATETIME  
-			,@endRun			DATETIME  
-			,@duration			INT
-			,@logSPData			VARCHAR(5000)
-			,@logSPDataOld		VARCHAR(5000)			
-			,@xml				XML
+    DECLARE 
+		@startRun		DATETIME,
+		@endRun			DATETIME,
+		@duration		INT,
+		@logSPData		VARCHAR(5000),
+		@logSPDataOld	VARCHAR(5000),
+		@xml			XML
 
 	SET @startRun = GETDATE()
 
 	IF @BetLimit <> ''
 		BEGIN
-			DECLARE @BetLimitTable TABLE(
-				SportType SMALLINT,
-				BetType SMALLINT,
-				MinBet MONEY,
-				MaxBet MONEY,
-				MaxPerMatch MONEY)
+			DECLARE @BetLimitTable TABLE (
+				SportType	SMALLINT,
+				BetType		SMALLINT,
+				MinBet		MONEY,
+				MaxBet		MONEY,
+				MaxPerMatch	MONEY)
 
-			DECLARE @BetLimitCompareTable TABLE(
-				SportType SMALLINT,
-				BetType SMALLINT,
-				MaxMinBet MONEY,
-				MinMaxBet MONEY,
-				MinMaxPerMatch MONEY)
+			DECLARE @BetLimitCompareTable TABLE (
+				SportType		SMALLINT,
+				BetType			SMALLINT,
+				MaxMinBet		MONEY,
+				MinMaxBet		MONEY,
+				MinMaxPerMatch	MONEY)
 			
-			DECLARE @agentHId		HIERARCHYID
-					,@sportType		INT		
-					,@SUPERLEVEL	INT
+			DECLARE 
+				@agentHId		HIERARCHYID,
+				@sportType		INT,
+				@SUPERLEVEL		INT
 
 			SET @SUPERLEVEL	= 0
 
 			-- For read xml
-			DECLARE @DocHandler int
+			DECLARE @DocHandler INT
 
 			EXEC sp_xml_preparedocument @DocHandler OUTPUT, @BetLimit
 
@@ -96,20 +96,20 @@ BEGIN
 				BetType,
 				MinBet,
 				MaxBet,
-				MaxPerMatch)				
-			SELECT 			
+				MaxPerMatch)
+			SELECT
 				Data.SportType,
 				Data.BetType,
 				Data.Min,
 				Data.Max,
 				Data.MaxPerMatch
 			FROM OPENXML (@DocHandler, '/ROOT/BetLimit',1) 
-			WITH (			
-				SportType		SMALLINT,
-				BetType			SMALLINT,
-				Min				MONEY,
-				Max				MONEY,
-				MaxPerMatch		MONEY
+			WITH (
+				SportType	SMALLINT,
+				BetType		SMALLINT,
+				Min			MONEY,
+				Max			MONEY,
+				MaxPerMatch	MONEY
 			) AS Data
 
 			EXEC sp_xml_removedocument @DocHandler
@@ -122,27 +122,27 @@ BEGIN
 	
 			IF @sportType IS NOT NULL 
 				BEGIN
-					SELECT @ErrCode = 1
-
-					----Message for each sport type	WITH CASE @sportType
-					SELECT @ErrMsg	= 'Wrong Min bet/ Max bet/ Max per match.' + ' (' + dbo.f_Get_SportNameBySporttype(@sportType,@Language) + ')'						
-
-					RETURN			
+					SELECT 
+						@ErrCode = 3000,
+						@ErrMsg = 
+							CASE @Language
+								WHEN 'en-US' THEN 'Wrong Min bet/ Max bet/ Max per match' 
+								ELSE [dbo].f_Msg_GetContentById (3000, @Language)
+							END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
+					RETURN
 				END
 
 			SET @sportType = NULL
 
 			-- Get agent hierarchy ID
 			SELECT @agentHId = AgentHId
-			FROM AgentInfo WITH (NOLOCK)
-			WHERE AgentId = (
-						SELECT pli.AgentId
-						FROM CustInfo AS pli WITH (NOLOCK)
-						WHERE pli.CustId = @CustId
-					)
+			FROM 
+				AgentInfo AS ai WITH (NOLOCK)
+				INNER JOIN CustInfo AS ci WITH (NOLOCK) ON ai.AgentId = ci.AgentId
+			WHERE ci.CustId = @CustId
 
 			-- Get validate data from its parent and upline
-			INSERT INTO @BetLimitCompareTable(
+			INSERT INTO @BetLimitCompareTable (
 				SportType,
 				BetType,
 				MaxMinBet,
@@ -157,9 +157,12 @@ BEGIN
 			FROM AgentBetLimit WITH (NOLOCK)
 			WHERE AgentId IN (	SELECT AgentId 
 								FROM AgentInfo WITH (NOLOCK)
-								WHERE @AgentHId.IsDescendantOf(AgentHId) = 1
-								AND AgentLevel <> @SUPERLEVEL)
-			GROUP BY SportType, BetType
+								WHERE 
+									@AgentHId.IsDescendantOf(AgentHId) = 1
+									AND AgentLevel <> @SUPERLEVEL)
+			GROUP BY 
+				SportType, 
+				BetType
 
 			-- Check if min bet must be equal to or greater than all parents min bet
 			SELECT TOP(1) @sportType = btct.SportType
@@ -172,11 +175,13 @@ BEGIN
 
 			IF @sportType IS NOT NULL 
 				BEGIN
-					SELECT @ErrCode = 1
-
-					----Message for each sport type	WITH CASE @sportType
-					SELECT @ErrMsg	= 'Min bet must be equal to or greater than Parent Agent min bet.' + ' (' + dbo.f_Get_SportNameBySporttype(@sportType,@Language) + ')' 												
-
+					SELECT 
+						@ErrCode = 3001,
+						@ErrMsg = 
+							CASE @Language
+								WHEN 'en-US' THEN 'Min bet must be equal to or greater than Parent Agent min bet' 
+								ELSE [dbo].f_Msg_GetContentById (3001, @Language) 
+							END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
 					RETURN	
 				END
 
@@ -184,101 +189,122 @@ BEGIN
 			SELECT TOP(1) @sportType = btct.SportType
 			FROM 
 				@BetLimitCompareTable As btct
-				INNER JOIN @BetLimitTable AS btt ON btct.SportType = btt.SportType 
-					AND btct.BetType = btt.BetType	
+				INNER JOIN @BetLimitTable AS btt 
+				ON 
+					btct.SportType = btt.SportType 
+					AND btct.BetType = btt.BetType
 					AND btt.MaxBet > btct.MinMaxBet
 
 			IF @sportType IS NOT NULL 
 				BEGIN
-					SELECT @ErrCode = 1
-
-					----Message for each sport type	WITH CASE @sportType
-					SELECT @ErrMsg	= 'Max bet must be equal to or less than Parent Agent max bet.' + ' (' + dbo.f_Get_SportNameBySporttype(@sportType,@Language) + ')' 												
-
+					SELECT 
+						@ErrCode = 3002,
+						@ErrMsg = 
+							CASE @Language
+								WHEN 'en-US' THEN 'Max bet must be equal to or less than Parent Agent max bet' 
+								ELSE [dbo].f_Msg_GetContentById (3002, @Language) 
+							END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
 					RETURN	
 				END
 
-			-- Check validate max per match must be equal to or less than all parents max per match
+			-- Check if max per match must be equal to or less than all parents max per match
 			SELECT TOP(1) @sportType = btct.SportType
 			FROM 
 				@BetLimitCompareTable AS btct
-				INNER JOIN @BetLimitTable AS btt ON btct.SportType = btt.SportType 
-					AND btct.BetType = btt.BetType	
+				INNER JOIN @BetLimitTable AS btt 
+				ON 
+					btct.SportType = btt.SportType 
+					AND btct.BetType = btt.BetType
 					AND btt.MaxPerMatch > btct.MinMaxPerMatch
 
 			IF @sportType IS NOT NULL 
 				BEGIN
-					SELECT @ErrCode = 1
-
-					----Message for each sport type	WITH CASE @sportType
-					SELECT @ErrMsg	= 'Max per match must be equal to or less than Parent Agent max per match.' + ' (' + dbo.f_Get_SportNameBySporttype(@sportType,@Language) + ')'
-
-					RETURN	
+					SELECT 
+						@ErrCode = 3003,
+						@ErrMsg = 
+							CASE @Language
+								WHEN 'en-US' THEN 'Max per match must be equal to or less than Parent Agent max per match' 
+								ELSE [dbo].f_Msg_GetContentById (3003, @Language) 
+							END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
+					RETURN
 				END
 
 			-- write log before update
 				
 			SET @xml = (
-					SELECT  
-						cbl.SportType		AS '@s'
-						,cbl.BetType		AS '@b'
-						,cbl.MinBet			AS '@mib'
-						,cbl.MaxBet			AS '@mab'
-						,cbl.MaxPerMatch	AS '@mam'
-					FROM CustBetLimit AS cbl WITH (NOLOCK)
-						INNER JOIN @BetLimitTable AS blt
-							ON cbl.SportType	= blt.SportType
-							AND cbl.BetType		= blt.BetType
-					WHERE cbl.CustId			= @CustId				
-					FOR XML PATH('z'), ROOT('r')
+				SELECT  
+					cbl.SportType		AS '@s'
+					,cbl.BetType		AS '@b'
+					,cbl.MinBet			AS '@mib'
+					,cbl.MaxBet			AS '@mab'
+					,cbl.MaxPerMatch	AS '@mam'
+				FROM 
+					CustBetLimit AS cbl WITH (NOLOCK)
+					INNER JOIN @BetLimitTable AS blt
+					ON	cbl.SportType	= blt.SportType
+						AND cbl.BetType	= blt.BetType
+				WHERE cbl.CustId = @CustId
+				FOR XML PATH('z'), ROOT('r')
 			)
 
-			SET @logSPDataOld = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
+			SET @logSPDataOld = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
 
 			-- end write log
 
 			-- Update data
 			UPDATE dbo.CustBetLimit WITH (ROWLOCK, UPDLOCK)
 			SET 
-				CustBetLimit.MinBet		= blt.MinBet,
-				CustBetLimit.MaxBet		= blt.MaxBet,
+				CustBetLimit.MinBet			= blt.MinBet,
+				CustBetLimit.MaxBet			= blt.MaxBet,
 				CustBetLimit.MaxPerMatch	= blt.MaxPerMatch
 			FROM 
 				CustBetLimit AS pbl
-				INNER JOIN @BetLimitTable AS blt ON pbl.SportType = blt.SportType AND pbl.BetType = blt.BetType
+				INNER JOIN @BetLimitTable AS blt 
+				ON 
+					pbl.SportType = blt.SportType 
+					AND pbl.BetType = blt.BetType
 			WHERE pbl.CustId = @CustId
 
 			-- write log after update
 				
 			SET @xml = (
-					SELECT  
-						blt.SportType		AS '@s'
-						,blt.BetType		AS '@b'
-						,blt.MinBet			AS '@mib'
-						,blt.MaxBet			AS '@mab'
-						,blt.MaxPerMatch	AS '@mam'
-					FROM @BetLimitTable AS blt						
-					FOR XML PATH('z'), ROOT('r')
+				SELECT  
+					blt.SportType		AS '@s'
+					,blt.BetType		AS '@b'
+					,blt.MinBet			AS '@mib'
+					,blt.MaxBet			AS '@mab'
+					,blt.MaxPerMatch	AS '@mam'
+				FROM @BetLimitTable AS blt
+				FOR XML PATH('z'), ROOT('r')
 			)
 
-			SET @logSPData = REPLACE(CONVERT(varchar(max), @xml), '" />', '"/"')
+			SET @logSPData = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
 
 			-- end write log
-		END		
+		END
 
-	SET @endRun		= GETDATE()  
-	SET @duration	= DATEDIFF(millisecond, @startRun, @endRun) 
-
-	IF @LogDate IS NULL
-		SET @LogDate = GETDATE()
+	SET @endRun		= GETDATE()
+	SET @duration	= DATEDIFF(MILLISECOND, @startRun, @endRun) 
 		
-	EXEC LogDB.dbo.Age_LogRunSp_Insert
-		@UserId			= @ActorAgentId,
-		@SPName			= 'Age_Customer_UpdateBetLimit',
-		@LogDate		= @LogDate,
-		@ObjectId		= @CustId,
-		@ObjectTypeId	= 2,			--Object type : Cust						
-		@Duration		= @Duration,
-		@Data			= @logSPData,
-		@OldData		= @logSPDataOld
+	IF @@Error = 0
+		BEGIN TRY
+			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
+			@UserId		= @ActorAgentId,
+			@SPName		= 'Age_Customer_UpdateBetLimit',
+			@LogDate	= @startRun,
+			@CustId		= @CustId,
+			@Duration	= @Duration,
+			@Data		= @logSPData,
+			@OldData	= @logSPDataOld
+		END	TRY
+		BEGIN CATCH
+			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpCust
+			@UserId		= @ActorAgentId,
+			@SPName		= 'Age_Customer_UpdateBetLimit',
+			@LogDate	= @startRun,
+			@CustId		= @CustId,
+			@Duration	= @Duration,
+			@Data		= @logSPData,
+			@OldData	= @logSPDataOld
+		END CATCH 
 END

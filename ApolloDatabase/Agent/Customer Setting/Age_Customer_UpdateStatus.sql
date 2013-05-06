@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateStatus]    Script Date: 4/23/2013 12:55:40 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateStatus]    Script Date: 5/6/2013 12:43:30 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -11,7 +11,6 @@ ALTER PROCEDURE [dbo].[Age_Customer_UpdateStatus]
 	@Type		TINYINT,
 	@Status		TINYINT,
 	@Modifier	INT				= NULL,
-	@LogDate	DATETIME		= NULL,
 	@ErrCode	INT				= 0			OUTPUT,
 	@ErrMsg		NVARCHAR(1000)	= ''		OUTPUT	
 AS
@@ -35,6 +34,15 @@ AS
 BEGIN
 	
 	SET NOCOUNT ON
+
+	-- Check if customer ID exists
+	IF NOT EXISTS ( SELECT 1 FROM CustInfo WITH (NOLOCK) WHERE CustId = @CustId )
+		BEGIN
+			SELECT 
+				@ErrCode = 5200, 
+				@ErrMsg = 'Customer ID not exist [CustId = ' + COALESCE(CAST(@CustId AS VARCHAR(10)), SPACE(1)) + ']'
+			RETURN
+		END	
 
 	-- For write log
     DECLARE 
@@ -70,7 +78,7 @@ BEGIN
 			IF @@ERROR > 0
 				BEGIN
 					SELECT 
-						@ErrCode = 1207, 
+						@ErrCode = 6200, 
 						@ErrMsg = 'Failed to update customer status [CustId = ' + COALESCE(CAST(@CustId AS VARCHAR(10)), SPACE(1)) + ']'
 					RETURN
 				END	
@@ -86,7 +94,7 @@ BEGIN
 			IF @@ERROR > 0
 				BEGIN
 					SELECT 
-						@ErrCode = 1207, 
+						@ErrCode = 6200, 
 						@ErrMsg = 'Failed to update customer status [CustId = ' + COALESCE(CAST(@CustId AS VARCHAR(10)), SPACE(1)) + ']'
 					RETURN
 				END	
@@ -106,17 +114,27 @@ BEGIN
 
 	SET @endRun = GETDATE()
 	SET @duration = DATEDIFF(MILLISECOND, @startRun, @endRun) 
+		
+	IF @@Error = 0
+		BEGIN TRY
+			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
+			@UserId		= @Modifier,
+			@SPName		= 'Age_Customer_UpdateStatus',
+			@LogDate	= @startRun,
+			@CustId		= @CustId,
+			@Duration	= @Duration,
+			@Data		= @logSPData,
+			@OldData	= @logSPDataOld
+		END TRY
+		BEGIN CATCH
+			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpCust
+			@UserId		= @Modifier,
+			@SPName		= 'Age_Customer_UpdateStatus',
+			@LogDate	= @startRun,
+			@CustId		= @CustId,
+			@Duration	= @Duration,
+			@Data		= @logSPData,
+			@OldData	= @logSPDataOld
+		END CATCH
 
-	IF @LogDate IS NULL
-		SET @LogDate = GETDATE()	
-
-	EXEC LogDB.dbo.Age_LogRunSp_Insert
-		@UserId			= @Modifier,
-		@SPName			= 'Age_Customer_UpdateStatus',
-		@LogDate		= @LogDate,
-		@ObjectId		= @CustId,
-		@ObjectTypeId	= 2,			-- Object type : Customer
-		@Duration		= @Duration,
-		@Data			= @logSPData,
-		@OldData		= @logSPDataOld	
 END

@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_Insert]    Script Date: 4/23/2013 12:45:00 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_Insert]    Script Date: 5/6/2013 11:24:17 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -10,17 +10,15 @@ ALTER PROCEDURE [dbo].[Age_Agent_Insert]
 	@AgentId				INT,
 	@Username				NVARCHAR(50),
 	@ParentId				INT,
-	@Currency				VARCHAR(3),
+	@Currency				INT,
 	@Status					TINYINT			= 1,
 	@BetStatus				TINYINT			= 1,
 	@UplineStatus			TINYINT			= 1,
 	@UplineBetStatus		TINYINT			= 1,
-	@Credit					MONEY			= 0,
 	@MatchLimit				SMALLMONEY		= 0,
 	@VirtualMultiplier		SMALLMONEY		= 0,
 	@DoubleCommLosing		BIT				= 0,
 	@Creator				INT				= NULL,
-	@LogDate				DATETIME		= NULL,
 	@ErrCode				INT				= 0			OUTPUT,
 	@ErrMsg					NVARCHAR(1000)	= ''		OUTPUT 
 AS
@@ -33,8 +31,8 @@ AS
  * Revisions	:
  *	• 20130227@Edward	: Implement
  *	• 20130412@Kos		: Remove AgentUserId
- *	• 20130415@Edward	: Write log	and add @LogDate
-
+ *	• 20130415@Edward	: Write log
+ *	• 20130424@Kos		: Remove Credit
  * Parameters:
  *	•
  *	•
@@ -44,6 +42,42 @@ AS
 BEGIN
 	
 	SET NOCOUNT ON
+
+	-- Check if agent ID exists
+	IF EXISTS ( SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @AgentId )
+		BEGIN
+			SELECT 
+				@ErrCode = 5101, 
+				@ErrMsg = 'Agent ID duplicated [AgentId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
+			RETURN
+		END	
+
+	-- Check if username exists
+	IF EXISTS ( SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE Username = @Username )
+		BEGIN
+			SELECT 
+				@ErrCode = 5103, 
+				@ErrMsg = 'Username duplicated [Username = ' + COALESCE(@Username, SPACE(1)) + ']'
+			RETURN
+		END	
+
+	-- Check if agent user ID exists
+	IF EXISTS ( SELECT 1 FROM AgentUser WITH (NOLOCK) WHERE AgentUserId = @AgentId )
+		BEGIN
+			SELECT 
+				@ErrCode = 5301, 
+				@ErrMsg = 'Agent user ID duplicated [AgentUserId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
+			RETURN
+		END	
+
+	-- Check if username exists
+	IF EXISTS ( SELECT 1 FROM AgentUser WITH (NOLOCK) WHERE Username = @Username )
+		BEGIN
+			SELECT 
+				@ErrCode = 5303, 
+				@ErrMsg = 'Username duplicated [Username = ' + COALESCE(@Username, SPACE(1)) + ']'
+			RETURN
+		END	
 
 	-- For write log
 	DECLARE 
@@ -56,28 +90,9 @@ BEGIN
 
 	SET @startRun = GETDATE()
 
-	-- Check if agent ID exists
-	IF EXISTS ( SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @AgentId )
-		BEGIN
-			SELECT 
-				@ErrCode = 1102, 
-				@ErrMsg = 'Agent ID duplicated [AgentId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
-			RETURN
-		END	
-
-	-- Check if username exists
-	IF EXISTS ( SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE Username = @Username )
-		BEGIN
-			SELECT 
-				@ErrCode = 1104, 
-				@ErrMsg = 'Username duplicated [Username = ' + COALESCE(@Username, SPACE(1)) + ']'
-			RETURN
-		END	
-
 	-- Begin update
 	DECLARE @UplineNode				HIERARCHYID
 	DECLARE	@LastChild				HIERARCHYID
-	DECLARE @ExchangeId				INT
 	DECLARE @ParentStatus			TINYINT
 	DECLARE @ParentBetStatus		TINYINT
 	DECLARE @ParentUplineStatus		TINYINT
@@ -98,10 +113,6 @@ BEGIN
 	FROM AgentInfo WITH (NOLOCK)
 	WHERE AgentHId.GetAncestor(1) = @UplineNode
 
-	SELECT	@ExchangeId = exchangeid
-	FROM [SVRTXN].[TransDB].[dbo].[Exchange] WITH (NOLOCK)
-	WHERE UPPER(Code) = UPPER(@Currency)
-
 	-- Get upline status if not a main shareholder
 	IF @ParentId > 0 
 		BEGIN
@@ -118,7 +129,6 @@ BEGIN
 		Currency,
 		ParentId,
 		AutoSuspend,
-		Credit,
 		MatchLimit,
 		VirtualMultiplier,
 		DoubleCommLosing,
@@ -131,10 +141,9 @@ BEGIN
 		@AgentId,
 		@UplineNode.GetDescendant(@LastChild, NULL),
 		@Username,
-		@ExchangeId,
+		@Currency,
 		@ParentId,
 		0,				-- AutoSuspend
-		@Credit,
 		@MatchLimit,
 		@VirtualMultiplier,
 		@DoubleCommLosing,
@@ -148,7 +157,7 @@ BEGIN
 	IF @@ERROR > 0
 		BEGIN
 			SELECT 
-				@ErrCode = 1105, 
+				@ErrCode = 5104, 
 				@ErrMsg = 'Failed to insert agent [AgentId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
 			RETURN
 		END	
@@ -177,11 +186,11 @@ BEGIN
 		1			-- Status
 	)	
 
-	-- Not support for multiple language
+	-- Check error
 	IF @@ERROR > 0
 		BEGIN
 			SELECT 
-				@ErrCode = 1205, 
+				@ErrCode = 5304, 
 				@ErrMsg = 'Failed to insert agent user [AgentUserId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
 			RETURN
 		END	
@@ -238,13 +247,13 @@ BEGIN
 		SportType,
 		BetType,
 		IsLive,
-		0,			-- preset
-		0,			-- max
-		0			-- min
+		0,			-- max upper
+		0,			-- max given
+		0			-- min given
 	FROM AgentPositionTaking WITH (NOLOCK)
 	WHERE AgentId = @ParentId		
-	-- End update			
 
+	-- Write log
 	SET @xml = (
 		SELECT	
 			@Username			AS '@u',
@@ -254,7 +263,6 @@ BEGIN
 			@BetStatus			AS '@bs',
 			@UplineStatus		AS '@us',
 			@UplineBetStatus	AS '@ubs',
-			@Credit				AS '@cr',
 			@MatchLimit			AS '@ml',
 			@VirtualMultiplier	AS '@vm',
 			@DoubleCommLosing	AS '@dc'
@@ -266,16 +274,25 @@ BEGIN
 	SET @endRun = GETDATE()
 	SET @duration = DATEDIFF(MILLISECOND, @startRun, @endRun) 
 
-	IF @LogDate IS NULL
-		SET @LogDate = GETDATE()
-
-	EXEC LogDB.dbo.Age_LogRunSp_Insert
-		@UserId			= @Creator,
-		@SPName			= 'Age_Agent_Insert',
-		@LogDate		= @LogDate,
-		@ObjectId		= @AgentId,
-		@ObjectTypeId	= 1,			--Object type : Agent
-		@Duration		= @Duration,
-		@Data			= @logSPData,
-		@OldData		= @logSPDataOld
+	IF @@Error = 0
+		BEGIN TRY
+			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
+			@UserId			= @Creator,
+			@SPName			= 'Age_Agent_Insert',
+			@LogDate		= @startRun,
+			@AgentId		= @AgentId,
+			@Duration		= @Duration,
+			@Data			= @logSPData,
+			@OldData		= @logSPDataOld
+		END	TRY
+		BEGIN CATCH
+			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
+			@UserId			= @Creator,
+			@SPName			= 'Age_Agent_Insert',
+			@LogDate		= @startRun,
+			@AgentId		= @AgentId,
+			@Duration		= @Duration,
+			@Data			= @logSPData,
+			@OldData		= @logSPDataOld
+		END CATCH	
 END

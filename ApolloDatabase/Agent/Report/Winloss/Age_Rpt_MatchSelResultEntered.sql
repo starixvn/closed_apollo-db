@@ -23,11 +23,13 @@ Select	DATEDIFF(dd,@FROMDate,EventDate ) as IsToday,
 		SUM(CASE WHEN eventstatus not in ('completed', 'refund') THEN 1 ELSE 0 END) AS NonEntered
 FROM   
  (  
-	  SELECT	LeagueID, EventDate, MAX(EventStatus) AS EventStatus  
+	  SELECT	LeagueID, EventDate, MAX(e.EventStatus) AS EventStatus  
 	  FROM		Match WITH (NOLOCK)  
+		LEFT OUTER JOIN Match_remark_ex e WITH (NOLOCK) ON Match.MatchID = e.matchID
 	  WHERE		Match.EventDate between @FROMDate and @ToDate  
-				and Match.eventstatus NOT IN ( 'closed'  ,'internal')
-	  GROUP BY 	leagueid, EventDate, matchid 	 
+				and e.eventstatus NOT IN ( 'closed' ,'internal')
+				and Match.sporttype <= 99
+	  GROUP BY 	leagueid, EventDate, match.matchid 	 
 		  
  ) as Match  
 	INNER JOIN League WITH (NOLOCK) on Match.LeagueID = League.LeagueID and League.isTest = 0 

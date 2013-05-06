@@ -43,8 +43,7 @@ DECLARE  @TMP_ALL_MatchInfo TABLE (
 IF @Todate >= @BalanceUpDay    
 BEGIN
 	INSERT INTO @TMP_ALL_MatchInfo
-	SELECT matchid , homeid , awayid ,  eventdate , leagueid, isneutral, sporttype, showtime, 
-		   CASE WHEN ISNULL(homeid2,0) = 0 AND sporttype = 162 THEN 1101 ELSE homeid2 END as homeid2  -- contains bettype of Live Casino 
+	SELECT matchid , homeid , awayid ,  eventdate , leagueid, isneutral, sporttype, showtime, ISNULL(homeid2,0) as homeid2		   
 	FROM match WITH (NOLOCK)
 	WHERE (matchId = @matchid or matchcode = @matchCode )
 		and eventdate BETWEEN @FromDate and @ToDate
@@ -52,8 +51,7 @@ BEGIN
 	IF @BalanceUpDay < @FromDate     
 		SELECT @BalanceUpDay=@FromDate  
 	INSERT INTO @TMP_ALL_MatchInfo
-	SELECT matchid , homeid , awayid ,  eventdate , leagueid, isneutral, sporttype, showtime,
-		   CASE WHEN ISNULL(homeid2,0) = 0 AND sporttype = 162 THEN 1101 ELSE homeid2 END AS homeid2  -- contains bettype of Live Casino 
+	SELECT matchid , homeid , awayid ,  eventdate , leagueid, isneutral, sporttype, showtime, ISNULL(homeid2,0) as homeid2	
 	FROM match14 WITH (NOLOCK)
 	WHERE (matchId = @matchid or matchcode = @matchCode )
 		and eventdate BETWEEN @BalanceUpDay and @ToDate
@@ -65,8 +63,7 @@ BEGIN
 		SELECT @ToDate = DATEADD(dd, -1, @BalanceUpDay)  
 
 	INSERT INTO @TMP_ALL_MatchInfo
-	SELECT matchid , homeid , awayid , eventdate , leagueid, isneutral, sporttype, showtime,
-		   CASE WHEN ISNULL(homeid2,0) = 0 AND sporttype = 162 THEN 1101 ELSE homeid2 END AS homeid2  -- contains bettype of Live Casino 
+	SELECT matchid , homeid , awayid , eventdate , leagueid, isneutral, sporttype, showtime, ISNULL(homeid2,0) as homeid2			
 	FROM SVRARC.ArchiveDB.dbo.match_bk WITH (NOLOCK) 
 	WHERE (matchId = @matchid or matchcode = @matchCode )
 		AND eventdate BETWEEN @FromDate and @ToDate

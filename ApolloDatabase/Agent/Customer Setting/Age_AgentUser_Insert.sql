@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_AgentUser_Insert]    Script Date: 4/23/2013 12:46:05 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_AgentUser_Insert]    Script Date: 5/6/2013 11:31:41 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -13,7 +13,6 @@ ALTER PROCEDURE [dbo].[Age_AgentUser_Insert]
 	@PageAccess		VARCHAR(50)		= '',
 	@Status			TINYINT			= 1,
 	@Creator		INT				= NULL,
-	@LogDate		DATETIME		= NULL,
 	@ErrCode		INT				= 0			OUTPUT,
 	@ErrMsg			NVARCHAR(1000)	= ''		OUTPUT 
 AS
@@ -25,7 +24,7 @@ AS
  * DB			: SVRCUST.CustDB
  * Revisions	:
  *	• 20130412@Kos	: Change parameter from Closed to Status
- *	• 20130417@Edward : Add @LogDate and Write log
+ *	• 20130417@Edward : Add @LogDate
  * Parameters:
  *	•
  *	•
@@ -35,6 +34,24 @@ AS
 BEGIN
 	
 	SET NOCOUNT ON	
+
+	-- Check if agent user ID exists
+	IF EXISTS ( SELECT 1 FROM AgentUser WITH (NOLOCK) WHERE AgentUserId = @AgentUserId )
+		BEGIN
+			SELECT 
+				@ErrCode = 5301, 
+				@ErrMsg = 'Agent user ID duplicated [AgentUserId = ' + COALESCE(CAST(@AgentUserId AS VARCHAR(10)), SPACE(1)) + ']'
+			RETURN
+		END	
+
+	-- Check if username exists
+	IF EXISTS ( SELECT 1 FROM AgentUser WITH (NOLOCK) WHERE Username = @Username )
+		BEGIN
+			SELECT 
+				@ErrCode = 5303, 
+				@ErrMsg = 'Username duplicated [Username = ' + COALESCE(@Username, SPACE(1)) + ']'
+			RETURN
+		END	
 
 	-- For write log
 	DECLARE 
@@ -46,24 +63,6 @@ BEGIN
 		@xml			XML
 
 	SET @startRun = GETDATE()
-
-	-- Check if agent user ID exists
-	IF EXISTS ( SELECT 1 FROM AgentUser WITH (NOLOCK) WHERE AgentUserId = @AgentUserId )
-		BEGIN
-			SELECT 
-				@ErrCode = 1202, 
-				@ErrMsg = 'Agent user ID duplicated [AgentUserId = ' + COALESCE(CAST(@AgentUserId AS VARCHAR(10)), SPACE(1)) + ']'
-			RETURN
-		END	
-
-	-- Check if username exists
-	IF EXISTS ( SELECT 1 FROM AgentUser WITH (NOLOCK) WHERE Username = @Username )
-		BEGIN
-			SELECT 
-				@ErrCode = 1204, 
-				@ErrMsg = 'Username duplicated [Username = ' + COALESCE(@Username, SPACE(1)) + ']'
-			RETURN
-		END	
 
 	-- Insert into AgentUser
 	INSERT INTO AgentUser (
@@ -91,7 +90,7 @@ BEGIN
 	IF @@ERROR > 0
 		BEGIN
 			SELECT 
-				@ErrCode = 1205, 
+				@ErrCode = 5304, 
 				@ErrMsg = 'Failed to insert agent user [AgentUserId = ' + COALESCE(CAST(@AgentUserId AS VARCHAR(10)), SPACE(1)) + ']'
 			RETURN
 		END
@@ -109,17 +108,26 @@ BEGIN
 
 	SET @endRun	= GETDATE()  
 	SET @duration = DATEDIFF(MILLISECOND, @startRun, @endRun) 
-
-	IF @LogDate IS NULL
-		SET @LogDate = GETDATE()
-
-	EXEC LogDB.dbo.Age_LogRunSp_Insert
-		@UserId			= @Creator,
-		@SPName			= 'Age_AgentUser_Insert',
-		@LogDate		= @LogDate,
-		@ObjectId		= @AgentUserId,
-		@ObjectTypeId	= 1,			-- Object type : Agent user
-		@Duration		= @Duration,
-		@Data			= @logSPData,
-		@OldData		= @logSPDataOld
+		
+	IF @@Error = 0
+		BEGIN TRY
+			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
+			@UserId			= @Creator,
+			@SPName			= 'Age_AgentUser_Insert',
+			@LogDate		= @startRun,
+			@AgentId		= @AgentId,
+			@Duration		= @Duration,
+			@Data			= @logSPData,
+			@OldData		= @logSPDataOld
+		END	TRY
+		BEGIN CATCH
+			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
+			@UserId			= @Creator,
+			@SPName			= 'Age_AgentUser_Insert',
+			@LogDate		= @startRun,
+			@AgentId		= @AgentId,
+			@Duration		= @Duration,
+			@Data			= @logSPData,
+			@OldData		= @logSPDataOld
+		END CATCH 
 END	

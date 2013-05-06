@@ -50,9 +50,11 @@ BEGIN
 			, changetime = GETDATE(), settleTime = GETDATE()			
 		WHERE matchid = @MatchID-- and eventstatus = 'completed'
 
+		/*
 		-- delete disabled actions before the undo action
 		DELETE [dbo].[match_log] with (ROWLOCK,UPDLOCK)
 		WHERE matchid = @MatchID AND (Disabled=1 or ActionId=0)
+		*/
 	END
 	ELSE IF @Command = 'Admin_Settlement_1-CAL'
 	BEGIN

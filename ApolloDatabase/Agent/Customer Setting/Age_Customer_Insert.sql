@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_Insert]    Script Date: 4/23/2013 12:46:56 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_Insert]    Script Date: 5/6/2013 12:41:32 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -12,7 +12,6 @@ ALTER PROCEDURE [dbo].[Age_Customer_Insert]
 	@AgentId			INT,	
 	@Status				TINYINT			= 1,
 	@BetStatus			TINYINT			= 1,
-	@Credit				MONEY			= 0,
 	@MatchLimit			SMALLMONEY		= 0,
 	@VirtualMultiplier	SMALLMONEY		= 0,
 	@DoubleCommLosing	BIT				= 0,	
@@ -20,7 +19,6 @@ ALTER PROCEDURE [dbo].[Age_Customer_Insert]
 	@IPLogin			VARCHAR(40)		= NULL,
 	@UGroup				VARCHAR(3)		= 'a',				-- Group A
 	@Creator			INT				= NULL,
-	@LogDate			DATETIME		= NULL,
 	@ErrCode			INT				= 0			OUTPUT,
 	@ErrMsg				NVARCHAR(1000)	= ''		OUTPUT
 AS
@@ -33,7 +31,7 @@ AS
  * Revisions	:
  *	• 20130227@Edward	: Implement
  *	• 20130415@Kos		: Add statuses
- *	• 20130415@Edward	: Write log	and add @LogDate
+ *	• 20130415@Edward	: Write log
  * Parameters:
  *	•
  *	•
@@ -43,6 +41,24 @@ AS
 BEGIN
 	
 	SET NOCOUNT ON
+
+	-- Check if customer ID exists
+	IF EXISTS ( SELECT 1 FROM CustInfo WITH (NOLOCK) WHERE CustId = @CustId )
+		BEGIN
+			SELECT 
+				@ErrCode = 5201, 
+				@ErrMsg = 'Customer ID duplicated [CustId = ' + COALESCE(CAST(@CustId AS VARCHAR(10)), SPACE(1)) + ']'
+			RETURN
+		END	
+
+	-- Check if username exists
+	IF EXISTS ( SELECT 1 FROM CustInfo WITH (NOLOCK) WHERE Username = @Username )
+		BEGIN
+			SELECT 
+				@ErrCode = 5203, 
+				@ErrMsg = 'Username duplicated [Username = ' + COALESCE(@Username, SPACE(1)) + ']'
+			RETURN
+		END	
 
 	-- For write log
 	DECLARE 
@@ -55,23 +71,7 @@ BEGIN
 
 	SET @startRun = GETDATE()
 
-	-- Check if customer ID exists
-	IF EXISTS ( SELECT 1 FROM CustInfo WITH (NOLOCK) WHERE CustId = @CustId )
-		BEGIN
-			SELECT 
-				@ErrCode = 1302, 
-				@ErrMsg = 'Customer ID duplicated [CustId = ' + COALESCE(CAST(@CustId AS VARCHAR(10)), SPACE(1)) + ']'
-			RETURN
-		END	
-
-	-- Check if username exists
-	IF EXISTS ( SELECT 1 FROM CustInfo WITH (NOLOCK) WHERE Username = @Username )
-		BEGIN
-			SELECT 
-				@ErrCode = 1304, 
-				@ErrMsg = 'Username duplicated [Username = ' + COALESCE(@Username, SPACE(1)) + ']'
-			RETURN
-		END	
+	SET @UGroup = LOWER(@Ugroup)
 
 	-- Insert into CustInfo
 	INSERT INTO CustInfo (
@@ -80,7 +80,6 @@ BEGIN
 		Username,
 		Currency,
 		AutoSuspend,
-		Credit,
 		MatchLimit,
 		VirtualMultiplier,
 		Danger,
@@ -100,7 +99,6 @@ BEGIN
 		@Username,
 		Currency,
 		0,					-- AutoSuspend
-		@Credit,
 		@MatchLimit,
 		@VirtualMultiplier,
 		@Danger,
@@ -121,7 +119,7 @@ BEGIN
 	IF @@ERROR > 0
 		BEGIN
 			SELECT 
-				@ErrCode = 1305, 
+				@ErrCode = 5204, 
 				@ErrMsg = 'Failed to insert customer [CustId = ' + COALESCE(CAST(@CustId AS VARCHAR(10)), SPACE(1)) + ']'
 			RETURN
 		END
@@ -195,7 +193,6 @@ BEGIN
 			@AgentId			AS '@ai',
 			@Status				AS '@s',
 			@BetStatus			AS '@bs',
-			@Credit				AS '@cr',
 			@MatchLimit			AS '@ml',
 			@VirtualMultiplier	AS '@vm',
 			@DoubleCommLosing	AS '@dc',
@@ -209,17 +206,26 @@ BEGIN
 
 	SET @endRun = GETDATE()
 	SET @duration = DATEDIFF(MILLISECOND, @startRun, @endRun) 
-
-	IF @LogDate IS NULL
-		SET @LogDate = GETDATE()
-
-	EXEC LogDB.dbo.Age_LogRunSp_Insert
-		@UserId			= @Creator,
-		@SPName			= 'Age_Customer_Insert',
-		@LogDate		= @LogDate,
-		@ObjectId		= @CustId,
-		@ObjectTypeId	= 2,			-- Object type : Customer
-		@Duration		= @Duration,
-		@Data			= @logSPData,
-		@OldData		= @logSPDataOld		
-END
+		
+	IF @@Error = 0
+		BEGIN TRY
+			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
+			@UserId			= @Creator,
+			@SPName			= 'Age_Customer_Insert',
+			@LogDate		= @startRun,
+			@CustId			= @CustId,
+			@Duration		= @Duration,
+			@Data			= @logSPData,
+			@OldData		= @logSPDataOld
+		END	TRY
+		BEGIN CATCH
+			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpCust
+			@UserId			= @Creator,
+			@SPName			= 'Age_Customer_Insert',
+			@LogDate		= @startRun,
+			@CustId			= @CustId,
+			@Duration		= @Duration,
+			@Data			= @logSPData,
+			@OldData		= @logSPDataOld
+		END CATCH
+END										

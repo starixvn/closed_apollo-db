@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_GetParentInfo]    Script Date: 4/18/2013 1:37:45 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_GetParentInfo]    Script Date: 5/6/2013 11:24:37 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -8,14 +8,14 @@ GO
 
 
 ALTER PROCEDURE [dbo].[Age_Agent_GetParentInfo]
-	@AgentId		INT	
+	@AgentId	INT	
 AS
 
 /**
  * Created by	: Edward
  * Date			: 20130304
  * Task			: Get parent information
- * DB			: APL.CustDB
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	• @20130418	: Add statuses
  * Parameters:
@@ -27,33 +27,24 @@ AS
 BEGIN
 	
 	SET NOCOUNT ON
-	
-	-- Get parent id
-	DECLARE @parentId	INT
 
-	SELECT @parentId = ai.ParentId
-	FROM AgentInfo AS ai WITH (NOLOCK)	
-	WHERE ai.AgentId = @AgentId
-
-	-- Get parent information
 	SELECT
-		ai.AgentId,
-		ai.AgentLevel,
-		ai.Username,
-		ai.Currency,		
-		ai.Status,
-		ai.BetStatus,
-		ai.UplineStatus,
-		ai.UplineBetStatus,
-		ai.Credit,
-		ai.MatchLimit,
-		ai.VirtualMultiplier,
-		ai.DoubleCommLosing,
-		ai.ParentId,
-		pai.Username AS ParentUsername		
+		pai.AgentId,
+		pai.AgentLevel,
+		pai.Username,
+		pai.Currency,
+		pai.Status,
+		pai.BetStatus,
+		pai.UplineStatus,
+		pai.UplineBetStatus,
+		pai.MatchLimit,
+		pai.VirtualMultiplier,
+		pai.DoubleCommLosing,
+		pai.ParentId,
+		gpai.Username AS ParentUsername
 	FROM 
 		AgentInfo AS ai WITH (NOLOCK)
-		INNER JOIN AgentInfo AS pai WITH (NOLOCK) ON ai.ParentId = pai.AgentId		 
-	WHERE ai.AgentId = @parentId
+		INNER JOIN AgentInfo AS pai WITH (NOLOCK) ON ai.ParentId = pai.AgentId
+		INNER JOIN AgentInfo AS gpai WITH (NOLOCK) ON pai.ParentId = gpai.AgentId
+	WHERE ai.AgentId = @AgentId
 END
-

@@ -37,10 +37,11 @@ Param's Explanation:
 SET NOCOUNT ON
 
 
-CREATE TABLE #Betlist (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVARCHAR(50), 
-						HomeId INT, AwayId INT, SportType TINYINT, LeagueId INT, IsNeutral BIT, Showtime NVARCHAR(50),
+CREATE TABLE #Betlist ( TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVARCHAR(50), 
+						HomeId INT, AwayId INT, SportType TINYINT, LeagueId INT, IsNeutral BIT, BetStatus NVARCHAR(50),
 						Username NVARCHAR(50), BetType SMALLINT, CustId INT , Hdp1 SMALLMONEY, Hdp2 SMALLMONEY, Odds SMALLMONEY, MOdds SMALLMONEY,
 						Status VARCHAR(10), Stake MONEY, Actual_Stake MONEY, TransDate DATETIME, BetTeam VARCHAR(10), BetId BIGINT, 
+						PlayerDiscount DECIMAL (9,8), Winlost MONEY, PlayerComm MONEY, 
 						APositionTaking SMALLMONEY, ADiscount DECIMAL (9,8), AWinlost MONEY, AComm MONEY,
 						LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
 						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT)
@@ -82,7 +83,7 @@ BEGIN
 					m.SportType,
 					m.LeagueId, 
 					m.IsNeutral,
-					m.ShowTime,
+					ISNULL(e.BetStatus,'') AS BetStatus ,
 					B.Username,
 					B.BetType,
 					B.CustId,
@@ -98,6 +99,9 @@ BEGIN
 					B.TransDate,		
 					B.BetTeam,
 					B.BetId,
+					B.PlayerDiscount,
+					B.WinLost - B.Actual_Stake as WinLost,
+					B.PlayerComm,
 					(1 - B.TPositionTaking) AS APositionTaking,
 					NULL AS ADiscount,
 					- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
@@ -109,13 +113,14 @@ BEGIN
 					B.Oddstype,		
 					B.DoubleCommLosing
  			FROM 	BetTrans AS B  WITH (NOLOCK) 
-					INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId					
+				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId					
+				LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
 			WHERE 	B.StatusId in (SELECT StatusId FROM #StatusId ) 
 					AND	B.TransDate Between @FromDate AND @ToDate	
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
 							OR B.bettype between 1301 and 1334 
-							OR B.bettype BETWEEN 81 AND 120 				
+							--OR B.bettype BETWEEN 81 AND 120 				
 						) 		
 					
 
@@ -131,7 +136,7 @@ BEGIN
 					0 as sporttype,
 					'' as LeagueId,
 					CONVERT(BIT,0) as IsNeutral,
-					'' as ShowTime,
+					'' as BetStatus,
 					B.Username,				
 					B.BetType,
 					B.CustId,
@@ -145,6 +150,9 @@ BEGIN
 					B.TransDate,		
 					B.BetTeam,
 					B.BetId,
+					B.PlayerDiscount,
+					B.WinLost - B.Actual_Stake as WinLost,
+					B.PlayerComm,
 					(1 - B.TPositionTaking) AS APositionTaking,
 					NULL AS ADiscount,
 					- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
@@ -173,7 +181,7 @@ BEGIN
 					lg.sporttype,
 					m.LeagueID,
 					CONVERT(BIT,0) as IsNeutral,
-					'' as showtime,
+					'' as BetStatus,
 					B.username,
 					B.bettype,	
 					B.custid,
@@ -187,6 +195,9 @@ BEGIN
 					B.transdate,		
 					B.betteam,
 					B.betID,
+					B.PlayerDiscount,
+					B.WinLost - B.Actual_Stake as WinLost,
+					B.PlayerComm,
 					(1 - B.TPositionTaking) AS APositionTaking,
 					NULL AS ADiscount,
 					- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
@@ -218,7 +229,7 @@ BEGIN
 					m.SportType,
 					m.LeagueId, 
 					m.IsNeutral,
-					m.ShowTime,
+					ISNULL(e.BetStatus,'') AS BetStatus,
 					B.Username,
 					B.BetType,
 					B.CustId,
@@ -234,6 +245,9 @@ BEGIN
 					B.TransDate,		
 					B.BetTeam,
 					B.BetId,
+					B.PlayerDiscount,
+					B.WinLost - B.Actual_Stake as WinLost,
+					B.PlayerComm,
 					(1 - B.TPositionTaking) AS APositionTaking,
 					NULL AS ADiscount,
 					- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
@@ -248,7 +262,7 @@ BEGIN
 					BetTrans AS B  WITH (NOLOCK) 
 					INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId  
 					INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId
-					
+					LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
 				WHERE 
 					BA.AgentId = @AgentId 
 					AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 
@@ -256,7 +270,7 @@ BEGIN
 					AND (	BA.bettype < 31 
 							OR BA.bettype between 121 and 999
 							OR BA.bettype between 1301 and 1334 
-							OR BA.bettype BETWEEN 81 AND 120 				
+							--OR BA.bettype BETWEEN 81 AND 120 				
 						) 		
 					
 
@@ -271,7 +285,7 @@ BEGIN
 					0 as sporttype,
 					'' as LeagueId,
 					CONVERT(BIT,0) as IsNeutral,
-					'' as ShowTime,
+					'' as BetStatus,
 					B.Username,				
 					B.BetType,
 					B.CustId,
@@ -285,6 +299,9 @@ BEGIN
 					B.TransDate,		
 					B.BetTeam,
 					B.BetId,
+					B.PlayerDiscount,
+					B.WinLost - B.Actual_Stake as WinLost,
+					B.PlayerComm,
 					(1 - B.TPositionTaking) AS APositionTaking,
 					NULL AS ADiscount,
 					- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
@@ -314,7 +331,7 @@ BEGIN
 					lg.sporttype,
 					m.LeagueID,
 					CONVERT(BIT,0) as IsNeutral,
-					'' as showtime,
+					'' as BetStatus,
 					B.username,
 					B.bettype,	
 					B.custid,
@@ -328,6 +345,9 @@ BEGIN
 					B.transdate,		
 					B.betteam,
 					B.betID,
+					B.PlayerDiscount,
+					B.WinLost - B.Actual_Stake as WinLost,
+					B.PlayerComm,
 					(1 - B.TPositionTaking) AS APositionTaking,
 					NULL AS ADiscount,
 					- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
@@ -363,7 +383,7 @@ BEGIN
 				m.SportType,
 				m.LeagueId, 
 				m.IsNeutral,
-				m.ShowTime,
+				ISNULL(e.BetStatus,'') AS BetStatus,
 				B.Username,
 				B.BetType,
 				B.CustId,
@@ -379,6 +399,9 @@ BEGIN
 				B.TransDate,		
 				B.BetTeam,
 				B.BetId,
+				B.PlayerDiscount,
+				B.WinLost - B.Actual_Stake as WinLost,
+				B.PlayerComm,
 				(1 - B.TPositionTaking) AS APositionTaking,
 				NULL AS ADiscount,
 				- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
@@ -391,7 +414,8 @@ BEGIN
 				B.DoubleCommLosing
  			FROM 
 				BetTrans AS B  WITH (NOLOCK) 				
-				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 			
+				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 
+				LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId			
 			WHERE 
 				B.CustID = @CustId 
 				AND B.StatusId in (SELECT StatusId FROM #StatusId )   	
@@ -399,7 +423,7 @@ BEGIN
 				AND (	B.bettype < 31 
 						OR B.bettype between 121 and 999
 						OR B.bettype between 1301 and 1334 
-						OR B.bettype BETWEEN 81 AND 120 				
+						--OR B.bettype BETWEEN 81 AND 120 				
 					) 		
 				
 
@@ -415,7 +439,7 @@ BEGIN
 				0 as sporttype,
 				'' as LeagueId,
 				CONVERT(BIT,0) as IsNeutral,
-				'' as ShowTime,
+				'' as BetStatus,
 				B.Username,				
 				B.BetType,
 				B.CustId,
@@ -429,6 +453,9 @@ BEGIN
 				B.TransDate,		
 				B.BetTeam,
 				B.BetId,
+				B.PlayerDiscount,
+				B.WinLost - B.Actual_Stake as WinLost,
+				B.PlayerComm,
 				(1 - B.TPositionTaking) AS APositionTaking,
 				NULL AS ADiscount,
 				- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
@@ -457,7 +484,7 @@ BEGIN
 				lg.sporttype,
 				m.LeagueID,
 				CONVERT(BIT,0) as IsNeutral,
-				'' as showtime,
+				'' as BetStatus,
 				B.username,
 				B.bettype,	
 				B.custid,
@@ -471,6 +498,9 @@ BEGIN
 				B.transdate,		
 				B.betteam,
 				B.betID,
+				B.PlayerDiscount,
+				B.WinLost - B.Actual_Stake as WinLost,
+				B.PlayerComm,
 				(1 - B.TPositionTaking) AS APositionTaking,
 				NULL AS ADiscount,
 				- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
@@ -509,7 +539,7 @@ BEGIN
 				m.SportType,
 				m.LeagueId, 
 				m.IsNeutral,
-				m.ShowTime,
+				ISNULL(e.BetStatus,'') AS BetStatus,
 				B.Username,
 				B.BetType,
 				B.CustId,
@@ -525,6 +555,9 @@ BEGIN
 				B.TransDate,		
 				B.BetTeam,
 				B.BetId,
+				B.PlayerDiscount,
+				B.WinLost - B.Actual_Stake as WinLost,
+				B.PlayerComm,
 				L.APositionTaking ,
 				L.ADiscount ,
 				L.AWinlost,
@@ -541,13 +574,14 @@ BEGIN
 				INNER JOIN BetTrans_Agent AS L WITH (NOLOCK )  ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 				LEFT JOIN Bettrans_Agent D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
 				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 						
+				LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
 			WHERE BA.AgentId =  @AgentId
 				AND B.StatusId in (SELECT StatusId FROM #StatusId )  
 				AND B.TransDate Between @FromDate AND @ToDate	
 				AND (	B.bettype < 31 
 						OR B.bettype between 121 and 999
 						OR B.bettype between 1301 and 1334 
-						OR B.bettype BETWEEN 81 AND 120 				
+						--OR B.bettype BETWEEN 81 AND 120 				
 					) 			
 			
 
@@ -562,7 +596,7 @@ BEGIN
 				0 as sporttype,
 				'' as LeagueId,
 				CONVERT(BIT,0) as IsNeutral,
-				'' as ShowTime,
+				'' as BetStatus,
 				B.Username,				
 				B.BetType,
 				B.CustId,
@@ -576,6 +610,9 @@ BEGIN
 				B.TransDate,		
 				B.BetTeam,
 				B.BetId,
+				B.PlayerDiscount,
+				B.WinLost - B.Actual_Stake as WinLost,
+				B.PlayerComm,
 				L.APositionTaking,
 				L.ADiscount,
 				L.AWinlost,
@@ -607,7 +644,7 @@ BEGIN
 				lg.sporttype,
 				m.LeagueID,
 				CONVERT(BIT,0) as IsNeutral,
-				'' as showtime,
+				'' as BetStatus,
 				B.username,
 				B.bettype,	
 				B.custid,
@@ -621,6 +658,9 @@ BEGIN
 				B.transdate,		
 				B.betteam,
 				B.betID,
+				B.PlayerDiscount,
+				B.WinLost - B.Actual_Stake as WinLost,
+				B.PlayerComm,
 				L.APositionTaking,
 				L.ADiscount,
 				L.AWinlost,
@@ -659,7 +699,7 @@ BEGIN
 				m.SportType,
 				m.LeagueId, 
 				m.IsNeutral,
-				m.ShowTime,
+				ISNULL(e.BetStatus,'') AS BetStatus,
 				B.Username,
 				B.BetType,
 				B.CustId,
@@ -675,6 +715,9 @@ BEGIN
 				B.TransDate,		
 				B.BetTeam,
 				B.BetId,
+				B.PlayerDiscount,
+				B.WinLost - B.Actual_Stake as WinLost,
+				B.PlayerComm,
 				L.APositionTaking ,
 				L.ADiscount ,
 				L.AWinlost,
@@ -690,13 +733,14 @@ BEGIN
 				INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 				LEFT JOIN Bettrans_Agent D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
 				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 		
+				LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
 			WHERE	B.CustID = @CustId  
 				AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
 				AND B.TransDate Between @FromDate AND @ToDate	
 				AND (	B.bettype < 31 
 						OR B.bettype between 121 and 999
 						OR B.bettype between 1301 and 1334 
-						OR B.bettype BETWEEN 81 AND 120 				
+						--OR B.bettype BETWEEN 81 AND 120 				
 					) 		
 				
 			
@@ -711,7 +755,7 @@ BEGIN
 				0 as sporttype,
 				'' as LeagueId,
 				CONVERT(BIT,0) as IsNeutral,
-				'' as ShowTime,
+				'' as BetStatus,
 				B.Username,				
 				B.BetType,
 				B.CustId,
@@ -725,6 +769,9 @@ BEGIN
 				B.TransDate,		
 				B.BetTeam,
 				B.BetId,
+				B.PlayerDiscount,
+				B.WinLost - B.Actual_Stake as WinLost,
+				B.PlayerComm,
 				L.APositionTaking,
 				L.ADiscount,
 				L.AWinlost,
@@ -757,7 +804,7 @@ BEGIN
 				lg.sporttype,
 				m.LeagueID,
 				CONVERT(BIT,0) as IsNeutral,
-				'' as showtime,
+				'' as BetStatus,
 				B.username,
 				B.bettype,	
 				B.custid,
@@ -771,6 +818,9 @@ BEGIN
 				B.transdate,		
 				B.betteam,
 				B.betID,
+				B.PlayerDiscount,
+				B.WinLost - B.Actual_Stake as WinLost,
+				B.PlayerComm,
 				L.APositionTaking,
 				L.ADiscount,
 				L.AWinlost,
@@ -807,5 +857,4 @@ DROP TABLE #StatusId
 
 GO
 GRANT EXECUTE ON [dbo].[Age_BetList_SelByDateMemStatus] TO [aplweb]
-GO
-GRANT VIEW DEFINITION ON [dbo].[Age_BetList_SelByDateMemStatus] TO [vnteam]
+GO 

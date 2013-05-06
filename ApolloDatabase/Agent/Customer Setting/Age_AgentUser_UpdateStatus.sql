@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_AgentUser_UpdateStatus]    Script Date: 4/23/2013 12:50:20 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_AgentUser_UpdateStatus]    Script Date: 5/6/2013 11:31:55 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -10,7 +10,6 @@ ALTER PROCEDURE [dbo].[Age_AgentUser_UpdateStatus]
 	@AgentUserId	INT,	
 	@Status			TINYINT,
 	@Modifier		INT				= NULL,
-	@LogDate		DATETIME		= NULL,
 	@ErrCode		INT				= 0			OUTPUT,
 	@ErrMsg			NVARCHAR(1000)	= ''		OUTPUT	
 AS
@@ -21,7 +20,7 @@ AS
  * Task			: Update agent user status
  * DB			: APL.CustDB
  * Revisions	:
- *	• 20130417@Edward : Add @LogDate and Write log
+ *	• 20130417@Edward : Write log
  * Parameters:
  *	• @Status	:	1 : Active
  *					2 : Stopped
@@ -33,6 +32,15 @@ BEGIN
 	
 	SET NOCOUNT ON
 
+	-- Check if agent user ID exists
+	IF NOT EXISTS ( SELECT 1 FROM AgentUser WITH (NOLOCK) WHERE AgentUserId = @AgentUserId )
+		BEGIN
+			SELECT 
+				@ErrCode = 5300, 
+				@ErrMsg = 'Agent user ID not exist [AgentUserId = ' + COALESCE(CAST(@AgentUserId AS VARCHAR(10)), SPACE(1)) + ']'
+			RETURN
+		END	
+	
 	-- For write log
 	DECLARE 
 		@startRun		DATETIME,
@@ -62,7 +70,7 @@ BEGIN
 	IF @@ERROR > 0
 		BEGIN
 			SELECT 
-				@ErrCode = 1207, 
+				@ErrCode = 6300, 
 				@ErrMsg = 'Failed to update agent user status [AgentUserId = ' + COALESCE(CAST(@AgentUserId AS VARCHAR(10)), SPACE(1)) + ']'
 			RETURN
 		END	
@@ -77,17 +85,26 @@ BEGIN
 
 	SET @endRun	= GETDATE()
 	SET @duration = DATEDIFF(MILLISECOND, @startRun, @endRun) 
-
-	IF @LogDate IS NULL
-		SET @LogDate = GETDATE()
-
-	EXEC LogDB.dbo.Age_LogRunSp_Insert
-		@UserId			= @Modifier,
-		@SPName			= 'Age_AgentUser_UpdateStatus',
-		@LogDate		= @LogDate,
-		@ObjectId		= @AgentUserId,
-		@ObjectTypeId	= 1,			-- Object type : Agent user
-		@Duration		= @Duration,
-		@Data			= @logSPData,
-		@OldData		= @logSPDataOld
+		
+	IF @@Error = 0
+		BEGIN TRY
+			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
+			@UserId			= @Modifier,
+			@SPName			= 'Age_AgentUser_UpdateStatus',
+			@LogDate		= @startRun,
+			@AgentId		= @AgentUserId,
+			@Duration		= @Duration,
+			@Data			= @logSPData,
+			@OldData		= @logSPDataOld
+		END	TRY
+		BEGIN CATCH
+			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
+			@UserId			= @Modifier,
+			@SPName			= 'Age_AgentUser_UpdateStatus',
+			@LogDate		= @startRun,
+			@AgentId		= @AgentUserId,
+			@Duration		= @Duration,
+			@Data			= @logSPData,
+			@OldData		= @logSPDataOld
+		END CATCH
 END

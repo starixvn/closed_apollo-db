@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Forecast_5_15_GetByMatch]    Script Date: 4/1/2013 3:29:12 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Forecast_5_15_GetByMatch]    Script Date: 5/2/2013 12:45:51 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -15,7 +15,7 @@ AS
  * Created by	: Quinn
  * Date			: 20130301
  * Task			: Forecast by Match for 1x2 bettype
- * DB			: APL.DB05
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	•
  * Parameters:

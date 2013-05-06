@@ -56,9 +56,10 @@ SELECT val FROM dbo.strSplit_Key(''' + CONVERT (VARCHAR(200),@StatusIds) +''',''
 
 SET @S1 = ' 
 CREATE TABLE #Betlist  (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVARCHAR(50), 
-						HomeId INT, AwayId INT, SportType TINYINT, LeagueId INT, IsNeutral BIT, Showtime NVARCHAR(50),
+						HomeId INT, AwayId INT, SportType TINYINT, LeagueId INT, IsNeutral BIT, BetStatus NVARCHAR(50),
 						Username NVARCHAR(50), BetType SMALLINT, CustId INT , Hdp1 SMALLMONEY, Hdp2 SMALLMONEY, Odds SMALLMONEY, MOdds SMALLMONEY,
 						Status VARCHAR(10), Stake MONEY, Actual_Stake MONEY, TransDate DATETIME, WinLostDate SMALLDATETIME,	BetTeam VARCHAR(10), BetId BIGINT, 
+						PlayerDiscount DECIMAL (9,8), Winlost MONEY, PlayerComm MONEY, 
 						APositionTaking SMALLMONEY, ADiscount DECIMAL (9,8), AWinlost MONEY, AComm MONEY,
 						LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
 						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT)
@@ -84,7 +85,7 @@ CREATE TABLE #Betlist  (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						m.SportType,
 						m.leagueId, 
 						m.IsNeutral,
-						m.ShowTime,
+						ISNULL(e.BetStatus,'') AS BetStatus,
 						B.Username,
 						B.BetType,
 						B.CustId,
@@ -101,6 +102,9 @@ CREATE TABLE #Betlist  (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						B.WinlostDate,	
 						B.BetTeam,
 						B.BetId,
+						B.PlayerDiscount,
+						B.WinLost - B.Actual_Stake as WinLost,
+						B.PlayerComm,
 						(1 - B.TPositionTaking) AS APositionTaking,
 						NULL AS ADiscount,
 						- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
@@ -112,7 +116,8 @@ CREATE TABLE #Betlist  (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						B.Oddstype,		
 						B.DoubleCommLosing
  				FROM 	BetTrans_BK AS B  WITH (NOLOCK) 
-						INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId					
+						INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId	
+						LEFT JOIN SVRPRO.ProdDB.dbo.Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId				
 				WHERE 	B.StatusId in (SELECT StatusId FROM #StatusId ) 
 						AND	B.WinLostDate Between '''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 	
 						AND (	B.bettype < 31 
@@ -134,7 +139,7 @@ CREATE TABLE #Betlist  (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						0 as sporttype,
 						'''' as leagueId,
 						CONVERT(BIT,0) as IsNeutral,
-						'''' as ShowTime,
+						'''' as BetStatus,
 						B.Username,				
 						B.BetType,
 						B.CustId,
@@ -149,6 +154,9 @@ CREATE TABLE #Betlist  (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						B.WinlostDate,		
 						B.BetTeam,
 						B.BetId,
+						B.PlayerDiscount,
+						B.WinLost - B.Actual_Stake as WinLost,
+						B.PlayerComm,
 						(1 - B.TPositionTaking) AS APositionTaking,
 						NULL AS ADiscount,
 						- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
@@ -177,7 +185,7 @@ SET @S2 = '
 						lg.sporttype,
 						m.leagueID,
 						CONVERT(BIT,0) as IsNeutral,
-						'''' as showtime,
+						'''' as BetStatus,
 						B.username,
 						B.bettype,	
 						B.custid,
@@ -192,6 +200,9 @@ SET @S2 = '
 						B.WinlostDate,	
 						B.betteam,
 						B.betID,
+						B.PlayerDiscount,
+						B.WinLost - B.Actual_Stake as WinLost,
+						B.PlayerComm,
 						(1 - B.TPositionTaking) AS APositionTaking,
 						NULL AS ADiscount,
 						- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
@@ -223,7 +234,7 @@ SET @S2 = '
 						m.SportType,
 						m.leagueId, 
 						m.IsNeutral,
-						m.ShowTime,
+						ISNULL(e.BetStatus,'') AS BetStatus,
 						B.Username,
 						B.BetType,
 						B.CustId,
@@ -240,6 +251,9 @@ SET @S2 = '
 						B.WinlostDate,	
 						B.BetTeam,
 						B.BetId,
+						B.PlayerDiscount,
+						B.WinLost - B.Actual_Stake as WinLost,
+						B.PlayerComm,
 						(1 - B.TPositionTaking) AS APositionTaking,
 						NULL AS ADiscount,
 						- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
@@ -254,7 +268,7 @@ SET @S2 = '
 						BetTrans_BK AS B  WITH (NOLOCK) 
 						INNER JOIN BetTrans_Agent_BK AS BA WITH (NOLOCK) ON BA.TransId = B.TransId  
 						INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId
-					
+						LEFT JOIN SVRPRO.ProdDB.dbo.Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
 					WHERE 
 						BA.AgentId = '+ CONVERT(VARCHAR(10),@AgentId) +'
 						AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 
@@ -277,7 +291,7 @@ SET @S2 = '
 						0 as sporttype,
 						'''' as leagueId,
 						CONVERT(BIT,0) as IsNeutral,
-						'''' as ShowTime,
+						'''' as BetStatus,
 						B.Username,				
 						B.BetType,
 						B.CustId,
@@ -292,6 +306,9 @@ SET @S2 = '
 						B.WinlostDate,	
 						B.BetTeam,
 						B.BetId,
+						B.PlayerDiscount,
+						B.WinLost - B.Actual_Stake as WinLost,
+						B.PlayerComm,
 						(1 - B.TPositionTaking) AS APositionTaking,
 						NULL AS ADiscount,
 						- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
@@ -322,7 +339,7 @@ SET @S3 = '
 						lg.sporttype,
 						m.leagueID,
 						CONVERT(BIT,0) as IsNeutral,
-						'''' as showtime,
+						'''' as BetStatus,
 						B.username,
 						B.bettype,	
 						B.custid,
@@ -337,6 +354,9 @@ SET @S3 = '
 						B.WinlostDate,	
 						B.betteam,
 						B.betID,
+						B.PlayerDiscount,
+						B.WinLost - B.Actual_Stake as WinLost,
+						B.PlayerComm,
 						(1 - B.TPositionTaking) AS APositionTaking,
 						NULL AS ADiscount,
 						- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
@@ -373,7 +393,7 @@ SET @S3 = '
 					m.SportType,
 					m.leagueId, 
 					m.IsNeutral,
-					m.ShowTime,
+					ISNULL(e.BetStatus,'') AS BetStatus,
 					B.Username,
 					B.BetType,
 					B.CustId,
@@ -390,6 +410,9 @@ SET @S3 = '
 					B.WinlostDate,	
 					B.BetTeam,
 					B.BetId,
+					B.PlayerDiscount,
+					B.WinLost - B.Actual_Stake as WinLost,
+					B.PlayerComm,
 					(1 - B.TPositionTaking) AS APositionTaking,
 					NULL AS ADiscount,
 					- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
@@ -403,6 +426,7 @@ SET @S3 = '
  				FROM 
 					BetTrans_BK AS B  WITH (NOLOCK) 				
 					INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId 			
+					LEFT JOIN SVRPRO.ProdDB.dbo.Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
 				WHERE 
 					B.CustID = '+ CONVERT(VARCHAR(10),@CustId) +'
 					AND B.StatusId in (SELECT StatusId FROM #StatusId )   	
@@ -426,7 +450,7 @@ SET @S3 = '
 					0 as sporttype,
 					'''' as leagueId,
 					CONVERT(BIT,0) as IsNeutral,
-					'''' as ShowTime,
+					'''' as BetStatus,
 					B.Username,				
 					B.BetType,
 					B.CustId,
@@ -441,6 +465,9 @@ SET @S3 = '
 					B.WinlostDate,	
 					B.BetTeam,
 					B.BetId,
+					B.PlayerDiscount,
+					B.WinLost - B.Actual_Stake as WinLost,
+					B.PlayerComm,
 					(1 - B.TPositionTaking) AS APositionTaking,
 					NULL AS ADiscount,
 					- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
@@ -470,7 +497,7 @@ SET @S4= '
 					lg.sporttype,
 					m.leagueID,
 					CONVERT(BIT,0) as IsNeutral,
-					'''' as showtime,
+					'''' as BetStatus,
 					B.username,
 					B.bettype,	
 					B.custid,
@@ -485,6 +512,9 @@ SET @S4= '
 					B.WinlostDate,		
 					B.betteam,
 					B.betID,
+					B.PlayerDiscount,
+					B.WinLost - B.Actual_Stake as WinLost,
+					B.PlayerComm,
 					(1 - B.TPositionTaking) AS APositionTaking,
 					NULL AS ADiscount,
 					- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
@@ -523,7 +553,7 @@ SET @S4= '
 					m.SportType,
 					m.leagueId, 
 					m.IsNeutral,
-					m.ShowTime,
+					ISNULL(e.BetStatus,'') AS BetStatus,
 					B.Username,
 					B.BetType,
 					B.CustId,
@@ -540,6 +570,9 @@ SET @S4= '
 					B.WinlostDate,	
 					B.BetTeam,
 					B.BetId,
+					B.PlayerDiscount,
+					B.WinLost - B.Actual_Stake as WinLost,
+					B.PlayerComm,
 					L.APositionTaking ,
 					L.ADiscount ,
 					L.AWinlost,
@@ -556,6 +589,7 @@ SET @S4= '
 					INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK )  ON B.TransId = L.TransId AND L.AgentID = '+ CONVERT(VARCHAR(10),@LoggedId) +'
 					LEFT JOIN BetTrans_Agent_BK D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
 					INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId 						
+					LEFT JOIN SVRPRO.ProdDB.dbo.Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
 				WHERE BA.AgentId =  '+ CONVERT(VARCHAR(10),@AgentId) +'
 					AND B.StatusId in (SELECT StatusId FROM #StatusId )  
 					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 	
@@ -578,7 +612,7 @@ SET @S5 = '
 					0 as sporttype,
 					'''' as leagueId,
 					CONVERT(BIT,0) as IsNeutral,
-					'''' as ShowTime,
+					'''' as BetStatus,
 					B.Username,				
 					B.BetType,
 					B.CustId,
@@ -593,6 +627,9 @@ SET @S5 = '
 					B.WinlostDate,	
 					B.BetTeam,
 					B.BetId,
+					B.PlayerDiscount,
+					B.WinLost - B.Actual_Stake as WinLost,
+					B.PlayerComm,
 					L.APositionTaking,
 					L.ADiscount,
 					L.AWinlost,
@@ -624,7 +661,7 @@ SET @S5 = '
 					lg.sporttype,
 					m.leagueID,
 					CONVERT(BIT,0) as IsNeutral,
-					'''' as showtime,
+					'''' as BetStatus,
 					B.username,
 					B.bettype,	
 					B.custid,
@@ -639,6 +676,9 @@ SET @S5 = '
 					B.WinlostDate,	
 					B.betteam,
 					B.betID,
+					B.PlayerDiscount,
+					B.WinLost - B.Actual_Stake as WinLost,
+					B.PlayerComm,
 					L.APositionTaking,
 					L.ADiscount,
 					L.AWinlost,
@@ -679,7 +719,7 @@ SET @S6 = '
 					m.SportType,
 					m.leagueId, 
 					m.IsNeutral,
-					m.ShowTime,
+					ISNULL(e.BetStatus,'') AS BetStatus,
 					B.Username,
 					B.BetType,
 					B.CustId,
@@ -696,6 +736,9 @@ SET @S6 = '
 					B.WinlostDate,	
 					B.BetTeam,
 					B.BetId,
+					B.PlayerDiscount,
+					B.WinLost - B.Actual_Stake as WinLost,
+					B.PlayerComm,
 					L.APositionTaking ,
 					L.ADiscount ,
 					L.AWinlost,
@@ -711,6 +754,7 @@ SET @S6 = '
 					INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = '+ CONVERT(VARCHAR(10),@LoggedId) +'
 					LEFT JOIN BetTrans_Agent_BK D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
 					INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId 		
+					LEFT JOIN SVRPRO.ProdDB.dbo.Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
 				WHERE	B.CustID = '+ CONVERT(VARCHAR(10),@CustId) +'
 					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
 					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 	
@@ -732,7 +776,7 @@ SET @S6 = '
 					0 as sporttype,
 					'''' as leagueId,
 					CONVERT(BIT,0) as IsNeutral,
-					'''' as ShowTime,
+					'''' as BetStatus,
 					B.Username,				
 					B.BetType,
 					B.CustId,
@@ -747,6 +791,9 @@ SET @S6 = '
 					B.WinlostDate,	
 					B.BetTeam,
 					B.BetId,
+					B.PlayerDiscount,
+					B.WinLost - B.Actual_Stake as WinLost,
+					B.PlayerComm,
 					L.APositionTaking,
 					L.ADiscount,
 					L.AWinlost,
@@ -779,7 +826,7 @@ SET @S6 = '
 					lg.sporttype,
 					m.leagueID,
 					CONVERT(BIT,0) as IsNeutral,
-					'''' as showtime,
+					'''' as BetStatus,
 					B.username,
 					B.bettype,	
 					B.custid,
@@ -794,6 +841,9 @@ SET @S6 = '
 					B.WinlostDate,	
 					B.betteam,
 					B.betID,
+					B.PlayerDiscount,
+					B.WinLost - B.Actual_Stake as WinLost,
+					B.PlayerComm,
 					L.APositionTaking,
 					L.ADiscount,
 					L.AWinlost,
@@ -830,13 +880,13 @@ DROP TABLE #DirectChild
 DROP TABLE #StatusId
 
 '
-PRINT @S 
-PRINT @S1
-PRINT @S2
-PRINT @S3
-PRINT @S4
-PRINT @S5
-PRINT @S6
+--PRINT @S 
+--PRINT @S1
+--PRINT @S2
+--PRINT @S3
+--PRINT @S4
+--PRINT @S5
+--PRINT @S6
 EXEC (@S+@S1+@S2+@S3+@S4+@S5+@S6)
 
 GO

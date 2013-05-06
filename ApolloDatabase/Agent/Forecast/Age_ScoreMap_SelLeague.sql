@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_ScoreMap_SelLeague]    Script Date: 4/2/2013 8:39:23 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_ScoreMap_SelLeague]    Script Date: 5/2/2013 12:59:32 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -14,7 +14,7 @@ AS
  * Created by	: Terry.Nguyen
  * Date			: 20130228
  * Task			: Get League for ScoreMap
- * DB			: APL.TransDB
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	• 20132801@Terry.Nguyen	: Implement
  * Parameters:
@@ -31,11 +31,12 @@ BEGIN
 		m.LeagueId, 
 		m.SportType
 	FROM 
-		match AS m WITH (NOLOCK) 
+		match AS m WITH (NOLOCK)
+		LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId 
 		INNER JOIN BetTrans_Agent AS ba WITH (NOLOCK) ON m.MatchId = ba.MatchId
 	WHERE 
 		ba.AgentId = @AgentId 
-		AND m.eventstatus <> 'completed' 
+		AND e.eventstatus <> 'completed' 
 		AND	m.matchid IN (	SELECT DISTINCT matchid 
 							FROM bettrans WITH (NOLOCK)
 							WHERE 
@@ -46,4 +47,3 @@ BEGIN
 		m.SportType, 
 		m.LeagueId 
 END
-

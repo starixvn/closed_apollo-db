@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_CheckUpdatePermission]    Script Date: 4/23/2013 1:02:02 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_CheckUpdatePermission]    Script Date: 5/6/2013 10:29:48 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -16,7 +16,7 @@ AS
  * Created by	: Edward
  * Date			: 20130328
  * Task			: Check permission update of agent
- * DB			: APL.CustDB
+ * DB			: SVRCUST.CustDB
  * Revisions	:
  *	• 
  * Parameters:
@@ -27,7 +27,7 @@ AS
 
 BEGIN
 	
-	SET NOCOUNT ON	
+	SET NOCOUNT ON
 
 	SET @HasPermission = 0
 
@@ -48,7 +48,7 @@ BEGIN
 					AND AgentId	<> @ActorAgentId
 					AND AgentId	= @ObjectId
 			)
-				SET @HasPermission = 1		
+				SET @HasPermission = 1
 
 			RETURN
 		END
@@ -68,4 +68,4 @@ BEGIN
 
 			RETURN
 		END
-END	
+END
