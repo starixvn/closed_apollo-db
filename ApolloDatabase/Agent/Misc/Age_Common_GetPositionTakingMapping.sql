@@ -18,7 +18,7 @@ AS
  * Created by	: Kos
  * Date			: 20130309
  * Task			: Get position taking mapping output of sport type and bet type
- * DB			: APL.CustDB
+ * DB			: SRVAGE.RepDB
  * Revisions	:
  *	• 
  * Parameters:
@@ -67,5 +67,4 @@ BEGIN
 			ELSE @OutBetType 
 		END
 		
-END	
-
+END

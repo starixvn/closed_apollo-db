@@ -1,11 +1,10 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Common_GetBetLimitMapping]    Script Date: 3/29/2013 10:01:43 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Common_GetBetLimitMapping]    Script Date: 5/6/2013 3:52:05 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-
 
 ALTER PROCEDURE [dbo].[Age_Common_GetBetLimitMapping]
 	@InSportType	SMALLINT,
@@ -18,7 +17,7 @@ AS
  * Created by	: Kos
  * Date			: 20130309
  * Task			: Get bet limit mapping output of sport type and bet type
- * DB			: APL.CustDB
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	• 
  * Parameters:
@@ -41,15 +40,7 @@ BEGIN
 			RETURN
 		END
 
-	IF EXISTS ( SELECT 1 
-				FROM AgentBetLimit3rd WITH (NOLOCK) 
-				WHERE SportType = @InSportType AND BetType = @InBetType )
-		BEGIN
-			RETURN
-		END
-
 	SET @OutSportType = 99		-- Other sports
 	SET @OutBetType = 1			-- Handicap
 		
 END
-
