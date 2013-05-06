@@ -1,13 +1,13 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[DBA_Customer_GetPT]    Script Date: 4/23/2013 1:08:52 PM ******/
+/****** Object:  StoredProcedure [dbo].[DBA_Customer_GetPT]    Script Date: 5/3/2013 5:14:04 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 ALTER PROCEDURE [dbo].[DBA_Customer_GetPT]
-	@InputCust	VARCHAR(30),
+	@InputCust	NVARCHAR(50),
 	@SportType	SMALLINT	= 1,
 	@BetType	SMALLINT	= 1,
 	@IsLive		BIT			= 0
@@ -17,7 +17,7 @@ AS
  * Created by	: Kos
  * Date			: 20130305
  * Task			: Get customer position taking and upline position taking
- * DB			: APL.CustDB
+ * DB			: SVRCUST.CustDB
  * Revisions	:
  *	• 
  * Parameters:
@@ -31,13 +31,13 @@ BEGIN
 	SET NOCOUNT ON	
 
 	DECLARE @CustId					INT
-	DECLARE @CustUsername			VARCHAR(50)
+	DECLARE @CustUsername			NVARCHAR(50)
 	DECLARE @AgentId				INT
 	DECLARE @AgentHId				HIERARCHYID
-	DECLARE @AgentUsername			VARCHAR(50)
+	DECLARE @AgentUsername			NVARCHAR(50)
 	DECLARE @MaxUpperPositionTaking	SMALLINT
-	DECLARE @MaxGivenPositionTaking		SMALLINT
-	DECLARE @MinGivenPositionTaking		SMALLINT
+	DECLARE @MaxGivenPositionTaking	SMALLINT
+	DECLARE @MinGivenPositionTaking	SMALLINT
 	DECLARE @PositionTaking			SMALLINT
 
 	SELECT @InputCust = LTRIM(RTRIM(@InputCust))
@@ -110,10 +110,10 @@ BEGIN
 
 	PRINT 
 		'| ' + CAST('Agent ID' AS CHAR(10)) 
-		+ '| ' + CAST('Username' AS CHAR(30))
-		+ '| ' + CAST('Preset' AS CHAR(10)) 
-		+ '| ' + CAST('Max' AS CHAR(10)) 
-		+ '| ' + CAST('Min' AS CHAR(10)) 
+		+ '| ' + CAST('Username' AS NCHAR(30))
+		+ '| ' + CAST('MaxTaken' AS CHAR(10)) 
+		+ '| ' + CAST('MaxGiven' AS CHAR(10)) 
+		+ '| ' + CAST('MinGiven' AS CHAR(10)) 
 		+ '| ' + CAST('Mem' AS CHAR(10)) 
 
 	PRINT @strLine
@@ -133,7 +133,7 @@ BEGIN
 		BEGIN
 			PRINT 
 				'| ' + CAST(@AgentId AS CHAR(10)) 
-				+ '| ' + CAST(@AgentUsername AS CHAR(30))
+				+ '| ' + CAST(@AgentUsername AS NCHAR(30))
 				+ '| ' + CAST(CAST(@MaxUpperPositionTaking AS FLOAT) / CAST(10000 AS FLOAT) AS CHAR(10)) 
 				+ '| ' + CAST(CAST(@MaxGivenPositionTaking AS FLOAT) / CAST(10000 AS FLOAT) AS CHAR(10)) 
 				+ '| ' + CAST(CAST(@MinGivenPositionTaking AS FLOAT) / CAST(10000 AS FLOAT) AS CHAR(10)) 
@@ -156,7 +156,3 @@ BEGIN
 	DEALLOCATE AgentCursor
 		
 END	
-
-
-
-

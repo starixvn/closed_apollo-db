@@ -1,13 +1,13 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[DBA_Agent_GetPT]    Script Date: 4/23/2013 1:07:37 PM ******/
+/****** Object:  StoredProcedure [dbo].[DBA_Agent_GetPT]    Script Date: 5/3/2013 5:21:11 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 ALTER PROCEDURE [dbo].[DBA_Agent_GetPT]
-	@InputAgent	VARCHAR(30),
+	@InputAgent	NVARCHAR(50),
 	@SportType	SMALLINT	= 1,
 	@BetType	SMALLINT	= 1,
 	@IsLive		BIT			= 0
@@ -17,7 +17,7 @@ AS
  * Created by	: Kos
  * Date			: 20130305
  * Task			: Get agent position taking and upline position taking
- * DB			: APL.CustDB
+ * DB			: SVRCUST.CustDB
  * Revisions	:
  *	• 
  * Parameters:
@@ -34,8 +34,8 @@ BEGIN
 	DECLARE @AgentHId				HIERARCHYID
 	DECLARE @Username				VARCHAR(50)
 	DECLARE @MaxUpperPositionTaking	SMALLINT
-	DECLARE @MaxGivenPositionTaking		SMALLINT
-	DECLARE @MinGivenPositionTaking		SMALLINT
+	DECLARE @MaxGivenPositionTaking	SMALLINT
+	DECLARE @MinGivenPositionTaking	SMALLINT
 
 	SELECT @InputAgent = LTRIM(RTRIM(@InputAgent))
 
@@ -91,7 +91,7 @@ BEGIN
 
 	PRINT 
 		'| ' + CAST('Agent ID' AS CHAR(10)) 
-		+ '| ' + CAST('Username' AS CHAR(30))
+		+ '| ' + CAST('Username' AS NCHAR(30))
 		+ '| ' + CAST('Preset' AS CHAR(10)) 
 		+ '| ' + CAST('Max' AS CHAR(10)) 
 		+ '| ' + CAST('Min' AS CHAR(10)) 
@@ -112,7 +112,7 @@ BEGIN
 		BEGIN
 			PRINT 
 				'| ' + CAST(@AgentId AS CHAR(10)) 
-				+ '| ' + CAST(@Username AS CHAR(30))
+				+ '| ' + CAST(@Username AS NCHAR(30))
 				+ '| ' + CAST(CAST(@MaxUpperPositionTaking AS FLOAT) / CAST(10000 AS FLOAT) AS CHAR(10)) 
 				+ '| ' + CAST(CAST(@MaxGivenPositionTaking AS FLOAT) / CAST(10000 AS FLOAT) AS CHAR(10)) 
 				+ '| ' + CAST(CAST(@MinGivenPositionTaking AS FLOAT) / CAST(10000 AS FLOAT) AS CHAR(10)) 
@@ -132,7 +132,7 @@ BEGIN
 
 	DEALLOCATE AgentCursor
 		
-END
+END	
 
 
 

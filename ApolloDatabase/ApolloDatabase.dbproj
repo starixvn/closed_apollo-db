@@ -1077,6 +1077,9 @@
     <NotInBuild Include="Agent\Function\f_Sport_GetNameByType.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="Agent\Function\f_Msg_GetContentById.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">

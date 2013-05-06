@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateSetting]    Script Date: 5/3/2013 4:33:41 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateSetting]    Script Date: 5/6/2013 9:29:03 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -25,11 +25,11 @@ AS
  * Revisions	:
  *	•  20132702@Edward	: Implement
  * Parameters:
- *	•	@BetLimit : 		
+ *	•	@BetLimit : 
 			<ROOT>
 				<Discount SportType="4" BetType="4" DiscountA="1" DiscountB="1" DiscountC="1" DiscountD="1"></Discount>
 			</ROOT>
- *	•	@Discount : 		
+ *	•	@Discount : 
 			<ROOT>
 				<Discount SportType="4" BetType="4" DiscountA="1" DiscountB="1" DiscountC="1" DiscountD="1"></Discount>
 			</ROOT>	
@@ -45,16 +45,21 @@ BEGIN
 	
 	-- Check update permission
 	DECLARE @hasPermission BIT
+
 	EXEC dbo.Age_Agent_CheckUpdatePermission @ActorAgentId, @AgentId, 1, @hasPermission OUTPUT 
-	SELECT @hasPermission
+
 	IF @hasPermission = 0
 		BEGIN
-			SELECT @ErrCode = 1
-			
-			SELECT @ErrMsg	= 'Do not permission for update.'
+			SELECT 
+				@ErrCode = 1000,
+				@ErrMsg = 
+					CASE @Language
+						WHEN 'en-US' THEN 'You do not have permission to update setting'
+						ELSE [dbo].f_Msg_GetContentById (1000, @Language)
+					END
 
 			RETURN
-		END	
+		END
 
 	EXEC Age_Agent_UpdateBetLimit @ActorAgentId, @AgentId, @BetLimit, @Language, @ErrCode OUTPUT, @ErrMsg OUTPUT
 
