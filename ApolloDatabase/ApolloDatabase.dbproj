@@ -309,9 +309,6 @@
     <NotInBuild Include="Agent\BetList\Age_BetList_AgentDetail.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_TotalBets_SelRunningByBettype.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="Agent\BetList\Age_BetList_TotalBets_SelRunningByBettypeMatch.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1086,19 +1083,26 @@
     <NotInBuild Include="Agent\Customer Setting\DBA_Agent_GetPTToCustomer.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+<<<<<<< HEAD
     <NotInBuild Include="Agent\Message\Age_CustomerUpdMessagesRead.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+=======
+>>>>>>> 36bfc951fe3c5aa4030febb2529f938e6cbde213
     <NotInBuild Include="Agent\Message\Dot_Msg_GetNotSpecialMessage.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Message\Dot_Msg_GetSpecialMessage.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+<<<<<<< HEAD
     <NotInBuild Include="Agent\Message\Age_Msg_GetByCustomer.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Message\Age_Msg_UpdateRead.sql">
+=======
+    <NotInBuild Include="Agent\Message\Age_CustomerUpdMessagesRead.sql">
+>>>>>>> 36bfc951fe3c5aa4030febb2529f938e6cbde213
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>

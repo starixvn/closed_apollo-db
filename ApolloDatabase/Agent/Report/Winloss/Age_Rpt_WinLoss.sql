@@ -33,7 +33,7 @@ BEGIN
 		SELECT  C.Username, C.AgentID, 1 as IsAgent,
 				PT.MaxUpperPositionTaking as PositionTaking,				
 		   		SUM(ABS(B.Stake)) AS TurnOver,
-				SUM(CASE WHEN ABS(B.MOdds) > 0.25 THEN ABS(B.Stake) ELSE CASE WHEN B.MOdds IN (0.25,-0.25) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS ActualTO,
+				SUM(CASE WHEN ABS(B.MOdds) > 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN B.MOdds IN (0.25,-0.25) AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS ActualTO,
 				- SUM(B.Winlost - B.Actual_Stake + B.TWinlost) AS AWinlost,	
 				- SUM (B.TComm) AS AComm,
 				- (SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS ATotal,
@@ -56,13 +56,16 @@ BEGIN
 	ELSE 
 	BEGIN
 		---- Agent Winloss
-		SELECT  C.Username, C.AgentID, PT.MaxUpperPositionTaking as PositionTaking,				 
+		SELECT  C.Username, C.AgentID, PT.MaxUpperPositionTaking as PositionTaking,			 
 		   		SUM(ABS(B.Stake)) AS TurnOver,
-				SUM(CASE WHEN ABS(B.MOdds)> 0.25 THEN ABS(B.Stake) ELSE CASE WHEN B.MOdds IN (0.25,-0.25) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS ActualTO,
+				SUM(CASE WHEN ABS(B.MOdds)> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN B.MOdds IN (0.25,-0.25) AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS ActualTO,
 				SUM(BP.AWinlost) AS AWinlost,	
 				SUM(BP.AComm) - SUM(BA.AComm) AS AComm,
 				SUM(BP.AWinlost) + SUM (BP.AComm) - SUM (BA.AComm)  AS ATotal,
-			    SUM(BA.AComm) ChildAComm  , SUM (BA.AWINLOst) as ChildWinlost
+			    SUM(BA.AComm) ChildAComm  , 
+				--SUM (BA.AWinlost)  as ChildWinlost,
+				MAX(B.Winlost) as Winlost,
+				MAX(B.Actual_Stake) as Actual_Stake
 	    INTO	#T
 		FROM	Bettrans B
 		INNER JOIN Bettrans_Agent BP WITH (NOLOCK) 
@@ -88,15 +91,15 @@ BEGIN
 		INSERT INTO #WinLossAgent
 		SELECT	T.Username, T.AgentID, 1 as IsAgent, T.PositionTaking as PositionTaking,	
 				T.TurnOver, T.ActualTO, T.AWinlost, T.AComm, T.ATotal, 
-				SUM(BA.AWINLOST) + T.ChildWinlost + T.ChildAComm AS GrossTotal,  
-				SUM(BA.AWINLOST) + T.ChildWinlost + T.ChildAComm - T.ATotal AS UplineTotal
+				SUM(BA.AWINLOST) + (T.Winlost - T.Actual_Stake) + T.ChildAComm AS GrossTotal,  
+				-(SUM(BA.AWINLOST) + (T.Winlost - T.Actual_Stake) + T.ChildAComm  + T.ATotal) AS UplineTotal
 		FROM AgentInfo P with (nolock)  
 		INNER JOIN AgentInfo C WITH(NOLOCK) ON C.AgentHId.IsDescendantOf(P.AgentHId ) =1  AND C.AgentLevel >= P.AgentLevel  --- Children of k+1 (k+1 -> k+...)
 		INNER JOIN Bettrans_Agent BA WITH (NOLOCK) ON BA.AgentID = C.AgentID
 		INNER JOIN #T T ON T.AgentID = P.AgentID
 		WHERE	BA.StatusID NOT IN (0,1) 
 				AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
-		GROUP BY T.AgentID, T.Username,T.PositionTaking, T.TurnOver, T.ActualTO, T.AWinlost, T.AComm, T.ATotal, T.ChildAComm, ChildWinlost
+		GROUP BY T.AgentID, T.Username,T.PositionTaking, T.TurnOver, T.ActualTO, T.AWinlost, T.AComm, T.ATotal, T.ChildAComm, T.Winlost , T.Actual_Stake
 	 
 	
 		DROP TABLE #T
@@ -109,12 +112,12 @@ BEGIN
 	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,
 			0 as PositionTaking,				
 		   	SUM(ABS(B.Stake)) as TurnOver,
-			SUM(CASE WHEN ABS(B.MOdds)> 0.25 THEN ABS(B.Stake) ELSE CASE WHEN B.MOdds IN (0.25,-0.25)  THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as ActualTO,
+			SUM(CASE WHEN ABS(B.MOdds)> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN B.MOdds IN (0.25,-0.25) AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as ActualTO,
 			SUM(BA.AWinLost) as AWinlost,	
 			SUM(BA.AComm) - SUM (B.PlayerComm) as AComm,
 			SUM(BA.AWinLost) + SUM(BA.AComm) - SUM (B.PlayerComm) AS ATotal,
 			SUM (-(B.Winlost - B.Actual_Stake + B.PlayerComm)) GrossTotal,
-			SUM (-(B.Winlost - B.Actual_Stake + B.PlayerComm)) - (SUM(BA.AWinLost) + SUM(BA.AComm) - SUM (B.PlayerComm)) UplineTotal
+			-(SUM (B.Winlost - B.Actual_Stake + B.PlayerComm) + SUM(BA.AWinLost) + SUM(BA.AComm) - SUM (B.PlayerComm)) UplineTotal
 	FROM	Bettrans B WITH (NOLOCK)
 	INNER JOIN BetTrans_Agent BA WITH (NOLOCK) 
 		ON	BA.TransID = B.TransID 
@@ -228,10 +231,13 @@ WHERE	TurnOver IS NULL
 SELECT	Username, AgentId, isAgent, PositionTaking,
 		SUM(TurnOver) as TurnOver,
 		SUM(ActualTO) as ActualTO,
+
+		SUM(GrossTotal) as GrossTotal,
+
 		SUM(AWinLost) as  AWinLost, 
 		SUM(AComm) as AComm,
-		SUM(ATotal) as ATotal,
-		SUM(GrossTotal) as GrossTotal,
+		SUM(ATotal) as ATotal,	
+			
 		SUM(UplineTotal) as UplineTotal
 FROM	#WinLossAgent
 GROUP BY Username, AgentId, isAgent, PositionTaking
@@ -239,10 +245,13 @@ UNION ALL
 SELECT	Username, AgentId, isAgent, PositionTaking,
 		SUM(TurnOver) as TurnOver,
 		SUM(ActualTO) as ActualTO,
+
+		SUM(GrossTotal) as GrossTotal,
+
 		SUM(AWinLost) as  AWinLost, 
 		SUM(AComm) as AComm,
 		SUM(ATotal) as ATotal,
-		SUM(GrossTotal) as GrossTotal,
+		
 		SUM(UplineTotal) as UplineTotal
 FROM	#WinLossMember 
 GROUP BY Username, AgentId, isAgent, PositionTaking

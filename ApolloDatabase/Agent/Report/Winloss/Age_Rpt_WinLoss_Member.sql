@@ -27,7 +27,7 @@ BEGIN
 				C.CustID,
 				PT.PositionTaking, 
 		   		SUM(ABS(B.Stake)) AS TurnOver,
-				SUM(CASE WHEN ABS(B.MOdds)> 0.25 THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as ActualTO,
+				SUM(CASE WHEN ABS(B.MOdds)> 0.25 AND B.B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as ActualTO,
 
 				SUM(B.WinLost - B.Actual_Stake) AS WinLost,
 				SUM(B.PlayerComm) AS PlayerComm,

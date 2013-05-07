@@ -1,10 +1,15 @@
 ﻿USE [bodb_Message]
 GO
+<<<<<<< HEAD
 /****** Object:  StoredProcedure [dbo].[Dot_Msg_GetPrivateMessage]    Script Date: 5/7/2013 2:02:40 PM ******/
+=======
+/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetPrivateMessage]    Script Date: 5/7/2013 1:16:25 PM ******/
+>>>>>>> 36bfc951fe3c5aa4030febb2529f938e6cbde213
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+<<<<<<< HEAD
 
 ALTER PROCEDURE [dbo].[Dot_Msg_GetPrivateMessage]
 	@TargetId	INT				= 0, 
@@ -34,6 +39,34 @@ AS
 BEGIN
 	SET NOCOUNT ON
 
+=======
+ALTER PROCEDURE [dbo].[Dot_Msg_GetPrivateMessage]  
+	 @TargetId	INT				= 0,  	
+	 @TargetId2 VARCHAR(100)	= '0', 
+	 @IsAgent	BIT				= 1 ,  
+	 @Special	INT				= 2,  
+	 @Record	INT				= 1,  
+	 @Sdate		DATETIME		= NULL,  
+	 @Edate		DATETIME		= NULL,  
+	 @IsTest	BIT				= 0,  
+	 @MatchId	BIT				= 0  
+AS  
+/*  
+*	Created: @TWTeam  
+*	Task:   
+*	DB: DB07  
+*   Original:  
+*   Revisions:  
+*	•	Don@20090923 : adapt for new design (Drop table BatchMsg)  
+*	•	Scott@20120109 : add condition for new flag column [isDeleted] to filter deleted data. 
+*	•	Edward@20130418	: reformat and add @IsAgent
+*
+*•	Param's Explanation:  
+*/ 
+BEGIN      
+    SET NOCOUNT ON  
+  
+>>>>>>> 36bfc951fe3c5aa4030febb2529f938e6cbde213
 	IF	@TargetId > 0 
 		AND @Special = 2 
 		AND @IsTest = 0
