@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateDiscount]    Script Date: 5/6/2013 11:25:27 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateDiscount]    Script Date: 5/6/2013 5:30:43 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -329,6 +329,7 @@ BEGIN
 							ON ad.AgentId		= tad.AgentId
 							AND ad.SportType	= tad.SportType
 							AND ad.BetType		= tad.BetType
+					WHERE ad.DiscountB > tad.DiscountB
 					
 					UPDATE ad WITH (ROWLOCK, UPDLOCK)
 					SET ad.DiscountC	= tad.DiscountC
@@ -338,6 +339,7 @@ BEGIN
 							ON ad.AgentId		= tad.AgentId
 							AND ad.SportType	= tad.SportType
 							AND ad.BetType		= tad.BetType
+					WHERE ad.DiscountC > tad.DiscountC
 					
 					UPDATE ad WITH (ROWLOCK, UPDLOCK)
 					SET ad.DiscountD = tad.DiscountD
@@ -347,6 +349,7 @@ BEGIN
 							ON ad.AgentId		= tad.AgentId
 							AND ad.SportType	= tad.SportType
 							AND ad.BetType		= tad.BetType
+					WHERE ad.DiscountD > tad.DiscountD
 
 					IF EXISTS (
 						SELECT TOP(1) * FROM @TableStackDiscountUpdate
@@ -375,6 +378,17 @@ BEGIN
 									AND ad.SportType = cd.SportType
 									AND ad.BetType = cd.BetType
 							WHERE ad.AgentId IN ( SELECT DISTINCT AgentId FROM @TableStackDiscountUpdate )
+								AND cd.Discount > CASE
+													WHEN ad.SportType = 1 AND ad.BetType = 5 THEN ad.DiscountA		-- 1x2
+													WHEN ad.SportType = 1 AND ad.BetType = 4 THEN ad.DiscountA		-- Others 
+													ELSE
+														CASE
+															WHEN ci.UGroup = 'a' THEN ad.DiscountA
+															WHEN ci.UGroup = 'b' THEN ad.DiscountB
+															WHEN ci.UGroup = 'c' THEN ad.DiscountC
+															WHEN ci.UGroup = 'd' THEN ad.DiscountD
+														END
+												END
 						
 						END
 

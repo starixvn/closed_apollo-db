@@ -438,9 +438,6 @@
     <NotInBuild Include="Agent\Customer Setting\Age_Agent_Insert.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_SearchByUsername.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdateBetLimit.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1026,9 +1023,6 @@
     <NotInBuild Include="CSD\Write Log\WriteLog_Settlement_Settle.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Write Log\Age_LogRunSp_Insert.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="Agent\AccountInfo\Age_Agent_GetAgentDownline.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1083,7 +1077,19 @@
     <NotInBuild Include="Agent\Customer Setting\Age_Customer_GetUplineInfo.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_TotalBets_SelRunningByBettype.sql">
+    <NotInBuild Include="Agent\Customer Setting\DBA_Agent_GetPTToAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\DBA_Agent_GetPTToCustomer.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Message\Dot_Msg_GetNotSpecialMessage.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Message\Dot_Msg_GetSpecialMessage.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Message\Age_CustomerUpdMessagesRead.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>

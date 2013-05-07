@@ -1,13 +1,14 @@
 ﻿USE [bodb_Message]
 GO
-/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetPrivateMessage]    Script Date: 4/18/2013 2:40:21 PM ******/
+/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetPrivateMessage]    Script Date: 5/7/2013 1:16:25 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 ALTER PROCEDURE [dbo].[Dot_Msg_GetPrivateMessage]  
-	 @TargetId	INT				= 0,  	 
-	 @IsAgent	BIT				= 0,  
+	 @TargetId	INT				= 0,  	
+	 @TargetId2 VARCHAR(100)	= '0', 
+	 @IsAgent	BIT				= 1 ,  
 	 @Special	INT				= 2,  
 	 @Record	INT				= 1,  
 	 @Sdate		DATETIME		= NULL,  
@@ -23,7 +24,7 @@ AS
 *   Revisions:  
 *	•	Don@20090923 : adapt for new design (Drop table BatchMsg)  
 *	•	Scott@20120109 : add condition for new flag column [isDeleted] to filter deleted data. 
-*	•	Edward@20130418	: reformat and add @IsAgent, remove @targetid2 not used 
+*	•	Edward@20130418	: reformat and add @IsAgent
 *
 *•	Param's Explanation:  
 */ 

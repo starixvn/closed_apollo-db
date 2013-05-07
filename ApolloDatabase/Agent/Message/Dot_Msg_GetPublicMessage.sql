@@ -1,6 +1,6 @@
 ﻿USE [bodb_Message]
 GO
-/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetPublicMessage]    Script Date: 4/18/2013 4:17:02 PM ******/
+/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetPublicMessage]    Script Date: 5/7/2013 1:16:57 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -9,7 +9,7 @@ GO
 ALTER PROCEDURE [dbo].[Dot_Msg_GetPublicMessage]
 	@TargetId	INT				= 0,  	
 	@TargetId2	VARCHAR(100)	= '0', 	
-	@IsAgent	BIT				= 0,
+	@IsAgent	BIT				= 1,
 	@Special	INT				= 2,  
 	@Record		INT				= 1,  
 	@Sdate		DATETIME		= NULL,  
@@ -23,7 +23,7 @@ AS
     DB: DB07
     Original:
     Revisions:
-		20130418@Edward	: Reformat and add @IsAgent
+		20130418@Edward	: Reformat and add @IsAgent, check isDeleted
     Param's Explanation:
     */
 BEGIN
@@ -61,7 +61,9 @@ BEGIN
 		FROM dbo.Msg AS	m WITH (NOLOCK)
 			INNER JOIN dbo.MsgTarget AS mt WITH (NOLOCK) 
 			ON m.MessageId = mt.MessageId
-		WHERE m.MsgType = 3
+		WHERE m.MsgType		= 3
+			AND m.isDeleted	= 0
+			AND mt.isDeleted= 0	
 			AND CASE
 					WHEN ((@Special IN (0,1) AND m.IsSticky = @Special)) THEN 1
 					WHEN (@Special = 2) THEN 1
@@ -80,16 +82,8 @@ BEGIN
 					WHEN (@Sdate IS NULL AND @Edate IS NOT NULL AND m.PostTime <= @Edate) THEN 1
 					ELSE 0 
 				END = 1
-			AND CASE
-					WHEN (@IsTest = 1) THEN 1
-					WHEN (m.IsTest = @IsTest) THEN 1
-					ELSE 0 
-				END = 1
-			AND CASE
-					WHEN (@MatchID = 0) THEN 1
-					WHEN (m.MatchID = @MatchID) THEN 1
-					ELSE 0 
-				END = 1
+			AND (@IsTest = 1 OR (@IsTest <> 1 AND m.IsTest = @IsTest))
+			AND (@MatchId = 0 OR (@MatchId <> 0 AND m.MatchId = @MatchId))			
 	) new_table
 	WHERE CASE
 			WHEN (@Record <> 0 AND new_table.rownum <= @Record) THEN 1

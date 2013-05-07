@@ -1,47 +1,52 @@
 ﻿USE [bodb_Message]
 GO
-/****** Object:  StoredProcedure [dbo].[Dot_Msg_HasPriMessage24]    Script Date: 4/2/2013 2:30:55 PM ******/
+/****** Object:  StoredProcedure [dbo].[Dot_Msg_HasPriMessage24]    Script Date: 5/7/2013 1:13:28 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	<Description,,>
--- =============================================
---exec [dbo].[Dot_Msg_HasPriMessage24] 1134121,0
 ALTER PROCEDURE [dbo].[Dot_Msg_HasPriMessage24]
-	-- Add the parameters for the stored procedure here
-	@UserID int,
-	@IsTest bit = 0
+	@TargetId		INT,
+	@IsAgent		BIT		= 1,
+	@IsTest			BIT		= 0
 AS
 BEGIN
-	-- SET NOCOUNT ON added to prevent extra result sets from
-	-- interfering with SELECT statements.
+/**
+ * Created by	: TWTeam
+ * Date			: 
+ * Task			: 
+ * DB			: APL.bodb_Message
+ * Revisions	:
+ *	• 20120109@Scott(DB07): add condition for new flag column [isDeleted] to filter deleted data.
+ *	• 202130405@Edward : Add parameter @IsAgent and review,change parameter
+ *						from @UserId to @TargetId
+ * Parameters:
+ *  
+ */
 	SET NOCOUNT ON;
+   
+	DECLARE @MessageID INT
+			,@PostTime DATETIME
 
-    -- Insert statements for procedure here
-declare @MessageID int
-declare @PostTime datetime
-	--if exists
-		SELECT top 1 @MessageID=m.MessageID,@PostTime=m.PostTime FROM dbo.Msg m with (nolock)
-		INNER JOIN dbo.MsgTarget mt with (nolock) ON m.MessageId = mt.MessageId and mt.TargetId=@UserID
-		WHERE m.MsgType=1  
-		--AND m.MessageId > 50000
-		AND m.IsSticky = 0
-		AND case @IsTest when 1 then 1
-			when m.IsTest then 1
-			end = 1
-		and m.posttime > dateadd(d,-1,getdate()) 
-		ORDER BY m.PostTime DESC
-		--set @MessageID = MessageID
-	--else
-	--	set @MessageID = 0
+	--If exists
+	SELECT TOP 1 @MessageID = m.MessageID
+				,@PostTime	= m.PostTime 
+	FROM 
+		dbo.Msg AS m WITH (NOLOCK)
+		INNER JOIN dbo.MsgTarget AS mt WITH (NOLOCK) 
+			ON m.MessageId	= mt.MessageId 						
+	WHERE 
+		m.MsgType			= 1  
+		AND m.isDeleted		= 0 
+		AND mt.isDeleted	= 0		
+		AND m.IsSticky		= 0		
+		AND (@IsTest = 1 OR (@IsTest <> 1 AND m.IsTest = @IsTest))
+		AND mt.TargetId		= @TargetId
+		AND mt.IsAgent		= @IsAgent	
+	ORDER BY m.PostTime DESC		
 
-if @@rowcount>0
-	select @MessageID as MessageID, @PostTime as Posttime
-else
-	select 0 as MessageID, null as PostTime
+	IF @@ROWCOUNT > 0
+		SELECT @MessageID AS MessageID, @PostTime AS Posttime
+	ELSE	
+		SELECT 0 AS MessageID, NULL AS PostTime
 END
-

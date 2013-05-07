@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking]    Script Date: 5/6/2013 11:30:57 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking]    Script Date: 5/6/2013 5:45:18 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -327,7 +327,7 @@ BEGIN
 								WHEN 'en-US' THEN 'Sum Max Upper and Max Given Share must be equal or less than Max Given Share of Parent Agent' 
 								ELSE [dbo].f_Msg_GetContentById (4001, @Language)
 							END + ' ('+ @tempUsername +')' 
-								+ ' (' + dbo.f_Get_SportNameBySporttype(@sportType,@Language) + ')'
+								+ ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
 
 				RETURN			
 			END	

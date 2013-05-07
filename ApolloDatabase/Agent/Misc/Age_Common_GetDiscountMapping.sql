@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Common_GetDiscountMapping]    Script Date: 3/29/2013 10:02:00 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Common_GetDiscountMapping]    Script Date: 5/6/2013 3:53:55 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -18,7 +18,7 @@ AS
  * Created by	: Kos
  * Date			: 20130309
  * Task			: Get discount mapping output of sport type and bet type
- * DB			: APL.CustDB
+ * DB			: SVRAGE.RepDB
  * Revisions	:
  *	• 
  * Parameters:
