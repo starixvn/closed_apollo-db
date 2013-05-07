@@ -1,4 +1,11 @@
-﻿
+﻿USE [bodb_Message]
+GO
+/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetMessage]    Script Date: 5/7/2013 3:22:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
 ALTER PROCEDURE [dbo].[Dot_Msg_GetMessage]
 	@targetid int = 0, 
 	@targetid2 varchar(100) = '0', 
@@ -6,19 +13,23 @@ ALTER PROCEDURE [dbo].[Dot_Msg_GetMessage]
 	@record int = 1, 
 	@sdate datetime=NULL, 
 	@edate datetime=NULL,
-	@IsTest bit = 0,
-	@MatchId int = 0
+	@IsTest bit = 0,	
+	@MatchId int = 0,
+	@IsAgent bit = 1
 AS
 BEGIN
-    /*
-    Created: @TWTeam
-    Task: 
-    DB: SVRMSG.bosb_Message
-    Original:
-    Revisions: 
 
-    Param's Explanation:
-    */
+/*  
+ * Created		: @TWTeam
+ * Task			:
+ * DB			: SVRMSG.bodb_Message
+ * Original		:
+ * Revisions	:
+ *	• Kos@20130418	: review, add @IsAgent parameter
+ *
+ *•	Param's Explanation:
+ */ 
+
     SET NOCOUNT ON;
     
 	SELECT *
@@ -36,11 +47,11 @@ BEGIN
 		    INNER JOIN dbo.MsgTarget mt with (nolock) ON m.MessageId = mt.MessageId
 		WHERE ((CASE
 				  WHEN (@targetid = 0) THEN 1
-				  WHEN (@targetid <> 0 AND m.MsgType = 1 AND mt.TargetId = @targetid) THEN 1
+				  WHEN (@targetid <> 0 AND m.MsgType = 1 AND mt.TargetId = @targetid AND mt.IsAgent = @IsAgent) THEN 1
 				ELSE 0 END = 1) OR
 				(CASE
 				  WHEN (@targetid2 = '0') THEN 1
-				  WHEN (@targetid2 <> '0' AND m.MsgType = 3 AND mt.TargetId IN (SELECT val FROM dbo.strSplit(@targetid2,','))) THEN 1
+				  WHEN (@targetid2 <> '0' AND m.MsgType = 3 AND mt.TargetId IN (SELECT val FROM dbo.strSplit(@targetid2,',')) AND mt.IsAgent = @IsAgent) THEN 1
 				ELSE 0 END = 1))
 			AND CASE				 
 				  WHEN (@sdate IS NOT NULL AND @edate IS NOT NULL 

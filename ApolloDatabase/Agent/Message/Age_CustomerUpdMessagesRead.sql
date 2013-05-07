@@ -1,6 +1,6 @@
 ﻿USE [bodb_Message]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_CustomerUpdMessagesRead]    Script Date: 5/7/2013 10:58:19 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_CustomerUpdMessagesRead]    Script Date: 5/7/2013 4:24:08 PM ******/
 SET ANSI_NULLS OFF
 GO
 SET QUOTED_IDENTIFIER OFF
@@ -8,7 +8,7 @@ GO
  
  ALTER PROCEDURE [dbo].[Age_CustomerUpdMessagesRead]
 	@TargetId		INT				= 0,
-	@IsAgent		BIT,
+	@IsAgent		BIT				= 1,
 	@MessageIDs		VARCHAR(4000)	= ''
 	
 /*

@@ -1,21 +1,34 @@
 ﻿USE [bodb_Message]
 GO
-/****** Object:  StoredProcedure [dbo].[Dot_Msg_SetPriMsgRead]    Script Date: 4/2/2013 3:26:10 PM ******/
+/****** Object:  StoredProcedure [dbo].[Dot_Msg_SetPriMsgRead]    Script Date: 5/7/2013 2:46:47 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+
 ALTER PROCEDURE [dbo].[Dot_Msg_SetPriMsgRead]
-	@UserId int,
-	@UserName nvarchar(20)
+	@TargetId	INT,
+	@IsAgent	BIT
 AS
+
+/**
+ * Created by	: TWTeam
+ * Date			: 
+ * Task			: Set private message read
+ * DB			: SVRMSG.bodb_Message
+ * Revisions	:
+ *	• 20130405@Kos	:	Add parameter @IsAgent, remove parameter @UserName, change parameter
+ *						from @UserId to @TargetId
+ * Parameters:
+ *  
+ */
+
 BEGIN
-SET NOCOUNT ON
-	Update dbo.MsgTarget
+	UPDATE dbo.MsgTarget
 	SET IsRead = 1
-	WHERE IsRead = 0
-		AND TargetId = @UserId
-		AND TargetName = @UserName
+	WHERE 
+		IsRead = 0
+		AND IsDeleted = 0
+		AND TargetId = @TargetId
+		AND IsAgent = @IsAgent
 END
-
-

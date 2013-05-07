@@ -1,6 +1,6 @@
 ﻿USE [bodb_Message]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_CustomerSelMessages]    Script Date: 4/2/2013 9:32:22 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_CustomerSelMessages]    Script Date: 5/7/2013 4:22:45 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
