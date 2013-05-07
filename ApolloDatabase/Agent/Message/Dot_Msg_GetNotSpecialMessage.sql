@@ -1,6 +1,6 @@
 ﻿USE [bodb_Message]
 GO
-/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetNotSpecialMessage]    Script Date: 5/7/2013 10:53:05 AM ******/
+/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetNotSpecialMessage]    Script Date: 5/7/2013 1:17:37 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -9,7 +9,7 @@ GO
 ALTER PROCEDURE [dbo].[Dot_Msg_GetNotSpecialMessage]
 	@TargetId	INT				= 0,  	
 	@TargetId2	VARCHAR(100)	= '0', 	
-	@IsAgent	BIT				= 0,
+	@IsAgent	BIT				= 1,
 	@Special	INT				= 2,  
 	@Record		INT				= 1,  
 	@Sdate		DATETIME		= NULL,  
