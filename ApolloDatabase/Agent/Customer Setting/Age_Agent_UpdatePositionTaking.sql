@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking]    Script Date: 5/6/2013 5:45:18 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking]    Script Date: 5/8/2013 9:46:38 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -103,6 +103,7 @@ BEGIN
 				,@parentAgentId		INT
 				,@agentLevel		SMALLINT
 				,@sportType			SMALLINT
+				,@betType			SMALLINT
 				,@tempAgentId		INT
 				,@tempUsername		NVARCHAR(50)
 				,@isLastAgent		BIT
@@ -268,7 +269,8 @@ BEGIN
 		-- end read xml	
 
 		-- Check validate max and min
-		SELECT TOP(1) @sportType = tpt.SportType
+		SELECT TOP(1) @sportType	= tpt.SportType
+						,@betType	= tpt.BetType
 		FROM @TablePositionTaking AS tpt					
 		WHERE tpt.MinGivenPT	< 0
 			OR tpt.MaxGivenPT	< 0
@@ -282,13 +284,14 @@ BEGIN
 							CASE @Language
 								WHEN 'en-US' THEN 'Share must be equal or greater than zero' 
 								ELSE [dbo].f_Msg_GetContentById (4002, @Language)
-							END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
+							END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ' - ' + dbo.f_Bet_GetNameByType(@betType, @Language) +')'
 
 				RETURN			
 			END	
 
 		-- Check validate max and min
-		SELECT TOP(1) @sportType = tpt.SportType
+		SELECT TOP(1) @sportType	= tpt.SportType
+						,@betType	= tpt.BetType
 		FROM @TablePositionTaking AS tpt					
 		WHERE tpt.MinGivenPT > tpt.MaxGivenPT
 
@@ -300,13 +303,14 @@ BEGIN
 							CASE @Language
 								WHEN 'en-US' THEN 'Min Given Share must be equal to or less than Max Given Share' 
 								ELSE [dbo].f_Msg_GetContentById (4003, @Language)
-							END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
+							END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ' - ' + dbo.f_Bet_GetNameByType(@betType, @Language) +')'
 
 				RETURN			
 			END	
 
 		SELECT TOP(1) @sportType		= tpt.SportType
 						,@tempAgentId	= apt.AgentId
+						,@betType		= tpt.BetType
 		FROM @TablePositionTaking AS tpt
 			INNER JOIN AgentPositionTaking AS apt WITH (NOLOCK)
 				ON apt.SportType	= tpt.SportType
@@ -327,7 +331,7 @@ BEGIN
 								WHEN 'en-US' THEN 'Sum Max Upper and Max Given Share must be equal or less than Max Given Share of Parent Agent' 
 								ELSE [dbo].f_Msg_GetContentById (4001, @Language)
 							END + ' ('+ @tempUsername +')' 
-								+ ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
+								+ ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ' - ' + dbo.f_Bet_GetNameByType(@betType, @Language) +')'
 
 				RETURN			
 			END	
@@ -389,7 +393,8 @@ BEGIN
 								-- Check validate when update main share holder
 
 								-- Max given position taking must be MinGivenPT < MaxGivenPT < @MAXSHAREHOLDERPT
-								SELECT TOP(1) @sportType = tpt.SportType
+								SELECT TOP(1) @sportType	= tpt.SportType
+												,@betType	= tpt.BetType
 								FROM @TablePositionTaking AS tpt					
 								WHERE tpt.MaxGivenPT NOT BETWEEN tpt.MinGivenPT AND @MAXSHAREHOLDERPT
 
@@ -400,9 +405,9 @@ BEGIN
 											@ErrCode = 4004,
 											@ErrMsg	= 
 												CASE @Language
-													WHEN 'en-US' THEN 'Max Given Share must be equal to or less than ' 
+													WHEN 'en-US' THEN 'Max Given Share must be equal to or less than 90%' 
 													ELSE [dbo].f_Msg_GetContentById (4004, @Language)
-												END + @MAXSHAREHOLDERPT + '.' + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'										
+												END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ' - ' + dbo.f_Bet_GetNameByType(@betType, @Language) +')'
 										
 										RETURN			
 									END
@@ -410,6 +415,7 @@ BEGIN
 								-- Max given position taking must be greater or equal Max[Sum(PreK+MaxK)]
 								SELECT TOP(1) @sportType		= tpt.SportType
 												,@tempAgentId	= shareHolderTemp.AgentId
+												,@betType		= tpt.BetType
 								FROM @TablePositionTaking AS tpt
 									INNER JOIN (
 										SELECT apt.AgentId
@@ -426,20 +432,17 @@ BEGIN
 										AND tpt.BetType		= shareHolderTemp.BetType
 										AND tpt.IsLive		= shareHolderTemp.IsLive
 								WHERE tpt.MaxGivenPT < shareHolderTemp.SumMaxUpperAndGiven
-
-								SELECT @tempUsername = Username FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @tempAgentId
-
+									  
 								IF @sportType IS NOT NULL 
 									BEGIN
-										
 										SELECT 
-											@ErrCode = 4005,
-											@ErrMsg	= 
+											@ErrCode	= 4006,
+											@ErrMsg		= 
 												CASE @Language
-													WHEN 'en-US' THEN 'Max Given Share must be equal to or less than sum Max Upper and Max Given Share of Share Holder' 
-													ELSE [dbo].f_Msg_GetContentById (4005, @Language)
-												END + ' ('+ @tempUsername + ')' + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
-										
+													WHEN 'en-US' THEN 'Invalid Max Given Share range' 
+													ELSE [dbo].f_Msg_GetContentById (4006, @Language)
+												END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ' - ' + dbo.f_Bet_GetNameByType(@betType, @Language) +')'
+
 										RETURN			
 									END
 								-- End check validate when update main share holder
@@ -560,7 +563,8 @@ BEGIN
 						)
 							BEGIN
 								-- Check validate when update main share holder
-								SELECT TOP(1) @sportType = tpt.SportType
+								SELECT TOP(1) @sportType	= tpt.SportType
+												,@betType	= tpt.BetType
 								FROM @TablePositionTaking AS tpt					
 									INNER JOIN AgentPositionTaking AS papt WITH (NOLOCK)
 										ON tpt.SportType	= papt.SportType
@@ -577,7 +581,7 @@ BEGIN
 												CASE @Language
 													WHEN 'en-US' THEN 'Invalid taken share range' 
 													ELSE [dbo].f_Msg_GetContentById (4000, @Language)
-												END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
+												END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ' - ' + dbo.f_Bet_GetNameByType(@betType, @Language) +')'
 
 										RETURN			
 									END
@@ -876,7 +880,8 @@ BEGIN
 							BEGIN								
 								IF @isLastAgent = 1
 									BEGIN
-										SELECT TOP(1) @sportType = tpt.SportType
+										SELECT TOP(1) @sportType	= tpt.SportType
+														,@betType	= tpt.BetType
 										FROM @TablePositionTaking AS tpt
 											INNER JOIN AgentPositionTaking AS papt WITH (NOLOCK)
 												ON tpt.SportType	= papt.SportType
@@ -894,7 +899,7 @@ BEGIN
 														CASE @Language
 															WHEN 'en-US' THEN 'Invalid Max Given Share range' 
 															ELSE [dbo].f_Msg_GetContentById (4006, @Language)
-														END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'											
+														END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ' - ' + dbo.f_Bet_GetNameByType(@betType, @Language) +')'
 
 												RETURN			
 											END
@@ -902,7 +907,8 @@ BEGIN
 								ELSE
 									BEGIN
 									
-										SELECT TOP(1) @sportType = tpt.SportType
+										SELECT TOP(1) @sportType	= tpt.SportType
+														,@betType	= tpt.BetType
 										FROM @TablePositionTaking AS tpt
 											INNER JOIN (
 												SELECT	
@@ -946,7 +952,7 @@ BEGIN
 														CASE @Language
 															WHEN 'en-US' THEN 'Invalid Max Given Share range' 
 															ELSE [dbo].f_Msg_GetContentById (4006, @Language)
-														END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'	
+														END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ' - ' + dbo.f_Bet_GetNameByType(@betType, @Language) +')'
 
 												RETURN			
 											END
@@ -990,7 +996,8 @@ BEGIN
 											INNER JOIN CustInfo AS ci WITH (NOLOCK)
 												ON cpt.CustId		= ci.CustId
 										WHERE ci.AgentId	= @AgentId
-											AND cpt.PositionTaking > tpt.MaxGivenPT
+											AND cpt.AgentId	= @AgentId
+											AND cpt.PositionTaking > tpt.MaxGivenPT									
 
 									-- Update member
 										UPDATE cpt
@@ -1461,7 +1468,8 @@ BEGIN
 						)
 							BEGIN
 								-- Check validate when update main share holder
-								SELECT TOP(1) @sportType = tpt.SportType
+								SELECT TOP(1) @sportType	= tpt.SportType
+												,@betType	= tpt.BetType
 								FROM @TablePositionTaking AS tpt														
 								WHERE tpt.MinGivenPT NOT BETWEEN 0 AND tpt.MaxGivenPT
 
@@ -1473,7 +1481,7 @@ BEGIN
 												CASE @Language
 													WHEN 'en-US' THEN 'Invalid Min Given Share range' 
 													ELSE [dbo].f_Msg_GetContentById (4007, @Language)
-												END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'	
+												END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ' - ' + dbo.f_Bet_GetNameByType(@betType, @Language) +')'
 
 										RETURN			
 									END

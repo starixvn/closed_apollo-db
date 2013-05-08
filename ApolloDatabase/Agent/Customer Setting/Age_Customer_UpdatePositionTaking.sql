@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdatePositionTaking]    Script Date: 5/6/2013 12:42:52 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdatePositionTaking]    Script Date: 5/8/2013 9:47:00 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -208,6 +208,7 @@ BEGIN
 						@agentLevel		SMALLINT,
 						@agentHId		HIERARCHYID,
 						@sportType		INT,
+						@betType		INT,
 						@childAgentId	INT
 					---- End declare
 
@@ -253,7 +254,8 @@ BEGIN
 					-- Check for direct member or indirect member
 					IF EXISTS (	SELECT 1 FROM CustInfo WHERE CustId = @CustId AND AgentId = @AgentId )		-- direct member
 						BEGIN
-							SELECT TOP(1) @sportType = apt.SportType 
+							SELECT TOP(1) @sportType	= apt.SportType 
+											,@betType	= apt.BetType
 							FROM 
 								AgentPositionTaking AS apt WITH (NOLOCK)
 								INNER JOIN @TablePositionTaking AS ptt
@@ -272,7 +274,7 @@ BEGIN
 											CASE @Language
 												WHEN 'en-US' THEN 'Invalid taken share range' 
 												ELSE [dbo].f_Msg_GetContentById (4000, @Language)
-											END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'	
+											END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ' - ' + dbo.f_Bet_GetNameByType(@betType, @Language) +')'
 									RETURN
 								END
 						END
@@ -283,7 +285,8 @@ BEGIN
 							FROM @DownlineAgentInfo
 							WHERE ParentId = @AgentId
 							
-							SELECT TOP(1) @sportType = ptt.SportType	
+							SELECT TOP(1) @sportType	= ptt.SportType
+											,@betType	= ptt.BetType
 							FROM 
 								@TablePositionTaking AS ptt
 								INNER JOIN (
@@ -338,7 +341,7 @@ BEGIN
 											CASE @Language
 												WHEN 'en-US' THEN 'Invalid taken share range' 
 												ELSE [dbo].f_Msg_GetContentById (4000, @Language)
-											END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
+											END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ' - ' + dbo.f_Bet_GetNameByType(@betType, @Language) +')'
 
 									RETURN
 								END
