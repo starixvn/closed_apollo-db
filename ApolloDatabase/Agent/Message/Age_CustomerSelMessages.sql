@@ -1,6 +1,10 @@
 ﻿USE [bodb_Message]
 GO
+<<<<<<< HEAD
+/****** Object:  StoredProcedure [dbo].[Age_CustomerSelMessages]    Script Date: 5/7/2013 4:22:45 PM ******/
+=======
 /****** Object:  StoredProcedure [dbo].[Age_CustomerSelMessages_xtest]    Script Date: 5/7/2013 1:11:18 PM ******/
+>>>>>>> 36bfc951fe3c5aa4030febb2529f938e6cbde213
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON

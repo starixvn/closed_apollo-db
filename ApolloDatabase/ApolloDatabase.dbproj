@@ -1083,11 +1083,20 @@
     <NotInBuild Include="Agent\Customer Setting\DBA_Agent_GetPTToCustomer.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="Agent\Message\Age_CustomerUpdMessagesRead.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
     <NotInBuild Include="Agent\Message\Dot_Msg_GetNotSpecialMessage.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Message\Dot_Msg_GetSpecialMessage.sql">
       <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Message\Age_Msg_GetByCustomer.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Message\Age_Msg_UpdateRead.sql">
+	  <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Message\Age_CustomerUpdMessagesRead.sql">
       <SubType>NotInBuild</SubType>

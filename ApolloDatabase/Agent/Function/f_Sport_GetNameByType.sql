@@ -1,12 +1,12 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  UserDefinedFunction [dbo].[f_Get_SportNameBySporttype]    Script Date: 5/2/2013 4:17:42 PM ******/
+/****** Object:  UserDefinedFunction [dbo].[f_Sport_GetNameByType]    Script Date: 5/8/2013 9:46:20 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE FUNCTION [dbo].[f_Sport_GetNameByType] (
+ALTER FUNCTION [dbo].[f_Sport_GetNameByType] (
 	@Sporttype	TINYINT,
 	@Language	VARCHAR(5)	= 'en-US'
 )
@@ -49,12 +49,12 @@ BEGIN
 							WHEN 'vi-VN' THEN SportNameVN
 							ELSE SportName 
 						END
-	FROM RepDB.dbo.Sports WITH (NOLOCK)
+	FROM SVRAGE.ProdDB.dbo.Sports WITH (NOLOCK)
 	WHERE SportType = @Sporttype
 	
-	IF (@sportName = '' OR @sportName IS NULL)
+	IF (@sportName IS NULL OR @sportName = '')
 		SELECT	@sportName = SportName 
-		FROM	RepDB.dbo.Sports WITH (NOLOCK)
+		FROM	SVRAGE.RepDB.dbo.Sports WITH (NOLOCK)
 		WHERE	SportType = @Sporttype
 
 	-- Return the result of the function
