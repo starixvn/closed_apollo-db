@@ -1,10 +1,11 @@
 ﻿USE [bodb_Message]
 GO
-/****** Object:  StoredProcedure [dbo].[Dot_Msg_SetUsrMessage]    Script Date: 5/7/2013 3:13:11 PM ******/
+/****** Object:  StoredProcedure [dbo].[Dot_Msg_SetUsrMessage]    Script Date: 5/8/2013 10:19:01 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+ 
 
 ALTER PROCEDURE [dbo].[Dot_Msg_SetUsrMessage]
 	@MessageId	INT,
@@ -31,7 +32,12 @@ AS
 BEGIN
 	IF EXISTS (SELECT MessageId FROM dbo.Msg WITH (NOLOCK) WHERE MessageId = @MessageId)
 		BEGIN
-			IF EXISTS (SELECT MessageId FROM dbo.MsgTarget WITH (NOLOCK) WHERE MessageId = @MessageId AND TargetId = @TargetId)
+			IF EXISTS (	SELECT MessageId 
+						FROM dbo.MsgTarget WITH (NOLOCK) 
+						WHERE 
+							MessageId = @MessageId 
+							AND TargetId = @TargetId
+							AND IsAgent = @IsAgent )
 				BEGIN
 					-- update
 					UPDATE dbo.MsgTarget WITH (ROWLOCK, UPDLOCK)
@@ -39,7 +45,10 @@ BEGIN
 						TargetName = @TargetName, 
 						BetTransId = @BetTransId, 
 						isDeleted = 0
-					WHERE MessageId = @MessageId AND TargetId = @TargetId
+					WHERE 
+						MessageId = @MessageId 
+						AND TargetId = @TargetId
+						AND IsAgent = @IsAgent
 				END
 			ELSE
 				BEGIN
@@ -47,6 +56,7 @@ BEGIN
 					INSERT dbo.MsgTarget(
 						MessageId, 
 						TargetId, 
+						IsAgent,
 						TargetName, 
 						isRead, 
 						BetTransId,
@@ -55,6 +65,7 @@ BEGIN
 					VALUES (
 						@MessageId, 
 						@TargetId, 
+						@IsAgent,
 						@TargetName, 
 						@isRead, 
 						@BetTransId,
@@ -63,3 +74,4 @@ BEGIN
 				END
 		END
 END
+
