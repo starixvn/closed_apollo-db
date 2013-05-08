@@ -52,6 +52,7 @@ BEGIN
 		,modds Smallmoney  
         ,OddsType tinyint  
 		,bettype smallint
+		,betteam varchar(10)
         ,status nvarchar(10)  
         ,spositiontaking smallmoney  
         ,currency tinyint    
@@ -203,7 +204,8 @@ BEGIN
    b.odds, 
    b.modds,    
    b.OddsType,
-   b.bettype,   
+   b.bettype, 
+   b.betteam,  
    b.status,  
    b.tpositiontaking,  
    b.currency,       
