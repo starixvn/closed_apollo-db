@@ -1,6 +1,10 @@
 ﻿USE [bodb_Message]
 GO
+<<<<<<< HEAD
+/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetPriMsgCount]    Script Date: 5/7/2013 4:07:33 PM ******/
+=======
 /****** Object:  StoredProcedure [dbo].[Dot_Msg_GetPriMsgCount_xtest]    Script Date: 5/7/2013 1:15:04 PM ******/
+>>>>>>> 36bfc951fe3c5aa4030febb2529f938e6cbde213
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON

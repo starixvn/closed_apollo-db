@@ -48,7 +48,8 @@ BEGIN
 		,actual_stake money
         ,stake money  
         ,winlost money  
-        ,odds smallmoney  
+        ,odds smallmoney
+		,modds Smallmoney  
         ,OddsType tinyint  
 		,bettype smallint
         ,status nvarchar(10)  
@@ -199,7 +200,8 @@ BEGIN
    b.actual_stake,     
    b.stake as StakePositiontaking,  
    b.winlost-b.actual_stake AS winlost,  
-   b.odds,     
+   b.odds, 
+   b.modds,    
    b.OddsType,
    b.bettype,   
    b.status,  
