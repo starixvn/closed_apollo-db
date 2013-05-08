@@ -36,3 +36,5 @@ BEGIN
 
 END
  
+ GO
+ GRANT EXECUTE ON [Age_Agent_GetAllMainShareHolder] TO aplweb
