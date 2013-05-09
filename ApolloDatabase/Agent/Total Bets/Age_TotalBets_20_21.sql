@@ -17,6 +17,7 @@ AS
  * DB			: SVRAGE.RepDB
  * Revisions	:
  *	• 20132801@Terry.Nguyen	: Implement
+ *  • 20130509@Sophia: revise code, order by LeagueId
  * Parameters:
  *	•
  *	•
@@ -102,6 +103,7 @@ GROUP BY
 	bt.LiveAwayScore,
 	m.isNeutral
 ORDER BY
+	m.LeagueId,
 	m.MatchCode, 
 	bt.LiveIndicator DESC
 

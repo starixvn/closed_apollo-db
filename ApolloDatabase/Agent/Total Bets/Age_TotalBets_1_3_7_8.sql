@@ -15,7 +15,7 @@ AS
  * Task			: Retrieve Total Bet values for bettype 1,3,7,8
  * DB			: SVRAGE.RepDB
  * Revisions	:
- *	•
+ *	• 20130509@Sophia: Revise code
  * Parameters :
  *	@AgentId : agent ID
  *  
@@ -62,11 +62,9 @@ FROM
 	FROM 
 		BetTrans_Agent AS bta WITH (NOLOCK)
 		INNER JOIN BetTrans AS bt WITH (NOLOCK) ON bta.TransId = bt.TransId
-	WHERE
-		bt.BetType IN (1, 3, 7, 8)
-		AND bta.AgentId = @AgentId
-		AND bt.StatusId IN (0, 1) -- status is waiting or running
-		AND bt.Ruben = 0	-- match not yet settle
+	WHERE bta.AgentId = @AgentId
+		AND bta.StatusId IN (0, 1) -- status is waiting or running
+		AND bta.BetType IN (1, 3, 7, 8)		
 	GROUP BY 
 		bt.MatchId, 
 		bt.BetType, 
@@ -76,7 +74,8 @@ FROM
 		bt.LiveAwayScore
 	) AS b
 	INNER JOIN Match AS m WITH (NOLOCK) ON m.MatchId = b.MatchId
-WHERE m.EventStatus = 'running'
+	INNER JOIN match_remark_ex e WITH (NOLOCK) ON e.matchID = m.matchid
+WHERE e.EventStatus = 'running'
 GROUP BY
 	m.ShowTime, 
 	m.LeagueId,
@@ -88,6 +87,11 @@ GROUP BY
 	b.LiveHomeScore,
 	b.LiveAwayScore,
 	m.IsNeutral
-ORDER BY	
+ORDER BY
+	m.LeagueId,
 	b.LiveIndicator DESC, 
 	m.MatchCode
+
+GO
+GRANT EXECUTE ON [Age_TotalBets_1_3_7_8] TO [aplweb]
+GO
