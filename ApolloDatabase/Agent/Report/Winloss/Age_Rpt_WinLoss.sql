@@ -48,7 +48,7 @@ BEGIN
 				ON  PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
 		WHERE		C.ParentId = @AgentID 
 					AND B.StatusID NOT IN (0,1)
-					AND B.Winlostdate BETWEEN @FromDate AND @ToDate 
+					AND B.Winlostdate BETWEEN @FromDate AND @ToDate
 		GROUP BY	C.Username, C.AgentID, PT.MaxUpperPositionTaking
 
 
