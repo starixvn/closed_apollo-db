@@ -1545,34 +1545,6 @@ BEGIN
 								AND apt.MinGivenPositionTaking <> tpt.MinGivenPT
 						)
 							BEGIN
-								-- Check validate when update main share holder
-								SELECT TOP(1) @sportType	= tpt.SportType
-												,@betType	= tpt.BetType
-												,@isLive	= tpt.IsLive
-								FROM @TablePositionTaking AS tpt														
-								WHERE tpt.MinGivenPT NOT BETWEEN 0 AND tpt.MaxGivenPT
-
-								IF @sportType IS NOT NULL 
-									BEGIN
-										SELECT 
-											@ErrCode	= 4007,
-											@ErrMsg		= 
-												CASE @Language
-													WHEN 'en-US' THEN 'Invalid Min Given Share range' 
-													ELSE [dbo].f_Msg_GetContentById (4007, @Language)
-												END + ' (' 
-													+ CASE WHEN @sportType = 99 AND @betType = 9
-															THEN [dbo].f_Msg_GetContentById (4009, @Language)
-															ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
-														END
-													+ CASE WHEN @isLive = 1 THEN + ' ' + [dbo].f_Msg_GetContentById (4008, @Language) 
-															ELSE '' 
-														END
-													+ ' - ' + dbo.f_Bet_GetNameByType(@betType, @Language) 
-													+')'
-
-										RETURN			
-									END
 								
 								-- Update if min greater
 								IF EXISTS(
