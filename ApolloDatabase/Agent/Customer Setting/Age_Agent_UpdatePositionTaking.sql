@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking]    Script Date: 5/9/2013 10:28:13 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking]    Script Date: 5/9/2013 3:06:27 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -38,7 +38,7 @@ ALTER PROCEDURE [dbo].[Age_Agent_UpdatePositionTaking]
 	@ActorAgentId			INT				= NULL,
 	@AgentId				INT,
 	@PositionTaking			VARCHAR(MAX)	= '',	
-	@Language				VARCHAR(2)		= 'en-US',	
+	@Language				VARCHAR(5)		= 'en-US',	
 	@ErrCode				INT				= 0			OUTPUT,
 	@ErrMsg					NVARCHAR(1000)	= ''		OUTPUT	 	 		
 AS
