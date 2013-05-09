@@ -26,7 +26,7 @@ BEGIN
 	
 	SET NOCOUNT ON
 
-	SELECT	A.AgentId, 
+	SELECT	DISTINCT A.AgentId, 
 			A.Username
 	FROM	AgentInfo A WITH (NOLOCK)
 	INNER JOIN  Bettrans_Agent BA WITH (NOLOCK) 
