@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateBetLimit]    Script Date: 5/6/2013 5:44:17 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateBetLimit]    Script Date: 5/10/2013 11:26:51 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -36,6 +36,7 @@ BEGIN
 	
 	-- Check update permission
 	DECLARE @hasPermission BIT
+
 	EXEC dbo.Age_Agent_CheckUpdatePermission @ActorAgentId, @AgentId, 1, @hasPermission OUTPUT 
 	
 	IF @hasPermission = 0
@@ -132,10 +133,12 @@ BEGIN
 			)
 				BEGIN
 
-					DECLARE @sportType INT
+					DECLARE @sportType	INT
+							,@betType	INT
 
 					-- Check validate > 0	
-					SELECT TOP(1) @sportType = SportType 
+					SELECT TOP(1) @sportType	= SportType 
+									,@betType	= BetType		
 					FROM @BetLimitTable 
 					WHERE MinBet < 0 OR MaxBet < 0 OR MaxPerMatch < 0
 	
@@ -147,13 +150,19 @@ BEGIN
 									CASE @Language
 										WHEN 'en-US' THEN 'Wrong Min bet/ Max bet/ Max per match' 
 										ELSE [dbo].f_Msg_GetContentById (3000, @Language)
-									END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
+									END + ' (' 
+										+ CASE WHEN @sportType = 99 AND @betType = 9
+												THEN [dbo].f_Msg_GetContentById (4009, @Language)
+												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+											END 
+										+ ')'
 
 							RETURN			
 						END	
 
 					-- Check validate 
-					SELECT TOP(1) @sportType = SportType 
+					SELECT TOP(1) @sportType	= SportType
+									,@betType	= BetType 
 					FROM @BetLimitTable 
 					WHERE FLOOR(MinBet)			< MinBet
 						OR FLOOR(MaxBet)		< MaxBet
@@ -167,14 +176,20 @@ BEGIN
 									CASE @Language
 										WHEN 'en-US' THEN 'Invalid Min bet/ Max bet/ Max per match' 
 										ELSE [dbo].f_Msg_GetContentById (3007, @Language)
-									END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
+									END + ' (' 
+										+ CASE WHEN @sportType = 99 AND @betType = 9
+												THEN [dbo].f_Msg_GetContentById (4009, @Language)
+												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+											END
+										+ ')'
 
 							RETURN			
 						END	
 
 
 					-- Min Bet > Max Bet
-					SELECT TOP(1) @sportType = SportType 
+					SELECT TOP(1) @sportType	= SportType
+									,@betType	= BetType 
 					FROM @BetLimitTable 
 					WHERE MinBet > MaxBet
 	
@@ -186,12 +201,18 @@ BEGIN
 										CASE @Language
 											WHEN 'en-US' THEN 'Min Bet must be less than or equal to Max Bet' 
 											ELSE [dbo].f_Msg_GetContentById (3004, @Language)
-										END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'					
+										END + ' (' 
+											+ CASE WHEN @sportType = 99 AND @betType = 9
+													THEN [dbo].f_Msg_GetContentById (4009, @Language)
+													ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+												END
+											+ ')'					
 							RETURN
 						END	
 	
 					-- Min Bet > Max Per Match
-					SELECT TOP(1) @sportType = SportType 
+					SELECT TOP(1) @sportType	= SportType 
+									,@betType	= BetType
 					FROM @BetLimitTable 
 					WHERE MinBet > MaxPerMatch
 	
@@ -203,13 +224,19 @@ BEGIN
 										CASE @Language
 											WHEN 'en-US' THEN 'Min Bet must be less than or equal to Max Per Match' 
 											ELSE [dbo].f_Msg_GetContentById (3005, @Language)
-										END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
+										END + ' (' 
+											+ CASE WHEN @sportType = 99 AND @betType = 9
+													THEN [dbo].f_Msg_GetContentById (4009, @Language)
+													ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+												END
+											+ ')'
 
 							RETURN
 						END	
 
 					-- Max Bet > Max Per Match
-					SELECT TOP(1) @sportType = SportType 
+					SELECT TOP(1) @sportType	= SportType
+									,@betType	= BetType 
 					FROM @BetLimitTable 
 					WHERE MaxBet > MaxPerMatch
 	
@@ -221,7 +248,12 @@ BEGIN
 										CASE @Language
 											WHEN 'en-US' THEN 'Max Bet must be less than or equal to Max Per Match' 
 											ELSE [dbo].f_Msg_GetContentById (3006, @Language)
-										END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
+										END + ' (' 
+											+ CASE WHEN @sportType = 99 AND @betType = 9
+													THEN [dbo].f_Msg_GetContentById (4009, @Language)
+													ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+												END
+											+ ')'
 							RETURN
 						END	
 
@@ -250,7 +282,8 @@ BEGIN
 						BetType
 
 					---- Check validate min bet must be equal to or greater than parent
-					SELECT TOP(1) @sportType = btct.SportType
+					SELECT TOP(1) @sportType	= btct.SportType
+									,@betType	= btct.BetType
 					FROM 
 						@BetLimitCompareTable AS btct
 						INNER JOIN @BetLimitTable AS btt ON btct.SportType = btt.SportType 
@@ -265,13 +298,19 @@ BEGIN
 									CASE @Language
 										WHEN 'en-US' THEN 'Min bet must be equal to or greater than Parent Agent min bet' 
 										ELSE [dbo].f_Msg_GetContentById (3001, @Language) 
-									END	+ ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
+									END	+ ' (' 
+										+ CASE WHEN @sportType = 99 AND @betType = 9
+												THEN [dbo].f_Msg_GetContentById (4009, @Language)
+												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+											END
+										+ ')'
 
 							RETURN
 						END	
 
 					---- Check validate max bet must be equal to or less than parent
-					SELECT TOP(1) @sportType = btct.SportType
+					SELECT TOP(1) @sportType	= btct.SportType
+									,@betType	= btct.BetType
 					FROM 
 						@BetLimitCompareTable AS btct
 						INNER JOIN @BetLimitTable AS btt 
@@ -288,13 +327,19 @@ BEGIN
 									CASE @Language
 										WHEN 'en-US' THEN 'Max bet must be equal to or less than Parent Agent max bet' 
 										ELSE [dbo].f_Msg_GetContentById (3002, @Language) 
-									END	+ ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
+									END	+ ' (' 
+										+ CASE WHEN @sportType = 99 AND @betType = 9
+												THEN [dbo].f_Msg_GetContentById (4009, @Language)
+												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+											END
+										+ ')'
 
 							RETURN
 						END	
 
 					---- Check validate max per match must be equal to or less than parent
-					SELECT TOP(1) @sportType = btct.SportType
+					SELECT TOP(1) @sportType	= btct.SportType
+									,@betType	= btct.BetType
 					FROM 
 						@BetLimitCompareTable AS btct
 						INNER JOIN @BetLimitTable AS btt 
@@ -311,7 +356,12 @@ BEGIN
 									CASE @Language
 										WHEN 'en-US' THEN 'Max per match must be equal to or less than Parent Agent max per match' 
 										ELSE [dbo].f_Msg_GetContentById (3003, @Language) 
-									END	+ ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
+									END	+ ' (' 
+										+ CASE WHEN @sportType = 99 AND @betType = 9
+												THEN [dbo].f_Msg_GetContentById (4009, @Language)
+												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+											END
+										+ ')'
 							RETURN
 						END	
 	

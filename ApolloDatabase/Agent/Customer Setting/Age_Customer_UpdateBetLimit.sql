@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateBetLimit]    Script Date: 5/6/2013 12:42:27 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateBetLimit]    Script Date: 5/10/2013 11:27:06 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -82,6 +82,7 @@ BEGIN
 			DECLARE 
 				@agentHId		HIERARCHYID,
 				@sportType		INT,
+				@betType		INT,
 				@SUPERLEVEL		INT
 
 			SET @SUPERLEVEL	= 0
@@ -116,7 +117,8 @@ BEGIN
 			-- end read xml
 
 			-- Check if min >= 0, max >= 0, max per match >= 0
-			SELECT TOP(1) @sportType = SportType 
+			SELECT TOP(1) @sportType	= SportType 
+							,@betType	= BetType
 			FROM @BetLimitTable
 			WHERE MinBet < 0 OR MaxBet < 0 OR MaxPerMatch < 0 
 	
@@ -128,11 +130,40 @@ BEGIN
 							CASE @Language
 								WHEN 'en-US' THEN 'Wrong Min bet/ Max bet/ Max per match' 
 								ELSE [dbo].f_Msg_GetContentById (3000, @Language)
-							END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
+							END + ' (' 
+								+ CASE WHEN @sportType = 99 AND @betType = 9
+										THEN [dbo].f_Msg_GetContentById (4009, @Language)
+										ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+									END
+								+ ')'
 					RETURN
 				END
 
-			SET @sportType = NULL
+			-- Check validate 
+			SELECT TOP(1) @sportType = SportType
+							,@betType= BetType 
+			FROM @BetLimitTable 
+			WHERE FLOOR(MinBet)			< MinBet
+				OR FLOOR(MaxBet)		< MaxBet
+				OR FLOOR(MaxPerMatch)	< MaxPerMatch
+	
+			IF @sportType IS NOT NULL 
+				BEGIN
+					SELECT 
+						@ErrCode = 3007,
+						@ErrMsg = 
+							CASE @Language
+								WHEN 'en-US' THEN 'Invalid Min bet/ Max bet/ Max per match' 
+								ELSE [dbo].f_Msg_GetContentById (3007, @Language)
+							END + ' (' 
+								+ CASE WHEN @sportType = 99 AND @betType = 9
+										THEN [dbo].f_Msg_GetContentById (4009, @Language)
+										ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+									END
+								+ ')'
+
+					RETURN			
+				END	
 
 			-- Get agent hierarchy ID
 			SELECT @agentHId = AgentHId
@@ -166,6 +197,7 @@ BEGIN
 
 			-- Check if min bet must be equal to or greater than all parents min bet
 			SELECT TOP(1) @sportType = btct.SportType
+							,@betType= btct.BetType
 			FROM 
 				@BetLimitCompareTable AS btct
 				INNER JOIN @BetLimitTable AS btt 
@@ -181,12 +213,18 @@ BEGIN
 							CASE @Language
 								WHEN 'en-US' THEN 'Min bet must be equal to or greater than Parent Agent min bet' 
 								ELSE [dbo].f_Msg_GetContentById (3001, @Language) 
-							END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
+							END + ' (' 
+								+ CASE WHEN @sportType = 99 AND @betType = 9
+										THEN [dbo].f_Msg_GetContentById (4009, @Language)
+										ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+									END
+								+ ')'
 					RETURN	
 				END
 
 			-- Check if max bet must be equal to or less than all parents max bet
 			SELECT TOP(1) @sportType = btct.SportType
+							,@betType = btct.BetType
 			FROM 
 				@BetLimitCompareTable As btct
 				INNER JOIN @BetLimitTable AS btt 
@@ -203,12 +241,18 @@ BEGIN
 							CASE @Language
 								WHEN 'en-US' THEN 'Max bet must be equal to or less than Parent Agent max bet' 
 								ELSE [dbo].f_Msg_GetContentById (3002, @Language) 
-							END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
+							END + ' (' 
+								+ CASE WHEN @sportType = 99 AND @betType = 9
+										THEN [dbo].f_Msg_GetContentById (4009, @Language)
+										ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+									END
+								+ ')'
 					RETURN	
 				END
 
 			-- Check if max per match must be equal to or less than all parents max per match
 			SELECT TOP(1) @sportType = btct.SportType
+							,@betType= btct.BetType
 			FROM 
 				@BetLimitCompareTable AS btct
 				INNER JOIN @BetLimitTable AS btt 
@@ -225,7 +269,12 @@ BEGIN
 							CASE @Language
 								WHEN 'en-US' THEN 'Max per match must be equal to or less than Parent Agent max per match' 
 								ELSE [dbo].f_Msg_GetContentById (3003, @Language) 
-							END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
+							END + ' (' 
+								+ CASE WHEN @sportType = 99 AND @betType = 9
+										THEN [dbo].f_Msg_GetContentById (4009, @Language)
+										ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+									END
+								+ ')'
 					RETURN
 				END
 
