@@ -30,20 +30,23 @@ BEGIN
 	SELECT 
 		m.LeagueId, 
 		m.SportType
-	FROM 
-		match AS m WITH (NOLOCK)
-		LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId 
-		INNER JOIN BetTrans_Agent AS ba WITH (NOLOCK) ON m.MatchId = ba.MatchId
-	WHERE 
-		ba.AgentId = @AgentId 
-		AND e.eventstatus <> 'completed' 
+	FROM match AS m WITH (NOLOCK)		
+	WHERE 		
+		m.eventstatus <> 'completed' 
 		AND	m.matchid IN (	SELECT DISTINCT matchid 
-							FROM bettrans WITH (NOLOCK)
+							FROM BetTrans_Agent WITH (NOLOCK)
 							WHERE 
-								StatusId IN (0, 1)
-								AND Ruben = 0
+								AgentId = @AgentId
+								AND StatusId IN (0,1)
 								AND BetType IN (1, 2, 3, 4, 5, 6, 7, 8, 12, 13, 15, 20, 21, 24, 25, 26, 27, 28, 30, 121, 122, 123))
 	GROUP BY 
 		m.SportType, 
 		m.LeagueId 
+	ORDER BY m.LeagueId 
 END
+
+GO
+GRANT EXECUTE ON [dbo].[Age_ScoreMap_SelLeague] TO [aplWeb]
+Go 
+
+

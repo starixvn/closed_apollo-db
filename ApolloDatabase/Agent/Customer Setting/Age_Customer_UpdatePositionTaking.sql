@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdatePositionTaking]    Script Date: 5/6/2013 12:42:52 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdatePositionTaking]    Script Date: 5/9/2013 10:27:54 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -208,6 +208,8 @@ BEGIN
 						@agentLevel		SMALLINT,
 						@agentHId		HIERARCHYID,
 						@sportType		INT,
+						@betType		INT,
+						@isLive			BIT,
 						@childAgentId	INT
 					---- End declare
 
@@ -253,7 +255,9 @@ BEGIN
 					-- Check for direct member or indirect member
 					IF EXISTS (	SELECT 1 FROM CustInfo WHERE CustId = @CustId AND AgentId = @AgentId )		-- direct member
 						BEGIN
-							SELECT TOP(1) @sportType = apt.SportType 
+							SELECT TOP(1) @sportType	= apt.SportType 
+											,@betType	= apt.BetType
+											,@isLive	= apt.IsLive
 							FROM 
 								AgentPositionTaking AS apt WITH (NOLOCK)
 								INNER JOIN @TablePositionTaking AS ptt
@@ -272,7 +276,16 @@ BEGIN
 											CASE @Language
 												WHEN 'en-US' THEN 'Invalid taken share range' 
 												ELSE [dbo].f_Msg_GetContentById (4000, @Language)
-											END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'	
+											END + ' (' 
+												+ CASE WHEN @sportType = 99 AND @betType = 9
+														THEN [dbo].f_Msg_GetContentById (4009, @Language)
+														ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+													END
+												+ CASE WHEN @isLive = 1 THEN + ' ' + [dbo].f_Msg_GetContentById (4008, @Language) 
+														ELSE '' 
+													END
+												+ ' - ' + dbo.f_Bet_GetNameByType(@betType, @Language) 
+												+')'
 									RETURN
 								END
 						END
@@ -283,7 +296,9 @@ BEGIN
 							FROM @DownlineAgentInfo
 							WHERE ParentId = @AgentId
 							
-							SELECT TOP(1) @sportType = ptt.SportType	
+							SELECT TOP(1) @sportType	= ptt.SportType
+											,@betType	= ptt.BetType
+											,@isLive	= ptt.IsLive
 							FROM 
 								@TablePositionTaking AS ptt
 								INNER JOIN (
@@ -338,7 +353,16 @@ BEGIN
 											CASE @Language
 												WHEN 'en-US' THEN 'Invalid taken share range' 
 												ELSE [dbo].f_Msg_GetContentById (4000, @Language)
-											END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
+											END + ' (' 
+												+ CASE WHEN @sportType = 99 AND @betType = 9
+														THEN [dbo].f_Msg_GetContentById (4009, @Language)
+														ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+													END
+												+ CASE WHEN @isLive = 1 THEN + ' ' + [dbo].f_Msg_GetContentById (4008, @Language) 
+														ELSE '' 
+													END
+												+ ' - ' + dbo.f_Bet_GetNameByType(@betType, @Language) 
+												+')'
 
 									RETURN
 								END

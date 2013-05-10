@@ -12,10 +12,10 @@ AS
 /**
  * Created by	: Quinn
  * Date			: 20130228
- * Task			: Retrieve Total Bet values for bettype 14
+ * Task			: Retrieve Total Bet values for bettype 14 (First Goal/Last Goal)
  * DB			: SVRAGE.RepDB
  * Revisions	:
- *	•
+ *  • 20130509@Sophia: revise code, order by LeagueId
  * Parameters:
  *	@AgentId: agent ID
  *  
@@ -63,5 +63,6 @@ GROUP BY
 	m.ShowTime,
 	m.IsNeutral
 ORDER BY
+	m.LeagueId,
 	m.MatchCode, 
 	bt.LiveIndicator DESC

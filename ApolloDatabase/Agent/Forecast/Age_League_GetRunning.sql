@@ -36,22 +36,15 @@ SELECT @Bettypes = 	CASE @Bettypes
 SELECT 
 	m.LeagueId, 
 	m.SportType
-FROM 
-	League AS l WITH (NOLOCK) 
-	INNER JOIN Match AS m WITH (NOLOCK) ON l.leagueid = m.LeagueId
-	LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
+FROM Match AS m WITH (NOLOCK) 
 WHERE  
-	e.EventStatus = 'running'
-	AND m.MatchId IN (	SELECT DISTINCT bt.MatchId 
-						FROM 
-							BetTrans_Agent AS bta WITH (NOLOCK)
-							INNER JOIN BetTrans AS bt WITH (NOLOCK) ON bta.TransId = bt.TransId
-						WHERE 
-							bt.Ruben = 0 -- Match not yet settle
-							AND bta.AgentId = @AgentID
-							AND bt.BetType IN (SELECT val FROM dbo.strSplit_Key(@Bettypes, ',')))
+	m.EventStatus = 'running'
+	AND m.MatchId IN (	SELECT DISTINCT MatchId 
+						FROM BetTrans_Agent WITH (NOLOCK)							
+						WHERE 	StatusID IN (0,1)
+							AND AgentId = @AgentID
+							AND BetType IN (SELECT val FROM dbo.strSplit_Key(@Bettypes, ',')))
 GROUP BY 
 	m.leagueid, 
-	l.leaguename, 
 	m.sporttype
-ORDER BY l.leaguename
+ORDER BY m.leagueid

@@ -1,6 +1,6 @@
 ﻿USE [bodb_Message]
 GO
-/****** Object:  StoredProcedure [dbo].[Acc_Msg_GetTopPubMessage]    Script Date: 4/2/2013 12:41:07 PM ******/
+/****** Object:  StoredProcedure [dbo].[Acc_Msg_GetTopPubMessage]    Script Date: 5/7/2013 4:23:13 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -108,7 +108,7 @@ BEGIN
 		m.MsgType = @MessageType
 		AND mt.TargetID IN (@site1i, @site2i, @site3i, @site4i, @site5i, @site6i, @site7i, @site8i)
 		AND m.MessageId > @LatestMsgID
-		AND (@IsTest = 1 OR m.IsTest = 0)
+		AND (@IsTest = 1 OR (@IsTest <> 1 AND m.IsTest = @IsTest))			
 		AND m.isDeleted = 0
 		AND mt.isDeleted = 0
 	ORDER BY m.PostTime DESC

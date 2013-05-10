@@ -15,7 +15,7 @@ AS
  * Task			: Retrieve Total Bet values for bettype 2, 5, 12, 15, 123
  * DB			: SVRAGE.RepDB
  * Revisions	:
- *	•
+ *	•20130509@Sophia: revise code, order by LeagueId
  * Parameters:
  *	@AgentId: agent ID
  *  
@@ -80,5 +80,6 @@ GROUP BY
 	m.ShowTime,
 	m.IsNeutral
 ORDER BY
+	m.LeagueId,
 	bt.LiveIndicator DESC, 
 	m.MatchCode

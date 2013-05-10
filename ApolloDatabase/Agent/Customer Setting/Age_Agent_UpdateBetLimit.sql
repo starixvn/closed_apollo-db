@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateBetLimit]    Script Date: 5/6/2013 11:25:17 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateBetLimit]    Script Date: 5/6/2013 5:44:17 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -152,6 +152,27 @@ BEGIN
 							RETURN			
 						END	
 
+					-- Check validate 
+					SELECT TOP(1) @sportType = SportType 
+					FROM @BetLimitTable 
+					WHERE FLOOR(MinBet)			< MinBet
+						OR FLOOR(MaxBet)		< MaxBet
+						OR FLOOR(MaxPerMatch)	< MaxPerMatch
+	
+					IF @sportType IS NOT NULL 
+						BEGIN
+							SELECT 
+								@ErrCode = 3007,
+								@ErrMsg = 
+									CASE @Language
+										WHEN 'en-US' THEN 'Invalid Min bet/ Max bet/ Max per match' 
+										ELSE [dbo].f_Msg_GetContentById (3007, @Language)
+									END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
+
+							RETURN			
+						END	
+
+
 					-- Min Bet > Max Bet
 					SELECT TOP(1) @sportType = SportType 
 					FROM @BetLimitTable 
@@ -165,7 +186,7 @@ BEGIN
 										CASE @Language
 											WHEN 'en-US' THEN 'Min Bet must be less than or equal to Max Bet' 
 											ELSE [dbo].f_Msg_GetContentById (3004, @Language)
-										END + ' (' + dbo.f_Get_SportNameBySporttype(@sportType,@Language) + ')'					
+										END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'					
 							RETURN
 						END	
 	
@@ -182,7 +203,7 @@ BEGIN
 										CASE @Language
 											WHEN 'en-US' THEN 'Min Bet must be less than or equal to Max Per Match' 
 											ELSE [dbo].f_Msg_GetContentById (3005, @Language)
-										END + ' (' + dbo.f_Get_SportNameBySporttype(@sportType,@Language) + ')'
+										END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
 
 							RETURN
 						END	
@@ -200,7 +221,7 @@ BEGIN
 										CASE @Language
 											WHEN 'en-US' THEN 'Max Bet must be less than or equal to Max Per Match' 
 											ELSE [dbo].f_Msg_GetContentById (3006, @Language)
-										END + ' (' + dbo.f_Get_SportNameBySporttype(@sportType,@Language) + ')'
+										END + ' (' + dbo.f_Sport_GetNameByType(@sportType, @Language) + ')'
 							RETURN
 						END	
 
