@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking]    Script Date: 5/9/2013 3:06:27 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking]    Script Date: 5/10/2013 11:26:26 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -104,6 +104,7 @@ BEGIN
 				,@betType			SMALLINT
 				,@isLive			BIT
 				,@tempAgentId		INT
+				,@tempAgentHId		HIERARCHYID
 				,@tempUsername		NVARCHAR(50)
 				,@isLastAgent		BIT
 				,@currentCustId		INT				
@@ -233,6 +234,8 @@ BEGIN
 		DECLARE @TableTempAgent TABLE(AgentId INT)
 
 		DECLARE @tempLevel		INT
+
+		DECLARE @TableCustAgent TABLE(CustId INT, AgentId INT,AgentLevel INT)
 		-- End for update Cust Position Taking
 		-- For read xml
 		DECLARE @DocHandler int
@@ -580,6 +583,115 @@ BEGIN
 																												
 									END
 								-- End update Min Given PT greater than Current Min Given PT
+
+								-- If New Min Given PT less than current Min Position Taking of agent
+								IF EXISTS(
+									SELECT TOP(1) *
+									FROM AgentPositionTaking AS apt WITH (NOLOCK)
+										INNER JOIN @TablePositionTaking AS tpt 
+											ON apt.SportType	= tpt.SportType
+											AND apt.BetType		= tpt.BetType
+											AND apt.IsLive		= tpt.IsLive
+									WHERE apt.AgentId = @AgentId
+										AND tpt.MinGivenPT < apt.MinGivenPositionTaking
+								)
+									BEGIN												
+
+										-- Get all member in downline of agent
+										DELETE @TableCustAgent
+										INSERT INTO @TableCustAgent(CustId,AgentId)
+										SELECT ci.CustId
+												,ci.AgentId 
+										FROM CustInfo AS ci WITH (NOLOCK)
+											INNER JOIN AgentInfo AS ai WITH (NOLOCK)
+												ON ci.AgentId = ai.AgentId
+										WHERE ai.AgentHId.IsDescendantOf(@agentHId) = 1
+											AND ai.AgentId <> @AgentId																							
+
+										WHILE EXISTS(
+											SELECT TOP(1) * FROM @TableCustAgent
+										)
+											BEGIN
+												-- Select current Cust Id
+												SELECT TOP(1) @currentCustId		= CustId
+																,@currentAgentId	= AgentId
+												FROM @TableCustAgent																									
+												
+												SELECT @tempAgentHId = AgentHId
+												FROM AgentInfo WITH (NOLOCK)
+												WHERE AgentId = @currentAgentId
+																																								
+												SELECT @tempAgentId = AgentId 
+												FROM AgentInfo WITH (NOLOCK)
+												WHERE @tempAgentHId.IsDescendantOf(AgentHId) = 1
+													AND AgentLevel = @agentLevel + 1
+												ORDER BY AgentLevel
+
+												DELETE @TableCustPositionTaking
+												INSERT INTO @TableCustPositionTaking(
+													CustId																														
+													,SportType
+													,BetType
+													,IsLive
+													,PositionTaking)
+												SELECT 
+													cpt.CustId
+													,cpt.SportType
+													,cpt.BetType
+													,cpt.IsLive
+													,CASE WHEN capt.MaxUpperPositionTaking > tpt.MinGivenPT - dcpt.SumOfPositionTaking
+														THEN capt.MaxUpperPositionTaking
+														ELSE tpt.MinGivenPT - dcpt.SumOfPositionTaking																			
+													END
+												FROM CustPositionTaking AS cpt WITH (NOLOCK)
+													INNER JOIN @TablePositionTaking AS tpt
+															ON cpt.SportType	= tpt.SportType
+															AND cpt.BetType	= tpt.BetType
+															AND cpt.IsLive		= tpt.IsLive															
+													INNER JOIN AgentPositionTaking AS capt WITH (NOLOCK)
+														ON cpt.SportType	= capt.SportType
+															AND cpt.BetType	= capt.BetType
+															AND cpt.IsLive		= capt.IsLive
+													INNER JOIN (
+														SELECT 
+															CustId
+															,SportType
+															,BetType
+															,IsLive
+															,SUM(PositionTaking) AS SumOfPositionTaking
+														FROM 
+															CustPositionTaking AS cpt WITH (NOLOCK)															
+															INNER JOIN AgentInfo AS ai WITH (NOLOCK)
+																ON cpt.AgentId	= ai.AgentId
+															WHERE cpt.CustId		= @currentCustId
+																AND ai.AgentLevel	> @agentLevel
+														GROUP BY CustId, SportType, BetType, IsLive	
+													) AS dcpt 
+														ON 	cpt.SportType	= dcpt.SportType
+															AND cpt.BetType = dcpt.BetType
+															AND cpt.IsLive	= dcpt.IsLive
+															AND cpt.CustId  = dcpt.CustId
+												WHERE cpt.AgentId			= @AgentId
+													AND cpt.CustId			= @currentCustId
+													AND capt.AgentId		= @tempAgentId
+													AND cpt.PositionTaking	> capt.MaxUpperPositionTaking
+
+
+												UPDATE cpt	
+												SET cpt.PositionTaking = tcpt.PositionTaking	
+												FROM CustPositionTaking AS cpt WITH (NOLOCK)
+													INNER JOIN @TableCustPositionTaking AS tcpt
+															ON cpt.SportType	= tcpt.SportType
+															AND cpt.BetType	= tcpt.BetType
+															AND cpt.IsLive		= tcpt.IsLive															
+												WHERE cpt.AgentId	= @AgentId
+													AND cpt.CustId	= @currentCustId														
+												
+												-- Remove cust id
+												DELETE @TableCustAgent WHERE CustId = @currentCustId
+											END												
+									END
+								-- End if New Min Given PT less than current Min Position Taking of agent 
 
 								-- Begin update
 								UPDATE apt
@@ -2171,43 +2283,36 @@ BEGIN
 											BEGIN												
 
 												-- Get all member in downline of agent
-												DELETE @TableCust
-												INSERT INTO @TableCust(CustId)
-												SELECT ci.CustId 
+												DELETE @TableCustAgent
+												INSERT INTO @TableCustAgent(CustId,AgentId)
+												SELECT ci.CustId
+														,ci.AgentId 
 												FROM CustInfo AS ci WITH (NOLOCK)
 													INNER JOIN AgentInfo AS ai WITH (NOLOCK)
 														ON ci.AgentId = ai.AgentId
 												WHERE ai.AgentHId.IsDescendantOf(@agentHId) = 1
 													AND ai.AgentId <> @AgentId													
 
-												DECLARE @TableCustAgent TABLE(CustId INT, AgentId INT,AgentLevel INT)
+												--DECLARE @TableCustAgent TABLE(CustId INT, AgentId INT,AgentLevel INT)
 
 												WHILE EXISTS(
-													SELECT TOP(1) * FROM @TableCust
+													SELECT TOP(1) * FROM @TableCustAgent
 												)
 													BEGIN
 														-- Select current Cust Id
-														SELECT TOP(1) @currentCustId = CustId
-														FROM @TableCust																										
-
+														SELECT TOP(1) @currentCustId		= CustId
+																		,@currentAgentId	= AgentId
+														FROM @TableCustAgent																									
+												
+														SELECT @tempAgentHId = AgentHId
+														FROM AgentInfo WITH (NOLOCK)
+														WHERE AgentId = @currentAgentId
 																																								
-														DELETE @TableCustAgent														
-														INSERT INTO @TableCustAgent(CustId, AgentId,AgentLevel)
-														SELECT DISTINCT 
-																	cpt.CustId
-																	,ai.AgentId 
-																	,ai.AgentLevel			
-														FROM CustPositionTaking AS cpt WITH (NOLOCK)	
-															INNER JOIN AgentInfo AS ai WITH (NOLOCK)
-																ON cpt.AgentId = ai.AgentId																		
-														WHERE cpt.AgentId IN (	SELECT dai.AgentId 
-																				FROM AgentInfo AS dai WITH (NOLOCK)
-																				WHERE dai.ParentId = @AgentId
-																				)																
-																AND cpt.CustId = @currentCustId
-														ORDER BY ai.AgentLevel														
-
-														SELECT TOP(1) @tempAgentId = AgentId FROM @TableCustAgent
+														SELECT @tempAgentId = AgentId 
+														FROM AgentInfo WITH (NOLOCK)
+														WHERE @tempAgentHId.IsDescendantOf(AgentHId) = 1
+															AND AgentLevel = @agentLevel + 1
+														ORDER BY AgentLevel
 
 														DELETE @TableCustPositionTaking
 														INSERT INTO @TableCustPositionTaking(
@@ -2376,7 +2481,7 @@ BEGIN
 															END
 														
 														-- Remove cust id
-														DELETE @TableCust WHERE CustId = @currentCustId
+														DELETE @TableCustAgent WHERE CustId = @currentCustId
 													END												
 											END
 										-- End if New Min Given PT less than current Min Position Taking of agent 
