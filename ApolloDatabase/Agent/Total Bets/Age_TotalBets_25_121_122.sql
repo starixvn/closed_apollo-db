@@ -17,6 +17,7 @@ AS
  * DB			: SVRAGE.RepDB
  * Revisions	:
  *	• 20132801@Terry.Nguyen	: Implement
+ *  • 20130509@Sophia: revise code, order by LeagueId
  * Parameters:
  *	•
  *	•
@@ -74,6 +75,7 @@ BEGIN
 		m.showtime,
 		m.isNeutral
 	ORDER BY
+		m.LeagueId,
 		b.LiveIndicator DESC, 
 		m.matchcode
 
