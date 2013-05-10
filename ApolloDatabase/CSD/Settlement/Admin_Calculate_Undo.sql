@@ -43,3 +43,6 @@ BEGIN
     
     IF @@ROWCOUNT < 10000 BREAK
 END
+
+GO
+GRANT EXECUTE ON [dbo].[Admin_Calculate_Undo]  TO [aplweb]
