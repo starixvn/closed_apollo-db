@@ -14,10 +14,9 @@ DB:  SVRARC.ArchiveDB
 Original:  
 
 Revisions:
-  
+    - 20130510@Sophia: Change @splitter of strSplit_Key from '^', to ','
 Param''s Explanation:  
-
-EX: Exec [Age_BetList_SelWinloss_Old] 3,-1, 35, '2013-01-01' , '2013-04-09', '0^1^101^103^111^112'
+ 
 
 				
 */  
@@ -51,7 +50,7 @@ FROM	OPENQUERY (SVRCUST, ''	SELECT	AgentLevel
 
 CREATE TABLE #StatusId ( StatusId TINYINT)
 INSERT INTO #StatusId
-SELECT val FROM dbo.strSplit_Key(''' + CONVERT (VARCHAR(200),@StatusIds) +''',''^'')
+SELECT val FROM dbo.strSplit_Key(''' + CONVERT (VARCHAR(200),@StatusIds) +''','','')
 '
 
 SET @S1 = ' 

@@ -14,21 +14,20 @@ ALTER PROC [dbo].[Age_BetList_TotalBets_SelRunningByBettype]
   Revisions	:
 	- 20130409@Sophia: revise all, change #Bettype to #Bettypes 
 	- 20130507@Sophia: Add @AgentID for Super view total bets of Main shareholder
+	- 20130510@Sophia: Change @splitter of strSplit_Key from '^', to ','
   Parameters:
  		@AgentId: agent ID
-  		#Bettypes: string of bettypes , seperate by ^
+  		#Bettypes: string of bettypes , seperate by ,
  		@Language: default English
 
-  EX: EXEC [Age_BetList_TotalBets_SelRunningByBettype] 3, '1^0^9^29^10'
-
-   
+    
  */
 
 SET NOCOUNT ON
 CREATE TABLE #Bettype (bettype INT)
 
 INSERT INTO #Bettype
-SELECT val FROM dbo.strSplit_Key(@Bettypes,'^')
+SELECT val FROM dbo.strSplit_Key(@Bettypes,',')
 
 DECLARE @Betlist TABLE (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, MatchCode NVARCHAR(50), 
 						HomeId INT, AwayId INT, SportType TINYINT, LeagueId INT, IsNeutral BIT,  Showtime NVARCHAR(50),
