@@ -14,9 +14,8 @@ Revisions:
 */ 
 SET NOCOUNT ON
 
-SELECT isnull(e.GoalRecord,'') as GoalRecord,leagueid,homeid,awayid,isNeutral 
+SELECT m.GoalRecord,leagueid,homeid,awayid,isNeutral 
 FROM match m WITH (NOLOCK) 
-LEFT OUTER JOIN Match_remark_ex e WITH (NOLOCK) ON m.matchID = e.matchID
 WHERE m.matchid=@MatchID
 
 GO

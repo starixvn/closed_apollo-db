@@ -84,7 +84,7 @@ CREATE TABLE #Betlist  (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						m.SportType,
 						m.leagueId, 
 						m.IsNeutral,
-						ISNULL(e.BetStatus,'') AS BetStatus,
+						m.BetStatus,
 						B.Username,
 						B.BetType,
 						B.CustId,
@@ -115,8 +115,7 @@ CREATE TABLE #Betlist  (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						B.Oddstype,		
 						B.DoubleCommLosing
  				FROM 	BetTrans_BK AS B  WITH (NOLOCK) 
-						INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId	
-						LEFT JOIN SVRPRO.ProdDB.dbo.Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId				
+						INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId							
 				WHERE 	B.StatusId in (SELECT StatusId FROM #StatusId ) 
 						AND	B.WinLostDate Between '''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 	
 						AND (	B.bettype < 31 
@@ -233,7 +232,7 @@ SET @S2 = '
 						m.SportType,
 						m.leagueId, 
 						m.IsNeutral,
-						ISNULL(e.BetStatus,'') AS BetStatus,
+						m.BetStatus,
 						B.Username,
 						B.BetType,
 						B.CustId,
@@ -266,8 +265,7 @@ SET @S2 = '
  					FROM 	
 						BetTrans_BK AS B  WITH (NOLOCK) 
 						INNER JOIN BetTrans_Agent_BK AS BA WITH (NOLOCK) ON BA.TransId = B.TransId  
-						INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId
-						LEFT JOIN SVRPRO.ProdDB.dbo.Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
+						INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId						
 					WHERE 
 						BA.AgentId = '+ CONVERT(VARCHAR(10),@AgentId) +'
 						AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 
@@ -392,7 +390,7 @@ SET @S3 = '
 					m.SportType,
 					m.leagueId, 
 					m.IsNeutral,
-					ISNULL(e.BetStatus,'') AS BetStatus,
+					m.BetStatus,
 					B.Username,
 					B.BetType,
 					B.CustId,
@@ -424,8 +422,7 @@ SET @S3 = '
 					B.DoubleCommLosing
  				FROM 
 					BetTrans_BK AS B  WITH (NOLOCK) 				
-					INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId 			
-					LEFT JOIN SVRPRO.ProdDB.dbo.Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
+					INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId 								
 				WHERE 
 					B.CustID = '+ CONVERT(VARCHAR(10),@CustId) +'
 					AND B.StatusId in (SELECT StatusId FROM #StatusId )   	
@@ -552,7 +549,7 @@ SET @S4= '
 					m.SportType,
 					m.leagueId, 
 					m.IsNeutral,
-					ISNULL(e.BetStatus,'') AS BetStatus,
+					m.BetStatus,
 					B.Username,
 					B.BetType,
 					B.CustId,
@@ -587,8 +584,7 @@ SET @S4= '
 					INNER JOIN BetTrans_Agent_BK AS BA WITH (NOLOCK) ON BA.TransId = B.TransId 				
 					INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK )  ON B.TransId = L.TransId AND L.AgentID = '+ CONVERT(VARCHAR(10),@LoggedId) +'
 					LEFT JOIN BetTrans_Agent_BK D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
-					INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId 						
-					LEFT JOIN SVRPRO.ProdDB.dbo.Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
+					INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId 											
 				WHERE BA.AgentId =  '+ CONVERT(VARCHAR(10),@AgentId) +'
 					AND B.StatusId in (SELECT StatusId FROM #StatusId )  
 					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 	
@@ -718,7 +714,7 @@ SET @S6 = '
 					m.SportType,
 					m.leagueId, 
 					m.IsNeutral,
-					ISNULL(e.BetStatus,'') AS BetStatus,
+					m.BetStatus,
 					B.Username,
 					B.BetType,
 					B.CustId,
@@ -752,8 +748,7 @@ SET @S6 = '
 					BetTrans_BK AS B  WITH (NOLOCK)				
 					INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = '+ CONVERT(VARCHAR(10),@LoggedId) +'
 					LEFT JOIN BetTrans_Agent_BK D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
-					INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId 		
-					LEFT JOIN SVRPRO.ProdDB.dbo.Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
+					INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId 							
 				WHERE	B.CustID = '+ CONVERT(VARCHAR(10),@CustId) +'
 					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
 					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 	

@@ -76,7 +76,7 @@ BEGIN
 					m.SportType,
 					m.LeagueId, 
 					m.IsNeutral,
-					ISNULL(e.BetStatus,'') AS BetStatus,
+					m.BetStatus,
 					B.Username,
 					B.BetType,
 					B.CustId,
@@ -107,7 +107,6 @@ BEGIN
 					B.DoubleCommLosing
  			FROM 	BetTrans AS B  WITH (NOLOCK) 
 				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId					
-				LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
 			WHERE 	B.StatusId in (SELECT StatusId FROM #StatusId ) 
 					AND	B.TransDate Between @FromDate AND @ToDate	
 					AND (	B.bettype < 31 
@@ -222,7 +221,7 @@ BEGIN
 					m.SportType,
 					m.LeagueId, 
 					m.IsNeutral,
-					ISNULL(e.BetStatus,'') AS BetStatus,
+					m.BetStatus,
 					B.Username,
 					B.BetType,
 					B.CustId,
@@ -254,8 +253,7 @@ BEGIN
  				FROM 	
 					BetTrans AS B  WITH (NOLOCK) 
 					INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId  
-					INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId
-					LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
+					INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId				
 					
 				WHERE 
 					BA.AgentId = @AgentId 
@@ -377,7 +375,7 @@ BEGIN
 				m.SportType,
 				m.LeagueId, 
 				m.IsNeutral,
-				ISNULL(e.BetStatus,'') AS BetStatus,
+				m.BetStatus,
 				B.Username,
 				B.BetType,
 				B.CustId,
@@ -408,8 +406,7 @@ BEGIN
 				B.DoubleCommLosing
  			FROM 
 				BetTrans AS B  WITH (NOLOCK) 				
-				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 
-				LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId			
+				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 				
 			WHERE 
 				B.CustID = @CustId 
 				AND B.StatusId in (SELECT StatusId FROM #StatusId )   	
@@ -533,7 +530,7 @@ BEGIN
 				m.SportType,
 				m.LeagueId, 
 				m.IsNeutral,
-				ISNULL(e.BetStatus,'') AS BetStatus,
+				m.BetStatus,
 				B.Username,
 				B.BetType,
 				B.CustId,
@@ -567,8 +564,7 @@ BEGIN
 				INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId 				
 				INNER JOIN BetTrans_Agent AS L WITH (NOLOCK )  ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 				LEFT JOIN Bettrans_Agent D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
-				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 	
-				LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId					
+				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 					
 			WHERE BA.AgentId =  @AgentId
 				AND B.StatusId in (SELECT StatusId FROM #StatusId )  
 				AND B.TransDate Between @FromDate AND @ToDate	
@@ -693,7 +689,7 @@ BEGIN
 				m.SportType,
 				m.LeagueId, 
 				m.IsNeutral,
-				ISNULL(e.BetStatus,'') AS BetStatus,
+				m.BetStatus,
 				B.Username,
 				B.BetType,
 				B.CustId,
@@ -726,8 +722,7 @@ BEGIN
 				BetTrans AS B  WITH (NOLOCK)				
 				INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 				LEFT JOIN Bettrans_Agent D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
-				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 		
-				LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
+				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 						
 			WHERE	B.CustID = @CustId  
 				AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
 				AND B.TransDate Between @FromDate AND @ToDate	

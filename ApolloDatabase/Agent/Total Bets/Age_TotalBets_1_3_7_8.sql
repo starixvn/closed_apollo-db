@@ -74,8 +74,7 @@ FROM
 		bt.LiveAwayScore
 	) AS b
 	INNER JOIN Match AS m WITH (NOLOCK) ON m.MatchId = b.MatchId
-	INNER JOIN match_remark_ex e WITH (NOLOCK) ON e.matchID = m.matchid
-WHERE e.EventStatus = 'running'
+WHERE m.EventStatus = 'running'
 GROUP BY
 	m.ShowTime, 
 	m.LeagueId,
