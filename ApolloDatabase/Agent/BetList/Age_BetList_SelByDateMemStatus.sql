@@ -14,19 +14,7 @@ DB:  SVRAGE.RepDB
 Original:  
 
 Revisions:
-  
-EX:
- Exec [Age_BetList_SelByDateMemStatus] 3,-1, 63967, '2013-01-01' , '2013-04-09', '0^1^101^103' 
- Exec [Age_BetList_SelByDateMemStatus] 3,99, -1, '2012-01-01' , '2013-04-15', '0^1^101^102^103^111^112^113'
-
-
- exec Age_BetList_SelByDateMemStatus @LoggedId=49,@AgentId=-1,@CustId=33611,@FromDate='2013-01-30 00:00:00',@Todate='2013-04-15 08:57:00',@StatusIds='0^1'
- exec Age_BetList_SelByDateMemStatus @LoggedId=3,@AgentId=4,@CustId=-1,@FromDate='2013-01-30 00:00:00',@Todate='2013-04-15 08:57:00',@StatusIds='0^1'
- exec Age_BetList_SelByDateMemStatus @LoggedId=49,@AgentId=49,@CustId=-1,@FromDate='2013-01-30 00:00:00',@Todate='2013-04-15 08:57:00',@StatusIds='0^1'
- 
-exec Age_BetList_SelByDateMemStatus @LoggedId=0,@AgentId=-1,@CustId=33611,@FromDate='2013-01-30 00:00:00',@Todate='2013-04-15 15:26:00',@StatusIds='0^1'
-exec Age_BetList_SelByDateMemStatus @LoggedId=0,@AgentId=4,@CustId=-1,@FromDate='2013-01-30 00:00:00',@Todate='2013-04-15 08:57:00',@StatusIds='0^1'
-
+   - 20130510@Sophia: Change @splitter of strSplit_Key from '^', to ','
 
 
 Param's Explanation:  
@@ -61,7 +49,7 @@ WHERE	AgentId = @LoggedId
 
 CREATE TABLE #StatusId ( StatusId TINYINT)
 INSERT INTO #StatusId
-SELECT val FROM dbo.strSplit_Key(@StatusIds,'^')
+SELECT val FROM dbo.strSplit_Key(@StatusIds,',')
 
 ---*****************************  Super View ***************************--
 IF @LoggedId = 0 
