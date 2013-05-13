@@ -18,15 +18,13 @@ SET NOCOUNT ON
 
 SELECT DISTINCT m.eventdate
 FROM   match m WITH (NOLOCK)
-LEFT OUTER JOIN match_remark_ex e WITH (NOLOCK) ON m.matchid = e.matchid
-WHERE  e.eventstatus NOT IN ('internal', 'closed', 'running')
+WHERE  m.eventstatus NOT IN ('internal', 'closed', 'running')
 
 UNION ALL
 
 SELECT DISTINCT m.eventdate
 FROM   match14 m WITH (NOLOCK)
-LEFT OUTER JOIN match_remark_ex e WITH (NOLOCK) ON m.matchid = e.matchid
-WHERE  e.eventstatus NOT IN ('internal', 'closed', 'running')
+WHERE  m.eventstatus NOT IN ('internal', 'closed', 'running')
 ORDER BY m.eventdate DESC
 
 	

@@ -14,7 +14,7 @@ Revisions:
 SET NOCOUNT ON
 DECLARE	@tmpParlay	TABLE(
 	transid		BIGINT,
-	sporttype	INT,
+	sporttype	TINYINT,
 	leagueid	INT,
 	bettype		INT,
 	homeid		INT,
@@ -77,7 +77,7 @@ BEGIN
 		b.livehomescore,
 		b.liveawayscore,
 		b.liveindicator,
-		ISNULL(e.betstatus,'') AS betstatus,
+		m.betstatus,
 		m.isNeutral
 	FROM(	SELECT 
 					transid,
@@ -94,8 +94,7 @@ BEGIN
 			FROM	BettransM with (nolock)
 					WHERE refno=@refno and custID = @custID              
 		) AS b		
-			INNER JOIN match as m WITH (NOLOCK) ON b.matchid=m.matchid
-			LEFT JOIN match_remark_ex e WITH(NOLOCK) ON m.matchid = e.matchid
+			inner join match as m with (nolock) on b.matchid=m.matchid
 END
 IF EXISTS (SELECT 1 FROM bettransm14 WITH (NOLOCK) WHERE refno = @refno and custid = @custid)
 BEGIN
@@ -132,7 +131,7 @@ BEGIN
 		b.livehomescore,
 		b.liveawayscore,
 		b.liveindicator,
-		ISNULL(e.BetStatus,'') AS BetStatus,
+		m.betstatus,
 		m.isNeutral
 	FROM(	SELECT 
 					transid,
@@ -149,8 +148,7 @@ BEGIN
 			FROM	BettransM14 with (nolock)
 					WHERE refno=@refno and custID = @custID              
 		) AS b		
-			INNER JOIN match14 as m WITH (NOLOCK) ON b.matchid=m.matchid
-			LEFT JOIN match_remark_ex e WITH(NOLOCK) ON m.matchid = e.matchid
+			inner join match14 as m with (nolock) on b.matchid=m.matchid
 END
 IF EXISTS (SELECT 1 FROM SVRARC.ArchiveDB.dbo.BettransM WITH (NOLOCK) WHERE refno = @refno)
 BEGIN
@@ -187,7 +185,7 @@ BEGIN
 		b.livehomescore,
 		b.liveawayscore,
 		b.liveindicator,
-		ISNULL(e.BetStatus,'') AS BetStatus,
+		m.betstatus,
 		m.isNeutral
 	FROM(	SELECT 
 					transid,
@@ -204,8 +202,7 @@ BEGIN
 			FROM	SVRARC.ArchiveDB.dbo.BettransM with (nolock)
 					WHERE refno=@refno  and custID = @custID          
 		) AS b		
-			INNER JOIN SVRARC.ArchiveDB.dbo.match_bk AS m WITH (NOLOCK) ON b.matchid = m.matchid	
-			LEFT JOIN match_remark_ex e WITH(NOLOCK) ON m.matchid = e.matchid
+			inner join SVRARC.ArchiveDB.dbo.match_bk as m with (nolock) on b.matchid=m.matchid	
 END
 SELECT * FROM @tmpParlay
 ORDER BY transID DESC 

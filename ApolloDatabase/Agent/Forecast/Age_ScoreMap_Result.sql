@@ -439,9 +439,8 @@ BEGIN
 		homeid, 
 		awayid
 	FROM match m WITH (NOLOCK)
-	LEFT JOIN Match_remark_ex e WITH (NOLOCK) ON e.MatchId = m.MatchId
 	WHERE 
-		e.eventstatus <> 'completed'
+		m.eventstatus <> 'completed'
 		AND m.matchid IN (SELECT val FROM strSplit(@matchids, ','))
 
 END
