@@ -276,7 +276,7 @@ IF @@SERVERNAME IN ('DB042', 'DB043', 'DB044') RETURN
 	WHERE IsUpdated = 1
 
 	--IF @@SERVERNAME <> N'DBTRANS' RETURN
-	IF @@SERVERNAME <> N'DB215\SQL2012' or db_name() <> N'TransDB' RETURN
+	--IF @@SERVERNAME <> N'DB215\SQL2012' or db_name() <> N'TransDB' RETURN
 	
 	--	 below code is just for DBTRANS to process
 	
