@@ -7,7 +7,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 ALTER PROCEDURE [dbo].[Age_TotalBets_161]
-	@AgentId	INT
+	@AgentId	INT, 
+	@LoggedID INT = 0
 AS
 
 /**
@@ -138,7 +139,7 @@ BEGIN
 				ba.BetType, 
 				betteam,
 				liveindicator,
-				SUM(ba.APositionTaking * ba.Stake * CASE WHEN ABS(b.Odds) < 1 THEN 1 ELSE ABS(b.Odds) END) AS Stake,
+				SUM(CASE WHEN @LoggedID = 0 THEN (1-TPositionTaking) ELSE ba.APositionTaking END * ba.Stake * CASE WHEN ABS(b.Odds) < 1 THEN 1 ELSE ABS(b.Odds) END) AS Stake,
 				COUNT(1) AS BetCOUNT
 			FROM 
 				BetTrans_Agent AS ba WITH (NOLOCK) 

@@ -6,7 +6,8 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 ALTER PROCEDURE [dbo].[Age_TotalBets_1_3_7_8]
-	@AgentId INT
+	@AgentId INT,
+	@LoggedId INT = 0
 AS
 
 /**
@@ -15,7 +16,8 @@ AS
  * Task			: Retrieve Total Bet values for bettype 1,3,7,8
  * DB			: SVRAGE.RepDB
  * Revisions	:
- *	• 20130509@Sophia: Revise code
+ *	- 20130509@Sophia: Revise code
+ *  - 20130513@Sophjia: Add super view
  * Parameters :
  *	@AgentId : agent ID
  *  
@@ -57,7 +59,7 @@ FROM
 		bt.LiveIndicator, 
 		bt.LiveHomeScore, 
 		bt.LiveAwayScore,
-		SUM(bta.APositionTaking * bta.Stake * CASE WHEN ABS(bt.Odds) < 1 THEN 1 ELSE ABS(bt.Odds) END) AS Stake,
+		SUM( CASE WHEN @LoggedID = 0 THEN (1-bt.TPositionTaking) ELSE bta.APositionTaking END * bta.Stake * CASE WHEN ABS(bt.Odds) < 1 THEN 1 ELSE ABS(bt.Odds) END) AS Stake,
 		COUNT(*) AS BetCount
 	FROM 
 		BetTrans_Agent AS bta WITH (NOLOCK)

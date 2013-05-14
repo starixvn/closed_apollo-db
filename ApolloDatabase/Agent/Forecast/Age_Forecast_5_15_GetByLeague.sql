@@ -7,7 +7,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 ALTER PROCEDURE [dbo].[Age_Forecast_5_15_GetByLeague]
 	@LeagueID	INT,
-	@AgentId	INT
+	@AgentId	INT,
+	@LoggedID	INT = 0
 AS
 
 /**
@@ -16,7 +17,7 @@ AS
  * Task			: Forecast for 1x2 bettype
  * DB			: SVRAGE.RepDB
  * Revisions	:
- *	•
+ *	• 20130514@Sophia: Add super view
  * Parameters:
  *	@AgentId: Agent ID
  *	@LeagueID: League ID
@@ -52,32 +53,32 @@ FROM (
 		M.ShowTime,
 		M.MatchCode,
 		ISNULL(m.isNeutral, CONVERT(BIT, 0)) AS IsNeutral,
-		SUM(CASE WHEN betteam = '1' AND b.BetType = 5 THEN (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS homewin,
-		SUM(CASE WHEN betteam = '2' AND b.BetType = 5 THEN (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS awaywin,
-		SUM(CASE WHEN betteam = 'x' AND b.BetType = 5 THEN (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS drawwin,
+		SUM(CASE WHEN betteam = '1' AND b.BetType = 5 THEN (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS homewin,
+		SUM(CASE WHEN betteam = '2' AND b.BetType = 5 THEN (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS awaywin,
+		SUM(CASE WHEN betteam = 'x' AND b.BetType = 5 THEN (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS drawwin,
 
-		SUM(CASE WHEN betteam = '1' AND b.BetType = 5 THEN (CASE WHEN odds < 0 THEN ABS(odds - 1) ELSE 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS homelose,
-		SUM(CASE WHEN betteam = '2' AND b.BetType = 5 THEN (CASE WHEN odds < 0 THEN ABS(odds - 1) ELSE 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS awaylose,
-		SUM(CASE WHEN betteam = 'x' AND b.BetType = 5 THEN (CASE WHEN odds < 0 THEN ABS(odds - 1) ELSE 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS drawlose,
+		SUM(CASE WHEN betteam = '1' AND b.BetType = 5 THEN (CASE WHEN odds < 0 THEN ABS(odds - 1) ELSE 1 END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS homelose,
+		SUM(CASE WHEN betteam = '2' AND b.BetType = 5 THEN (CASE WHEN odds < 0 THEN ABS(odds - 1) ELSE 1 END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS awaylose,
+		SUM(CASE WHEN betteam = 'x' AND b.BetType = 5 THEN (CASE WHEN odds < 0 THEN ABS(odds - 1) ELSE 1 END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS drawlose,
 
-		SUM(CASE WHEN betteam = '1' AND b.BetType = 15 THEN (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS ht_homewin,
-		SUM(CASE WHEN betteam = '2' AND b.BetType = 15 THEN (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS ht_awaywin,
-		SUM(CASE WHEN betteam = 'x' AND b.BetType = 15 THEN (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS ht_drawwin,
+		SUM(CASE WHEN betteam = '1' AND b.BetType = 15 THEN (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS ht_homewin,
+		SUM(CASE WHEN betteam = '2' AND b.BetType = 15 THEN (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS ht_awaywin,
+		SUM(CASE WHEN betteam = 'x' AND b.BetType = 15 THEN (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS ht_drawwin,
 
-		SUM(CASE WHEN betteam = '1' AND b.BetType = 15 THEN (CASE WHEN odds < 0 THEN ABS(odds - 1) ELSE 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS ht_homelose,
-		SUM(CASE WHEN betteam = '2' AND b.BetType = 15 THEN (CASE WHEN odds < 0 THEN ABS(odds - 1) ELSE 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS ht_awaylose,
-		SUM(CASE WHEN betteam = 'x' AND b.BetType = 15 THEN (CASE WHEN odds < 0 THEN ABS(odds - 1) ELSE 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS ht_drawlose
+		SUM(CASE WHEN betteam = '1' AND b.BetType = 15 THEN (CASE WHEN odds < 0 THEN ABS(odds - 1) ELSE 1 END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS ht_homelose,
+		SUM(CASE WHEN betteam = '2' AND b.BetType = 15 THEN (CASE WHEN odds < 0 THEN ABS(odds - 1) ELSE 1 END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS ht_awaylose,
+		SUM(CASE WHEN betteam = 'x' AND b.BetType = 15 THEN (CASE WHEN odds < 0 THEN ABS(odds - 1) ELSE 1 END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS ht_drawlose
 	FROM 
 		BetTrans_Agent AS ba WITH (NOLOCK)
 		INNER JOIN BetTrans AS b WITH (NOLOCK) ON ba.TransId = b.TransId
 		INNER JOIN Match AS M WITH (NOLOCK) ON b.MatchID = M.MatchID
 	WHERE 
 		b.BetType IN (5, 15)
-		AND LeagueID = @LeagueID
-		AND ba.AgentId = @AgentId
 		AND b.StatusId IN (0, 1) -- status is waiting or running
+		AND ba.AgentId = @AgentId		
 		AND b.Ruben = 0	-- match not yet settle
 		AND M.EventStatus = 'running'
+		AND m.LeagueID = @LeagueID
 	GROUP BY 
 		liveindicator, 
 		b.currency,

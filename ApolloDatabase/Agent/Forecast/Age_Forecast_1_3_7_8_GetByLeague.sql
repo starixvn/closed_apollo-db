@@ -12,7 +12,8 @@ ALTER PROCEDURE [dbo].[Age_Forecast_1_3_7_8_GetByLeague]
 	@BaseOffsetHTHDP	INT,
 	@BaseOffsetHTOU		INT,
 	@LeagueID			INT,
-	@AgentId			INT
+	@AgentId			INT,
+	@LoggedID			INT = 0
 AS
 
 /**
@@ -21,7 +22,7 @@ AS
  * Task			: Forecast for HDP/OU bettype
  * DB			: SVRAGE.RepDB
  * Revisions	:
- *	•
+ *	• 20130514@Sophia: Add super view
  * Parameters:
  *	
  */
@@ -126,10 +127,10 @@ FROM
 							b.hdp2 - b.hdp1 AS hdp, 
 							b.livehomescore - b.liveawayscore AS score, 
 							b.liveindicator,
-							SUM(CASE WHEN betteam = 'h' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS homewin,
-							SUM(CASE WHEN betteam = 'a' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS awaywin,
-							SUM(CASE WHEN betteam = 'h' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS homelose,
-							SUM(CASE WHEN betteam = 'a' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS awaylose,
+							SUM(CASE WHEN betteam = 'h' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS homewin,
+							SUM(CASE WHEN betteam = 'a' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS awaywin,
+							SUM(CASE WHEN betteam = 'h' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS homelose,
+							SUM(CASE WHEN betteam = 'a' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS awaylose,
 							M.MatchID,
 							ISNULL(o.livehomescore, 0) - ISNULL(o.liveawayscore, 0) AS VScoreHDP,
 							ISNULL(o.livehomescore, 0) + ISNULL(o.liveawayscore, 0) AS VScoreOU
@@ -180,10 +181,10 @@ FROM
 							b.Currency, 
 							b.Hdp1 AS hdp, 
 							0 AS score,
-							SUM(CASE WHEN betteam = 'h' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS homewin,
-							SUM(CASE WHEN betteam = 'a' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS awaywin,
-							SUM(CASE WHEN betteam = 'h' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS homelose,
-							SUM(CASE WHEN betteam = 'a' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS awaylose,
+							SUM(CASE WHEN betteam = 'h' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS homewin,
+							SUM(CASE WHEN betteam = 'a' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS awaywin,
+							SUM(CASE WHEN betteam = 'h' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS homelose,
+							SUM(CASE WHEN betteam = 'a' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS awaylose,
 							M.MatchID,
 							ISNULL(o.livehomescore, 0) - ISNULL(o.liveawayscore, 0) AS VScoreHDP,
 							ISNULL(o.livehomescore, 0) + ISNULL(o.liveawayscore, 0) AS VScoreOU
@@ -232,10 +233,10 @@ FROM
 					(
 						SELECT 
 							b.currency, b.hdp2 - b.hdp1 hdp, b.livehomescore - b.liveawayscore AS score, b.liveindicator,
-							SUM(CASE WHEN betteam = 'h' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS homewin,
-							SUM(CASE WHEN betteam = 'a' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS awaywin,
-							SUM(CASE WHEN betteam = 'h' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS homelose,
-							SUM(CASE WHEN betteam = 'a' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS awaylose,
+							SUM(CASE WHEN betteam = 'h' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS homewin,
+							SUM(CASE WHEN betteam = 'a' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS awaywin,
+							SUM(CASE WHEN betteam = 'h' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS homelose,
+							SUM(CASE WHEN betteam = 'a' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS awaylose,
 							M.MatchID,
 							ISNULL(o.livehomescore, 0) - ISNULL(o.liveawayscore, 0) AS VScoreHDP,
 							ISNULL(o.livehomescore, 0) + ISNULL(o.liveawayscore, 0) AS VScoreOU
@@ -286,10 +287,10 @@ FROM
 							b.currency, 
 							b.hdp1 AS hdp, 
 							0 AS score,
-							SUM(CASE WHEN betteam = 'h' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS homewin,
-							SUM(CASE WHEN betteam = 'a' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS awaywin,
-							SUM(CASE WHEN betteam = 'h' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS homelose,
-							SUM(CASE WHEN betteam = 'a' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS awaylose,
+							SUM(CASE WHEN betteam = 'h' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS homewin,
+							SUM(CASE WHEN betteam = 'a' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS awaywin,
+							SUM(CASE WHEN betteam = 'h' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS homelose,
+							SUM(CASE WHEN betteam = 'a' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS awaylose,
 							M.MatchID,
 							ISNULL(o.livehomescore, 0) - ISNULL(o.liveawayscore, 0) AS VScoreHDP,
 							ISNULL(o.livehomescore, 0) + ISNULL(o.liveawayscore, 0) AS VScoreOU

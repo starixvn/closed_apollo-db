@@ -7,7 +7,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 ALTER PROCEDURE [dbo].[Age_TotalBets_25_121_122]
-	@AgentId	INT
+	@AgentId	INT,
+	@LoggedID INT = 0
 AS
 
 /**
@@ -18,16 +19,68 @@ AS
  * Revisions	:
  *	• 20132801@Terry.Nguyen	: Implement
  *  • 20130509@Sophia: revise code, order by LeagueId
+ *  • 20130514@Sophia: Add super view
  * Parameters:
  *	•
  *	•
  *  
  */
- 
-BEGIN
+SET NOCOUNT ON
+IF @LoggedID = 0 
+BEGIN 
+	SELECT 
+		m.ShowTime, 
+		m.LeagueId,
+		m.MatchCode, 
+		b.LiveIndicator, 
+		b.LiveHomeScore,
+		b.LiveAwayScore,
+		m.MatchId,
+		m.HomeId,
+		m.AwayId,
 
-	SET NOCOUNT ON
+		SUM(CASE WHEN ba.BetType = 25 AND BetTeam = 'h' THEN (1-b.TPositionTaking) * ba.Stake ELSE 0 END) AS HomeOddsDNB,
+		SUM(CASE WHEN ba.BetType = 25 AND BetTeam = 'a' THEN (1-b.TPositionTaking) * ba.Stake ELSE 0 END) AS AwayOddsDNB,
 
+		SUM(CASE WHEN ba.BetType = 121 AND BetTeam = 'x' THEN (1-b.TPositionTaking) * ba.Stake ELSE 0 END) AS HomeOddsHNB,
+		SUM(CASE WHEN ba.BetType = 121 AND BetTeam = 'a' THEN (1-b.TPositionTaking) * ba.Stake ELSE 0 END) AS AwayOddsHNB,
+	
+		SUM(CASE WHEN ba.BetType = 122 AND BetTeam = 'h' THEN (1-b.TPositionTaking) * ba.Stake ELSE 0 END) AS HomeOddsANB,
+		SUM(CASE WHEN ba.BetType = 122 AND BetTeam = 'x' THEN (1-b.TPositionTaking) * ba.Stake ELSE 0 END) AS AwayOddsANB,
+
+		SUM(CASE WHEN ba.BetType = 25 THEN 1 ELSE 0 END) AS BetCountDNB,
+		SUM(CASE WHEN ba.BetType = 121 THEN 1 ELSE 0 END) AS BetCountHNB,
+		SUM(CASE WHEN ba.BetType = 122 THEN 1 ELSE 0 END) AS BetCountANB,
+	
+		ISNULL(m.isNeutral, CONVERT(BIT, 0)) AS IsNeutral
+	FROM
+		BetTrans_Agent AS ba WITH (NOLOCK)  
+		INNER JOIN BetTrans AS b WITH (NOLOCK) ON ba.TransId = b.TransId 
+		INNER JOIN Match AS m WITH (NOLOCK) ON b.MatchId = m.MatchId
+	WHERE  	
+		ba.AgentId = @AgentId 
+		AND m.EventStatus = 'running'
+		AND ba.BetType IN (25, 121, 122)
+		AND ba.statusID IN (0,1)
+		AND b.Ruben = 0
+	GROUP BY 
+		b.LiveIndicator, 
+		b.LiveHomeScore,
+		b.LiveAwayScore,
+		m.HomeId,
+		m.AwayId,
+		m.MatchId,
+		m.MatchCode, 
+		m.LeagueId,
+		m.showtime,
+		m.isNeutral
+	ORDER BY
+		m.LeagueId,
+		b.LiveIndicator DESC, 
+		m.matchcode
+END
+ELSE
+BEGIN 
 	SELECT 
 		m.ShowTime, 
 		m.LeagueId,
@@ -60,8 +113,8 @@ BEGIN
 	WHERE  	
 		ba.AgentId = @AgentId 
 		AND m.EventStatus = 'running'
-		AND b.BetType IN (25, 121, 122)
-		AND b.statusID IN (0,1)
+		AND ba.BetType IN (25, 121, 122)
+		AND ba.statusID IN (0,1)
 		AND b.Ruben = 0
 	GROUP BY 
 		b.LiveIndicator, 
@@ -78,6 +131,6 @@ BEGIN
 		m.LeagueId,
 		b.LiveIndicator DESC, 
 		m.matchcode
-
 END
+
 
