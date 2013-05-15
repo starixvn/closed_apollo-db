@@ -6,7 +6,8 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 ALTER PROCEDURE [dbo].[Age_TotalBets_6]
-	@AgentId	INT
+	@AgentId	INT,
+	@LoggedID INT = 0
 AS
 
 /**
@@ -22,20 +23,18 @@ AS
  *  
  */
 
+SET NOCOUNT ON
 BEGIN
-
-	SET NOCOUNT ON
-
 	SELECT
 		ba.MatchId,
 		m.HomeId,
 		m.AwayId,
 		MatchCode,
 	
-		SUM((CASE BetTeam WHEN '0-1' THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS Total01,
-		SUM((CASE BetTeam WHEN '2-3' THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS Total23,
-		SUM((CASE BetTeam WHEN '4-6' THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS Total46,
-		SUM((CASE BetTeam WHEN '7-over' THEN (ba.Stake * b.Odds) - ba.Stake ELSE -ba.Stake END ) * ba.APositionTaking) AS Total7Over,
+		SUM((CASE BetTeam WHEN '0-1' THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END)) AS Total01,
+		SUM((CASE BetTeam WHEN '2-3' THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END)) AS Total23,
+		SUM((CASE BetTeam WHEN '4-6' THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END)) AS Total46,
+		SUM((CASE BetTeam WHEN '7-over' THEN (ba.Stake * b.Odds) - ba.Stake ELSE -ba.Stake END ) * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END)) AS Total7Over,
 		ISNULL(m.IsNeutral, CONVERT(BIT, 0)) AS IsNeutral
 	FROM  
 		BetTrans_Agent AS ba WITH (NOLOCK) 
@@ -43,10 +42,10 @@ BEGIN
 		INNER JOIN Match AS m WITH (NOLOCK) ON b.MatchId = m.MatchId
 	WHERE
 		ba.AgentId = @AgentId	
-		AND ba.BetType = 6 
-		AND m.EventStatus = 'running'
-		AND ba.StatusId = 0  
-		AND (ISNULL(ba.SecAcceptFlag, 0) = 0 OR (ISNULL(ba.SecAcceptFlag, 0) = 1 AND ISNULL(b.CheckTime, CURRENT_TIMESTAMP) <= CURRENT_TIMESTAMP ))
+		AND b.BetType = 6 	
+		AND b.StatusId = 0
+		AND m.EventStatus = 'running'  
+		AND (ISNULL(b.SecAcceptFlag, 0) = 0 OR (ISNULL(b.SecAcceptFlag, 0) = 1 AND ISNULL(b.CheckTime, CURRENT_TIMESTAMP) <= CURRENT_TIMESTAMP ))
 		AND b.Ruben = 0
 	GROUP BY
 		ba.MatchId,

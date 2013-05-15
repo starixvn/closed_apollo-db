@@ -8,7 +8,8 @@ GO
 ALTER PROCEDURE [dbo].[Age_Forecast_3_8_GetByMatch]
 	@MatchId INT,
 	@BetType INT = 3,
-	@AgentId INT
+	@AgentId INT,
+	@LoggedID INT = 0
 AS
 
 /**
@@ -17,7 +18,7 @@ AS
  * Task			: Forecast by Match for OU bettype.
  * DB			: SVRAGE.RepDB
  * Revisions	:
- *	•
+ *	• 20130514@Sophia: add super view
  * Parameters:
  *	@MatchId: Match ID
  *	@BetType: BetType
@@ -43,20 +44,20 @@ BEGIN
 				b.Currency, 
 				hdp1 AS hdp, 
 				0 AS score, 
-				SUM(CASE WHEN betteam = 'h' THEN ba.Stake * ba.APositionTaking ELSE 0 END) AS hometotal,
-				SUM(CASE WHEN betteam = 'a' THEN ba.Stake * ba.APositionTaking ELSE 0 END) AS awaytotal,	
-				SUM(CASE WHEN betteam = 'h' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS homewin,
-				SUM(CASE WHEN betteam = 'a' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS awaywin,
-				SUM(CASE WHEN betteam = 'h' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS homelose,
-				SUM(CASE WHEN betteam = 'a' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * ba.Stake * ba.APositionTaking ELSE 0 END) AS awaylose
+				SUM(CASE WHEN betteam = 'h' THEN b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS hometotal,
+				SUM(CASE WHEN betteam = 'a' THEN b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS awaytotal,	
+				SUM(CASE WHEN betteam = 'h' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS homewin,
+				SUM(CASE WHEN betteam = 'a' THEN (CASE WHEN odds < 0 THEN 1 ELSE odds END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS awaywin,
+				SUM(CASE WHEN betteam = 'h' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS homelose,
+				SUM(CASE WHEN betteam = 'a' THEN (CASE WHEN odds < 0 THEN ABS(odds) ELSE 1 END) * b.Stake * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) ELSE 0 END) AS awaylose
 			FROM 
 				BetTrans_Agent AS ba WITH (NOLOCK)
 				INNER JOIN BetTrans AS b WITH (NOLOCK) ON ba.TransId = b.TransId
 			WHERE 
 				b.BetType = @BetType
-				AND b.MatchId = @MatchId
-				AND ba.AgentId = @AgentId
 				AND b.StatusId IN (0, 1) -- status is waiting or running
+				AND b.MatchId = @MatchId
+				AND ba.AgentId = @AgentId				
 				AND b.Ruben = 0	-- match not yet settle
 			GROUP BY 
 				b.LiveIndicator, 

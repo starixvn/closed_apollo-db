@@ -1,12 +1,5 @@
-﻿USE [RepDB]
-GO
-/****** Object:  StoredProcedure [dbo].[Age_ScoreMap_Result]    Script Date: 5/2/2013 12:49:16 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-ALTER PROCEDURE [dbo].[Age_ScoreMap_Result]
+﻿ALTER PROCEDURE [dbo].[Age_ScoreMap_Result]
+	@LoggedID			INT				= 0,
 	@AgentId			INT,
 	@MatchIds			VARCHAR(4000)	= '',
 	@Bettypes_Live		VARCHAR(500),
@@ -23,7 +16,8 @@ AS
  * Task			: Get data for ScoreMap
  * DB			: SVRAGE.RepDB
  * Revisions	:
- *	• 20132801@Terry.Nguyen	: Implement
+ *	• 20130128@Terry.Nguyen	: Implement
+ *	• 20130514@Sophia	: Add Super View
  * Parameters:
  *	•
  *	•
@@ -66,31 +60,31 @@ BEGIN
 	-- get member tickets INTO temp TABLE	
 	INSERT INTO @tmpBettrans 
 	SELECT 
-		ba.TransId, 
-		BetTeam, 
+		b.TransId, 
+		b.BetTeam, 
 		b.MatchId, 
-		AgentId, 
-		ba.BetType, 
-		Hdp1, 
-		Hdp2, 
+		ba.AgentId, 
+		b.BetType, 
+		b.Hdp1, 
+		b.Hdp2, 
 		b.Odds, 
-		ba.Stake, 
-		LiveIndicator, 
+		b.Stake, 
+		b.LiveIndicator, 
 		b.LiveHomeScore, 
 		b.LiveAwayScore, 
-		APositionTaking
+		CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END AS APositionTaking
 	FROM 
 		BetTrans_Agent AS ba WITH (NOLOCK) 
 		INNER JOIN BetTrans AS b WITH (NOLOCK) ON ba.TransId = b.TransId
 	WHERE 
 		b.MatchId IN (SELECT val FROM strSplit(@MatchIds, ','))
 		AND ba.AgentId = @AgentId
-		AND (( ba.BetType IN (SELECT val FROM strSplit(@Bettypes_Live, ',')) AND liveindicator = 1) 
-				OR (ba.BetType IN (SELECT val FROM strSplit(@Bettypes_Dead, ',')) AND liveindicator = 0)
+		AND (( b.BetType IN (SELECT val FROM strSplit(@Bettypes_Live, ',')) AND b.liveindicator = 1) 
+				OR (b.BetType IN (SELECT val FROM strSplit(@Bettypes_Dead, ',')) AND b.liveindicator = 0)
 			)
 		AND b.ruben = 0
-		AND ba.StatusId IN (0, 1)
-		AND APositionTaking > 0 
+		AND b.StatusId IN (0, 1)
+		AND CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END > 0 
 		
 	SELECT 
 		matchid, 
@@ -444,4 +438,5 @@ BEGIN
 		AND m.matchid IN (SELECT val FROM strSplit(@matchids, ','))
 
 END
+
 
