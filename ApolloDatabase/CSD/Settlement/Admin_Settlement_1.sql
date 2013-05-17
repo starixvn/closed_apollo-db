@@ -59,6 +59,8 @@ SELECT @goalrecord_old = ISNULL(GoalRecord,'')
 FROM SVRPRO.ProdDB.dbo.match_remark_ex WITH(NOLOCK)
 WHERE matchid = @matchid
 
+SELECT @goalrecord_old = ISNULL(@goalrecord_old, '')
+
 /*
 --check whether it's at weekend peak-hour, from 7PM - 2AM (GMT+8)
 if datename(weekday, getdate()) in ('Saturday','Sunday') and datepart(hour, getdate()) between 7 and 14  AND @matchcode NOT LIKE '%hedge%'
@@ -347,7 +349,7 @@ SELECT @stop = CURRENT_TIMESTAMP
 
 SELECT @LogData = 'Calculate (' + @action + ') for matchid:' + CAST(@matchid as nvarchar(10)) 
 	+ ' score:' + CAST(ISNULL(@fth,0) as nvarchar(10)) + '-' + CAST(ISNULL(@fta,0) as nvarchar(10)) + ' HT:' + CAST(@hth as nvarchar(10)) + '-' + CAST(@hta as nvarchar(10)) 
-	+ ' GoalRecord:' + ISNULL(@goalrecord, '') + '(Old:' + @goalrecord_old + ') Remark(' + @betstatus + ') (' + CAST(DATEDIFF(millisecond, @start, @stop) as nvarchar(50)) + ' ms)'
+	+ ' GoalRecord:' + ISNULL(@goalrecord, '') + '(Old:' + @goalrecord_old  + ') Remark(' + @betstatus + ') (' + CAST(DATEDIFF(millisecond, @start, @stop) as nvarchar(50)) + ' ms)'
 EXEC dbo.WriteLog_UserLog_T  @creator, @LogData
 
 --Write Log Settle
