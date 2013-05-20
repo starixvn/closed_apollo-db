@@ -139,10 +139,10 @@ BEGIN
 				SUM(Turnover) TurnOver,
 				SUM(Actual_Turnover) ActualTO,		
 				SUM(UplineWinlost) as AWinLost,
-				SUM(UplineComm) as AComm,
-				SUM(UplineWinlost) + SUM(UplineComm) AS ATotal,
+				SUM(UplineComm - AComm) as AComm,
+				SUM(UplineWinlost) + SUM(UplineComm- AComm) AS ATotal,
 				SUM(GrossTotal) AS GrossTotal,
-				-(SUM(GrossTotal) + SUM(UplineWinlost) + SUM(UplineComm)) as UplineTotal
+				-(SUM(GrossTotal) + SUM(UplineWinlost) + SUM(UplineComm- AComm)) as UplineTotal
 	    FROM	Sum_WinLoss_Agent A WITH(NOLOCK) 
 		INNER JOIN AgentPositionTaking PT WITH (NOLOCK) 
 				ON PT.AgentID = A.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
@@ -179,10 +179,10 @@ BEGIN
 				SUM(Turnover) TurnOver,
 				SUM(Actual_Turnover) ActualTO,		
 				SUM(UplineWinlost) as AWinLost,
-				SUM(UplineComm) as AComm,
-				SUM(UplineWinlost) + SUM(UplineComm) AS ATotal,
+				SUM(UplineComm - AComm) as AComm,
+				SUM(UplineWinlost) + SUM(UplineComm- AComm) AS ATotal,
 				SUM(GrossTotal) AS GrossTotal,
-				-(SUM(GrossTotal) + SUM(UplineWinlost) + SUM(UplineComm)) as UplineTotal
+				-(SUM(GrossTotal) + SUM(UplineWinlost) + SUM(UplineComm - AComm)) as UplineTotal
 	    FROM	SVRARC.ArchiveDB.dbo.Sum_WinLoss_Agent_Old A WITH(NOLOCK) 
 		INNER JOIN AgentPositionTaking PT WITH (NOLOCK) 
 				ON PT.AgentID = A.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
