@@ -75,7 +75,7 @@ BEGIN
 			AND (BA.bettype < 31 
 				OR BA.bettype BETWEEN 121 AND 999 
 				OR BA.bettype BETWEEN 1301 AND 1334   
-				OR BA.Bettype  BETWEEN 81 AND 120 )
+				) ---OR BA.Bettype  BETWEEN 81 AND 120 )
 			AND ISNULL(C.AgentLevel,@AgentLevel) >= @AgentLevel   
 
 
@@ -104,7 +104,7 @@ BEGIN
 					AND (BA.bettype < 31 
 						OR BA.bettype BETWEEN 121 AND 999 
 						OR BA.bettype BETWEEN 1301 AND 1334   
-						OR BA.Bettype  BETWEEN 81 AND 120 )
+						) ----OR BA.Bettype  BETWEEN 81 AND 120 )
 					AND ISNULL(C.AgentLevel,@AgentLevel) >= @AgentLevel 
 	END
 	
@@ -135,7 +135,7 @@ BEGIN
 					AND (BA.bettype < 31 
 						OR BA.bettype BETWEEN 121 AND 999 
 						OR BA.bettype BETWEEN 1301 AND 1334  
-						OR BA.bettype  BETWEEN 81 AND 120 ) 
+						) ---OR BA.bettype  BETWEEN 81 AND 120 ) 
 					AND ISNULL(C.AgentLevel,@AgentLevel) >= @AgentLevel 
 					  	
 	-----Super View add 1 more row of Super
@@ -163,7 +163,7 @@ BEGIN
 					AND (BA.bettype < 31 
 						OR BA.bettype BETWEEN 121 AND 999 
 						OR BA.bettype BETWEEN 1301 AND 1334   
-						OR BA.Bettype  BETWEEN 81 AND 120 )
+						) ---OR BA.Bettype  BETWEEN 81 AND 120 )
 					AND ISNULL(C.AgentLevel,@AgentLevel) >= @AgentLevel 
 	END	
 	
