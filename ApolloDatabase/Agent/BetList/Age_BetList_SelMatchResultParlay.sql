@@ -141,7 +141,7 @@ BEGIN
 				INNER JOIN match14 m WITH(NOLOCK) ON bM.matchid = m.matchid
 				LEFT OUTER JOIN match_remark mr WITH(NOLOCK) ON m.matchid = mr.matchid
 	END
-	IF EXISTS (SELECT 1 FROM SVRARC.ArchiveDB.dbo.BettransM  WITH (NOLOCK) WHERE  refno = @refno)
+	IF EXISTS (SELECT 1 FROM SVRARC.ArchiveDB.dbo.BettransM_BK  WITH (NOLOCK) WHERE  refno = @refno)
 	BEGIN
 		INSERT INTO @tmpParlay (
 			sporttype, 	
@@ -190,7 +190,7 @@ BEGIN
 				ISNULL(mr.isHTCal,0) as isHTCal,
 				ISNULL(mr.calculate,0) as calculate,
 				ISNULL(mr.IsPending,0) as IsPending
-		FROM(	SELECT b.matchId FROM SVRARC.ArchiveDB.dbo.BettransM b (NOLOCK) WHERE b.refno = @refno ) bM
+		FROM(	SELECT b.matchId FROM SVRARC.ArchiveDB.dbo.BettransM_BK b (NOLOCK) WHERE b.refno = @refno ) bM
 				INNER JOIN SVRARC.ArchiveDB.dbo.match_BK m WITH(NOLOCK) ON bM.matchid = m.matchid
 				LEFT OUTER JOIN match_remark mr WITH(NOLOCK) ON m.matchid = mr.matchid
 	END

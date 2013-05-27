@@ -27,7 +27,7 @@ BEGIN
 				C.CustID,
 				PT.PositionTaking, 
 		   		SUM(ABS(B.Stake)) AS TurnOver,
-				SUM(CASE WHEN ABS(B.MOdds)> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as ActualTO,
+				SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as ActualTO,
 
 				SUM(B.WinLost - B.Actual_Stake) AS WinLost,
 				SUM(B.PlayerComm) AS PlayerComm,
@@ -70,10 +70,10 @@ BEGIN
 				SUM(WinLost) + SUM(PlayerComm) as MemTotal,
 
 				SUM(UplineWinlost) as AWinLost,
-				SUM(UplineComm) as AComm,
-				SUM(UplineWinlost) + SUM(UplineComm) AS ATotal,
+				SUM(UplineComm - PlayerComm) as AComm,
+				SUM(UplineWinlost) + SUM(UplineComm-PlayerComm) AS ATotal,
 
-				- (SUM(WinLost) + SUM(UplineWinlost) + SUM(UplineComm)) as UplineTotal
+				- (SUM(WinLost) + SUM(UplineWinlost) + SUM(UplineComm- PlayerComm)) as UplineTotal
 	    FROM	Sum_WinLoss_Cust A WITH(NOLOCK) 
 		INNER JOIN	CustPositionTaking PT WITH (NOLOCK) 
 				ON	PT.CustID = A.CustID AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
@@ -96,9 +96,9 @@ BEGIN
 				SUM(PlayerComm) as PlayerComm,
 				SUM(WinLost) + SUM(PlayerComm) as MemTotal,	
 				SUM(UplineWinlost) as AWinLost,
-				SUM(UplineComm) as AComm,
-				SUM(UplineWinlost) + SUM(UplineComm) AS ATotal,
-				- (SUM(WinLost) + SUM(UplineWinlost) + SUM(UplineComm)) as UplineTotal
+				SUM(UplineComm-PlayerComm) as AComm,
+				SUM(UplineWinlost) + SUM(UplineComm-PlayerComm) AS ATotal,
+				- (SUM(WinLost) + SUM(UplineWinlost) + SUM(UplineComm-PlayerComm)) as UplineTotal
 	    FROM	SVRARC.ArchiveDB.dbo.Sum_WinLoss_Cust_Old A WITH(NOLOCK) 
 		INNER JOIN	CustPositionTaking PT WITH (NOLOCK) 
 				ON	PT.CustID = A.CustID AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0

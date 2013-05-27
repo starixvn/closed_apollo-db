@@ -33,7 +33,7 @@ BEGIN
 		SELECT  C.Username, C.AgentID, 1 as IsAgent,
 				PT.MaxUpperPositionTaking as PositionTaking,				
 		   		SUM(ABS(B.Stake)) AS TurnOver,
-				SUM(CASE WHEN ABS(B.MOdds) > 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN B.MOdds IN (0.25,-0.25) AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS ActualTO,
+				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS ActualTO,
 				- SUM(B.Winlost - B.Actual_Stake + B.TWinlost) AS AWinlost,	
 				- SUM (B.TComm) AS AComm,
 				- (SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS ATotal,
@@ -58,7 +58,7 @@ BEGIN
 		---- Agent Winloss
 		SELECT  C.Username, C.AgentID, PT.MaxUpperPositionTaking as PositionTaking,			 
 		   		SUM(ABS(B.Stake)) AS TurnOver,
-				SUM(CASE WHEN ABS(B.MOdds)> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN B.MOdds IN (0.25,-0.25) AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS ActualTO,
+				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS ActualTO,
 				SUM(BP.AWinlost) AS AWinlost,	
 				SUM(BP.AComm) - SUM(BA.AComm) AS AComm,
 				SUM(BP.AWinlost) + SUM (BP.AComm) - SUM (BA.AComm)  AS ATotal,
@@ -112,7 +112,7 @@ BEGIN
 	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,
 			0 as PositionTaking,				
 		   	SUM(ABS(B.Stake)) as TurnOver,
-			SUM(CASE WHEN ABS(B.MOdds)> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN B.MOdds IN (0.25,-0.25) AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as ActualTO,
+			SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as ActualTO,
 			SUM(BA.AWinLost) as AWinlost,	
 			SUM(BA.AComm) - SUM (B.PlayerComm) as AComm,
 			SUM(BA.AWinLost) + SUM(BA.AComm) - SUM (B.PlayerComm) AS ATotal,
@@ -139,10 +139,10 @@ BEGIN
 				SUM(Turnover) TurnOver,
 				SUM(Actual_Turnover) ActualTO,		
 				SUM(UplineWinlost) as AWinLost,
-				SUM(UplineComm) as AComm,
-				SUM(UplineWinlost) + SUM(UplineComm) AS ATotal,
+				SUM(UplineComm - AComm) as AComm,
+				SUM(UplineWinlost) + SUM(UplineComm- AComm) AS ATotal,
 				SUM(GrossTotal) AS GrossTotal,
-				-(SUM(GrossTotal) + SUM(UplineWinlost) + SUM(UplineComm)) as UplineTotal
+				-(SUM(GrossTotal) + SUM(UplineWinlost) + SUM(UplineComm- AComm)) as UplineTotal
 	    FROM	Sum_WinLoss_Agent A WITH(NOLOCK) 
 		INNER JOIN AgentPositionTaking PT WITH (NOLOCK) 
 				ON PT.AgentID = A.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
@@ -179,10 +179,10 @@ BEGIN
 				SUM(Turnover) TurnOver,
 				SUM(Actual_Turnover) ActualTO,		
 				SUM(UplineWinlost) as AWinLost,
-				SUM(UplineComm) as AComm,
-				SUM(UplineWinlost) + SUM(UplineComm) AS ATotal,
+				SUM(UplineComm - AComm) as AComm,
+				SUM(UplineWinlost) + SUM(UplineComm- AComm) AS ATotal,
 				SUM(GrossTotal) AS GrossTotal,
-				-(SUM(GrossTotal) + SUM(UplineWinlost) + SUM(UplineComm)) as UplineTotal
+				-(SUM(GrossTotal) + SUM(UplineWinlost) + SUM(UplineComm - AComm)) as UplineTotal
 	    FROM	SVRARC.ArchiveDB.dbo.Sum_WinLoss_Agent_Old A WITH(NOLOCK) 
 		INNER JOIN AgentPositionTaking PT WITH (NOLOCK) 
 				ON PT.AgentID = A.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
