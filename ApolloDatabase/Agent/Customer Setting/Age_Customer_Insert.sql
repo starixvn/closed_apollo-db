@@ -13,7 +13,7 @@ ALTER PROCEDURE [dbo].[Age_Customer_Insert]
 	@Status				TINYINT			= 1,
 	@BetStatus			TINYINT			= 1,
 	@MatchLimit			SMALLMONEY		= 0,
-	@VirtualMultiplier	SMALLMONEY		= 0,
+	@VirtualMultiplier	SMALLMONEY		= 1,
 	@DoubleCommLosing	BIT				= 0,	
 	@Danger				TINYINT			= 0,
 	@IPLogin			VARCHAR(40)		= NULL,
