@@ -13,7 +13,7 @@ AS
  * Created by	: Kaden
  * Date			: 20130318
  * Task			: Update Confirmed Action value
- * DB			: SVRPRO/ProdDB
+ * DB			: SVRTRANS/TransDB
  * Revisions	:
  *	•
  * Parameters:

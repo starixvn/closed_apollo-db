@@ -16,7 +16,7 @@ ALTER PROCEDURE [dbo].[Age_Agent_Insert]
 	@UplineStatus			TINYINT			= 1,
 	@UplineBetStatus		TINYINT			= 1,
 	@MatchLimit				SMALLMONEY		= 0,
-	@VirtualMultiplier		SMALLMONEY		= 0,
+	@VirtualMultiplier		SMALLMONEY		= 1,
 	@DoubleCommLosing		BIT				= 0,
 	@Creator				INT				= NULL,
 	@ErrCode				INT				= 0			OUTPUT,

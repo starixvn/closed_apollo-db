@@ -6,7 +6,7 @@ AS
  * Created by	: Kaden
  * Date			: 20130326
  * Task			: Get detail action log by logId
- * DB			: APL.ProdDB
+ * DB			: SVRTRANS/TransDB
  * Revisions	:
  *	•
  * Parameters:

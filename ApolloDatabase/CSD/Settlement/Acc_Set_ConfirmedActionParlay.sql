@@ -8,7 +8,7 @@ AS
  * Created by	: Kaden
  * Date			: 20130402
  * Task			: Update Confirmed Action value for Mix Parlay
- * DB			: APL.ProdDB
+ * DB			: SVRTRANS/TransDB
  * Revisions	:
  *	•
  * Parameters:
