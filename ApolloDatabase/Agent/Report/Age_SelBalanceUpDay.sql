@@ -16,13 +16,16 @@ Param's Explanation:
 SET NOCOUNT ON
 BEGIN
 	declare @BalanceUpDay smalldatetime, @MoveBetsDay smalldatetime
+
 	SELECT TOP 1 @BalanceUpDay = winlostdate
-	FROM Bettrans_Agent WITH(NOLOCK)
-	WHERE bettype = 20000 and matchid = 0 and AgentID = 0
+	FROM Bettrans WITH(NOLOCK)
+	WHERE bettype = 20000 and matchid = 0  
 	
 	SELECT @MoveBetsDay = MAX(eventdate)  
 	FROM match14 WITH(NOLOCK)  
-	
+		
+	IF @MoveBetsDay IS NULL SELECT @MoveBetsDay = '2013-05-01'
+	IF @BalanceUpDay IS NULL SELECT @BalanceUpDay = '2013-05-01'
 
 	SELECT @BalanceUpDay as BalanceUpDay, @MoveBetsDay as MoveBetsDay
 END
