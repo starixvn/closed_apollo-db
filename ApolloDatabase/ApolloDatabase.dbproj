@@ -99,6 +99,7 @@
     <Folder Include="CSD\Write Log" />
     <Folder Include="CSD\Others" />
     <Folder Include="Agent\Customer Setting\Unit Test" />
+    <Folder Include="CSD\Report" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1136,6 +1137,9 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\View Log\WriteLog_RunSpAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\Acc_Rpt_MatchWinloss2_New.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
