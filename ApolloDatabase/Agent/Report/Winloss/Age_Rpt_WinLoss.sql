@@ -64,8 +64,8 @@ BEGIN
 				SUM(BP.AWinlost) + SUM (BP.AComm) - SUM (BA.AComm)  AS ATotal,
 			    SUM(BA.AComm) ChildAComm  , 
 				--SUM (BA.AWinlost)  as ChildWinlost,
-				MAX(B.Winlost) as Winlost,
-				MAX(B.Actual_Stake) as Actual_Stake
+				SUM(B.Winlost) as Winlost,
+				SUM(B.Actual_Stake) as Actual_Stake
 	    INTO	#T
 		FROM	Bettrans B
 		INNER JOIN Bettrans_Agent BP WITH (NOLOCK) 
@@ -140,9 +140,9 @@ BEGIN
 				SUM(Actual_Turnover) ActualTO,		
 				SUM(UplineWinlost) as AWinLost,
 				SUM(UplineComm - AComm) as AComm,
-				SUM(UplineWinlost) + SUM(UplineComm- AComm) AS ATotal,
+				SUM(UplineWinlost) + SUM(UplineComm - AComm) AS ATotal,
 				SUM(GrossTotal) AS GrossTotal,
-				-(SUM(GrossTotal) + SUM(UplineWinlost) + SUM(UplineComm- AComm)) as UplineTotal
+				-(SUM(GrossTotal) + SUM(UplineWinlost) + SUM(UplineComm - AComm)) as UplineTotal
 	    FROM	Sum_WinLoss_Agent A WITH(NOLOCK) 
 		INNER JOIN AgentPositionTaking PT WITH (NOLOCK) 
 				ON PT.AgentID = A.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
@@ -156,10 +156,10 @@ BEGIN
 				SUM(Turnover) TurnOver,
 				SUM(Actual_Turnover) ActualTO,		
 				SUM(UplineWinlost) as AWinLost,
-				SUM(UplineComm) as AComm,
-				SUM(UplineWinlost) + SUM(UplineComm) AS ATotal,
+				SUM(UplineComm-PlayerComm) as AComm,
+				SUM(UplineWinlost) + SUM(UplineComm-PlayerComm) AS ATotal,
 				SUM(WinLost + PlayerComm) AS GrossTotal,
-				SUM(WinLost + PlayerComm) + SUM(UplineWinlost) + SUM(UplineComm) as UplineTotal
+				-(SUM(WinLost) + SUM(UplineWinlost) + SUM(UplineComm)) as UplineTotal
 	    FROM	Sum_WinLoss_Cust b WITH(NOLOCK) 
 		WHERE	AgentId = @AgentId 
 				AND WinLostDate BETWEEN @BalanceUpDay AND @ToDate 
@@ -180,9 +180,9 @@ BEGIN
 				SUM(Actual_Turnover) ActualTO,		
 				SUM(UplineWinlost) as AWinLost,
 				SUM(UplineComm - AComm) as AComm,
-				SUM(UplineWinlost) + SUM(UplineComm- AComm) AS ATotal,
+				SUM(UplineWinlost) + SUM(UplineComm - AComm) AS ATotal,
 				SUM(GrossTotal) AS GrossTotal,
-				-(SUM(GrossTotal) + SUM(UplineWinlost) + SUM(UplineComm - AComm)) as UplineTotal
+				-(SUM(GrossTotal) + SUM(UplineWinlost) + SUM(UplineComm - AComm)) as UplineTotal				
 	    FROM	SVRARC.ArchiveDB.dbo.Sum_WinLoss_Agent_Old A WITH(NOLOCK) 
 		INNER JOIN AgentPositionTaking PT WITH (NOLOCK) 
 				ON PT.AgentID = A.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
@@ -196,10 +196,10 @@ BEGIN
 				SUM(Turnover) TurnOver,
 				SUM(Actual_Turnover) ActualTO,		
 				SUM(UplineWinlost) as AWinLost,
-				SUM(UplineComm) as AComm,
-				SUM(UplineWinlost) + SUM(UplineComm) AS ATotal,
+				SUM(UplineComm-PlayerComm) as AComm,
+				SUM(UplineWinlost) + SUM(UplineComm-PlayerComm) AS ATotal,
 				SUM(WinLost + PlayerComm) AS GrossTotal,
-				-(SUM(WinLost + PlayerComm) + SUM(UplineWinlost) + SUM(UplineComm)) as UplineTotal
+				-(SUM(WinLost) + SUM(UplineWinlost) + SUM(UplineComm)) as UplineTotal				
 	    FROM	SVRARC.ArchiveDB.dbo.Sum_WinLoss_Cust_Old b WITH(NOLOCK) 
 		WHERE	AgentId = @AgentId 
 				AND WinLostDate BETWEEN @BalanceUpDay AND @ToDate 

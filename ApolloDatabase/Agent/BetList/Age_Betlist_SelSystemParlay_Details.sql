@@ -161,7 +161,7 @@ BEGIN
 		
 		INSERT INTO @tmpResults(winlostdate, serial, modds, stake, winlost, statusid, playercomm)
 				SELECT winlostdate, serial, modds, stake, winlost, statusid, playercomm
-				FROM SVRARC.ArchiveDB.dbo.betparlayresult b WITH(NOLOCK) 
+				FROM SVRARC.ArchiveDB.dbo.BetParlayResult_BK b WITH(NOLOCK) 
 				WHERE refno = @refno
 	END
 	IF @minMatchdate <= @MoveBetsDay  --- get data from bettrans14
