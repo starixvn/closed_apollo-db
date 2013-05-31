@@ -56,12 +56,12 @@ BEGIN
 		RETURN
 	END
 	*/
-	--IF EXISTS(SELECT 1 FROM DBACC.bodb02.dbo.SystemSettings WITH (NOLOCK) WHERE VValue = 1 AND VName = 'isMovingBet')
-	--BEGIN
-	--	SELECT @ErrCode = 101
-	--	SELECT @ErrMsg = 'System is not ready to calculate Mix Parlay for this match. Please try again after few minutes.'
-	--	RETURN
-	--END
+	IF EXISTS(SELECT 1 FROM SVRCSD.RepDB.dbo.SystemSettings WITH (NOLOCK) WHERE VValue = 1 AND VName = 'isMovingBet')
+	BEGIN
+		SELECT @ErrCode = 101
+		SELECT @ErrMsg = 'System is not ready to calculate Mix Parlay for this match. Please try again after few minutes.'
+		RETURN
+	END
 	
 	IF EXISTS(SELECT 1 FROM SystemSettings WITH (NOLOCK) WHERE VValue = 1 AND VName = 'isCalculatingParlay')
 	BEGIN
