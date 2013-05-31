@@ -73,7 +73,7 @@ BEGIN
 				SUM(UplineComm - PlayerComm) as AComm,
 				SUM(UplineWinlost) + SUM(UplineComm-PlayerComm) AS ATotal,
 
-				- (SUM(WinLost) + SUM(UplineWinlost) + SUM(UplineComm- PlayerComm)) as UplineTotal
+				- (SUM(WinLost)  + SUM(UplineWinlost) + SUM(UplineComm)) as UplineTotal
 	    FROM	Sum_WinLoss_Cust A WITH(NOLOCK) 
 		INNER JOIN	CustPositionTaking PT WITH (NOLOCK) 
 				ON	PT.CustID = A.CustID AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
@@ -95,10 +95,11 @@ BEGIN
 				SUM(WinLost) WinLost,
 				SUM(PlayerComm) as PlayerComm,
 				SUM(WinLost) + SUM(PlayerComm) as MemTotal,	
+
 				SUM(UplineWinlost) as AWinLost,
 				SUM(UplineComm-PlayerComm) as AComm,
 				SUM(UplineWinlost) + SUM(UplineComm-PlayerComm) AS ATotal,
-				- (SUM(WinLost) + SUM(UplineWinlost) + SUM(UplineComm-PlayerComm)) as UplineTotal
+				- (SUM(WinLost) + SUM(UplineWinlost) + SUM(UplineComm)) as UplineTotal
 	    FROM	SVRARC.ArchiveDB.dbo.Sum_WinLoss_Cust_Old A WITH(NOLOCK) 
 		INNER JOIN	CustPositionTaking PT WITH (NOLOCK) 
 				ON	PT.CustID = A.CustID AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
