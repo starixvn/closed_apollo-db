@@ -7,6 +7,7 @@ ALTER PROCEDURE [dbo].[Mem_API_GetFundTrans]
 	@amount money = 0 OUTPUT,		
 	@beforebalance money = 0 OUTPUT,
 	@balance money = 0 OUTPUT	,
+	@osbalance money = 0 OUTPUT,
 	@status tinyint = 1 OUTPUT
 AS
 /*
@@ -29,6 +30,7 @@ Param's Explanation:
 • @SGS_transid: Transaction Id at SGS
 • @beforebalance: The amount of the player before transfer
 • @balance money: The amount of the player after transfer
+• @osbalance:Player outstanding balance amount	
 • @status: 1 – Success ; 2 – Failed
 */
 declare @custid int, @location tinyint, @bettype smallint, @currencyid tinyint
@@ -40,6 +42,7 @@ Select @trans_date = transdate ,
 	@bettype= bettype,
 	@beforebalance = balance,
 	@balance = balance + (WinLost - Actual_Stake),
+	@osbalance = TWinLost,
 	@status=case when statusid=101 then 2 else 1 end
 from BetTrans as b with (NOLOCK) 
 where transid = @trans_id
@@ -54,6 +57,7 @@ BEGIN
 		@bettype= bettype,
 		@beforebalance = balance,
 		@balance = balance + (WinLost - Actual_Stake),
+		@osbalance = TWinLost,
 		@status=case when statusid=101 then 2 else 1 end
 	from BetTrans14 as b with (NOLOCK) 
 	where transid = @trans_id
@@ -68,6 +72,7 @@ BEGIN
 			@bettype= bettype,
 			@beforebalance = balance,
 			@balance = balance + (WinLost - Actual_Stake),
+			@osbalance = TWinLost,
 			@status=case when statusid=101 then 2 else 1 end
 		from SVRARC.ArchiveDB.dbo.BetTrans_BK as b with (NOLOCK) 
 		where transid = @trans_id

@@ -8,7 +8,8 @@ ALTER PROCEDURE [dbo].[Mem_API_BettransInsTransaction]
 	@ErrMsg nvarchar(2000) = '' OUTPUT,		
 	@transid bigint = 0 OUTPUT,		
 	@beforebalance money = 0 OUTPUT,
-	@balance money = 0 OUTPUT	
+	@balance money = 0 OUTPUT,	
+	@osbalance money = 0 OUTPUT
 AS
 /*
 Creator : Dan
@@ -24,6 +25,7 @@ Param's Explanation:
 • @type:
 	1 – Fund In (SGS to IBC)
 	2 – Fund Out (IBC to SGS)
+	3 – Fund Out All (SB To SGS, except the amount in os_balance)
 • @ErrCode:
 	= 0: Transaction recorded successfully.
 	> 0: Specific Error.
@@ -32,6 +34,7 @@ Param's Explanation:
 • @transid: IBC transaction id
 • @beforebalance: The balance of the player before transfer
 • @balance money: The balance of the player after transfer
+• @osbalance:Player outstanding balance amount	
 */
 SET NOCOUNT ON
 
@@ -56,9 +59,7 @@ Select @ErrCode = 0,
 		@DDEP = 22001,
 		@DWIT = 22002
 
-
-
-if ISNULL(@type,0) not in (1,2)
+if ISNULL(@type,0) not in (1,2,3)
 BEGIN
 	Select @ErrMsg = 'Type is invalid', @ErrCode = 101	
 	return		
@@ -68,10 +69,20 @@ select @bettype =
 	case @type 
 		when 1 then 22001 
 		when 2 then 22002				
+		when 3 then 22002 
 	end
 
+IF @type=3
+	SELECT  @amount = ISNULL(SUM(winlost-actual_stake+playercomm),0),
+		@osbalance = ISNULL(SUM(case when bettype < 19000  and ruben=0 then actual_stake else 0 end),0) 
+	FROM bettrans WITH (NOLOCK) 
+	WHERE custid = @custid 
+ELSE
+	SELECT  @osbalance = ISNULL(SUM(case when bettype < 19000  and ruben=0 then actual_stake else 0 end),0) 
+	FROM bettrans WITH (NOLOCK) 
+	WHERE custid = @custid 
 
-if @amount <= 0
+if @amount <= 0 AND @type<>3
 BEGIN
 	Select @ErrMsg = 'Amount is invalid.', @ErrCode = 102	
 	return		
@@ -150,10 +161,10 @@ select @transdate = current_timestamp
 BEGIN TRY
 	INSERT INTO bettrans 
 		(custid, username, refno, transdate, matchid, bettype, transdesc,winlost, actual_stake, winlostdate, 
-		 creator,currency,actualrate, currencyName, ruben, status, statusID,ip, betid, balance)
+		 creator,currency,actualrate, currencyName, ruben, status, statusID,ip, betid, balance, TWinLost)
 	VALUES 
 		(@CustID, @username, @RefNo, @transdate, 0, @bettype, @transdesc,@winlost, @actual_stake, convert(nvarchar(10), current_timestamp, 120), 
-		 @CustID, @Currencyid,@actualrate, @currencyName, 1, 'Completed', 131,@ip, @SGS_transid,@beforebalance)
+		 @CustID, @Currencyid,@actualrate, @currencyName, 1, 'Completed', 131,@ip, @SGS_transid,@beforebalance, @osbalance)
 
 	SELECT @TransID = SCOPE_IDENTITY()
 
@@ -181,10 +192,10 @@ BEGIN CATCH
 	--keep track fail record with rejected status
 	INSERT INTO bettrans 
 	(custid, username, refno, transdate, matchid, bettype, transdesc,winlost, actual_stake, winlostdate, 
-	 creator,currency,actualrate, currencyName, ruben, status, statusID,ip, betid, balance)
+	 creator,currency,actualrate, currencyName, ruben, status, statusID,ip, betid, balance, TWinLost)
 	VALUES 
 		(@CustID, @username, @RefNo, @transdate, 0, @bettype, @transdesc, @amount, @amount, convert(nvarchar(10), current_timestamp, 120), 
-		 @CustID, @Currencyid,@actualrate, @currencyName, 1, 'Reject', 101,@ip, @SGS_transid, @beforebalance)
+		 @CustID, @Currencyid,@actualrate, @currencyName, 1, 'Reject', 101,@ip, @SGS_transid, @beforebalance, @osbalance)
 
 	SELECT @TransID = SCOPE_IDENTITY()
 

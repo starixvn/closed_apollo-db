@@ -32,7 +32,7 @@ END
 --check consitency bettrans and BetTrans_Agent
 IF (EXISTS(
 	select 1 -- b.TransId, ISNULL(MAX(ag.AgentLevel),0), count(ba.TransId)
-	from bettrans (nolock) b LEFT JOIN CustDB.[dbo].[CustInfo] (nolock) c ON c.CustId =b.CustId
+	from bettrans (nolock) b LEFT JOIN [dbo].[CustInfo] (nolock) c ON c.CustId =b.CustId
 		LEFT JOIN AgentInfo (nolock) ag ON ag.AgentId = c.AgentId
 		LEFT JOIN [dbo].[BetTrans_Agent] (nolock) ba on ba.TransId = b.TransId	
 	where b.matchid = @matchid
@@ -86,7 +86,7 @@ BEGIN
 	from bettrans with(nolock) 
 	where matchid = @matchid and bettype NOT IN(7,8,12,15,21,30,125) 
 		and bettype not between 1301 and 1334 -- exclude sporting solution product
-	UNION 
+	UNION ALL
 	select 'DB052', 
 		count(transid), 
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
@@ -94,7 +94,7 @@ BEGIN
 	from SVRAGE.RepDB.dbo.bettrans with(nolock) 
 	where matchid = @matchid and bettype NOT IN(7,8,12,15,21,30,125)
 		and bettype not between 1301 and 1334 -- exclude sporting solution product	
-	UNION
+	UNION ALL
 	select 'DB06', 
 		count(transid), 
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
@@ -113,7 +113,7 @@ BEGIN
 	from bettrans with(nolock) 
 	where matchid = @matchid
 		and bettype not between 1301 and 1334 -- exclude sporting solution product
-	UNION 
+	UNION ALL
 	select 'DB052', 
 		count(transid), 
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
@@ -121,7 +121,7 @@ BEGIN
 	from SVRAGE.RepDB.dbo.bettrans with(nolock) 
 	where matchid = @matchid
 		and bettype not between 1301 and 1334 -- exclude sporting solution product	
-	UNION
+	UNION ALL
 	select 'DB06', 
 		count(transid), 
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
@@ -179,7 +179,7 @@ BEGIN
 	from BetTrans_Agent with(nolock) 
 	where matchid = @matchid and bettype NOT IN(7,8,12,15,21,30,125) 
 		and bettype not between 1301 and 1334 -- exclude sporting solution product
-	UNION 
+	UNION ALL
 	select 'DB052', 
 		count(transid), 
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
@@ -187,7 +187,7 @@ BEGIN
 	from SVRAGE.RepDB.dbo.BetTrans_Agent with(nolock) 
 	where matchid = @matchid and bettype NOT IN(7,8,12,15,21,30,125)
 		and bettype not between 1301 and 1334 -- exclude sporting solution product	
-	UNION
+	UNION ALL
 	select 'DB06', 
 		count(transid), 
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
@@ -206,7 +206,7 @@ BEGIN
 	from BetTrans_Agent with(nolock) 
 	where matchid = @matchid
 		and bettype not between 1301 and 1334 -- exclude sporting solution product
-	UNION 
+	UNION ALL 
 	select 'DB052', 
 		count(transid), 
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
@@ -214,7 +214,7 @@ BEGIN
 	from SVRAGE.RepDB.dbo.BetTrans_Agent with(nolock) 
 	where matchid = @matchid
 		and bettype not between 1301 and 1334 -- exclude sporting solution product	
-	UNION
+	UNION ALL
 	select 'DB06', 
 		count(transid), 
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
