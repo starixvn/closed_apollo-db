@@ -10,7 +10,7 @@
  AS
 /*
 Created: 20130301@Sophia
-Task : Betlist for Outstanding report/ Cancel Bets Report/ Account Info-Betlist
+Task : Betlist for Transaction report
 DB:  SVRAGE.RepDB
 Original:  [Age_BetList_SelByDateMemStatus]
 
