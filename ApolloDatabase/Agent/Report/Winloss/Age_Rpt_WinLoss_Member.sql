@@ -48,12 +48,15 @@ BEGIN
 		WHERE		BA.AgentId = @AgentID
 				AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND BA.StatusID NOT IN (0,1)	
-				AND 
-				(	BA.bettype < 31 
-					OR BA.bettype between 121 and 999
-					OR BA.bettype between 1301 and 1334 
-					--OR BA.bettype BETWEEN 81 AND 120 				
-				) 
+				AND BA.bettype <= 19000
+				--(	BA.bettype < 31 
+				--	OR BA.bettype between 121 and 999
+				--	OR BA.bettype between 1301 and 1334 
+				--	--OR BA.bettype BETWEEN 81 AND 120 				
+				--) 
+				AND B.Winlostdate BETWEEN @FromDate AND @ToDate 
+				AND B.StatusID NOT IN (0,1)	
+				AND B.bettype <= 19000
 		GROUP BY C.Username, C.CustID, PT.PositionTaking
 
 		    
