@@ -178,4 +178,4 @@ WHERE
 
 
 GO
-GRANT VIEW DEFINITION ON [dbo].[Admin_Calculate_13] TO [aplweb]
+GRANT EXECUTE ON [dbo].[Admin_Calculate_13] TO [aplweb]

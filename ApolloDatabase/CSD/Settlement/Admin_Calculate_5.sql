@@ -188,4 +188,4 @@ IF @@SERVERNAME IN ('DB04', 'DB042', 'DB043', 'DB044') RETURN
 		BetTrans.statusID NOT IN (101,102)
 
 GO
-GRANT VIEW DEFINITION ON [dbo].[Admin_Calculate_5] TO [aplweb]
+GRANT EXECUTE ON [dbo].[Admin_Calculate_5] TO [aplweb]

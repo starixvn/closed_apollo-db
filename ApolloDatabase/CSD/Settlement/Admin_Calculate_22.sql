@@ -186,4 +186,4 @@ IF @@SERVERNAME IN ('DB04', 'DB042', 'DB043', 'DB044') RETURN
 
 
 GO
-GRANT VIEW DEFINITION ON [dbo].[Admin_Calculate_22] TO [aplweb]
+GRANT EXECUTE ON [dbo].[Admin_Calculate_22] TO [aplweb]

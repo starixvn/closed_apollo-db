@@ -174,4 +174,4 @@ WHERE
 	--[status] NOT IN (N'VOID', N'REJECT')
 	BetTrans.statusID NOT IN (101,102)
 GO
-GRANT VIEW DEFINITION ON [dbo].[Admin_Calculate_6] TO [aplweb]
+GRANT EXECUTE ON [dbo].[Admin_Calculate_6] TO [aplweb]
