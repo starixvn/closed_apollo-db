@@ -124,7 +124,7 @@ BEGIN
 	
 	SELECT	bm.transid, bm.refno, bm.winlostdate,bm.bettype,m.homeid, m.awayid, bm.hdp1, bm.hdp2, bm.odds, bm.betteam,
 			bm.statusid, bm.livehomescore, bm.liveawayscore, bm.liveindicator, m.leagueid, m.sporttype, m.isNeutral ,m.matchid,	m.matchcode, bm.matchdate
-	FROM	SVRARC.ArchiveDB.dbo.BettransM_BK bm WITH(NOLOCK)
+	FROM	SVRARC.ArchiveDB.dbo.BettransM bm WITH(NOLOCK)
 		INNER JOIN SVRARC.ArchiveDB.dbo.match_bk m WITH (NOLOCK) ON bm.matchid = m.matchid
 	WHERE	refno = @refno
 
@@ -161,7 +161,7 @@ BEGIN
 		
 		INSERT INTO @tmpResults(winlostdate, serial, modds, stake, winlost, statusid, playercomm)
 				SELECT winlostdate, serial, modds, stake, winlost, statusid, playercomm
-				FROM SVRARC.ArchiveDB.dbo.BetParlayResult_BK b WITH(NOLOCK) 
+				FROM SVRARC.ArchiveDB.dbo.BetParlayResult b WITH(NOLOCK) 
 				WHERE refno = @refno
 	END
 	IF @minMatchdate <= @MoveBetsDay  --- get data from bettrans14

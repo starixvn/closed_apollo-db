@@ -47,8 +47,12 @@ BEGIN
 		INNER JOIN  AgentPositionTaking PT WITH (NOLOCK) 
 				ON  PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
 		WHERE		C.ParentId = @AgentID 
-					AND B.StatusID NOT IN (0,1)
 					AND B.Winlostdate BETWEEN @FromDate AND @ToDate
+					AND B.StatusID NOT IN (0,1)
+					AND B.Bettype <=19000 
+					AND BA.Winlostdate BETWEEN @FromDate AND @ToDate
+					AND BA.StatusID NOT IN (0,1)
+					AND BA.Bettype <=19000
 		GROUP BY	C.Username, C.AgentID, PT.MaxUpperPositionTaking
 
 
@@ -78,13 +82,18 @@ BEGIN
 				ON BA.TransID = B.TransID AND C.AgentID = BA.AgentID ---- Child direct (k+1)
 		WHERE	 B.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND B.StatusID NOT IN (0,1)	
-				AND 
-				(	B.bettype < 31 
-					OR B.bettype between 121 and 999
-					OR B.bettype between 1301 and 1334 
-					--OR B.bettype BETWEEN 81 AND 120 				
-				) 
-			
+				AND B.Bettype <=19000
+				--(	B.bettype < 31 
+				--	OR B.bettype between 121 and 999
+				--	OR B.bettype between 1301 and 1334 
+				--	--OR B.bettype BETWEEN 81 AND 120 				
+				--) 
+				AND BP.Winlostdate BETWEEN @FromDate AND @ToDate 
+				AND BP.StatusID NOT IN (0,1)	
+				AND BP.Bettype <=19000
+				AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
+				AND BA.StatusID NOT IN (0,1)	
+				AND BA.Bettype <=19000
 		GROUP BY C.Username, C.AgentID ,  PT.MaxUpperPositionTaking
 
 
@@ -97,8 +106,9 @@ BEGIN
 		INNER JOIN AgentInfo C WITH(NOLOCK) ON C.AgentHId.IsDescendantOf(P.AgentHId ) =1  AND C.AgentLevel >= P.AgentLevel  --- Children of k+1 (k+1 -> k+...)
 		INNER JOIN Bettrans_Agent BA WITH (NOLOCK) ON BA.AgentID = C.AgentID
 		INNER JOIN #T T ON T.AgentID = P.AgentID
-		WHERE	BA.StatusID NOT IN (0,1) 
-				AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
+		WHERE	BA.Winlostdate BETWEEN @FromDate AND @ToDate
+				AND BA.StatusID NOT IN (0,1) 				 
+				AND BA.Bettype <=19000 
 		GROUP BY T.AgentID, T.Username,T.PositionTaking, T.TurnOver, T.ActualTO, T.AWinlost, T.AComm, T.ATotal, T.ChildAComm, T.Winlost , T.Actual_Stake
 	 
 	
@@ -124,8 +134,12 @@ BEGIN
 	INNER JOIN CustInfo C WITH (NOLOCK)
 		ON	B.CustID = C.CustID AND C.AgentId = @AgentID
 	WHERE	BA.AgentId = @AgentID 
-			AND BA.StatusID NOT IN (0,1)
 			AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
+			AND BA.StatusID NOT IN (0,1)
+			AND BA.Bettype <= 19000
+			AND B.Winlostdate BETWEEN @FromDate AND @ToDate 
+			AND B.StatusID NOT IN (0,1)
+			AND B.Bettype <= 19000
 	---GROUP BY C.AgentId
 
 -------------------------------------------------------------------------------------------

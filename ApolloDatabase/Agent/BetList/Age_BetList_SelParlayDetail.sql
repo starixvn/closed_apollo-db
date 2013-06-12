@@ -150,7 +150,7 @@ BEGIN
 		) AS b		
 			inner join match14 as m with (nolock) on b.matchid=m.matchid
 END
-IF EXISTS (SELECT 1 FROM SVRARC.ArchiveDB.dbo.BettransM_BK WITH (NOLOCK) WHERE refno = @refno)
+IF EXISTS (SELECT 1 FROM SVRARC.ArchiveDB.dbo.BettransM WITH (NOLOCK) WHERE refno = @refno)
 BEGIN
 	INSERT INTO @tmpParlay (
 		transid,
@@ -199,7 +199,7 @@ BEGIN
 					livehomescore,
 					liveawayscore,
 					liveindicator
-			FROM	SVRARC.ArchiveDB.dbo.BettransM_BK with (nolock)
+			FROM	SVRARC.ArchiveDB.dbo.BettransM with (nolock)
 					WHERE refno=@refno  and custID = @custID          
 		) AS b		
 			inner join SVRARC.ArchiveDB.dbo.match_bk as m with (nolock) on b.matchid=m.matchid	
