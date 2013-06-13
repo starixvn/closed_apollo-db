@@ -49,7 +49,7 @@ BEGIN
 							WHEN 'vi-VN' THEN SportNameVN
 							ELSE SportName 
 						END
-	FROM SVRAGE.ProdDB.dbo.Sports WITH (NOLOCK)
+	FROM SVRPRO.ProdDB.dbo.Sports WITH (NOLOCK)
 	WHERE SportType = @Sporttype
 	
 	IF (@sportName IS NULL OR @sportName = '')
