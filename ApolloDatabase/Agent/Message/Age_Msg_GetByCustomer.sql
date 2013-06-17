@@ -1,4 +1,4 @@
-﻿USE [bodb_Message]
+﻿USE [MsgDB]
 GO
 /****** Object:  StoredProcedure [dbo].[Age_Msg_GetByCustomer]    Script Date: 5/7/2013 4:20:42 PM ******/
 SET ANSI_NULLS ON
@@ -19,7 +19,7 @@ AS
  * Created by	: Johnson
  * Date			: 20110523
  * Task			: Get annoucement
- * DB			: APL.bodb_Message
+ * DB			: SVRMSG.MsgDB
  * Revisions	:
  *	• 20132702@Kos		: Review
  *	• 20130405@Edward	: Add parameter @IsAgent

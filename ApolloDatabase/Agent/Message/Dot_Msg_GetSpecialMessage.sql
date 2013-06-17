@@ -1,17 +1,12 @@
-﻿USE [bodb_Message]
+﻿USE [MsgDB]
 GO
-<<<<<<< HEAD
-/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetSpecialMessage]    Script Date: 5/7/2013 2:38:12 PM ******/
-=======
-/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetSpecialMessage]    Script Date: 5/7/2013 1:18:04 PM ******/
->>>>>>> 36bfc951fe3c5aa4030febb2529f938e6cbde213
+/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetSpecialMessage]    Script Date: 6/17/2013 3:50:58 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 ALTER PROCEDURE [dbo].[Dot_Msg_GetSpecialMessage]
-<<<<<<< HEAD
 	@TargetId	INT				= 0,
 	@TargetId2	VARCHAR(100)	= '0',
 	@IsAgent	BIT				= 1,
@@ -19,15 +14,6 @@ ALTER PROCEDURE [dbo].[Dot_Msg_GetSpecialMessage]
 	@Record		INT				= 1,
 	@Sdate		DATETIME		= NULL,
 	@Edate		DATETIME		= NULL,
-=======
-	@TargetId	INT				= 0,  	
-	@TargetId2	VARCHAR(100)	= '0', 	
-	@IsAgent	BIT				= 1,
-	@Special	INT				= 2,  
-	@Record		INT				= 1,  
-	@Sdate		DATETIME		= NULL,  
-	@Edate		DATETIME		= NULL,  
->>>>>>> 36bfc951fe3c5aa4030febb2529f938e6cbde213
 	@IsTest		BIT				= 0,  
 	@MatchId	BIT				= 0
 AS
@@ -35,7 +21,7 @@ AS
 /*
  * Created		: @TWTeam
  * Task			: 
- * DB			: SVRMSG.bodb_Message
+ * DB			: SVRMSG.MsgDB
  * Original		:
  * Revisions	:
  *	• 20090923@Don : adapt for new design (Drop table BatchMsg)

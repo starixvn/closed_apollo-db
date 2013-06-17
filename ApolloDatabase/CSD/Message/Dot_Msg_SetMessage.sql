@@ -1,4 +1,11 @@
-﻿CREATE PROCEDURE [dbo].[Dot_Msg_SetMessage]
+﻿USE [MsgDB]
+GO
+/****** Object:  StoredProcedure [dbo].[Dot_Msg_SetMessage]    Script Date: 6/17/2013 5:02:35 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[Dot_Msg_SetMessage]
 	@MessageId int = NULL,
 	@Content_en	nvarchar(4000) = NULL,
 	@Content_ch	nvarchar(4000) = NULL,
@@ -21,11 +28,13 @@
 	@IsBatch bit = 0,
 	@MsgContentsType tinyint = 0,
 	@BetTransId varchar(2000) = NULL -- remove when admin lanuch batchmessage
+AS
+
 /*
 Created: Sophia
 Date: 20130305
 Task : insert/update special and normal message
-DB:  SVRMSG.bodb_Message
+DB:  SVRMSG.MsgDB
 Original: 
  
 
@@ -58,7 +67,6 @@ Param's Explanation:
 	= 1 : special message (need to replace the symbol @@ by transid when display)
 */
 
-AS
 SET NOCOUNT ON
 BEGIN
 	IF EXISTS (SELECT MessageId FROM dbo.Msg with (nolock) WHERE MessageId = @MessageId)
@@ -114,6 +122,3 @@ BEGIN
 	END
 END
 
-GO
- 
- 
