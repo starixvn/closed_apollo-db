@@ -1142,6 +1142,15 @@
     <NotInBuild Include="CSD\Report\Acc_Rpt_MatchWinloss2_New.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="CSD\Report\Acc_Rpt_MatchWinLoss2_New14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\Acc_Rpt_WinlossByBettype.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\Acc_Rpt_WinlossByBettype14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">
