@@ -1142,6 +1142,7 @@
     <NotInBuild Include="CSD\Report\Acc_Rpt_MatchWinloss2_New.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+<<<<<<< HEAD
     <NotInBuild Include="CSD\Report\Acc_Rpt_MatchWinLoss2_New14.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1149,6 +1150,9 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="CSD\Report\Acc_Rpt_WinlossByBettype14.sql">
+=======
+    <NotInBuild Include="CSD\Write Log\Task_CheckWriteLogFailed.sql">
+>>>>>>> 14777391d0911d10c7e19d0b37aabc5893a45453
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>

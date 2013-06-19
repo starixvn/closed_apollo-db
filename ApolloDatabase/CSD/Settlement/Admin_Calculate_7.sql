@@ -199,4 +199,4 @@ Declare @modds smallmoney, @commWinRate smallmoney, @commLostRate smallmoney, @R
 
 
 GO
-GRANT VIEW DEFINITION ON [dbo].[Admin_Calculate_7] TO [aplweb]
+GRANT EXECUTE ON [dbo].[Admin_Calculate_7] TO [aplweb]

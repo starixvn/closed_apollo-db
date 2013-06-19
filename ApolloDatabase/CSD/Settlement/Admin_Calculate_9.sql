@@ -28,12 +28,14 @@ IF @@SERVERNAME IN ('DB042', 'DB043', 'DB044') RETURN
 ------- 20121105@Viet : bring modds value from DBTrans to replicated servers.----
 -- 1st call: RUN at DBTRANS only
 --IF @targetserver = 'DBTRANS' AND @@SERVERNAME <> 'DBTRANS' RETURN
-IF @targetserver = 'DBTRANS' AND ( @@SERVERNAME <> 'DB215\SQL2012' or db_name() <> N'TransDB')
+IF @targetserver = 'TRANSDB' AND ( @@SERVERNAME NOT IN('SDBTrans1','SDBTrans2','DB215\SQL2012')  --TRANSDB SERVER
+					or db_name() <> N'TransDB') --JUST FOR LOCAL 
 	 RETURN
 
 -- 2nd call: RUN all servers except DBTRANS
 --IF @targetserver = '' AND @@SERVERNAME = 'DBTRANS' RETURN
-IF @targetserver = '' AND (@@SERVERNAME = 'DB215\SQL2012' and db_name() = N'TransDB')
+IF @targetserver = '' AND (@@SERVERNAME IN('SDBTrans1','SDBTrans2','DB215\SQL2012')  --TRANSDB SERVER
+			and db_name() = N'TransDB')
 	RETURN
 
 --------/ 20121105@Viet : bring modds value from DBTrans to replicated servers.---
@@ -139,7 +141,7 @@ INSERT INTO @modds (m_refno, modds, NoRefund, loseCnt, runningCnt, matchdate_max
 	GROUP BY refno  
 
 ------- 20121105@Viet : bring modds value from DBTrans to replicated servers.----
-IF (@targetserver = 'DBTRANS' AND @@SERVERNAME = 'DBTRANS')
+IF (@targetserver = 'TRANSDB' AND @@SERVERNAME IN('SDBTrans1','SDBTrans2','DB215\SQL2012'))
 BEGIN 
 	-- export modds for replicated servers to use [edited by viet @ 20121213]
 	SET @strXML = CONVERT(varchar(max),(
@@ -149,7 +151,7 @@ BEGIN
 		FOR XML PATH('r'), ROOT('root'), TYPE
 	))				
 END
-ELSE IF (@targetserver = '' AND @@SERVERNAME <> 'DBTRANS')
+ELSE IF (@targetserver = '' AND @@SERVERNAME NOT IN('SDBTrans1','SDBTrans2','DB215\SQL2012'))
 BEGIN
 	-- get modds from XML string [edited by viet @ 20121213]
 	declare @xml XML

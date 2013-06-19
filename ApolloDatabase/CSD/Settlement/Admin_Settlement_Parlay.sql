@@ -231,7 +231,7 @@ END --IF @SkipBalanceUpdate = 0
 			EXEC dbo.Admin_Calculate_9  
 				@matchids = @subMatchIDs, 
 				@matchdate = @matchdate, 
-				@targetserver = 'DBTRANS', -- calculate at DBTRANS only
+				@targetserver = 'TRANSDB', -- calculate at TRANSDB only
 				@strXML = @strXML_modds OUTPUT,
 				@selTime = @selTime OUTPUT, 
 				@updTime = @updTime OUTPUT

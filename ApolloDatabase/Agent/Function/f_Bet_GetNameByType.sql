@@ -50,7 +50,7 @@ BEGIN
 							WHEN 'vi-VN' THEN typenamevn
 							ELSE typenamee 
 						END
-	FROM SVRAGE.ProdDB.dbo.bettype WITH (NOLOCK)
+	FROM SVRPRO.ProdDB.dbo.bettype WITH (NOLOCK)
 	WHERE typeid = @Bettype
 	
 	IF (@betName IS NULL OR @betName = '')

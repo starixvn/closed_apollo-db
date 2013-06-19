@@ -1,10 +1,6 @@
-﻿USE [bodb_Message]
+﻿USE [MsgDB]
 GO
-<<<<<<< HEAD
-/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetNotSpecialMessage]    Script Date: 5/7/2013 2:29:37 PM ******/
-=======
-/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetNotSpecialMessage]    Script Date: 5/7/2013 1:17:37 PM ******/
->>>>>>> 36bfc951fe3c5aa4030febb2529f938e6cbde213
+/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetNotSpecialMessage]    Script Date: 6/17/2013 3:45:03 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -25,7 +21,7 @@ AS
 /*
  * Created		: @TWTeam
  * Task			: 
- * DB			: SVRMSG.bodb_Message
+ * DB			: SVRMSG.MsgDB
  * Original		:
  * Revisions	:
  *	• 20090923@Don : adapt for new design (Drop table BatchMsg)
