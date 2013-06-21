@@ -100,11 +100,11 @@
     <Folder Include="CSD\Others" />
     <Folder Include="Agent\Customer Setting\Unit Test" />
     <Folder Include="CSD\Report" />
-    <Folder Include="CSD\Admin\Log" />
     <Folder Include="DBA" />
     <Folder Include="DBA\BalanceDebitCredit" />
     <Folder Include="DBA\Move bet - Balance Up" />
     <Folder Include="DBA\Move bet - Balance Up\Move Bet" />
+    <Folder Include="CSD\Admin\Log" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1171,10 +1171,19 @@
     <NotInBuild Include="DBA\BalanceDebitCredit\Task_BalanceUpdDebit.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Log\NAP_LogRunSp_Insert.sql">
+    <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetByUserName.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\Log\DBA_ViewLogByID.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="CSD\Admin\Log\f_GEN_Tsql.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\Log\NAP_GetLogRunSPByID.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\Log\NAP_LogRunSp_Insert.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
