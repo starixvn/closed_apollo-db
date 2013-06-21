@@ -100,6 +100,7 @@
     <Folder Include="CSD\Others" />
     <Folder Include="Agent\Customer Setting\Unit Test" />
     <Folder Include="CSD\Report" />
+    <Folder Include="CSD\Admin\Log" />
     <Folder Include="DBA" />
     <Folder Include="DBA\BalanceDebitCredit" />
     <Folder Include="DBA\Move bet - Balance Up" />
@@ -1168,6 +1169,12 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="DBA\BalanceDebitCredit\Task_BalanceUpdDebit.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\Log\NAP_LogRunSp_Insert.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\Log\f_GEN_Tsql.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
