@@ -2,8 +2,8 @@
 	@LoggedId INT,
 	@AgentId INT = -1 ,
 	@CustId INT = -1,
-	@FromDate SMALLDATETIME, 
-	@Todate SMALLDATETIME,
+	@FromDate DATE, 
+	@Todate DATE,
 	@StatusIds VARCHAR(200),
 	@MoveBetsDay SMALLDATETIME
 

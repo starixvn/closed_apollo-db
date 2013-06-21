@@ -2,8 +2,8 @@
 	@LoggedId INT,
 	@AgentId INT = -1 ,
 	@CustId INT = -1,
-	@FromDate SMALLDATETIME, 
-	@ToDate SMALLDATETIME,
+	@FromDate DATE, 
+	@ToDate DATE,
 	@StatusIds VARCHAR(200)
 
  AS

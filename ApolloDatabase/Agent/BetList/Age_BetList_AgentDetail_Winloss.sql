@@ -7,8 +7,8 @@ GO
 ALTER PROCEDURE [dbo].[Age_BetList_AgentDetail_Winloss]
 	@TransId BIGINT,
 	@LoggedId INT,
-	@FromDate SMALLDATETIME,
-	@ToDate SMALLDATETIME,
+	@FromDate DATE,
+	@ToDate DATE,
 	@MoveBetsDay SMALLDATETIME
 
 

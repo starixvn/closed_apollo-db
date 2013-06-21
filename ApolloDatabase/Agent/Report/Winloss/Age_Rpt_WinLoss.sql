@@ -2,8 +2,8 @@
 GO 
 CREATE  PROCEDURE [dbo].[Age_Rpt_WinLoss]
 	@AgentID 	INT,
-	@FromDate 	SMALLDATETIME,
-	@ToDate 	SMALLDATETIME,	
+	@FromDate 	DATE,
+	@ToDate 	DATE,	
 	@BalanceUpDay SMALLDATETIME	
 AS
     /*

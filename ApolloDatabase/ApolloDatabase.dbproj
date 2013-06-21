@@ -100,6 +100,10 @@
     <Folder Include="CSD\Others" />
     <Folder Include="Agent\Customer Setting\Unit Test" />
     <Folder Include="CSD\Report" />
+    <Folder Include="DBA" />
+    <Folder Include="DBA\BalanceDebitCredit" />
+    <Folder Include="DBA\Move bet - Balance Up" />
+    <Folder Include="DBA\Move bet - Balance Up\Move Bet" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1152,6 +1156,18 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="CSD\Write Log\Task_CheckWriteLogFailed.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\BalanceDebitCredit\Dot_BalanceUpdCredit.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\BalanceDebitCredit\Dot_BalanceUpdDebit.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\BalanceDebitCredit\Task_BalanceUpdCredit.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\BalanceDebitCredit\Task_BalanceUpdDebit.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
