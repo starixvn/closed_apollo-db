@@ -30,6 +30,7 @@ BEGIN
 		m.matchcode, 
 		m.orid AS MatchId,
 		m.teamid,
+		m.kickofftime,
 		SUM((1-bt.TPositionTaking) * bta.Stake) AS balance,
 		SUM(1) AS BetCount,
 		SUM((1-bt.TPositionTaking) * bt.Stake * bt.Odds) - ISNULL(lt.totalbalance, 0) AS totalwinlost,
@@ -60,7 +61,8 @@ BEGIN
 		m.matchcode, 
 		m.leagueid,
 		lt.totalbalance,
-		m.leagueid
+		m.leagueid,
+		m.kickofftime
 	ORDER BY m.MatchCode DESC
 END 
 ELSE
@@ -70,6 +72,7 @@ BEGIN
 		m.matchcode, 
 		m.orid AS MatchId,
 		m.teamid,
+		m.kickofftime,
 		SUM(bta.APositionTaking * bta.Stake) AS balance,
 		SUM(1) AS BetCount,
 		SUM(bta.APositionTaking * bta.Stake * bt.Odds) - ISNULL(lt.totalbalance, 0) AS totalwinlost,
@@ -102,6 +105,7 @@ BEGIN
 		m.matchcode, 
 		m.leagueid,
 		lt.totalbalance,
-		m.leagueid
+		m.leagueid,
+		m.kickofftime
 	ORDER BY m.MatchCode DESC
 END

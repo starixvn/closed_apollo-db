@@ -28,6 +28,7 @@ IF @LoggedID = 0
 BEGIN 
 	SELECT
 		m.ShowTime, 
+		m.kickofftime,
 		m.LeagueId,
 		m.MatchCode,
 		bt.LiveIndicator,
@@ -64,6 +65,7 @@ BEGIN
 		bt.LiveHomeScore,
 		bt.LiveAwayScore,
 		m.ShowTime,
+		m.KickOffTime,
 		m.IsNeutral
 	ORDER BY
 		m.LeagueId,
@@ -74,6 +76,7 @@ ELSE
 BEGIN
 	SELECT
 		m.ShowTime, 
+		m.KickOffTime,
 		m.LeagueId,
 		m.MatchCode,
 		bt.LiveIndicator,
@@ -110,6 +113,7 @@ BEGIN
 		bt.LiveHomeScore,
 		bt.LiveAwayScore,
 		m.ShowTime,
+		m.KickOffTime,
 		m.IsNeutral
 	ORDER BY
 		m.LeagueId,
