@@ -1145,6 +1145,12 @@
     <NotInBuild Include="CSD\Write Log\Task_CheckWriteLogFailed.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Acc_Apl_ExecRep_00.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Acc_Apl_ExecRep_01.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">
