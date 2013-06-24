@@ -29,7 +29,8 @@ BEGIN
 		ba.MatchId,
 		m.HomeId,
 		m.AwayId,
-		MatchCode,
+		m.MatchCode,
+		m.kickofftime,
 	
 		SUM((CASE BetTeam WHEN '0-1' THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END)) AS Total01,
 		SUM((CASE BetTeam WHEN '2-3' THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END)) AS Total23,
@@ -51,7 +52,8 @@ BEGIN
 		ba.MatchId,
 		m.HomeId,
 		m.AwayId,
-		MatchCode,
+		m.MatchCode,
+		m.kickofftime,
 		m.IsNeutral
 	ORDER by m.matchcode
 

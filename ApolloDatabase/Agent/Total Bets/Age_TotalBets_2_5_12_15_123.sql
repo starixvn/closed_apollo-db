@@ -30,6 +30,8 @@ SELECT
 	m.ShowTime, 
 	m.LeagueId,
 	m.MatchCode,
+	m.kickofftime,
+
 	bt.LiveIndicator,
 	bt.LiveHomeScore,
 	bt.LiveAwayScore,
@@ -79,6 +81,7 @@ GROUP BY
 	m.AwayId,
 	m.MatchId,
 	m.MatchCode, 
+	m.kickofftime,
 	m.LeagueId,
 	m.ShowTime,
 	m.IsNeutral
@@ -93,6 +96,7 @@ SELECT
 	m.ShowTime, 
 	m.LeagueId,
 	m.MatchCode,
+	m.kickofftime,
 	bt.LiveIndicator,
 	bt.LiveHomeScore,
 	bt.LiveAwayScore,
@@ -142,6 +146,7 @@ GROUP BY
 	m.AwayId,
 	m.MatchId,
 	m.MatchCode, 
+	m.kickofftime,
 	m.LeagueId,
 	m.ShowTime,
 	m.IsNeutral

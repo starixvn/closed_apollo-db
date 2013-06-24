@@ -1,6 +1,6 @@
-﻿USE [bodb_Message]
+﻿USE [MsgDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Dot_Msg_SetUsrMessage]    Script Date: 5/8/2013 10:19:01 AM ******/
+/****** Object:  StoredProcedure [dbo].[Dot_Msg_SetUsrMessage]    Script Date: 6/17/2013 4:10:25 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -22,7 +22,7 @@ AS
  * Created by	: TWTeam
  * Date			: 
  * Task			: Add/Update target message 
- * DB			: SVRMSG.bodb_Message
+ * DB			: SVRMSG.MsgDB
  * Revisions	:
  *	• 20130405@Kos	:	Review and add parameter @IsAgent
  * Parameters:

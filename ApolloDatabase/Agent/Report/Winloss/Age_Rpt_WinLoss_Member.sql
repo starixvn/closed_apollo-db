@@ -107,7 +107,7 @@ BEGIN
 		INNER JOIN	CustPositionTaking PT WITH (NOLOCK) 
 				ON	PT.CustID = A.CustID AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
 		WHERE	A.AgentId = @AgentId 
-				AND WinLostDate BETWEEN @BalanceUpDay AND @ToDate 
+				AND WinLostDate BETWEEN @FromDate AND @ToDate 
 	    GROUP BY A.Username, A.CustId, PT.PositionTaking
 END 
  

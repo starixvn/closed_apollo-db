@@ -32,6 +32,7 @@ BEGIN
 		m.ShowTime, 
 		m.LeagueId,
 		m.MatchCode, 
+		m.kickofftime,
 		b.LiveIndicator, 
 		b.LiveHomeScore,
 		b.LiveAwayScore,
@@ -71,6 +72,7 @@ BEGIN
 		m.AwayId,
 		m.MatchId,
 		m.MatchCode, 
+		m.kickofftime,
 		m.LeagueId,
 		m.showtime,
 		m.isNeutral
@@ -85,6 +87,7 @@ BEGIN
 		m.ShowTime, 
 		m.LeagueId,
 		m.MatchCode, 
+		m.kickofftime,
 		b.LiveIndicator, 
 		b.LiveHomeScore,
 		b.LiveAwayScore,
@@ -124,6 +127,7 @@ BEGIN
 		m.AwayId,
 		m.MatchId,
 		m.MatchCode, 
+		m.kickofftime,
 		m.LeagueId,
 		m.showtime,
 		m.isNeutral

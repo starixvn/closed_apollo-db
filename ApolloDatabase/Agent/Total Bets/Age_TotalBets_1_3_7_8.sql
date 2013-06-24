@@ -17,7 +17,7 @@ AS
  * DB			: SVRAGE.RepDB
  * Revisions	:
  *	- 20130509@Sophia: Revise code
- *  - 20130513@Sophjia: Add super view
+ *  - 20130513@Sophia: Add super view
  * Parameters :
  *	@AgentId : agent ID
  *  
@@ -27,6 +27,7 @@ SET NOCOUNT ON
 
 SELECT
 	m.ShowTime, 
+	m.kickofftime,
 	m.LeagueId,
 	m.MatchCode,
 	b.LiveIndicator,
@@ -79,6 +80,7 @@ FROM
 WHERE m.EventStatus = 'running'
 GROUP BY
 	m.ShowTime, 
+	m.kickofftime,
 	m.LeagueId,
 	m.MatchCode,
 	b.LiveIndicator,

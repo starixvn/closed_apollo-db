@@ -2,8 +2,8 @@
 GO 
 CREATE  PROCEDURE [dbo].[Age_Rpt_WinLoss]
 	@AgentID 	INT,
-	@FromDate 	SMALLDATETIME,
-	@ToDate 	SMALLDATETIME,	
+	@FromDate 	DATE,
+	@ToDate 	DATE,	
 	@BalanceUpDay SMALLDATETIME	
 AS
     /*
@@ -201,7 +201,7 @@ BEGIN
 		INNER JOIN AgentPositionTaking PT WITH (NOLOCK) 
 				ON PT.AgentID = A.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
 		WHERE	A.ParentID = @AgentId 
-				AND WinLostDate BETWEEN @BalanceUpDay AND @ToDate 
+				AND WinLostDate BETWEEN @FromDate AND @ToDate 
 	    GROUP BY AgentUsername, A.AgentId, PT.MaxUpperPositionTaking
 
 		INSERT INTO #WinLossMember
@@ -216,7 +216,7 @@ BEGIN
 				-(SUM(WinLost) + SUM(UplineWinlost) + SUM(UplineComm)) as UplineTotal				
 	    FROM	SVRARC.ArchiveDB.dbo.Sum_WinLoss_Cust_Old b WITH(NOLOCK) 
 		WHERE	AgentId = @AgentId 
-				AND WinLostDate BETWEEN @BalanceUpDay AND @ToDate 
+				AND WinLostDate BETWEEN @FromDate AND @ToDate 
 	    ---GROUP BY Username, CustId
 	    
 END

@@ -31,7 +31,8 @@ BEGIN
 	SELECT 
 		m.showtime, 
 		m.leagueID,
-		m.matchcode, 
+		m.matchcode,
+		m.kickofftime, 
 		m.matchid,
 
 		SUM(over_1stBall) AS Over1stBall,
@@ -80,6 +81,7 @@ BEGIN
 			m.showtime, 
 			m.leagueID,
 			m.matchcode,
+			m.kickofftime,
 			bb.liveindicator,
 			m.matchid,
 
@@ -160,12 +162,14 @@ BEGIN
 			m.showtime, 
 			m.leagueID,
 			m.matchcode,
+			m.kickofftime,
 			bb.LiveIndicator,
 			m.matchid) AS m
 	GROUP BY	
 		m.showtime, 
 		m.leagueID,
 		m.matchcode,
+		m.kickofftime,
 		m.matchid
 	ORDER BY m.matchcode
 

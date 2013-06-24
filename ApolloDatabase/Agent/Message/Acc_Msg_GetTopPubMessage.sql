@@ -1,6 +1,6 @@
-﻿USE [bodb_Message]
+﻿USE [MsgDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Acc_Msg_GetTopPubMessage]    Script Date: 5/7/2013 4:23:13 PM ******/
+/****** Object:  StoredProcedure [dbo].[Acc_Msg_GetTopPubMessage]    Script Date: 6/17/2013 2:46:16 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -21,7 +21,7 @@ AS
  * Created by	: Jamie
  * Date			: 20120112
  * Task			: Get public message
- * DB			: APL.bodb_Message
+ * DB			: SVRMSG.MsgDB
  * Revisions	:
  *	• 20130401@Kos	: Review
  * Parameters:

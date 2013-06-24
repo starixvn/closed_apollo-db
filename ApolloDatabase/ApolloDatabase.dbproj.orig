@@ -98,6 +98,16 @@
     <Folder Include="API" />
     <Folder Include="CSD\Write Log" />
     <Folder Include="CSD\Others" />
+    <Folder Include="Agent\Customer Setting\Unit Test" />
+    <Folder Include="CSD\Report" />
+<<<<<<< HEAD
+    <Folder Include="DBA" />
+    <Folder Include="DBA\BalanceDebitCredit" />
+    <Folder Include="DBA\Move bet - Balance Up" />
+    <Folder Include="DBA\Move bet - Balance Up\Move Bet" />
+=======
+    <Folder Include="CSD\Admin\Log" />
+>>>>>>> cb12e9876b86970425ff7c885314845c887902f5
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1077,9 +1087,6 @@
     <NotInBuild Include="Agent\Customer Setting\Age_Customer_GetUplineInfo.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-<<<<<<< HEAD
-    <NotInBuild Include="Agent\BetList\Age_BetList_TotalBets_SelRunningByBettype.sql">
-=======
     <NotInBuild Include="Agent\Customer Setting\DBA_Agent_GetPTToAgent.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1093,7 +1100,97 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Message\Age_CustomerUpdMessagesRead.sql">
->>>>>>> 0f9e3603d5189edc7bee388bbb29600dbece28e9
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\Age_BetList_TotalBets_SelRunningByBettype.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Unit Test\AgentK.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Unit Test\AgentN.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Unit Test\DirectMember.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Unit Test\InDirectMember.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Unit Test\MainShareHolder.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\AccountInfo\Age_Agent_GetCustomerDownlinePath.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\AccountInfo\Age_Agent_GetMainShareHolderByMember.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Function\f_Bet_GetNameByType.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Message\Age_Msg_GetByCustomer.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Message\Age_Msg_UpdateRead.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\View Log\ReadLog_RunSpAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\View Log\WriteLog_RunSpCust.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\View Log\ReadLog_RunSpCust.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\View Log\WriteLog_RunSpAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\Acc_Rpt_MatchWinloss2_New.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\Acc_Rpt_MatchWinLoss2_New14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\Acc_Rpt_WinlossByBettype.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\Acc_Rpt_WinlossByBettype14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Write Log\Task_CheckWriteLogFailed.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+<<<<<<< HEAD
+    <NotInBuild Include="DBA\BalanceDebitCredit\Dot_BalanceUpdCredit.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\BalanceDebitCredit\Dot_BalanceUpdDebit.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\BalanceDebitCredit\Task_BalanceUpdCredit.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\BalanceDebitCredit\Task_BalanceUpdDebit.sql">
+=======
+    <NotInBuild Include="CSD\Admin\Function\NAP_Functions_GenerateNAPFunction.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\User\NAP_User_ChangeUserSiteStatus.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\Log\DBA_ViewLogByID.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\Log\NAP_GetLogRunSPByID.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\Log\NAP_LogRunSp_Insert.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\Log\f_GEN_Tsql.sql">
+>>>>>>> cb12e9876b86970425ff7c885314845c887902f5
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
