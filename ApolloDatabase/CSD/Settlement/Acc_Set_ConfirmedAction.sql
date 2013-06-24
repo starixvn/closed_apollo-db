@@ -1,4 +1,9 @@
-﻿
+﻿/****** Object:  StoredProcedure [dbo].[Acc_Set_ConfirmedAction]    Script Date: 5/29/2013 10:37:25 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
 ALTER PROCEDURE  [dbo].[Acc_Set_ConfirmedAction]		
 @matchid INT,
 @action smallint,
@@ -28,14 +33,15 @@ AS
  */
 
 SET NOCOUNT ON
-BEGIN
-	-- When action is UnSettle, we need update all action status before to true.
-	IF(@action=0)
-	BEGIN
-		UPDATE match_log WITH(ROWLOCK, UPDLOCK) SET [Disabled] = 1	WHERE matchid = @matchid
-	END
-	-- Insert into match_log
-	INSERT INTO match_log(Matchid, Hthomescore, Htawayscore, FinalHomeScore, FinalAwayScore, BetStatus, GoalRecord, ActionId)
-	VALUES(@matchid, @hth, @hta, @fth, @fta, @betstatus, @goalrecord, @action)
-END
-GRANT EXECUTE ON [dbo].[Acc_Set_ConfirmedAction] TO [aplweb]	
+EXEC [Acc_Apl_ExecRep_00]		
+	@matchid = @matchid,
+	@action = @action,
+	@fth = @fth,
+	@fta = @fta,
+	@hth = @hth,
+	@hta = @hta,
+	@goalrecord = @goalrecord,
+	@betstatus  = @betstatus
+GO
+GRANT EXECUTE ON [dbo].[Acc_Set_ConfirmedAction] TO [bodbAdminNet]	
+--GRANT EXECUTE ON [dbo].[Acc_Set_ConfirmedAction] TO [aplweb]	

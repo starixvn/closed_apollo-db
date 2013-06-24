@@ -1,5 +1,10 @@
-﻿
-CREATE PROCEDURE [dbo].[Acc_Set_ConfirmedActionParlay]
+﻿/****** Object:  StoredProcedure [dbo].[Acc_Set_ConfirmedActionParlay]    Script Date: 5/29/2013 10:37:40 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[Acc_Set_ConfirmedActionParlay]
 (
 	@matchids	VARCHAR(2000)
 ) 
@@ -14,13 +19,11 @@ AS
  * Parameters:
 	@MatchIDs: list matchId
  */
-BEGIN
-	DECLARE @actionid int
-	SET @actionid = 5
+SET NOCOUNT ON
 
-	INSERT INTO match_log(Matchid, ActionId)
-	SELECT	matchid, @actionid	
-	FROM dbo.Match WITH (ROWLOCK)
-	WHERE matchid IN (SELECT val FROM dbo.strSplit(@matchids,','))
+BEGIN
+	EXEC Acc_Apl_ExecRep_01 @matchids=@matchids
 END
-GRANT EXECUTE ON [dbo].[Acc_Set_ConfirmedActionParlay] TO [aplweb]	
+GO
+
+GRANT EXECUTE ON [dbo].[Acc_Set_ConfirmedActionParlay] TO [bodbAdminNet]	
