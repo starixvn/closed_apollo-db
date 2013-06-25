@@ -68,7 +68,6 @@
     <Folder Include="Agent\Customer Setting\Test" />
     <Folder Include="Agent\AccountInfo" />
     <Folder Include="CSD\Settlement" />
-    <Folder Include="CSD\Balance" />
     <Folder Include="Agent\BetList" />
     <Folder Include="Agent\Function" />
     <Folder Include="Agent\Shadow" />
@@ -305,12 +304,6 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="CSD\Settlement\Admin_Settlement_RefundHT.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Balance\Dot_BalanceUpdCredit.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Balance\Dot_BalanceUpdDebit.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\BetList\Age_BetList_AgentDetail.sql">
@@ -965,12 +958,6 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Message\Dot_Msg_GetPublicMessage.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Balance\Task_BalanceUpdCredit.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Balance\Task_BalanceUpdDebit.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Customer Setting\Age_AgentUser_GetInfo.sql">

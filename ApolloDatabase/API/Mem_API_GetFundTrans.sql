@@ -49,48 +49,23 @@ where transid = @trans_id
 
 if @@ROWCOUNT=0
 BEGIN			
-	-- try to find bettrans14
+	-- try to find transfer_bk in archive DB
 	Select @trans_date = transdate ,
-		@SGS_trans_id= betid,	
-		@amount =  CASE WHEN STATUSID= 101 THEN Actual_Stake ELSE WinLost - Actual_Stake END,
-		@custid = custid,
-		@bettype= bettype,
+		@SGS_trans_id= RefTransId,	
+		@amount =  CASE WHEN statusid= 101 THEN Debit ELSE Credit - Debit END,
+		@custid = custid,		
 		@beforebalance = balance,
-		@balance = balance + (WinLost - Actual_Stake),
-		@osbalance = TWinLost,
+		@balance = balance + (Credit - Debit),
+		@osbalance = TotalRunningStake,
 		@status=case when statusid=101 then 2 else 1 end
-	from BetTrans14 as b with (NOLOCK) 
+	from SVRARC.ArchiveDB.dbo.transfer_bk as b with (NOLOCK) 
 	where transid = @trans_id
-	
+
 	if @@ROWCOUNT=0
 	BEGIN
-		-- try to find bettrans_bk in archive DB
-		Select @trans_date = transdate ,
-			@SGS_trans_id= betid,	
-			@amount =  CASE WHEN STATUSID= 101 THEN Actual_Stake ELSE WinLost - Actual_Stake END,
-			@custid = custid,
-			@bettype= bettype,
-			@beforebalance = balance,
-			@balance = balance + (WinLost - Actual_Stake),
-			@osbalance = TWinLost,
-			@status=case when statusid=101 then 2 else 1 end
-		from SVRARC.ArchiveDB.dbo.BetTrans_BK as b with (NOLOCK) 
-		where transid = @trans_id
-
-		if @@ROWCOUNT=0 or @bettype NOT IN (22001,22002) 
-		BEGIN
-			Select @ErrMsg = 'Invalid trans id.', @ErrCode = 101
-			return
-		END		
-	END
-	ELSE
-	BEGIN
-		IF @bettype NOT IN (22001,22002) 
-		BEGIN
-			Select @ErrMsg = 'Invalid trans id.', @ErrCode = 102
-			return
-		END		
-	END
+		Select @ErrMsg = 'Invalid trans id.', @ErrCode = 101
+		return
+	END			
 END
 ELSE
 BEGIN

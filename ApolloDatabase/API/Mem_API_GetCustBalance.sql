@@ -34,7 +34,7 @@ BEGIN
 	return
 END
 
-SELECT @currency = [Code]
+SELECT @currency = currency
 FROM [Exchange] WITH (NOLOCK) 
 WHERE [exchangeid] = @currencyid
 
