@@ -104,6 +104,7 @@
     <Folder Include="DBA\Move bet - Balance Up" />
     <Folder Include="DBA\Move bet - Balance Up\Move Bet" />
     <Folder Include="CSD\Admin\Log" />
+    <Folder Include="DBA\Move bet - Balance Up\Balance Up" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1177,6 +1178,96 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="CSD\Settlement\Acc_Apl_ExecRep_01.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Balance_Insert_Bettrans.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Balance_Insert_Bettrans_Agent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\ExecRep_02.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\ExecRep_07.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Task_Archive_Event.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Task_Archive_ParlayResult.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Task_Archive_SelectBettrans.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Task_Archive_SelectBettrans_Agent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Task_Archive_SelectBettransm.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Task_Archive_SelectSum_Winloss_Agent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Task_Archive_SelectSum_Winloss_Cust.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Task_Archive_SelectTransfer.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Task_BalanceUp_Agent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Task_BalanceUp_background.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Task_BalanceUp_Cust.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Task_BalanceUp_DeleteOldMatch.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Task_BalanceUp_ProdDB.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Task_BalanceUp_TriggerControl.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\DBA_MatchName.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\Task_EventMovement.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\ExecRep_08.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\ExecRep_09.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\Sum_Winloss_Agent_Tmp_Delete.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\Sum_Winloss_Cust_Tmp_Delete.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\Task_CheckBalance.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\Task_DailySummary.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\Task_DailySummary_Job.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\Task_DailySummary_ProdDB_Copy.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\Task_DailySummary_ProdDB_Delete.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Report\Result\Age_Result_MatchSelBySport.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
