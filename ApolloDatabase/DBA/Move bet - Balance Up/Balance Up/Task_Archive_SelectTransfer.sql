@@ -14,6 +14,7 @@ DB: SVRTXN.TransDB
 Original: IBC.Task_Archive_SelectTransfer
 
 Revisions:
+- 20130625@Sophia: Add StatusId, RefTransId
  
 	
 Param's Explanation: 
@@ -27,7 +28,8 @@ Param's Explanation:
 	
 
 	SELECT	b.custid, b.transdate, b.actual_stake as Debit, b.winlost as Credit, b.TransDesc, b.winlostdate, 
-			c.AgentID, b.currency, b.refno, b.creator, b.TransID, b.bettype, b.Balance, b.TWinlost as TotalRunningStake
+			c.AgentID, b.currency, b.refno, b.creator, b.TransID, b.bettype, b.Balance, b.TWinlost as TotalRunningStake,
+			b.StatusId, b.BetId as RefTransId
 	FROM	bettrans b
 	INNER JOIN CustInfo c ON c.CustID = b.CustID
 	WHERE	b.ruben = 1 AND

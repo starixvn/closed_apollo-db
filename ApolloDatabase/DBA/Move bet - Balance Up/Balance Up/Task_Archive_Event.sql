@@ -41,13 +41,15 @@ Param's Explanation:
 	WHERE eventdate = @winlostdate
 
 	 
-	INSERT INTO SVRARC.ArchiveDB.dbo.outright_bk
-	(orid,  leagueid,  teamid,  eventdate,  kickofftime,  oddsstatus,  odds,  maxbet,  gapodds,  matchcode,  groupmatch,  status,  creator,  bal,  risk,  
-    DisplayMode,  PlaceOdds,  Placing,  IsFavor,  IsSCR,  ProgramID,  
-	FOddsStatus,  SCRTime,  LeaguePatternID,  TeamPatternID,  ProgramDate,  IsDeadHeat)
-	SELECT	orid,  leagueid,  teamid,  eventdate,  kickofftime,  oddsstatus,  odds,  maxbet,  gapodds,  matchcode,  groupmatch,  status,  creator,  bal,  risk,  
-			DisplayMode,  PlaceOdds,  Placing,  IsFavor,  IsSCR,  ProgramID,  FOddsStatus,  SCRTime,  LeaguePatternID,  TeamPatternID,  
-			ProgramDate,  IsDeadHeat
+	INSERT INTO SVRARC.ArchiveDB.dbo.outright_bk (
+			orid, leagueid, teamid, eventdate, kickofftime, oddsstatus, odds, maxbet, gapodds, 
+			matchcode, groupmatch, status, creator, bal, risk, DisplayMode, PlaceOdds, Placing, 
+			IsFavor, IsSCR, ProgramID, FOddsStatus, SCRTime, LeaguePatternID, TeamPatternID, 
+			ProgramDate, IsDeadheat, StdDelBetCheck, WinOdds2, PlaceOdds)
+	SELECT	orid, leagueid, teamid, eventdate, kickofftime, oddsstatus, odds, maxbet, gapodds, 
+			matchcode, groupmatch, status, creator, bal, risk, DisplayMode, PlaceOdds, Placing, 
+			IsFavor, IsSCR, ProgramID, FOddsStatus, SCRTime, LeaguePatternID, TeamPatternID, 
+			ProgramDate, IsDeadheat, StdDelBetCheck, WinOdds2, PlaceOdds
 	FROM outright14 
 	WHERE eventdate = @winlostdate
 
