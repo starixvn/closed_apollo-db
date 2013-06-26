@@ -1,6 +1,4 @@
-﻿DROP PROC [Age_Rpt_WinLoss]
-GO 
-CREATE  PROCEDURE [dbo].[Age_Rpt_WinLoss]
+﻿ALTER PROCEDURE [dbo].[Age_Rpt_WinLoss]
 	@AgentID 	INT,
 	@FromDate 	DATE,
 	@ToDate 	DATE,	
