@@ -9,13 +9,13 @@ ALTER PROCEDURE [dbo].[Age_BetList_TotalBets_SelRunningByBettypeMatch]
 AS
 
 /*
-Created: 20130311@Sophia
-Task : Betlist
-DB: SVRAGE.RepDB
+Created	: 20130311@Sophia
+Task	: Betlist of totalbets
+DB		: SVRAGE.RepDB
 Original:  Age_BetList_SelRunningByBettypeMatch_Ag
 Revisions:    
 	- 20130507@Sophia: Add @AgentID for Super view total bets of Main shareholder
-   
+    - 20130627@Sophia: Add UGroup for Singbet
 */
 
 SET NOCOUNT ON
@@ -55,14 +55,17 @@ BEGIN
 			B.betid,
 			'' as showtime,
 			B.refno,
-			B.DoubleCommLosing
+			B.DoubleCommLosing,
+			C.UGroup
 		FROM Bettrans B WITH (NOLOCK)
 		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
 			ON B.TransID = BA.TransID
 		INNER JOIN outright m WITH (NOLOCK) 
 			ON B.matchid=m.orid
 		INNER JOIN league l WITH (NOLOCK) 
-			ON m.leagueid = l.leagueid		
+			ON m.leagueid = l.leagueid
+		INNER JOIN CustInfo C  WITH (NOLOCK) 
+			ON  C.CustId = B.CustId	
 		WHERE
 			BA.AgentId = @AgentId and
 			B.matchid=@matchid and 
@@ -106,11 +109,15 @@ BEGIN
 			B.betid,
 			m.showtime,
 			B.refno,
-			B.DoubleCommLosing
+			B.DoubleCommLosing,
+			C.UGroup
 		FROM Bettrans B WITH (NOLOCK)
 		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
 			ON B.TransID = BA.TransID
-		INNER JOIN Match m  WITH (NOLOCK) ON B.matchid=m.matchid 	
+		INNER JOIN Match m  WITH (NOLOCK) 
+			ON B.matchid=m.matchid
+		INNER JOIN CustInfo C  WITH (NOLOCK) 
+			ON  C.CustId = B.CustId	
 		WHERE
 			BA.AgentId = @AgentId AND 
 			B.matchid=@matchid and 
@@ -155,14 +162,17 @@ BEGIN
 			B.betid,
 			'' as showtime,
 			B.refno,
-			B.DoubleCommLosing
+			B.DoubleCommLosing,
+			C.UGroup
 		FROM Bettrans B WITH (NOLOCK)
 		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
 			ON B.TransID = BA.TransID
 		INNER JOIN outright m WITH (NOLOCK) 
 			ON B.matchid=m.orid
 		INNER JOIN league l WITH (NOLOCK) 
-			ON m.leagueid = l.leagueid		
+			ON m.leagueid = l.leagueid
+		INNER JOIN CustInfo C  WITH (NOLOCK) 
+			ON  C.CustId = B.CustId		
 		WHERE
 			BA.AgentId = @AgentId and
 			B.matchid=@matchid and 
@@ -206,11 +216,15 @@ BEGIN
 			B.betid,
 			m.showtime,
 			B.refno,
-			B.DoubleCommLosing
+			B.DoubleCommLosing,
+			C.UGroup
 		FROM Bettrans B WITH (NOLOCK)
 		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
 			ON B.TransID = BA.TransID
-		INNER JOIN Match m  WITH (NOLOCK) ON B.matchid=m.matchid 	
+		INNER JOIN Match m  WITH (NOLOCK) 
+			ON B.matchid=m.matchid
+		INNER JOIN CustInfo C  WITH (NOLOCK) 
+			ON  C.CustId = B.CustId
 		WHERE
 			BA.AgentId = @AgentId AND 
 			B.matchid=@matchid and 
@@ -227,7 +241,6 @@ END
 GO
 GRANT EXECUTE ON [dbo].[Age_BetList_TotalBets_SelRunningByBettypeMatch] TO [aplweb]
 GO
---GRANT VIEW DEFINITION ON [dbo].[Age_BetList_TotalBets_SelRunningByBettypeMatch] TO [vnteam]
  
 
  

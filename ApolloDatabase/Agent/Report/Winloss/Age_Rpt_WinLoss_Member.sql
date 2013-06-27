@@ -5,10 +5,11 @@
 	@BalanceUpDay SMALLDATETIME	
 AS
     /*
-    Created: 
-    Task : 
+    Created: Sophia
+	Date: 20130401
+    Task : Members detail of Report Agent Winloss
     DB: SVRAGE.RepDB
-    Original SP:[Age_Rpt_WinLoss_Ag]
+    Original: Age_Rpt_WinLoss_Ag
     Revisions:
 	EX: EXEC Age_Rpt_WinLoss_Member @AgentId =3, @FromDate = '2013-01-01',  @ToDate = '2013-04-10', @BalanceUpDay = '2013-03-01'
 
@@ -17,7 +18,7 @@ AS
     
 SET NOCOUNT ON
 
-CREATE TABLE #WinLossMember ( Username NVARCHAR(50), CustID INT, PositionTaking SMALLINT, TurnOver MONEY, ActualTO MONEY, WinLost MONEY, PlayerComm MONEY, MemTotal MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, UplineTotal MONEY)
+CREATE TABLE #WinLossMember ( Username NVARCHAR(50), CustID INT, PositionTaking SMALLINT, BetCount BIGINT, TurnOver MONEY, ActualTO MONEY, WinLost MONEY, PlayerComm MONEY, MemTotal MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, UplineTotal MONEY)
 
 IF @Todate >= @BalanceUpDay
 BEGIN 
@@ -26,6 +27,7 @@ BEGIN
 	    SELECT  C.Username,
 				C.CustID,
 				PT.PositionTaking, 
+				COUNT(B.TransID) as BetCount,
 		   		SUM(ABS(B.Stake)) AS TurnOver,
 				SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as ActualTO,
 
@@ -48,12 +50,7 @@ BEGIN
 		WHERE		BA.AgentId = @AgentID
 				AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND BA.StatusID NOT IN (0,1)	
-				AND BA.bettype <= 19000
-				--(	BA.bettype < 31 
-				--	OR BA.bettype between 121 and 999
-				--	OR BA.bettype between 1301 and 1334 
-				--	--OR BA.bettype BETWEEN 81 AND 120 				
-				--) 
+				AND BA.bettype <= 19000			
 				AND B.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND B.StatusID NOT IN (0,1)	
 				AND B.bettype <= 19000
@@ -65,7 +62,8 @@ BEGIN
 
   		INSERT INTO #WinLossMember
 	    SELECT	A.Username, A.CustId,
-				PT.PositionTaking,						 
+				PT.PositionTaking,
+				SUM(BetCount) as BetCount,						 
 				SUM(Turnover) TurnOver,
 				SUM(Actual_Turnover) ActualTO,	
 				SUM(WinLost) WinLost,
@@ -92,7 +90,8 @@ BEGIN
 		
 		INSERT INTO #WinLossMember
 	    SELECT	A.Username, A.CustId,
-				PT.PositionTaking,				 
+				PT.PositionTaking,	
+				SUM(BetCount) as BetCount,				 
 				SUM(Turnover) TurnOver,
 				SUM(Actual_Turnover) ActualTO,	
 				SUM(WinLost) WinLost,
@@ -112,6 +111,7 @@ BEGIN
 END 
  
 SELECT	Username, CustId,  PositionTaking,
+		SUM(BetCount) as BetCount,	
 		SUM(TurnOver) as TurnOver,
 		SUM(ActualTO) as ActualTO,
 

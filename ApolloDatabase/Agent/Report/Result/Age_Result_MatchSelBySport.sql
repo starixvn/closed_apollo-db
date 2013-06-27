@@ -17,7 +17,6 @@ Revision:
 */
 SET NOCOUNT ON 
 DECLARE @SportsList TABLE (Sporttype TINYINT)
-
 INSERT INTO @SportsList (Sporttype)
 SELECT val FROM strSplit_key (@Sporttypes, ',')
 
@@ -26,7 +25,7 @@ DECLARE @ToDate datetime
 SELECT @ToDate = dateadd(s,-1, dateadd(d, 1, @FromDate))
 
 SELECT
-		l.sporttype, 
+		m.sporttype, 
 		m.betstatus , 
 		m.leagueid,
 		m.matchid,
