@@ -86,7 +86,7 @@ BEGIN
 				SUM(B.Winlost) as Winlost,
 				SUM(B.Actual_Stake) as Actual_Stake
 	    INTO	#T
-		FROM	Bettrans B
+		FROM	Bettrans B WITH (NOLOCK) 
 		INNER JOIN Bettrans_Agent BP WITH (NOLOCK) 
 				ON BP.TransID = B.TransID AND BP.AgentID = @AgentID ---Parent (k)
 		INNER JOIN AgentInfo C WITH (NOLOCK) --- Child direct (k+1)
@@ -97,10 +97,10 @@ BEGIN
 				ON BA.TransID = B.TransID AND C.AgentID = BA.AgentID ---- Child direct (k+1)
 		INNER JOIN  Match m  WITH (NOLOCK) 
 				ON m.MatchID = B.MatchID
-		WHERE	 B.Winlostdate BETWEEN @FromDate AND @ToDate 
+		WHERE	B.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND B.StatusID NOT IN (0,1)	
 				AND B.Bettype <=19000
-				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM @BettypeList))
+				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM @BettypeList))	
 				AND BP.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND BP.StatusID NOT IN (0,1)	
 				AND BP.Bettype <=19000
@@ -112,20 +112,23 @@ BEGIN
 				AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM @SportsList))
 		GROUP BY C.Username, C.AgentID ,  PT.MaxUpperPositionTaking
 
+		 
 
 		INSERT INTO #WinLossAgent
 		SELECT	T.Username, T.AgentID, 1 as IsAgent, T.PositionTaking as PositionTaking,
 				T.BetCount, T.TurnOver, T.ActualTO, T.AWinlost, T.AComm, T.ATotal, 
 				SUM(BA.AWINLOST) + (T.Winlost - T.Actual_Stake) + T.ChildAComm  AS GrossTotal,  
 				-(SUM(BA.AWINLOST) + (T.Winlost - T.Actual_Stake) + T.ChildAComm  + T.ATotal) AS UplineTotal
-		FROM AgentInfo P with (nolock)  
+		FROM #T T
+		INNER JOIN AgentInfo P with (nolock) ON  T.AgentID = P.AgentID
 		INNER JOIN AgentInfo C WITH(NOLOCK) ON C.AgentHId.IsDescendantOf(P.AgentHId ) =1  AND C.AgentLevel >= P.AgentLevel  --- Children of k+1 (k+1 -> k+...)
 		INNER JOIN Bettrans_Agent BA WITH (NOLOCK) ON BA.AgentID = C.AgentID
-		INNER JOIN #T T ON T.AgentID = P.AgentID
+		INNER JOIN match m With (NOLOCK)  ON m.MatchId = BA.matchId
 		WHERE	BA.Winlostdate BETWEEN @FromDate AND @ToDate
 				AND BA.StatusID NOT IN (0,1) 				 
 				AND BA.Bettype <=19000
 				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM @BettypeList)) 
+				AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM @SportsList))
 		GROUP BY T.AgentID, T.Username,T.PositionTaking, T.TurnOver, T.ActualTO, T.AWinlost, T.AComm, T.ATotal, T.ChildAComm, T.Winlost , T.Actual_Stake, T.BetCount
 	 
 	
@@ -147,7 +150,7 @@ BEGIN
 			SUM (B.Winlost - B.Actual_Stake + B.PlayerComm) GrossTotal,
 			-(SUM (B.Winlost - B.Actual_Stake + B.PlayerComm) + SUM(BA.AWinLost) + SUM(BA.AComm) - SUM (B.PlayerComm)) UplineTotal
 	FROM	Bettrans B WITH (NOLOCK)
-	INNER JOIN BetTrans_Agent BA WITH (NOLOCK) 
+	INNER JOIN BetTrans_Agent BA WITH (NOLOCK ) 
 		ON	BA.TransID = B.TransID 
 	INNER JOIN CustInfo C WITH (NOLOCK)
 		ON	B.CustID = C.CustID AND C.AgentId = @AgentID
