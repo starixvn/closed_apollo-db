@@ -8,7 +8,8 @@ Task : get parlay tickets
 DB: SVRAGE.REPDB
 Original: 
 
-Revisions:    
+Revisions:
+	- 20130628@Sophia: Add FinalHomeScore, FinalAwayScore
 
 */
 SET NOCOUNT ON
@@ -27,6 +28,8 @@ DECLARE	@tmpParlay	TABLE(
 	livehomescore	SMALLINT,
 	liveawayscore	SMALLINT,
 	liveindicator	BIT,
+	FinalHomeScore	SMALLINT,
+	FinalAwayScore	SMALLINT,
 	betstatus	NVARCHAR(50),
 	isNeutral	BIT
 )	
@@ -59,6 +62,8 @@ BEGIN
 		livehomescore,
 		liveawayscore,
 		liveindicator,
+		FinalHomeScore,
+		FinalAwayScore,
 		betstatus,
 		isNeutral
 	)
@@ -77,6 +82,8 @@ BEGIN
 		b.livehomescore,
 		b.liveawayscore,
 		b.liveindicator,
+		m.FinalHomeScore,
+		m.FinalAwayScore,
 		m.betstatus,
 		m.isNeutral
 	FROM(	SELECT 
@@ -113,6 +120,8 @@ BEGIN
 		livehomescore,
 		liveawayscore,
 		liveindicator,
+		FinalHomeScore,
+		FinalAwayScore,
 		betstatus,
 		isNeutral
 	)
@@ -131,6 +140,8 @@ BEGIN
 		b.livehomescore,
 		b.liveawayscore,
 		b.liveindicator,
+		m.FinalHomeScore,
+		m.FinalAwayScore,
 		m.betstatus,
 		m.isNeutral
 	FROM(	SELECT 
@@ -167,6 +178,8 @@ BEGIN
 		livehomescore,
 		liveawayscore,
 		liveindicator,
+		FinalHomeScore,
+		FinalAwayScore,
 		betstatus,
 		isNeutral
 	)
@@ -185,6 +198,8 @@ BEGIN
 		b.livehomescore,
 		b.liveawayscore,
 		b.liveindicator,
+		m.FinalHomeScore,
+		m.FinalAwayScore,
 		m.betstatus,
 		m.isNeutral
 	FROM(	SELECT 
@@ -212,4 +227,3 @@ ORDER BY transID DESC
 GO
 GRANT EXECUTE ON [dbo].[Age_BetList_SelParlayDetail] TO [aplweb]
 GO
----GRANT VIEW DEFINITION ON [dbo].[Age_BetList_SelParlayDetail] TO [vnteam]

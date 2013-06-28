@@ -15,6 +15,7 @@ Original:
 
 Revisions:
     - 20130510@Sophia: Change @splitter of strSplit_Key from '^', to ','
+	- 20130628@Sophia: Add FinalHomeScore, FinalAwayScore
 Param''s Explanation:  
  
 
@@ -61,6 +62,7 @@ CREATE TABLE #Betlist  (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						PlayerDiscount DECIMAL (9,8), Winlost MONEY, PlayerComm MONEY, 
 						APositionTaking SMALLMONEY, ADiscount DECIMAL (9,8), AWinlost MONEY, AComm MONEY,
 						LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
+						FinalHomeScore SMALLINT, FinalAwayScore SMALLINT,
 						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT)
 
 
@@ -111,6 +113,8 @@ CREATE TABLE #Betlist  (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						B.LiveHomeScore,
 						B.LiveAwayScore,
 						B.LiveIndicator, 
+						m.FinalHomeScore,
+						m.FinalAwayScore,
 						B.IP,		
 						B.Oddstype,		
 						B.DoubleCommLosing
@@ -162,6 +166,8 @@ CREATE TABLE #Betlist  (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						0 AS LiveHomeScore, 
 						0 AS LiveAwayScore,
 						0 AS LiveIndicator ,
+						0 AS FinalHomeScore,
+						0 AS FinalAwayScore,
 						B.IP,		
 						0 as OddStype,		
 						B.DoubleCommLosing	
@@ -207,7 +213,9 @@ SET @S2 = '
 						- (B.TComm) AS AComm,		
 						B.livehomescore,
 						B.liveawayscore,
-						B.liveindicator, 
+						B.liveindicator,
+						0 AS FinalHomeScore,
+						0 AS FinalAwayScore, 
 						B.IP as IP,		
 						0 as oddstype,		
 						B.DoubleCommLosing
@@ -259,6 +267,8 @@ SET @S2 = '
 						B.LiveHomeScore,
 						B.LiveAwayScore,
 						B.LiveIndicator, 
+						m.FinalHomeScore,
+						m.FinalAwayScore,
 						B.IP,		
 						B.Oddstype,		
 						B.DoubleCommLosing
@@ -313,6 +323,8 @@ SET @S2 = '
 						0 AS LiveHomeScore, 
 						0 AS LiveAwayScore,
 						0 AS LiveIndicator ,
+						0 AS FinalHomeScore,
+						0 AS FinalAwayScore,
 						B.IP,		
 						0 as OddStype,		
 						B.DoubleCommLosing	
@@ -361,6 +373,8 @@ SET @S3 = '
 						B.livehomescore,
 						B.liveawayscore,
 						B.liveindicator, 
+						0 AS FinalHomeScore,
+						0 AS FinalAwayScore,
 						B.IP as IP,		
 						0 as oddstype,		
 						B.DoubleCommLosing
@@ -416,7 +430,9 @@ SET @S3 = '
 					- (B.TComm) AS AComm,	
 					B.LiveHomeScore,
 					B.LiveAwayScore,
-					B.LiveIndicator, 
+					B.LiveIndicator,
+					m.FinalHomeScore,
+					m.FinalAwayScore, 
 					B.IP,		
 					B.Oddstype,		
 					B.DoubleCommLosing
@@ -471,6 +487,8 @@ SET @S3 = '
 					0 AS LiveHomeScore, 
 					0 AS LiveAwayScore,
 					0 AS LiveIndicator ,
+					0 AS FinalHomeScore,
+					0 AS FinalAwayScore,
 					B.IP,		
 					0 as OddStype,		
 					B.DoubleCommLosing	
@@ -518,6 +536,8 @@ SET @S4= '
 					B.livehomescore,
 					B.liveawayscore,
 					B.liveindicator, 
+					0 AS FinalHomeScore,
+					0 AS FinalAwayScore,
 					B.IP as IP,		
 					0 as oddstype,		
 					B.DoubleCommLosing
@@ -576,6 +596,8 @@ SET @S4= '
 					B.LiveHomeScore,
 					B.LiveAwayScore,
 					B.LiveIndicator, 
+					m.FinalHomeScore,
+					m.FinalAwayScore,
 					B.IP,		
 					B.Oddstype,		
 					B.DoubleCommLosing
@@ -632,6 +654,8 @@ SET @S5 = '
 					0 AS LiveHomeScore, 
 					0 AS LiveAwayScore,
 					0 AS LiveIndicator ,
+					0 AS FinalHomeScore,
+					0 AS FinalAwayScore,
 					B.IP,		
 					0 as OddStype,		
 					B.DoubleCommLosing	
@@ -681,6 +705,8 @@ SET @S5 = '
 					B.livehomescore,
 					B.liveawayscore,
 					B.liveindicator, 
+					0 AS FinalHomeScore,
+					0 AS FinalAwayScore,
 					B.IP as IP,		
 					0 as oddstype,		
 					B.DoubleCommLosing
@@ -741,6 +767,8 @@ SET @S6 = '
 					B.LiveHomeScore,
 					B.LiveAwayScore,
 					B.LiveIndicator, 
+					m.FinalHomeScore,
+					m.FinalAwayScore,
 					B.IP,		
 					B.Oddstype,		
 					B.DoubleCommLosing
@@ -795,6 +823,8 @@ SET @S6 = '
 					0 AS LiveHomeScore, 
 					0 AS LiveAwayScore,
 					0 AS LiveIndicator ,
+					0 AS FinalHomeScore,
+					0 AS FinalAwayScore,
 					B.IP,		
 					0 as OddStype,		
 					B.DoubleCommLosing	
@@ -845,6 +875,8 @@ SET @S6 = '
 					B.livehomescore,
 					B.liveawayscore,
 					B.liveindicator, 
+					0 AS FinalHomeScore,
+					0 AS FinalAwayScore,
 					B.IP as IP,		
 					0 as oddstype,		
 					B.DoubleCommLosing
