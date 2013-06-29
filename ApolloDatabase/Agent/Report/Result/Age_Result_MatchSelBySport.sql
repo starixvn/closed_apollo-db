@@ -55,14 +55,14 @@ SELECT
 						AND (@Sporttypes = '0' OR sporttype IN (SELECT val FROM StrSplit_Key(@Sporttypes, ','))) 						
 						AND matchcode NOT LIKE '%hedge%'	
 						AND matchcode NOT LIKE '%betdaq%'		 		
-				UNION ALL
-				SELECT	sporttype, betstatus,matchid, matchcode, homeid, awayid, leagueid, eventdate, eventstatus, kickofftime, hthomescore, htawayscore, finalhomescore, finalawayscore, showtime, isneutral,goalrecord,homeid2
-				FROM	match14 WITH (NOLOCK)	
-				WHERE	eventdate BETWEEN  @FromDate AND @ToDate 
-						AND sporttype <= 99  
-						AND (@Sporttypes = '0' OR sporttype IN (SELECT val FROM StrSplit_Key(@Sporttypes, ',')) ) 						
-						AND matchcode NOT LIKE '%hedge%'	
-						AND matchcode NOT LIKE '%betdaq%'		
+				--UNION ALL
+				--SELECT	sporttype, betstatus,matchid, matchcode, homeid, awayid, leagueid, eventdate, eventstatus, kickofftime, hthomescore, htawayscore, finalhomescore, finalawayscore, showtime, isneutral,goalrecord,homeid2
+				--FROM	match14 WITH (NOLOCK)	
+				--WHERE	eventdate BETWEEN  @FromDate AND @ToDate 
+				--		AND sporttype <= 99  
+				--		AND (@Sporttypes = '0' OR sporttype IN (SELECT val FROM StrSplit_Key(@Sporttypes, ',')) ) 						
+				--		AND matchcode NOT LIKE '%hedge%'	
+				--		AND matchcode NOT LIKE '%betdaq%'		
 			) AS m ON m.leagueid=l.leagueid	
 		LEFT OUTER JOIN match_remark mr WITH (NOLOCK) ON m.matchid = mr.matchid
 	WHERE

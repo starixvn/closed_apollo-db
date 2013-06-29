@@ -17,7 +17,7 @@ AS
 /*
 Created:  Sophia
 Date: 20130628
-Task:  Wagers_1_3_5
+Task:  Wagers for Soccer - Straight
 DB: SVRAGE.REPDB
  
 Revisions:    
@@ -57,7 +57,7 @@ SET NOCOUNT ON
 							Count(B.TransID) as BetCount
 				FROM		Bettrans B WITH (NOLOCK)
 				INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
-					ON		B.TransId = BA.TransId AND BA.AgentID = @LoggedID 
+					ON		B.TransId = BA.TransId AND BA.AgentID = @LoggedID  AND BA.Bettype IN (1,3,5) AND BA.StatusId IN (0,1)
 				INNER JOIN	Match M WITH (NOLOCK)
 					ON		M.matchID = B.MatchID
 				INNER JOIN  CustInfo C WITH (NOLOCK)

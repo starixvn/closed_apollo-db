@@ -35,16 +35,16 @@ FROM   (
                   AND [status] IN ('WON', 'REFUND')
                   AND eventdate >= @FromDate
                   AND eventdate <= @ToDate
-           UNION ALL
-           SELECT leagueid,
-                  eventdate,
-                  teamid,
-                  STATUS
-           FROM   dbo.outright14 AS o14 WITH (NOLOCK)
-           WHERE  oddsstatus = 'completed'
-                  AND [status] IN ('WON', 'REFUND')
-                  AND eventdate >= @FromDate
-                  AND eventdate <= @ToDate
+           --UNION ALL
+           --SELECT leagueid,
+           --       eventdate,
+           --       teamid,
+           --       STATUS
+           --FROM   dbo.outright14 AS o14 WITH (NOLOCK)
+           --WHERE  oddsstatus = 'completed'
+           --       AND [status] IN ('WON', 'REFUND')
+           --       AND eventdate >= @FromDate
+           --       AND eventdate <= @ToDate
        ) AS outright
        INNER JOIN dbo.league WITH (NOLOCK)
             ON  outright.leagueid = league.leagueid
