@@ -16,14 +16,12 @@ Parameters
  
 */
 SET NOCOUNT ON
-
-DECLARE @ToDate datetime
-SELECT @ToDate = dateadd(s,-1, dateadd(d, 1, @FromDate))
+ 
 
 SELECT	m.LeagueId
 FROM	Match m WITH (NOLOCK) 
 	INNER JOIN League l WITH (NOLOCK) ON m.leagueid = l.leagueid
-WHERE	m.eventdate BETWEEN @FromDate AND @ToDate
+WHERE	m.eventdate = @FromDate  
 		AND (m.Sporttype IN (SELECT val FROM [dbo].[StrSplit](@Sporttypes, ',') ) 
 			OR @Sporttypes = '0')
 		AND l.isTest = 0
