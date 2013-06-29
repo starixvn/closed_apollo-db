@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateDiscount]    Script Date: 5/6/2013 12:42:42 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateDiscount]    Script Date: 6/29/2013 11:22:23 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -67,15 +67,100 @@ BEGIN
 
 	SET @UGroup = LOWER(@Ugroup)
 
-	DECLARE @OldUGroup VARCHAR(3)
+	DECLARE 
+		@agentHId	HIERARCHYID
+		,@sportType	INT
+		,@groupCode	INT
+		,@OldUGroup VARCHAR(3)
 
 	SELECT @OldUGroup = LOWER(UGroup)
 	FROM CustInfo WITH (NOLOCK)
 	WHERE CustId = @CustId
-	
-	IF @Discount <> '' OR @UGroup <> @OldUGroup
+
+	IF @UGroup <> '' OR @Discount <> ''
+		BEGIN
+			-- write log before update
+				
+			SET @xml = (
+				SELECT
+					cd.SportType	AS '@s'
+					,cd.BetType		AS '@b'
+					--@OldUGroup		AS '@g'
+					,cd.Discount	AS '@d'
+				FROM CustDiscount AS cd WITH (NOLOCK)
+					--INNER JOIN @DiscountTable AS td
+					--	ON cd.SportType	= td.SportType
+					--	AND cd.BetType	= td.BetType
+				WHERE cd.CustId = @CustId
+				FOR XML PATH('z')--, ROOT('r')
+			)
+
+			SET @logSPDataOld = '<r g="'+ @OldUGroup +'">' + REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')+ '</r>'
+
+			-- end write log
+		END
+
+	IF @UGroup <> ''
 		BEGIN
 
+			IF	@UGroup <> 'a'
+				AND @UGroup <> 'b'
+				AND @UGroup <> 'c'
+				AND @UGroup <> 'd'
+				BEGIN
+					SELECT 
+						@ErrCode	= 2008,
+						@ErrMsg		= 
+							CASE @Language
+								WHEN 'en-US' THEN 'Invalid commission group '
+								ELSE [dbo].f_Msg_GetContentById (2008, @Language)
+							END
+					RETURN	
+				END
+
+			IF @Discount = '' AND @UGroup <> @OldUGroup
+				BEGIN
+					SELECT
+						@sportType = SportType,
+						@groupCode = 
+							CASE
+								WHEN Discount NOT BETWEEN 0 AND 0.0225 AND @UGroup = 'a' THEN 2001
+								WHEN Discount NOT BETWEEN 0 AND 0.0125 AND @UGroup = 'b' THEN 2002
+								WHEN Discount NOT BETWEEN 0 AND 0.0075 AND @UGroup = 'c' THEN 2003
+								WHEN Discount NOT BETWEEN 0 AND 0 AND @UGroup = 'd' THEN 2004						
+							END 
+					FROM CustDiscount WITH (NOLOCK)
+					WHERE 
+						(	
+							(Discount NOT BETWEEN 0 AND 0.0225 AND @UGroup = 'a')		-- Group A
+							OR (Discount NOT BETWEEN 0 AND 0.0125 AND @UGroup = 'b')	-- Group B
+							OR (Discount NOT BETWEEN 0 AND 0.0075 AND @UGroup = 'c')	-- Group C
+							OR (Discount NOT BETWEEN 0 AND 0 AND @UGroup = 'd')			-- Group D					
+						)	AND CustId = @CustId
+
+			IF @sportType IS NOT NULL 
+				BEGIN
+					SELECT 
+						@ErrCode	= 2000,
+						@ErrMsg		= 
+							CASE @Language
+								WHEN 'en-US' THEN 'Invalid commission rate '
+								ELSE [dbo].f_Msg_GetContentById (2000, @Language)
+							END + ' (' + [dbo].f_Msg_GetContentById (@groupCode, @Language) + ')'
+					RETURN
+				END			
+				END
+	
+			IF @OldUGroup <> @UGroup
+				BEGIN
+					UPDATE CustInfo WITH (ROWLOCK, UPDLOCK)
+					SET UGroup = @UGroup
+					WHERE CustId = @CustId
+				END
+		END
+
+	IF @Discount <> ''
+		BEGIN
 			DECLARE @DiscountTable TABLE (
 				SportType SMALLINT,
 				BetType SMALLINT,
@@ -84,11 +169,7 @@ BEGIN
 			DECLARE @DiscountCompareTable TABLE (
 				SportType SMALLINT,
 				BetType SMALLINT,
-				Discount DECIMAL(9,8))
-			
-			DECLARE @agentHId	HIERARCHYID
-			DECLARE @sportType	INT
-			DECLARE @groupCode	INT
+				Discount DECIMAL(9,8))	
 
 			-- For read xml
 			DECLARE @DocHandler int
@@ -140,9 +221,9 @@ BEGIN
 						@ErrCode	= 2000,
 						@ErrMsg		= 
 							CASE @Language
-								WHEN 'en-US' THEN 'Invalid commission rate'
+								WHEN 'en-US' THEN 'Invalid commission rate '
 								ELSE [dbo].f_Msg_GetContentById (2000, @Language)
-							END + '(' + [dbo].f_Msg_GetContentById (@groupCode, @Language) + ')'
+							END + ' (' + [dbo].f_Msg_GetContentById (@groupCode, @Language) + ')'
 					RETURN
 				END
 
@@ -200,25 +281,7 @@ BEGIN
 								ELSE [dbo].f_Msg_GetContentById (2007, @Language)  
 							END
 					RETURN
-				END
-			-- write log before update
-				
-			SET @xml = (
-				SELECT
-					cd.SportType		AS '@s'
-					,cd.BetType			AS '@b'
-					,cd.Discount		AS '@d'
-				FROM CustDiscount AS cd WITH (NOLOCK)
-					INNER JOIN @DiscountTable AS td
-						ON cd.SportType	= td.SportType
-						AND cd.BetType	= td.BetType
-				WHERE cd.CustId = @CustId
-				FOR XML PATH('z'), ROOT('r')
-			)
-
-			SET @logSPDataOld = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
-
-			-- end write log
+				END			
 
 			-- Update data
 			UPDATE CustDiscount WITH (ROWLOCK, UPDLOCK)
@@ -229,52 +292,52 @@ BEGIN
 					ON pd.SportType = dt.SportType 
 					AND pd.BetType	= dt.BetType
 			WHERE CustId = @CustId
-			
-			IF @OldUGroup <> @UGroup
-				BEGIN
-					UPDATE CustInfo WITH (ROWLOCK, UPDLOCK)
-					SET UGroup = @UGroup
-					WHERE CustId = @CustId
-				END
+		END
 
+	IF @UGroup <> '' OR @Discount <> ''
+		BEGIN
+			
 			-- write log before update
 				
 			SET @xml = (
 				SELECT  
 					SportType	AS '@s',
 					BetType		AS '@b',
+					--@UGroup		AS '@g',
 					Discount	AS '@d'
 				FROM @DiscountTable
-				FOR XML PATH('z'), ROOT('r')
+				FOR XML PATH('z')--, ROOT('r')
 			)
 
-			SET @logSPData = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
-
+			IF @xml IS NOT NULL
+				SET @logSPData = '<r g="'+ @UGroup +'">' + REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"') + '</r>'
+			ELSE
+				SET @logSPData = '<r g="'+ @UGroup +'"></r>'
 			-- end write log 
+
+			SET @endRun		= GETDATE()
+			SET @duration	= DATEDIFF(MILLISECOND, @startRun, @endRun) 
+
+			IF @@ERROR = 0
+				BEGIN TRY
+					EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
+					@UserId		= @ActorAgentId,
+					@SPName		= 'Age_Customer_UpdateDiscount',
+					@LogDate	= @startRun,
+					@CustId		= @CustId,
+					@Duration	= @Duration,
+					@Data		= @logSPData,
+					@OldData	= @logSPDataOld
+				END	TRY
+				BEGIN CATCH
+					EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpCust
+					@UserId		= @ActorAgentId,
+					@SPName		= 'Age_Customer_UpdateDiscount',
+					@LogDate	= @startRun,
+					@CustId		= @CustId,
+					@Duration	= @Duration,
+					@Data		= @logSPData,
+					@OldData	= @logSPDataOld
+				END CATCH
 		END
-
-	SET @endRun		= GETDATE()
-	SET @duration	= DATEDIFF(MILLISECOND, @startRun, @endRun) 
-
-	IF @@Error = 0
-		BEGIN TRY
-			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
-			@UserId		= @ActorAgentId,
-			@SPName		= 'Age_Customer_UpdateDiscount',
-			@LogDate	= @startRun,
-			@CustId		= @CustId,
-			@Duration	= @Duration,
-			@Data		= @logSPData,
-			@OldData	= @logSPDataOld
-		END	TRY
-		BEGIN CATCH
-			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpCust
-			@UserId		= @ActorAgentId,
-			@SPName		= 'Age_Customer_UpdateDiscount',
-			@LogDate	= @startRun,
-			@CustId		= @CustId,
-			@Duration	= @Duration,
-			@Data		= @logSPData,
-			@OldData	= @logSPDataOld
-		END CATCH
 END

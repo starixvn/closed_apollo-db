@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdatePositionTaking]    Script Date: 5/9/2013 10:27:54 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdatePositionTaking]    Script Date: 6/29/2013 11:25:01 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -178,9 +178,7 @@ BEGIN
 
 			IF EXISTS (	SELECT 1 FROM @TablePositionTaking )
 				BEGIN
-					
 					-- write log before update
-				
 					SET @xml = (
 						SELECT  
 							cpt.SportType		AS '@s'
@@ -189,13 +187,17 @@ BEGIN
 							,cpt.PositionTaking	AS '@p'
 						FROM 
 							CustPositionTaking AS cpt WITH (NOLOCK)
-							INNER JOIN @TablePositionTaking AS tpt
-								ON cpt.SportType	= tpt.SportType
-								AND cpt.BetType		= tpt.BetType
-								AND cpt.IsLive		= tpt.IsLive
+							--INNER JOIN @TablePositionTaking AS tpt
+							--	ON cpt.SportType	= tpt.SportType
+							--	AND cpt.BetType		= tpt.BetType
+							--	AND cpt.IsLive		= tpt.IsLive
 						WHERE 
 							cpt.AgentId	= @AgentId
 							AND cpt.CustId	= @CustId
+						ORDER BY
+							cpt.SportType
+							--,cpt.BetType
+							,cpt.IsLive
 						FOR XML PATH('z'), ROOT('r')
 					)
 
@@ -255,9 +257,10 @@ BEGIN
 					-- Check for direct member or indirect member
 					IF EXISTS (	SELECT 1 FROM CustInfo WHERE CustId = @CustId AND AgentId = @AgentId )		-- direct member
 						BEGIN
-							SELECT TOP(1) @sportType	= apt.SportType 
-											,@betType	= apt.BetType
-											,@isLive	= apt.IsLive
+							SELECT TOP(1) 
+								@sportType	= apt.SportType 
+								,@betType	= apt.BetType
+								,@isLive	= apt.IsLive
 							FROM 
 								AgentPositionTaking AS apt WITH (NOLOCK)
 								INNER JOIN @TablePositionTaking AS ptt
@@ -296,9 +299,10 @@ BEGIN
 							FROM @DownlineAgentInfo
 							WHERE ParentId = @AgentId
 							
-							SELECT TOP(1) @sportType	= ptt.SportType
-											,@betType	= ptt.BetType
-											,@isLive	= ptt.IsLive
+							SELECT TOP(1) 
+								@sportType	= ptt.SportType
+								,@betType	= ptt.BetType
+								,@isLive	= ptt.IsLive
 							FROM 
 								@TablePositionTaking AS ptt
 								INNER JOIN (
@@ -480,10 +484,11 @@ BEGIN
 								BEGIN
 									
 									UPDATE cpt
-									SET cpt.PositionTaking =	CASE 
-																	WHEN tupt.Preset > tupt.PT - tupt.Result THEN tupt.Preset
-																	ELSE tupt.PT - tupt.Result
-																END
+									SET cpt.PositionTaking =	
+										CASE 
+											WHEN tupt.Preset > tupt.PT - tupt.Result THEN tupt.Preset
+											ELSE tupt.PT - tupt.Result
+										END
 									FROM 
 										CustPositionTaking AS cpt WITH (ROWLOCK, UPDLOCK)
 										INNER JOIN @TableUpdatePositionTaking AS tupt
@@ -646,118 +651,168 @@ BEGIN
 								cpt.CustId	= @CustId
 								AND cpt.AgentId	= @AgentId
 								AND tpt.PT < cpt.PositionTaking
+
 							-- End update Position Taking
+							DECLARE @currentAgentId		INT
 
-							INSERT INTO @TableStackPositionTaking (
-								AgentId
-								,AgentLevel
-								,SportType
-								,BetType
-								,IsLive
-								,PT
-								,MinPT)
-							SELECT 
-								apt.AgentId
-								,uai.AgentLevel
-								,apt.SportType
-								,apt.BetType
-								,apt.IsLive
-								,cpt.PositionTaking
-								,apt.MinGivenPositionTaking
-							FROM 
-								AgentPositionTaking AS apt WITH (NOLOCK)
-								INNER JOIN @UplineAgentInfo AS uai ON apt.AgentId = uai.AgentId
-								INNER JOIN CustPositionTaking AS cpt WITH (NOLOCK)
-									ON apt.SportType	= cpt.SportType
-									AND apt.BetType		= cpt.BetType
-									AND apt.IsLive		= cpt.IsLive
-									AND apt.AgentId		= cpt.AgentId
-							WHERE 
-								cpt.CustId = @CustId
-								AND apt.MinGivenPositionTaking > 0
+							SET @currentAgentId = @AgentId
 
-							WHILE EXISTS( SELECT 1 FROM @UplineAgentInfo )
+							WHILE @currentAgentId IS NOT NULL
 								BEGIN
-		
-									DECLARE 
-										@tempLevel		INT,
-										@tempAgentId	INT
-
-									SELECT TOP 1
-										@tempAgentId = AgentId,
-										@tempLevel = AgentLevel
-									FROM @UplineAgentInfo
-
-									UPDATE tspt
-									SET	tspt.SumDownPT = temp.Sum
-									FROM 
-										@TableStackPositionTaking AS tspt
-										INNER JOIN (		
-											SELECT 
-												tcpt.SportType,
-												tcpt.BetType,
-												tcpt.IsLive,
-												SUM(tcpt.PositionTaking) AS Sum
-											FROM 
-												CustPositionTaking AS tcpt WITH (NOLOCK)
-												INNER JOIN AgentInfo AS tai WITH (NOLOCK) ON tcpt.AgentId = tai.AgentId
-											WHERE 
-												tcpt.CustId = @CustId
-												AND tai.AgentLevel >= @tempLevel
-											GROUP BY 
-												tcpt.SportType,
-												tcpt.BetType,
-												tcpt.IsLive
-										) AS temp
-											ON tspt.SportType	= temp.SportType
-											AND tspt.BetType	= temp.BetType
-											AND tspt.IsLive		= temp.IsLive
-									WHERE tspt.AgentLevel		= @tempLevel
-
-									DELETE @UplineAgentInfo 
-									WHERE AgentId = @tempAgentId
-								END
-
-							UPDATE cpt
-							SET cpt.PositionTaking = tempUpdate.MinPT - tempUpdate.SumDownPT + tempUpdate.PT
-							FROM 
-								CustPositionTaking AS cpt WITH(ROWLOCK,UPDLOCK)
-								INNER JOIN (
+									INSERT INTO @TableStackPositionTaking (
+										AgentId
+										,AgentLevel
+										,SportType
+										,BetType
+										,IsLive
+										,PT
+										,MinPT)
 									SELECT 
-										tspt.AgentId
-										,tspt.AgentLevel
-										,tspt.SportType
-										,tspt.BetType
-										,tspt.IsLive
-										,tspt.PT
-										,tspt.MinPT
-										,tspt.SumDownPT
+										apt.AgentId
+										,uai.AgentLevel
+										,apt.SportType
+										,apt.BetType
+										,apt.IsLive
+										,cpt.PositionTaking
+										,apt.MinGivenPositionTaking
 									FROM 
-										@TableStackPositionTaking AS tspt
-										INNER JOIN (
-											SELECT	
-												MAX(AgentLevel) AS AgentLevel,
-												SportType,
-												BetType,
-												IsLive 
-											FROM @TableStackPositionTaking
-											WHERE SumDownPT < MinPT
-											GROUP BY 
-												SportType,
-												BetType,
-												IsLive
-										) AS temp
-									ON 
-										tspt.SportType	= temp.SportType
-										AND tspt.BetType	= temp.BetType
-										AND tspt.IsLive		= temp.IsLive
-										AND tspt.AgentLevel	= temp.AgentLevel
-								) AS tempUpdate
-									ON cpt.SportType	= tempUpdate.SportType
-									AND cpt.BetType		= tempUpdate.BetType
-									AND cpt.IsLive		= tempUpdate.IsLive
-									AND cpt.AgentId		= tempUpdate.AgentId
-							WHERE cpt.CustId = @CustId
+										AgentPositionTaking AS apt WITH (NOLOCK)
+										INNER JOIN @UplineAgentInfo AS uai ON apt.AgentId = uai.AgentId
+										INNER JOIN CustPositionTaking AS cpt WITH (NOLOCK)
+											ON apt.SportType	= cpt.SportType
+											AND apt.BetType		= cpt.BetType
+											AND apt.IsLive		= cpt.IsLive
+											AND apt.AgentId		= cpt.AgentId
+									WHERE 
+										cpt.CustId = @CustId
+										AND apt.MinGivenPositionTaking > 0
+
+									WHILE EXISTS( SELECT 1 FROM @UplineAgentInfo )
+										BEGIN
+		
+											DECLARE 
+												@tempLevel		INT,
+												@tempAgentId	INT
+
+											SELECT TOP 1
+												@tempAgentId = AgentId,
+												@tempLevel = AgentLevel
+											FROM @UplineAgentInfo
+
+											UPDATE tspt
+											SET	tspt.SumDownPT = temp.Sum
+											FROM 
+												@TableStackPositionTaking AS tspt
+												INNER JOIN (		
+													SELECT 
+														tcpt.SportType,
+														tcpt.BetType,
+														tcpt.IsLive,
+														SUM(tcpt.PositionTaking) AS Sum
+													FROM 
+														CustPositionTaking AS tcpt WITH (NOLOCK)
+														INNER JOIN AgentInfo AS tai WITH (NOLOCK) ON tcpt.AgentId = tai.AgentId
+													WHERE 
+														tcpt.CustId = @CustId
+														AND tai.AgentLevel >= @tempLevel
+													GROUP BY 
+														tcpt.SportType,
+														tcpt.BetType,
+														tcpt.IsLive
+												) AS temp
+													ON tspt.SportType	= temp.SportType
+													AND tspt.BetType	= temp.BetType
+													AND tspt.IsLive		= temp.IsLive
+											WHERE tspt.AgentLevel		= @tempLevel
+
+											DELETE @UplineAgentInfo 
+											WHERE AgentId = @tempAgentId
+										END	
+
+										SET @currentAgentId = NULL
+										SELECT @currentAgentId = tspt.AgentId
+										FROM 
+											@TableStackPositionTaking AS tspt
+											INNER JOIN (
+												SELECT	
+													MAX(AgentLevel) AS AgentLevel,
+													SportType,
+													BetType,
+													IsLive 
+												FROM @TableStackPositionTaking
+												WHERE SumDownPT < MinPT
+												GROUP BY 
+													SportType,
+													BetType,
+													IsLive
+											) AS temp
+												ON 
+													tspt.SportType	= temp.SportType
+													AND tspt.BetType	= temp.BetType
+													AND tspt.IsLive		= temp.IsLive
+													AND tspt.AgentLevel	= temp.AgentLevel
+
+										IF @currentAgentId IS NOT NULL
+											BEGIN
+												DELETE @UplineAgentInfo
+												INSERT INTO @UplineAgentInfo (
+													AgentId,
+													AgentLevel,
+													ParentId)
+												SELECT	
+													AgentId,
+													AgentLevel,
+													ParentId
+												FROM AgentInfo WITH (NOLOCK)
+												WHERE
+													@agentHId.IsDescendantOf(AgentHId) = 1
+													AND AgentId <> @AgentId
+													AND AgentId IN (	SELECT DISTINCT AgentId
+																		FROM CustPositionTaking WITH (NOLOCK)
+																		WHERE CustId = @CustId )
+											END
+										
+										UPDATE cpt
+										SET cpt.PositionTaking = tempUpdate.MinPT - tempUpdate.SumDownPT + tempUpdate.PT
+										FROM 
+											CustPositionTaking AS cpt WITH (ROWLOCK, UPDLOCK)
+											INNER JOIN (
+												SELECT 
+													tspt.AgentId
+													,tspt.AgentLevel
+													,tspt.SportType
+													,tspt.BetType
+													,tspt.IsLive
+													,tspt.PT
+													,tspt.MinPT
+													,tspt.SumDownPT
+												FROM 
+													@TableStackPositionTaking AS tspt
+													INNER JOIN (
+														SELECT	
+															MAX(AgentLevel) AS AgentLevel,
+															SportType,
+															BetType,
+															IsLive 
+														FROM @TableStackPositionTaking
+														WHERE SumDownPT < MinPT
+														GROUP BY 
+															SportType,
+															BetType,
+															IsLive
+													) AS temp
+												ON 
+													tspt.SportType	= temp.SportType
+													AND tspt.BetType	= temp.BetType
+													AND tspt.IsLive		= temp.IsLive
+													AND tspt.AgentLevel	= temp.AgentLevel
+											) AS tempUpdate
+												ON cpt.SportType	= tempUpdate.SportType
+												AND cpt.BetType		= tempUpdate.BetType
+												AND cpt.IsLive		= tempUpdate.IsLive
+												AND cpt.AgentId		= tempUpdate.AgentId
+										WHERE cpt.CustId = @CustId
+								END
 						END
 					-- End if New Position Taking less than Current Position Taking	
 					
@@ -768,6 +823,9 @@ BEGIN
 							IsLive		AS '@i',
 							PT			AS '@p'
 						FROM @TablePositionTaking
+						ORDER BY SportType
+								--,BetType
+								,IsLive
 						FOR XML PATH('z'), ROOT('r')
 					)
 
@@ -776,7 +834,7 @@ BEGIN
 					SET @endRun	= GETDATE()  
 					SET @duration = DATEDIFF(MILLISECOND, @startRun, @endRun) 
 
-					IF @@Error = 0
+					IF @@ERROR = 0
 						BEGIN TRY
 							EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
 							@UserId		= @ActorAgentId,
