@@ -61,7 +61,7 @@ BEGIN
 
 	SET @logSPDataOld = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
 
-	UPDATE AgentUser
+	UPDATE AgentUser WITH (ROWLOCK, UPDLOCK)
 	SET Status = @Status
 	WHERE 
 		AgentUserId = @AgentUserId
