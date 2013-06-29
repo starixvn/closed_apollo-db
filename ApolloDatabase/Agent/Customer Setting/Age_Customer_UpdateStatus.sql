@@ -69,7 +69,7 @@ BEGIN
 
 	IF @Type = 1  			-- Account status
 		BEGIN
-			UPDATE CustInfo
+			UPDATE CustInfo WITH (ROWLOCK, UPDLOCK)
 			SET Status = @Status
 			WHERE 
 				CustId = @CustId
@@ -85,7 +85,7 @@ BEGIN
 		END
 	ELSE IF @Type = 2		-- Bet status
 		BEGIN
-			UPDATE CustInfo
+			UPDATE CustInfo WITH (ROWLOCK, UPDLOCK)
 			SET BetStatus = @Status
 			WHERE 
 				CustId = @CustId
