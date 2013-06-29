@@ -14,6 +14,7 @@ Task:	- Daily Summary
 		- Update outright on ProdDB via linked server call: Task_DailySummary_DB02_Copy/Delete 
 DB: SVRTXN.TransDB
 Revisions:
+	-20130628@Sophia: Left Join Match14 to have Sporttype of outright = 0
 
 
  */
@@ -492,7 +493,7 @@ EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing
 				SUM(B.Winlost) as Winlost,  --- Mem Winlost
 				SUM(B.Actual_Stake) as Actual_Stake,
 				COUNT(B.TransID) as BetCount,
-				m.Sporttype, 
+				ISNULL(m.Sporttype,0) as Sporttype, ---- Outright will have Sporttype = 0
 				B.Bettype
 		INTO	#Tmp
 		FROM	Bettrans14 B  WITH (NOLOCK,INDEX (IX_bettrans14)) 
@@ -500,7 +501,7 @@ EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing
 				ON BP.TransID = B.TransID ----Parent (k)
 		INNER JOIN AgentInfo C WITH (NOLOCK) --- Child direct (k+1)
 				ON C.ParentID =  BP.AgentID
-		INNER JOIN Match14 m WITH (NOLOCK)
+		LEFT JOIN Match14 m WITH (NOLOCK)   ----- Outright not have data on Match table, Left join to include Outright
 				ON m.matchId = b.matchId
 		INNER JOIN Bettrans14_Agent BA WITH (NOLOCK, INDEX (IX_bettrans14_Agent)) 
 				ON C.AgentID = BA.AgentID AND BA.TransID = B.TransID ---- Child direct (k+1) 
@@ -516,7 +517,7 @@ EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing
 				AND B.StatusID NOT IN (0,1)	
 				AND B.Winlostdate = @WinlostDate	
 				AND B.MatchId > 0
-		GROUP BY C.Username, C.AgentID, C.ParentId,	m.Sporttype, B.Bettype  
+		GROUP BY C.Username, C.AgentID, C.ParentId, ISNULL(m.Sporttype,0), B.Bettype  
 
 		INSERT INTO #Tmp
 		SELECT  C.Username, C.AgentID, C.ParentID,
@@ -529,20 +530,20 @@ EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing
 				SUM(B.Winlost) as Winlost,  --- Mem Winlost
 				SUM(B.Actual_Stake) as Actual_Stake,
 				COUNT(B.TransID) as BetCount,
-				m.Sporttype, 
+				ISNULL(m.Sporttype,0) as Sporttype, ---- Outright will have Sporttype = 0
 				B.Bettype	
 		FROM		AgentInfo C WITH (NOLOCK)
 		INNER JOIN	BetTrans14_Agent BA WITH (NOLOCK, INDEX(IX_bettrans14_Agent)) 
 				ON	BA.AgentID = C.AgentID		
 		INNER JOIN	Bettrans14 B WITH (NOLOCK) 	
 				ON	B.TransID = BA.TransID
-		INNER JOIN  Match14 m WITH (NOLOCK)
+		LEFT JOIN  Match14 m WITH (NOLOCK) ----- Outright not have data on Match table, Left join to include Outright
 				ON  m.matchId = b.matchId		
 		WHERE		C.ParentId = 0 
 					AND B.StatusID NOT IN (0,1)
 					AND B.Winlostdate = @WinlostDate				   
 					AND BA.Winlostdate = @WinlostDate	  
-		GROUP BY	C.Username, C.AgentID, C.ParentID, m.Sporttype, B.Bettype
+		GROUP BY	C.Username, C.AgentID, C.ParentID, ISNULL(m.Sporttype,0), B.Bettype
 
 		
 		INSERT INTO dbo.Sum_Winloss_Agent_Tmp
@@ -581,14 +582,14 @@ EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing
 				SUM(BA.AWinLost) AS UplineWinlost,	
 				SUM(BA.AComm)  AS UplineComm,
 				COUNT(B.TransID) as BetCount, 
-				m.SportType, 
+				ISNULL(m.Sporttype,0) as Sporttype, ---- Outright will have Sporttype = 0
 				B.BetType
 		FROM		Bettrans14 B WITH (NOLOCK)
 		INNER JOIN	BetTrans14_Agent BA WITH (NOLOCK, INDEX(IX_bettrans14_Agent))
 				ON	BA.TransID = B.TransID
 		INNER JOIN	CustInfo C WITH (NOLOCK)
 				ON	B.CustID = C.CustID AND  C.AgentId = BA.AgentId
-		INNER JOIN  Match14 m WITH (NOLOCK)
+		LEFT JOIN  Match14 m WITH (NOLOCK) ----- Outright not have data on Match table, Left join to include Outright
 				ON  m.matchId = b.matchId		
 		WHERE		BA.WinlostDate = @WinlostDate
 				AND BA.bettype <= 19000	
@@ -596,7 +597,7 @@ EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing
 				AND BA.WinlostDate = B.WinlostDate
 				AND BA.bettype = B.bettype
 				AND BA.StatusID = B.StatusID					
-		GROUP BY C.Username, C.CustID, C.AgentId, m.SportType, B.Bettype
+		GROUP BY C.Username, C.CustID, C.AgentId, ISNULL(m.Sporttype,0), B.Bettype
 
 
 -- =====================

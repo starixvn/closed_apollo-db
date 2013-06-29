@@ -1,6 +1,6 @@
 ﻿ALTER PROCEDURE [dbo].[Age_Wagers_SelLeague]
 	@FromDate DATETIME,
-	@Sporttype SMALLINT
+	@Sporttypes VARCHAR(MAX) = '0'
 AS
 /*
 Created:  Sophia
@@ -24,7 +24,8 @@ SELECT	m.LeagueId
 FROM	Match m WITH (NOLOCK) 
 	INNER JOIN League l WITH (NOLOCK) ON m.leagueid = l.leagueid
 WHERE	m.eventdate BETWEEN @FromDate AND @ToDate
-		AND m.Sporttype = @Sporttype
+		AND (m.Sporttype IN (SELECT val FROM [dbo].[StrSplit](@Sporttypes, ',') ) 
+			OR @Sporttypes = '0')
 		AND l.isTest = 0
 
 		 

@@ -24,14 +24,6 @@ SET NOCOUNT ON
 CREATE TABLE #WinLossMember ( Username NVARCHAR(50), CustID INT, PositionTaking SMALLINT, BetCount BIGINT, TurnOver MONEY, ActualTO MONEY, WinLost MONEY, PlayerComm MONEY, MemTotal MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, UplineTotal MONEY)
 
 
-DECLARE @SportsList TABLE (Sporttype TINYINT)
-INSERT INTO @SportsList (Sporttype)
-SELECT val FROM strSplit_key (@Sporttypes, ',')
-
-DECLARE @BettypeList TABLE (Bettype SMALLINT)
-INSERT INTO @BettypeList (Bettype)
-SELECT val FROM strSplit_key (@Bettypes, ',')
-
 IF @Todate >= @BalanceUpDay
 BEGIN 
 	
@@ -65,12 +57,12 @@ BEGIN
 				AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND BA.StatusID NOT IN (0,1)	
 				AND BA.bettype <= 19000
-				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM @BettypeList))			
+				AND (@Bettypes = '0' OR BA.Bettype IN (SELECT val FROM strSplit_key (@Bettypes, ',')))			
 				AND B.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND B.StatusID NOT IN (0,1)	
 				AND B.bettype <= 19000
-				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM @BettypeList))
-				AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM @SportsList))
+				AND (@Bettypes = '0' OR B.Bettype IN (SELECT val FROM strSplit_key (@Bettypes, ',')))
+				AND (@Sporttypes = '0' OR m.sporttype IN (SELECT val FROM strSplit_key (@Sporttypes, ',')))
 		GROUP BY C.Username, C.CustID, PT.PositionTaking
 
 		    
@@ -97,8 +89,8 @@ BEGIN
 				ON	PT.CustID = A.CustID AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
 		WHERE	A.AgentId = @AgentId 
 				AND WinLostDate BETWEEN @BalanceUpDay AND @ToDate 
-				AND (@Bettypes = '0' OR A.Bettype IN (Select bettype FROM @BettypeList))
-				AND (@Sporttypes = '0' OR A.sporttype IN (Select sporttype FROM @SportsList))
+				AND (@Bettypes = '0' OR A.Bettype IN (SELECT val FROM strSplit_key (@Bettypes, ',')))
+				AND (@Sporttypes = '0' OR A.sporttype IN (SELECT val FROM strSplit_key (@Sporttypes, ',')))
 		GROUP BY A.Username, A.CustId, PT.PositionTaking
 END
 
@@ -126,8 +118,8 @@ BEGIN
 				ON	PT.CustID = A.CustID AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
 		WHERE	A.AgentId = @AgentId 
 				AND WinLostDate BETWEEN @FromDate AND @ToDate
-				AND (@Bettypes = '0' OR A.Bettype IN (Select bettype FROM @BettypeList))
-				AND (@Sporttypes = '0' OR A.sporttype IN (Select sporttype FROM @SportsList)) 
+				AND (@Bettypes = '0' OR A.Bettype IN (SELECT val FROM strSplit_key (@Bettypes, ',')))
+				AND (@Sporttypes = '0' OR A.sporttype IN (SELECT val FROM strSplit_key (@Sporttypes, ','))) 
 	    GROUP BY A.Username, A.CustId, PT.PositionTaking
 END 
  
