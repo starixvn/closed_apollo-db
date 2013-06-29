@@ -1274,10 +1274,10 @@
     <NotInBuild Include="Agent\Wagers\Age_Wagers_SelLeague.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Wagers\Age_Wagers_SC_1_3_5.sql">
+    <NotInBuild Include="Agent\View Log\ReadLog_Login.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Wagers\Age_Wagers_SC_7_8_15.sql">
+    <NotInBuild Include="Agent\View Log\WriteLog_AgentLog_Login.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
