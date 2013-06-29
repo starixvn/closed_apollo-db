@@ -33,18 +33,20 @@ AS
 		END
 		ELSE -- for agents
 		BEGIN
-			DECLARE @tmp table (transid bigint)
-		
-			DELETE BA
-			OUTPUT DELETED.TransID INTO @tmp
+						
+			--DELETE OLD BALANCE
+			DELETE B			
 			FROM BetTrans_Agent BA JOIN Bettrans B ON BA.Transid=B.Transid
 			WHERE AgentId IN (SELECT val FROM dbo.strSplit(@custids, ','))
 				AND B.ruben = 1 AND B.winlostdate < @winlostdate
+				AND B.BETTYPE=20000 
+				AND BA.winlostdate < @winlostdate				 
+				
+			DELETE BA			
+			FROM BetTrans_Agent BA --JOIN Bettrans B ON BA.Transid=B.Transid
+			WHERE AgentId IN (SELECT val FROM dbo.strSplit(@custids, ','))
+				AND BA.STatusID NOT IN (0,1) 
 				AND BA.winlostdate < @winlostdate
-
-			DELETE B
-			FROM Bettrans B 
-			WHERE TransId IN (SELECT TransId FROM @tmp)			
 		END
 
 		COMMIT TRANSACTION

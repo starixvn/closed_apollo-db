@@ -19,27 +19,6 @@ Revisions:
 */
 SET NOCOUNT ON
 BEGIN     
-
-		DECLARE @TransID BIGINT
-
-		INSERT INTO dbo.bettrans 
-			(transdate, winlostdate, custid, checktime,
-			winlost, PlayerComm, actual_stake, 
-			bettype, matchid, status, statusID, transdesc, refno, creator, ruben,
-			currency, username, currencyname, actualrate, virtualrate)
-
-		SELECT 	winlostdate, winlostdate, 0, CURRENT_TIMESTAMP,
-			0 as Winlost,
-			0 as PlayerComm,
-			0 as actual_stake,
-			20000, 0, 'BALANCE', 141, 'OPENING BALANCE', 260000000000, 148, 1,
-			currency, UserName, CurrencyName, actualrate, actualrate
-		FROM deleted
-		WHERE Amount <> 0
-		
-		SELECT @TransID = SCOPE_IDENTITY()
-
-
 		-- Insert statements for trigger here
 		INSERT INTO dbo.Bettrans_Agent 
 			(TransID, transdate, winlostdate, AgentId, 
@@ -47,7 +26,7 @@ BEGIN
 			bettype, matchid, status, statusID, transdesc, refno,
 			currency, username, currencyname, actualrate, virtualrate)
 
-		SELECT @TransID, winlostdate, winlostdate, AgentId,
+		SELECT TransID, winlostdate, winlostdate, AgentId,
 			amount as AWinlost,   ----- keep balance on this column only, not use actual_stake for negative balance
 			0 as AComm,
 			0 as actual_stake,

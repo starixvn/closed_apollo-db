@@ -1270,6 +1270,15 @@
     <NotInBuild Include="Agent\Report\Result\Age_Result_MatchSelBySport.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Task_BackupFull_CustDB.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Task_BackupFull_ProdDB.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Task_BackupFull_TransDB.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">
