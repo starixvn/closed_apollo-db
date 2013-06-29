@@ -16,7 +16,7 @@ AS
 /*
 Created:  Sophia
 Date: 20130628
-Task:  Wagers for Soccer - Correct Score
+Task:  Wagers for Soccer - Correct Score (4)/HT Correct Score (30)/HT/FT (16)
 DB: SVRAGE.REPDB
  
 Revisions:    

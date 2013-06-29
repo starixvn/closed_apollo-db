@@ -5,6 +5,7 @@
 	@BalanceUpDay DATE,
 	@Sporttypes VARCHAR(MAX) = '0',
 	@Bettypes VARCHAR(MAX) = '0' 		
+WITH RECOMPILE
 AS
     /*
     Created: Sophia
