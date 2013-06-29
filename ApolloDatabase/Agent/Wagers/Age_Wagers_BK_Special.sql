@@ -7,6 +7,7 @@ GO
 ALTER PROCEDURE [dbo].[Age_Wagers_BK_Special]
 @LoggedId INT = 0,
 @FromDate Date,
+@Sporttypes VARCHAR(MAX),
 @UGroup varchar(3) = 'ALL',
 @IsDirectMem BIT = 0,
 @LeagueId INT
@@ -19,7 +20,7 @@ Task:  Wagers for B.K/NFL/RUGBY - Special
 DB: SVRAGE.REPDB
 
 Revisions:    
-
+	- 20130629@Sophia: Add @Sporttypes or Tennis, VB/BDM/TT (=Volleyball, Badminton, Table Tennis), Baseball use 
 Parameters
 	@IsDirectMem : 1: Direct Member
 				   0: All Member
@@ -49,7 +50,7 @@ SET NOCOUNT ON
 				WHERE		B.Bettype = 20
 							AND B.StatusId IN (0,1)							
 							AND B.LiveIndicator = 0
-							AND M.Sporttype IN (2,3,26)	
+							AND M.Sporttype IN (SELECT val FROM StrSplit_Key(@Sporttypes, ','))
 							AND M.Eventdate = @Fromdate
 							AND M.EventStatus = 'running'
 							AND (M.Leagueid = @LeagueId OR @LeagueId = 0)
