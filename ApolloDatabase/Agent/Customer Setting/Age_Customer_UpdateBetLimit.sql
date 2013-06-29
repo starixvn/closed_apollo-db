@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateBetLimit]    Script Date: 5/10/2013 11:27:06 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateBetLimit]    Script Date: 6/29/2013 11:19:27 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -140,8 +140,9 @@ BEGIN
 				END
 
 			-- Check validate 
-			SELECT TOP(1) @sportType = SportType
-							,@betType= BetType 
+			SELECT TOP(1) 
+				@sportType = SportType
+				,@betType= BetType 
 			FROM @BetLimitTable 
 			WHERE FLOOR(MinBet)			< MinBet
 				OR FLOOR(MaxBet)		< MaxBet
@@ -162,7 +163,7 @@ BEGIN
 									END
 								+ ')'
 
-					RETURN			
+					RETURN
 				END	
 
 			-- Get agent hierarchy ID
@@ -196,8 +197,9 @@ BEGIN
 				BetType
 
 			-- Check if min bet must be equal to or greater than all parents min bet
-			SELECT TOP(1) @sportType = btct.SportType
-							,@betType= btct.BetType
+			SELECT TOP(1) 
+				@sportType = btct.SportType
+				,@betType= btct.BetType
 			FROM 
 				@BetLimitCompareTable AS btct
 				INNER JOIN @BetLimitTable AS btt 
@@ -223,8 +225,9 @@ BEGIN
 				END
 
 			-- Check if max bet must be equal to or less than all parents max bet
-			SELECT TOP(1) @sportType = btct.SportType
-							,@betType = btct.BetType
+			SELECT TOP(1) 
+				@sportType = btct.SportType
+				,@betType = btct.BetType
 			FROM 
 				@BetLimitCompareTable As btct
 				INNER JOIN @BetLimitTable AS btt 
@@ -251,8 +254,9 @@ BEGIN
 				END
 
 			-- Check if max per match must be equal to or less than all parents max per match
-			SELECT TOP(1) @sportType = btct.SportType
-							,@betType= btct.BetType
+			SELECT TOP(1) 
+				@sportType = btct.SportType
+				,@betType= btct.BetType
 			FROM 
 				@BetLimitCompareTable AS btct
 				INNER JOIN @BetLimitTable AS btt 
@@ -289,9 +293,9 @@ BEGIN
 					,cbl.MaxPerMatch	AS '@mam'
 				FROM 
 					CustBetLimit AS cbl WITH (NOLOCK)
-					INNER JOIN @BetLimitTable AS blt
-					ON	cbl.SportType	= blt.SportType
-						AND cbl.BetType	= blt.BetType
+					--INNER JOIN @BetLimitTable AS blt
+					--ON	cbl.SportType	= blt.SportType
+					--	AND cbl.BetType	= blt.BetType
 				WHERE cbl.CustId = @CustId
 				FOR XML PATH('z'), ROOT('r')
 			)
@@ -318,42 +322,42 @@ BEGIN
 				
 			SET @xml = (
 				SELECT  
-					blt.SportType		AS '@s'
-					,blt.BetType		AS '@b'
-					,blt.MinBet			AS '@mib'
-					,blt.MaxBet			AS '@mab'
-					,blt.MaxPerMatch	AS '@mam'
-				FROM @BetLimitTable AS blt
+					SportType		AS '@s'
+					,BetType		AS '@b'
+					,MinBet			AS '@mib'
+					,MaxBet			AS '@mab'
+					,MaxPerMatch	AS '@mam'
+				FROM @BetLimitTable
 				FOR XML PATH('z'), ROOT('r')
 			)
 
 			SET @logSPData = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
 
 			-- end write log
-		END
 
-	SET @endRun		= GETDATE()
-	SET @duration	= DATEDIFF(MILLISECOND, @startRun, @endRun) 
+			SET @endRun		= GETDATE()
+			SET @duration	= DATEDIFF(MILLISECOND, @startRun, @endRun) 
 		
-	IF @@Error = 0
-		BEGIN TRY
-			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
-			@UserId		= @ActorAgentId,
-			@SPName		= 'Age_Customer_UpdateBetLimit',
-			@LogDate	= @startRun,
-			@CustId		= @CustId,
-			@Duration	= @Duration,
-			@Data		= @logSPData,
-			@OldData	= @logSPDataOld
-		END	TRY
-		BEGIN CATCH
-			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpCust
-			@UserId		= @ActorAgentId,
-			@SPName		= 'Age_Customer_UpdateBetLimit',
-			@LogDate	= @startRun,
-			@CustId		= @CustId,
-			@Duration	= @Duration,
-			@Data		= @logSPData,
-			@OldData	= @logSPDataOld
-		END CATCH 
+			IF @@ERROR = 0
+				BEGIN TRY
+					EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
+					@UserId		= @ActorAgentId,
+					@SPName		= 'Age_Customer_UpdateBetLimit',
+					@LogDate	= @startRun,
+					@CustId		= @CustId,
+					@Duration	= @Duration,
+					@Data		= @logSPData,
+					@OldData	= @logSPDataOld
+				END	TRY
+				BEGIN CATCH
+					EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpCust
+					@UserId		= @ActorAgentId,
+					@SPName		= 'Age_Customer_UpdateBetLimit',
+					@LogDate	= @startRun,
+					@CustId		= @CustId,
+					@Duration	= @Duration,
+					@Data		= @logSPData,
+					@OldData	= @logSPDataOld
+				END CATCH 
+		END
 END
