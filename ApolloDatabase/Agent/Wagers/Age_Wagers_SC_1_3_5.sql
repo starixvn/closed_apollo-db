@@ -57,7 +57,7 @@ SET NOCOUNT ON
 							Count(B.TransID) as BetCount
 				FROM		Bettrans B WITH (NOLOCK)
 				INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
-					ON		B.TransId = BA.TransId AND BA.AgentID = @LoggedID
+					ON		B.TransId = BA.TransId AND BA.AgentID = @LoggedID 
 				INNER JOIN	Match M WITH (NOLOCK)
 					ON		M.matchID = B.MatchID
 				INNER JOIN  CustInfo C WITH (NOLOCK)

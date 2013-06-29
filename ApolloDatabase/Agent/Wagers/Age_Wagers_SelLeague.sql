@@ -22,7 +22,7 @@ SELECT	m.LeagueId
 FROM	Match m WITH (NOLOCK) 
 	INNER JOIN League l WITH (NOLOCK) ON m.leagueid = l.leagueid
 WHERE	m.eventdate = @FromDate  
-		AND (m.Sporttype IN (SELECT val FROM [dbo].[StrSplit](@Sporttypes, ',') ) 
+		AND (m.Sporttype IN (SELECT val FROM StrSplit_Key(@Sporttypes, ',') ) 
 			OR @Sporttypes = '0')
 		AND l.isTest = 0
 
