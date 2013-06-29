@@ -63,9 +63,11 @@ SET NOCOUNT ON
 				INNER JOIN  CustInfo C WITH (NOLOCK)
 					ON		C.CustID = B.CustID
 				WHERE		B.Bettype IN (1,3,5)
+							AND B.StatusId IN (0,1)							
 							AND B.LiveIndicator = @LiveIndicator
 							AND M.Sporttype = 1	
 							AND M.Eventdate = @Fromdate
+							AND M.EventStatus = 'running'
 							AND (M.Leagueid = @LeagueId OR @LeagueId = 0)
 							AND C.UGroup = @UGroup
 							AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)											 
