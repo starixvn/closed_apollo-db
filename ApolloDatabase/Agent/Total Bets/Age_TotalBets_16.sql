@@ -19,6 +19,7 @@ AS
  * Revisions	:
   - 20132801@Terry.Nguyen	: Implement
   - 20130513@Sophia: add super view
+  - 20130629@Sophia: Add Showtime
 
  * Parameters:
  *	•
@@ -37,7 +38,7 @@ BEGIN
 		m.AwayId,
 		m.MatchCode,
 		m.kickofftime,
-	
+		m.Showtime,
 		SUM((CASE WHEN hdp1 = 1 AND hdp2 = 1 THEN (b.Stake * b.Odds) - b.Stake ELSE - b.Stake END ) * (1-b.TPositiontaking)) AS TotalHH,
 		SUM((CASE WHEN hdp1 = 1 AND hdp2 = 0 THEN (b.Stake * b.Odds) - b.Stake ELSE - b.Stake END ) * (1-b.TPositiontaking)) AS TotalHD,
 		SUM((CASE WHEN hdp1 = 1 AND hdp2 = 2 THEN (b.Stake * b.Odds) - b.Stake ELSE - b.Stake END ) * (1-b.TPositiontaking)) AS TotalHA,
@@ -69,6 +70,7 @@ BEGIN
 		m.AwayId,
 		m.MatchCode,
 		m.kickofftime,
+		m.Showtime,
 		m.IsNeutral
 	ORDER BY m.MatchCode
 END
@@ -80,6 +82,7 @@ SELECT
 		m.AwayId,
 		m.MatchCode,
 		m.kickofftime,	
+		m.Showtime,
 		SUM((CASE WHEN hdp1 = 1 AND hdp2 = 1 THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS TotalHH,
 		SUM((CASE WHEN hdp1 = 1 AND hdp2 = 0 THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS TotalHD,
 		SUM((CASE WHEN hdp1 = 1 AND hdp2 = 2 THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * ba.APositionTaking) AS TotalHA,
@@ -111,6 +114,7 @@ SELECT
 		m.AwayId,
 		m.MatchCode,
 		m.kickofftime,
+		m.Showtime,
 		m.IsNeutral
 	ORDER BY m.MatchCode
 END 
