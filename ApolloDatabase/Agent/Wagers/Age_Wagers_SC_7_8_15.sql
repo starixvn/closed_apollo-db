@@ -1,6 +1,5 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Wagers_7_8_15]    Script Date: 6/29/2013 8:34:17 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -8,8 +7,7 @@ GO
 ALTER PROCEDURE [dbo].[Age_Wagers_SC_7_8_15]
 @LoggedId INT = 0,
 @FromDate Date,
-@UGroup varchar(3) = 'C',
-@LiveIndicator BIT = 0,
+@UGroup varchar(3) = 'ALL',
 @IsDirectMem BIT = 0,
 @LeagueId INT
 AS
@@ -28,7 +26,7 @@ Parameters
  
 */
 SET NOCOUNT ON 
-	SELECT		B.KickOffTime, B.LiveIndicator,
+	SELECT		B.Showtime, B.LiveIndicator,
 				B.leagueid, B.matchcode, B.HomeId, B.AwayId, B.UGroup,
 				SUM(CASE WHEN B.Bettype = 7 AND betteam = 'h' THEN B.Stake ELSE 0 END) AS HomeStakeHTHDP,
 				SUM(CASE WHEN B.Bettype = 7 AND betteam = 'a' THEN B.Stake ELSE 0 END) AS AwayStakeHTHDP,
@@ -51,7 +49,7 @@ SET NOCOUNT ON
 				SUM(CASE WHEN B.Bettype = 15 AND betteam = '2' THEN B.BetCount ELSE 0 END) AS CountHT2
 
 	FROM (		
-				SELECT		M.KickOffTime, B.LiveIndicator,
+				SELECT		M.Showtime, B.LiveIndicator,
 							M.leagueid, M.matchcode, M.HomeId, M.AwayId, 
 							B.Bettype, B.Stake, B.betteam, C.UGroup,
 							Count(B.TransID) as BetCount
@@ -64,21 +62,21 @@ SET NOCOUNT ON
 					ON		C.CustID = B.CustID
 				WHERE		B.Bettype IN (7,8,15)
 							AND B.StatusId IN (0,1)							
-							AND B.LiveIndicator = @LiveIndicator
+							AND B.LiveIndicator = 0
 							AND M.Sporttype = 1	
 							AND M.Eventdate = @Fromdate
 							AND M.EventStatus = 'running'
 							AND (M.Leagueid = @LeagueId OR @LeagueId = 0)
-							AND C.UGroup = @UGroup
+							AND (C.UGroup = @UGroup OR @UGroup = 'ALL')
 							AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)											 
-				GROUP BY	M.KickOffTime, B.LiveIndicator,
+				GROUP BY	M.Showtime, B.LiveIndicator,
 							M.leagueid, M.matchcode, M.HomeId, M.AwayId, 
 							B.Bettype, B.Stake, B.betteam, C.UGroup
 				) B
 
-	GROUP BY 	B.KickOffTime, B.LiveIndicator,
+	GROUP BY 	B.Showtime, B.LiveIndicator,
 				B.leagueid, B.matchcode, B.HomeId, B.AwayId, B.UGroup	 
-	ORDER BY 	B.KickOffTime,B.leagueid, B.matchcode, B.HomeId, B.AwayId
+	ORDER BY 	B.Showtime,B.leagueid, B.matchcode, B.HomeId, B.AwayId
 GO
 GRANT EXECUTE ON [Age_Wagers_SC_7_8_15] TO [aplweb]
 
