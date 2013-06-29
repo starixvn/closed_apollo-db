@@ -15,6 +15,7 @@ Original:
 
 Revisions:
    - 20130510@Sophia: Change @splitter of strSplit_Key from '^', to ','
+   - 20130628@Sophia: Add FinalHomeScore, FinalAwayScore, UGroup for Singbet
 
 
 Param's Explanation:  
@@ -32,7 +33,8 @@ CREATE TABLE #Betlist ( TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						PlayerDiscount DECIMAL (9,8), Winlost MONEY, PlayerComm MONEY, 
 						APositionTaking SMALLMONEY, ADiscount DECIMAL (9,8), AWinlost MONEY, AComm MONEY,
 						LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
-						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT)
+						FinalHomeScore SMALLINT, FinalAwayScore SMALLINT,
+						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT, UGroup VARCHAR(3))
 
 CREATE TABLE #DirectChild ( AgentId INT)
 
@@ -97,11 +99,15 @@ BEGIN
 					B.LiveHomeScore,
 					B.LiveAwayScore,
 					B.LiveIndicator, 
+					m.FinalHomeScore,
+					m.FinalAwayScore,
 					B.IP,		
 					B.Oddstype,		
-					B.DoubleCommLosing
+					B.DoubleCommLosing,
+					C.UGroup
  			FROM 	BetTrans AS B  WITH (NOLOCK) 
-				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId									
+				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId
+				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId										
 			WHERE 	B.StatusId in (SELECT StatusId FROM #StatusId ) 
 					AND	B.TransDate Between @FromDate AND @ToDate	
 					AND (	B.bettype < 31 
@@ -147,10 +153,14 @@ BEGIN
 					0 AS LiveHomeScore, 
 					0 AS LiveAwayScore,
 					0 AS LiveIndicator ,
+					0 AS FinalHomeScore,
+					0 AS FinalAwayScore,
 					B.IP,		
 					0 as OddStype,		
-					B.DoubleCommLosing	
-			FROM BetTrans AS B  WITH (NOLOCK) 
+					B.DoubleCommLosing,
+					C.UGroup	
+			FROM BetTrans AS B  WITH (NOLOCK)
+			INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId 
 			WHERE  B.StatusId in (SELECT StatusId FROM #StatusId ) 
 					AND B.TransDate Between @FromDate AND @ToDate
 					AND B.BetType IN (9,29)
@@ -192,12 +202,16 @@ BEGIN
 					B.livehomescore,
 					B.liveawayscore,
 					B.liveindicator, 
+					0 as FinalHomeScore,
+					0 as FinalAwayScore,
 					B.IP as IP,		
 					0 as oddstype,		
-					B.DoubleCommLosing
+					B.DoubleCommLosing,
+					C.UGroup
 			FROM 	bettrans B WITH (NOLOCK)
 			INNER JOIN outright as m WITH (NOLOCK) on  B.matchid=m.orid
-			INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
+			INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid
+			INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId	
 			WHERE 	B.StatusId in (SELECT StatusId FROM #StatusId ) 		
 					AND B.TransDate Between @FromDate AND @ToDate
 					AND B.bettype = 10
@@ -242,13 +256,17 @@ BEGIN
 					B.LiveHomeScore,
 					B.LiveAwayScore,
 					B.LiveIndicator, 
+					m.FinalHomeScore,
+					m.FinalAwayScore,
 					B.IP,		
 					B.Oddstype,		
-					B.DoubleCommLosing
+					B.DoubleCommLosing,
+					C.UGroup
  				FROM 	
 					BetTrans AS B  WITH (NOLOCK) 
 					INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId  
 					INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId					
+					INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 				WHERE 
 					BA.AgentId = @AgentId 
 					AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 
@@ -294,12 +312,16 @@ BEGIN
 					- (B.TComm) AS AComm,	
 					0 AS LiveHomeScore, 
 					0 AS LiveAwayScore,
-					0 AS LiveIndicator ,
+					0 AS LiveIndicator,
+					0 AS FinalHomeScore,
+					0 AS FinalAwayScore,
 					B.IP,		
 					0 as OddStype,		
-					B.DoubleCommLosing	
+					B.DoubleCommLosing,
+					C.UGroup	
 			FROM BetTrans AS B  WITH (NOLOCK) 		
 			INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId 
+			INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 			WHERE	BA.AgentId = @AgentId 			
 				AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
 				AND B.TransDate Between @FromDate AND @ToDate
@@ -340,14 +362,18 @@ BEGIN
 					- (B.TComm) AS AComm,			
 					B.livehomescore,
 					B.liveawayscore,
-					B.liveindicator, 
+					B.liveindicator,
+					0 AS FinalHomeScore,
+					0 AS FinalAwayScore, 
 					B.IP as IP,		
 					0 as oddstype,		
-					B.DoubleCommLosing
+					B.DoubleCommLosing,
+					C.UGroup
 			FROM	bettrans B WITH (NOLOCK)
 				INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
 				INNER JOIN outright as m WITH (NOLOCK) on  B.matchid=m.orid
 				INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
+				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 			WHERE 	BA.AgentId = @AgentId 		
 				AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
 				AND B.TransDate Between @FromDate AND @ToDate
@@ -394,13 +420,17 @@ BEGIN
 				- (B.TComm) AS AComm,	
 				B.LiveHomeScore,
 				B.LiveAwayScore,
-				B.LiveIndicator, 
+				B.LiveIndicator,
+				m.FinalHomeScore,
+				m.FinalAwayScore, 
 				B.IP,		
 				B.Oddstype,		
-				B.DoubleCommLosing
+				B.DoubleCommLosing,
+				C.UGroup
  			FROM 
 				BetTrans AS B  WITH (NOLOCK) 				
-				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 						
+				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 		
+				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId				
 			WHERE 
 				B.CustID = @CustId 
 				AND B.StatusId in (SELECT StatusId FROM #StatusId )   	
@@ -447,11 +477,15 @@ BEGIN
 				- (B.TComm) AS AComm,	
 				0 AS LiveHomeScore, 
 				0 AS LiveAwayScore,
-				0 AS LiveIndicator ,
+				0 AS LiveIndicator,
+				0 as FinalHomeScore,
+				0 as FinalAwayScore,
 				B.IP,		
 				0 as OddStype,		
-				B.DoubleCommLosing	
+				B.DoubleCommLosing,
+				C.UGroup
 			FROM BetTrans AS B  WITH (NOLOCK) 
+			INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 			WHERE B.CustID = @CustId  				
 				AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
 				AND B.TransDate Between @FromDate AND @ToDate
@@ -492,14 +526,18 @@ BEGIN
 				- (B.TComm) AS AComm,		
 				B.livehomescore,
 				B.liveawayscore,
-				B.liveindicator, 
+				B.liveindicator,
+				0 as FinalHomeScore,
+				0 as FinalAwayScore, 
 				B.IP as IP,		
 				0 as oddstype,		
-				B.DoubleCommLosing
+				B.DoubleCommLosing,
+				C.UGroup
 			FROM 		
 				bettrans B WITH (NOLOCK)
 				INNER JOIN outright as m WITH (NOLOCK) on  B.matchid=m.orid
-				INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
+				INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid
+				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId	
 			WHERE 
 				B.CustID = @CustId  				
 				AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
@@ -549,16 +587,20 @@ BEGIN
 				L.AComm - ISNULL(D.AComm, B.PlayerComm) as AComm,
 				B.LiveHomeScore,
 				B.LiveAwayScore,
-				B.LiveIndicator, 
+				B.LiveIndicator,
+				m.FinalHomeScore,
+				m.FinalAwayScore,
 				B.IP,		
 				B.Oddstype,		
-				B.DoubleCommLosing
+				B.DoubleCommLosing,
+				C.UGroup
  			FROM 	
 				BetTrans AS B  WITH (NOLOCK) 
 				INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId 				
 				INNER JOIN BetTrans_Agent AS L WITH (NOLOCK )  ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 				LEFT JOIN Bettrans_Agent D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
-				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 										
+				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 	
+				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId									
 			WHERE BA.AgentId =  @AgentId
 				AND B.StatusId in (SELECT StatusId FROM #StatusId )  
 				AND B.TransDate Between @FromDate AND @ToDate	
@@ -603,14 +645,18 @@ BEGIN
 				L.AComm - ISNULL(D.AComm, B.PlayerComm) as AComm,
 				0 AS LiveHomeScore, 
 				0 AS LiveAwayScore,
-				0 AS LiveIndicator ,
+				0 AS LiveIndicator,
+				0 as FinalHomeScore,
+				0 as FinalAwayScore,
 				B.IP,		
 				0 as OddStype,		
-				B.DoubleCommLosing	
+				B.DoubleCommLosing,
+				C.UGroup	
 			FROM BetTrans AS B  WITH (NOLOCK) 		
 				INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
 				INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 				LEFT JOIN Bettrans_Agent D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
+				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 			WHERE BA.AgentId =  @AgentId				
 				AND B.StatusId in (SELECT StatusId FROM #StatusId )  	
 				AND B.TransDate Between @FromDate AND @ToDate
@@ -652,16 +698,20 @@ BEGIN
 				B.livehomescore,
 				B.liveawayscore,
 				B.liveindicator, 
+				0 as FinalHomeScore,
+				0 as FinalAwayScore,
 				B.IP as IP,		
 				0 as oddstype,		
-				B.DoubleCommLosing
+				B.DoubleCommLosing,
+				C.UGroup
 			FROM 		
 				bettrans B WITH (NOLOCK)
 				INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
 				INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 				LEFT JOIN Bettrans_Agent D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
 				INNER JOIN outright as m WITH (NOLOCK) on  B.matchid=m.orid
-				INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
+				INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid
+				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId	
 			WHERE 
 				BA.AgentId = @AgentId 		
 				AND B.StatusId in (SELECT StatusId FROM #StatusId )  
@@ -708,15 +758,19 @@ BEGIN
 				L.AComm - ISNULL(D.AComm, B.PlayerComm) as AComm,	
 				B.LiveHomeScore,
 				B.LiveAwayScore,
-				B.LiveIndicator, 
+				B.LiveIndicator,
+				m.FinalHomeScore,
+				m.FinalAwayScore, 
 				B.IP,		
 				B.Oddstype,		
-				B.DoubleCommLosing
+				B.DoubleCommLosing,
+				C.UGroup
  			FROM 	
 				BetTrans AS B  WITH (NOLOCK)				
 				INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 				LEFT JOIN Bettrans_Agent D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
 				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 						
+				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 			WHERE	B.CustID = @CustId  
 				AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
 				AND B.TransDate Between @FromDate AND @ToDate	
@@ -761,14 +815,18 @@ BEGIN
 				L.AComm - ISNULL(D.AComm, B.PlayerComm) as AComm,
 				0 AS LiveHomeScore, 
 				0 AS LiveAwayScore,
-				0 AS LiveIndicator ,
+				0 AS LiveIndicator,
+				0 as FinalHomeScore,
+				0 as FinalAwayScore,
 				B.IP,		
 				0 as OddStype,		
-				B.DoubleCommLosing	
+				B.DoubleCommLosing,
+				C.UGroup	
 			FROM BetTrans AS B  WITH (NOLOCK) 		
 				INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
 				INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 				LEFT JOIN Bettrans_Agent D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
+				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 			WHERE   B.CustID = @CustId 				
 				AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
 				AND B.TransDate Between @FromDate AND @ToDate
@@ -810,10 +868,13 @@ BEGIN
 				L.AComm - ISNULL(D.AComm, B.PlayerComm) as AComm,		
 				B.livehomescore,
 				B.liveawayscore,
-				B.liveindicator, 
+				B.liveindicator,
+				0 AS FinalHomeScore,
+				0 AS FinalAwayScore, 
 				B.IP as IP,		
 				0 as oddstype,		
-				B.DoubleCommLosing
+				B.DoubleCommLosing,
+				C.UGroup
 			FROM 		
 				bettrans B WITH (NOLOCK)
 				INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
@@ -821,6 +882,7 @@ BEGIN
 				LEFT JOIN Bettrans_Agent D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
 				INNER JOIN outright as m WITH (NOLOCK) on  B.matchid=m.orid
 				INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
+				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 			WHERE  B.CustID = @CustId 				
 				AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
 				AND B.TransDate Between @FromDate AND @ToDate

@@ -105,6 +105,7 @@
     <Folder Include="DBA\Move bet - Balance Up\Move Bet" />
     <Folder Include="CSD\Admin\Log" />
     <Folder Include="DBA\Move bet - Balance Up\Balance Up" />
+    <Folder Include="Agent\Wagers" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1268,6 +1269,15 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Report\Result\Age_Result_MatchSelBySport.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Wagers\Age_Wagers_SelLeague.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\View Log\ReadLog_Login.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\View Log\WriteLog_AgentLog_Login.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Task_BackupFull_CustDB.sql">

@@ -74,12 +74,13 @@ BEGIN
 		END	
 
 	-- For write log
-	DECLARE @startRun			DATETIME
-			,@endRun			DATETIME
-			,@duration			INT
-			,@logSPData			VARCHAR(5000)
-			,@logSPDataOld		VARCHAR(5000)
-			,@xml				XML
+	DECLARE 
+		@startRun		DATETIME,
+		@endRun			DATETIME,
+		@duration		INT,
+		@logSPData		VARCHAR(5000),
+		@logSPDataOld	VARCHAR(5000),
+		@xml			XML
 
 	SET @startRun = GETDATE()
 		
@@ -101,7 +102,7 @@ BEGIN
 			FROM AgentInfo WITH (NOLOCK)
 			WHERE AgentId = @AgentId
 
-			DECLARE @TableDiscount TABLE(
+			DECLARE @TableDiscount TABLE (
 				SportType	SMALLINT,
 				BetType		SMALLINT,
 				DiscountA	DECIMAL(9,8),
@@ -109,7 +110,7 @@ BEGIN
 				DiscountC	DECIMAL(9,8),
 				DiscountD	DECIMAL(9,8))
 
-			DECLARE @TableStackDiscountUpdate TABLE(
+			DECLARE @TableStackDiscountUpdate TABLE (
 				AgentId		INT,
 				SportType	SMALLINT,
 				BetType		SMALLINT,
@@ -174,14 +175,14 @@ BEGIN
 					SELECT	
 						@sportType = SportType ,
 						@groupCode = 
-						CASE
-							WHEN DiscountA NOT BETWEEN 0 AND 0.0225 AND SportType = 1 AND BetType = 1 THEN 2001
-							WHEN DiscountB NOT BETWEEN 0 AND 0.0125 AND SportType = 1 AND BetType = 1 THEN 2002
-							WHEN DiscountC NOT BETWEEN 0 AND 0.0075 AND SportType = 1 AND BetType = 1 THEN 2003
-							WHEN DiscountD NOT BETWEEN 0 AND 0 AND SportType = 1 AND BetType = 1 THEN 2004
-							WHEN DiscountA NOT BETWEEN 0 AND 0 AND SportType = 1 AND BetType = 5 THEN 2005
-							WHEN DiscountA NOT BETWEEN 0 AND 0 AND SportType = 1 AND BetType = 4 THEN 2006
-						END
+							CASE
+								WHEN DiscountA NOT BETWEEN 0 AND 0.0225 AND SportType = 1 AND BetType = 1 THEN 2001
+								WHEN DiscountB NOT BETWEEN 0 AND 0.0125 AND SportType = 1 AND BetType = 1 THEN 2002
+								WHEN DiscountC NOT BETWEEN 0 AND 0.0075 AND SportType = 1 AND BetType = 1 THEN 2003
+								WHEN DiscountD NOT BETWEEN 0 AND 0 AND SportType = 1 AND BetType = 1 THEN 2004
+								WHEN DiscountA NOT BETWEEN 0 AND 0 AND SportType = 1 AND BetType = 5 THEN 2005
+								WHEN DiscountA NOT BETWEEN 0 AND 0 AND SportType = 1 AND BetType = 4 THEN 2006
+							END
 					FROM @TableDiscount
 					WHERE 
 						(DiscountA NOT BETWEEN 0 AND 0.0225 AND SportType = 1 AND BetType = 1)		-- Group A
@@ -268,14 +269,14 @@ BEGIN
 					-- end write log
 
 					---- Update for current agent, and for all line
-					UPDATE ad WITH (ROWLOCK, UPDLOCK)
+					UPDATE ad 
 					SET 
 						ad.DiscountA = dt.DiscountA,
 						ad.DiscountB = dt.DiscountB,
 						ad.DiscountC = dt.DiscountC,
 						ad.DiscountD = dt.DiscountD
 					FROM 
-						AgentDiscount AS ad
+						AgentDiscount AS ad WITH (ROWLOCK, UPDLOCK)
 						INNER JOIN @TableDiscount AS dt 
 							ON ad.SportType = dt.SportType 
 							AND ad.BetType	= dt.BetType
@@ -312,63 +313,62 @@ BEGIN
 							OR ad.DiscountC > td.DiscountC
 							OR ad.DiscountD > td.DiscountD)
 
-					UPDATE ad WITH (ROWLOCK, UPDLOCK)
+					UPDATE ad 
 					SET ad.DiscountA = tad.DiscountA
-					FROM AgentDiscount AS ad
+					FROM AgentDiscount AS ad WITH (ROWLOCK, UPDLOCK)
 						INNER JOIN @TableStackDiscountUpdate AS tad
 							ON ad.AgentId		= tad.AgentId
 							AND ad.SportType	= tad.SportType
 							AND ad.BetType		= tad.BetType
 					WHERE ad.DiscountA > tad.DiscountA
 
-					UPDATE ad WITH (ROWLOCK, UPDLOCK)
-					SET ad.DiscountB	= tad.DiscountB
+					UPDATE ad 
+					SET ad.DiscountB = tad.DiscountB
 					FROM 
-						AgentDiscount AS ad
+						AgentDiscount AS ad WITH (ROWLOCK, UPDLOCK)
 						INNER JOIN @TableStackDiscountUpdate AS tad
 							ON ad.AgentId		= tad.AgentId
 							AND ad.SportType	= tad.SportType
 							AND ad.BetType		= tad.BetType
 					WHERE ad.DiscountB > tad.DiscountB
 					
-					UPDATE ad WITH (ROWLOCK, UPDLOCK)
-					SET ad.DiscountC	= tad.DiscountC
+					UPDATE ad 
+					SET ad.DiscountC = tad.DiscountC
 					FROM 
-						AgentDiscount AS ad
+						AgentDiscount AS ad WITH (ROWLOCK, UPDLOCK)
 						INNER JOIN @TableStackDiscountUpdate AS tad
 							ON ad.AgentId		= tad.AgentId
 							AND ad.SportType	= tad.SportType
 							AND ad.BetType		= tad.BetType
 					WHERE ad.DiscountC > tad.DiscountC
 					
-					UPDATE ad WITH (ROWLOCK, UPDLOCK)
+					UPDATE ad 
 					SET ad.DiscountD = tad.DiscountD
 					FROM 
-						AgentDiscount AS ad
+						AgentDiscount AS ad WITH (ROWLOCK, UPDLOCK)
 						INNER JOIN @TableStackDiscountUpdate AS tad
 							ON ad.AgentId		= tad.AgentId
 							AND ad.SportType	= tad.SportType
 							AND ad.BetType		= tad.BetType
 					WHERE ad.DiscountD > tad.DiscountD
 
-					IF EXISTS (
-						SELECT TOP(1) * FROM @TableStackDiscountUpdate
-					)
+					IF EXISTS ( SELECT TOP(1) * FROM @TableStackDiscountUpdate )
 						BEGIN
 							UPDATE cd
-							SET cd.Discount =	CASE
-													WHEN ad.SportType = 1 AND ad.BetType = 5 THEN ad.DiscountA		-- 1x2
-													WHEN ad.SportType = 1 AND ad.BetType = 4 THEN ad.DiscountA		-- Others 
-													ELSE
-														CASE
-															WHEN ci.UGroup = 'a' THEN ad.DiscountA
-															WHEN ci.UGroup = 'b' THEN ad.DiscountB
-															WHEN ci.UGroup = 'c' THEN ad.DiscountC
-															WHEN ci.UGroup = 'd' THEN ad.DiscountD
-														END
-												END
+							SET cd.Discount =	
+								CASE
+									WHEN ad.SportType = 1 AND ad.BetType = 5 THEN ad.DiscountA		-- 1x2
+									WHEN ad.SportType = 1 AND ad.BetType = 4 THEN ad.DiscountA		-- Others 
+									ELSE
+										CASE
+											WHEN ci.UGroup = 'a' THEN ad.DiscountA
+											WHEN ci.UGroup = 'b' THEN ad.DiscountB
+											WHEN ci.UGroup = 'c' THEN ad.DiscountC
+											WHEN ci.UGroup = 'd' THEN ad.DiscountD
+										END
+								END
 							FROM 
-								CustDiscount AS cd
+								CustDiscount AS cd WITH (ROWLOCK, UPDLOCK)
 								INNER JOIN @TableDiscount AS td
 									ON cd.SportType = td.SportType
 									AND cd.BetType = td.BetType
@@ -377,7 +377,8 @@ BEGIN
 									ON ci.AgentId = ad.AgentId
 									AND ad.SportType = cd.SportType
 									AND ad.BetType = cd.BetType
-							WHERE ad.AgentId IN ( SELECT DISTINCT AgentId FROM @TableStackDiscountUpdate )
+							WHERE 
+								ad.AgentId IN ( SELECT DISTINCT AgentId FROM @TableStackDiscountUpdate )
 								AND cd.Discount > CASE
 													WHEN ad.SportType = 1 AND ad.BetType = 5 THEN ad.DiscountA		-- 1x2
 													WHEN ad.SportType = 1 AND ad.BetType = 4 THEN ad.DiscountA		-- Others 
@@ -416,7 +417,7 @@ BEGIN
 	SET @endRun		= GETDATE()  
 	SET @duration	= DATEDIFF(MILLISECOND, @startRun, @endRun) 
 		
-	IF @@Error = 0
+	IF @@ERROR = 0
 		BEGIN TRY
 			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
 			@UserId		= @ActorAgentId,

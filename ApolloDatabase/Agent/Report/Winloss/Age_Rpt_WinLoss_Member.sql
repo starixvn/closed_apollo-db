@@ -1,15 +1,19 @@
-﻿ALTER PROCEDURE [dbo].[Age_Rpt_WinLoss_Member]
+﻿ALTER PROCEDURE [dbo].[Age_Rpt_WinLoss_Member_Xtest]
 	@AgentID 	INT,
-	@FromDate 	SMALLDATETIME,
-	@ToDate 	SMALLDATETIME,	
-	@BalanceUpDay SMALLDATETIME	
+	@FromDate 	DATE,
+	@ToDate 	DATE,	
+	@BalanceUpDay DATE,
+	@Sporttypes VARCHAR(MAX) = '0',
+	@Bettypes VARCHAR(MAX) = '0' 		
 AS
     /*
-    Created: 
-    Task : 
+    Created: Sophia
+	Date: 20130401
+    Task : Members detail of Report Agent Winloss
     DB: SVRAGE.RepDB
-    Original SP:[Age_Rpt_WinLoss_Ag]
+    Original: Age_Rpt_WinLoss_Ag
     Revisions:
+		- 20130627@Sophia: Modify for Singbet: filter by Sporttype and Bettype
 	EX: EXEC Age_Rpt_WinLoss_Member @AgentId =3, @FromDate = '2013-01-01',  @ToDate = '2013-04-10', @BalanceUpDay = '2013-03-01'
 
        
@@ -17,7 +21,8 @@ AS
     
 SET NOCOUNT ON
 
-CREATE TABLE #WinLossMember ( Username NVARCHAR(50), CustID INT, PositionTaking SMALLINT, TurnOver MONEY, ActualTO MONEY, WinLost MONEY, PlayerComm MONEY, MemTotal MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, UplineTotal MONEY)
+CREATE TABLE #WinLossMember ( Username NVARCHAR(50), CustID INT, PositionTaking SMALLINT, BetCount BIGINT, TurnOver MONEY, ActualTO MONEY, WinLost MONEY, PlayerComm MONEY, MemTotal MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, UplineTotal MONEY)
+
 
 IF @Todate >= @BalanceUpDay
 BEGIN 
@@ -26,6 +31,7 @@ BEGIN
 	    SELECT  C.Username,
 				C.CustID,
 				PT.PositionTaking, 
+				COUNT(B.TransID) as BetCount,
 		   		SUM(ABS(B.Stake)) AS TurnOver,
 				SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as ActualTO,
 
@@ -43,20 +49,20 @@ BEGIN
 				ON	BA.TransID = B.TransID
 		INNER JOIN	CustInfo C WITH (NOLOCK)
 				ON	B.CustID = C.CustID AND  C.AgentId = @AgentID
+		INNER JOIN  Match m  WITH (NOLOCK) 
+				ON  m.MatchID = B.MatchID
 		INNER JOIN	CustPositionTaking PT WITH (NOLOCK) 
 				ON	PT.CustID = C.CustID AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
 		WHERE		BA.AgentId = @AgentID
 				AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND BA.StatusID NOT IN (0,1)	
 				AND BA.bettype <= 19000
-				--(	BA.bettype < 31 
-				--	OR BA.bettype between 121 and 999
-				--	OR BA.bettype between 1301 and 1334 
-				--	--OR BA.bettype BETWEEN 81 AND 120 				
-				--) 
+				AND (@Bettypes = '0' OR BA.Bettype IN (SELECT val FROM strSplit_key (@Bettypes, ',')))			
 				AND B.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND B.StatusID NOT IN (0,1)	
 				AND B.bettype <= 19000
+				AND (@Bettypes = '0' OR B.Bettype IN (SELECT val FROM strSplit_key (@Bettypes, ',')))
+				AND (@Sporttypes = '0' OR m.sporttype IN (SELECT val FROM strSplit_key (@Sporttypes, ',')))
 		GROUP BY C.Username, C.CustID, PT.PositionTaking
 
 		    
@@ -65,7 +71,8 @@ BEGIN
 
   		INSERT INTO #WinLossMember
 	    SELECT	A.Username, A.CustId,
-				PT.PositionTaking,						 
+				PT.PositionTaking,
+				SUM(BetCount) as BetCount,						 
 				SUM(Turnover) TurnOver,
 				SUM(Actual_Turnover) ActualTO,	
 				SUM(WinLost) WinLost,
@@ -82,6 +89,8 @@ BEGIN
 				ON	PT.CustID = A.CustID AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
 		WHERE	A.AgentId = @AgentId 
 				AND WinLostDate BETWEEN @BalanceUpDay AND @ToDate 
+				AND (@Bettypes = '0' OR A.Bettype IN (SELECT val FROM strSplit_key (@Bettypes, ',')))
+				AND (@Sporttypes = '0' OR A.sporttype IN (SELECT val FROM strSplit_key (@Sporttypes, ',')))
 		GROUP BY A.Username, A.CustId, PT.PositionTaking
 END
 
@@ -92,7 +101,8 @@ BEGIN
 		
 		INSERT INTO #WinLossMember
 	    SELECT	A.Username, A.CustId,
-				PT.PositionTaking,				 
+				PT.PositionTaking,	
+				SUM(BetCount) as BetCount,				 
 				SUM(Turnover) TurnOver,
 				SUM(Actual_Turnover) ActualTO,	
 				SUM(WinLost) WinLost,
@@ -107,11 +117,14 @@ BEGIN
 		INNER JOIN	CustPositionTaking PT WITH (NOLOCK) 
 				ON	PT.CustID = A.CustID AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
 		WHERE	A.AgentId = @AgentId 
-				AND WinLostDate BETWEEN @FromDate AND @ToDate 
+				AND WinLostDate BETWEEN @FromDate AND @ToDate
+				AND (@Bettypes = '0' OR A.Bettype IN (SELECT val FROM strSplit_key (@Bettypes, ',')))
+				AND (@Sporttypes = '0' OR A.sporttype IN (SELECT val FROM strSplit_key (@Sporttypes, ','))) 
 	    GROUP BY A.Username, A.CustId, PT.PositionTaking
 END 
  
 SELECT	Username, CustId,  PositionTaking,
+		SUM(BetCount) as BetCount,	
 		SUM(TurnOver) as TurnOver,
 		SUM(ActualTO) as ActualTO,
 
@@ -131,8 +144,8 @@ ORDER BY Username
 DROP TABLE #WinLossMember
 
 
-
 GO
-GRANT EXECUTE ON [dbo].[Age_Rpt_WinLoss_Member] TO [aplWeb]
-Go
---GRANT VIEW DEFINITION ON [dbo].[Age_Rpt_WinLoss_Member] TO [vnteam]
+GRANT EXECUTE ON [dbo].[Age_Rpt_WinLoss_Member_Xtest] TO [aplWeb]
+GO
+
+

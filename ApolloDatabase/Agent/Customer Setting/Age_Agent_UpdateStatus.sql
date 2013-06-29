@@ -102,7 +102,7 @@ BEGIN
 			IF @Status <> 3 AND @CurrentStatus <> @Status	-- New status is not Locked
 				BEGIN
 					-- Update agent status
-					UPDATE AgentInfo
+					UPDATE AgentInfo WITH (ROWLOCK, UPDLOCK)
 					SET Status = @Status
 					WHERE AgentId = @AgentId
 
@@ -118,7 +118,7 @@ BEGIN
 					IF @CurrentUplineStatus = 1
 						BEGIN
 							-- Update agent downline
-							UPDATE AgentInfo
+							UPDATE AgentInfo WITH (ROWLOCK, UPDLOCK)
 							SET UplineStatus = @Status
 							WHERE 
 								AgentHId.IsDescendantOf(@AgentHId) = 1
@@ -135,7 +135,7 @@ BEGIN
 					-- Update agent user status if new status is Active
 					IF @Status = 1 AND @CurrentAgentUserStatus <> 1
 						BEGIN
-							UPDATE AgentUser
+							UPDATE AgentUser WITH (ROWLOCK, UPDLOCK)
 							SET Status = @Status
 							WHERE AgentUserId = @AgentId
 
@@ -151,7 +151,7 @@ BEGIN
 			ELSE IF @Status <> 2 AND @CurrentAgentUserStatus <> @Status		-- New status is not Stopped
 				BEGIN
 					-- Update agent user status
-					UPDATE AgentUser
+					UPDATE AgentUser WITH (ROWLOCK, UPDLOCK)
 					SET Status = @Status
 					WHERE AgentUserId = @AgentId
 
@@ -167,7 +167,7 @@ BEGIN
 	ELSE IF @Type = 2 AND @CurrentBetStatus <> @Status	-- Bet status
 		BEGIN
 			-- Update agent bet status
-			UPDATE AgentInfo
+			UPDATE AgentInfo WITH (ROWLOCK, UPDLOCK)
 			SET BetStatus = @Status
 			WHERE AgentId = @AgentId
 
@@ -183,14 +183,14 @@ BEGIN
 			IF @CurrentUplineBetStatus = 1
 				BEGIN
 					-- Update agent downline
-					UPDATE AgentInfo
+					UPDATE AgentInfo WITH (ROWLOCK, UPDLOCK)
 					SET UplineBetStatus = @Status
 					WHERE 
 						AgentHId.IsDescendantOf(@AgentHId) = 1
 						AND AgentId <> @AgentId
 
 					-- Update customer downline
-					UPDATE CustInfo
+					UPDATE CustInfo WITH (ROWLOCK, UPDLOCK)
 					SET UplineBetStatus = @Status
 					WHERE AgentId IN (	SELECT AgentId
 										FROM AgentInfo WITH (NOLOCK)

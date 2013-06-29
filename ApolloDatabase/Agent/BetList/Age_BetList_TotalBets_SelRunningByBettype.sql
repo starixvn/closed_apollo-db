@@ -15,6 +15,7 @@ ALTER PROC [dbo].[Age_BetList_TotalBets_SelRunningByBettype]
 	- 20130409@Sophia: revise all, change #Bettype to #Bettypes 
 	- 20130507@Sophia: Add @AgentID for Super view total bets of Main shareholder
 	- 20130510@Sophia: Change @splitter of strSplit_Key from '^', to ','
+	- 20130627@Sophia: Add UGroup for Singbet
   Parameters:
  		@AgentId: agent ID
   		#Bettypes: string of bettypes , seperate by ,
@@ -34,7 +35,7 @@ DECLARE @Betlist TABLE (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 						Username NVARCHAR(50), BetType SMALLINT, CustId INT , Hdp1 SMALLMONEY, Hdp2 SMALLMONEY, Odds SMALLMONEY, MOdds SMALLMONEY,
 						Status VARCHAR(10), Stake MONEY, Actual_Stake MONEY, TransDate DATETIME, BetTeam VARCHAR(10), BetId BIGINT, 
 						APositionTaking SMALLMONEY, ADiscount DECIMAL (9,8),  LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
-						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT)
+						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT, UGroup varchar(3))
 
 IF @LoggedId = 0 
 BEGIN 
@@ -74,9 +75,11 @@ BEGIN
 				0 AS LiveIndicator ,
 				B.IP,		
 				0 AS OddStype,		
-				B.DoubleCommLosing	
-			FROM BetTrans AS B  WITH (NOLOCK) 
-				INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
+				B.DoubleCommLosing,
+				C.UGroup	
+			FROM BetTrans B  WITH (NOLOCK) 
+				INNER JOIN BetTrans_Agent BA WITH (NOLOCK) ON BA.TransId = B.TransId
+				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 			WHERE
 				BA.AgentId = @AgentId
 				AND B.CustID = B.CustID  
@@ -119,10 +122,12 @@ BEGIN
 				B.liveindicator, 
 				B.IP AS IP,		
 				0 AS oddstype,		
-				B.DoubleCommLosing
+				B.DoubleCommLosing,
+				C.UGroup
 			FROM 		
 				bettrans b WITH (NOLOCK)
 				INNER JOIN BetTrans_Agent AS ba WITH (NOLOCK) ON BA.TransId = B.TransId
+				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 				INNER JOIN outright AS m WITH (NOLOCK) on  B.matchid=m.orid
 				INNER JOIN league l WITH (NOLOCK) on m.leagueid = l.leagueid	
 			WHERE 
@@ -169,11 +174,13 @@ BEGIN
 				B.LiveIndicator, 
 				B.IP,		
 				B.Oddstype,		
-				B.DoubleCommLosing
+				B.DoubleCommLosing,
+				C.UGroup
  			FROM 	
 				BetTrans AS b  WITH (NOLOCK) 
 				INNER JOIN BetTrans_Agent AS ba WITH (NOLOCK) ON BA.TransId = B.TransId
-				INNER JOIN  Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 				
+				INNER JOIN  Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId
+				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId				
 			WHERE 
 				BA.AgentId = @AgentId 
 				AND B.CustID = B.CustID  
@@ -219,9 +226,11 @@ BEGIN
 				0 AS LiveIndicator ,
 				B.IP,		
 				0 AS OddStype,		
-				B.DoubleCommLosing	
+				B.DoubleCommLosing,
+				C.UGroup
 			FROM BetTrans AS B  WITH (NOLOCK) 
 				INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
+				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 			WHERE
 				BA.AgentId = @AgentId 
 				AND B.CustID = B.CustID  
@@ -264,12 +273,14 @@ BEGIN
 				B.liveindicator, 
 				B.IP AS IP,		
 				0 AS oddstype,		
-				B.DoubleCommLosing
+				B.DoubleCommLosing,
+				C.UGroup
 			FROM 		
 				bettrans b WITH (NOLOCK)
 				INNER JOIN BetTrans_Agent AS ba WITH (NOLOCK) ON BA.TransId = B.TransId
 				INNER JOIN outright AS m WITH (NOLOCK) on  B.matchid=m.orid
 				INNER JOIN league l WITH (NOLOCK) on m.leagueid = l.leagueid	
+				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 			WHERE 
 				BA.AgentId = @AgentId 
 				AND B.CustID = B.CustID
@@ -314,11 +325,13 @@ BEGIN
 				B.LiveIndicator, 
 				B.IP,		
 				B.Oddstype,		
-				B.DoubleCommLosing
+				B.DoubleCommLosing,
+				C.UGroup
  			FROM 	
 				BetTrans AS b  WITH (NOLOCK) 
 				INNER JOIN BetTrans_Agent AS ba WITH (NOLOCK) ON BA.TransId = B.TransId
-				INNER JOIN  Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 				
+				INNER JOIN  Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 	
+				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId			
 			WHERE 
 				BA.AgentId = @AgentId
 				AND B.CustID = B.CustID  

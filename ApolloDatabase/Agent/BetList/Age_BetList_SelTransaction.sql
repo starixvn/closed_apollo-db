@@ -15,7 +15,8 @@ DB:  SVRAGE.RepDB
 Original:  [Age_BetList_SelByDateMemStatus]
 
 Revisions:  
-  - 20130510@Sophia: Change @splitter of strSplit_Key from '^', to ','
+   - 20130510@Sophia: Change @splitter of strSplit_Key from '^', to ','
+   - 20130628@Sophia: Add FinalHomeScore, FinalAwayScore
 
 Param's Explanation:  
 	+ @IsAgent = 1 : by Agent's Username,
@@ -32,6 +33,7 @@ CREATE TABLE #Betlist (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVAR
 						PlayerDiscount DECIMAL (9,8), Winlost MONEY, PlayerComm MONEY, 
 						APositionTaking SMALLMONEY, ADiscount DECIMAL (9,8), AWinlost MONEY, AComm MONEY,
 						LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
+						FinalHomeScore SMALLINT, FinalAwayScore SMALLINT,
 						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT)
 
 CREATE TABLE #DirectChild ( AgentId INT)
@@ -101,7 +103,9 @@ BEGIN
 					- (B.TComm) AS AComm,	
 					B.LiveHomeScore,
 					B.LiveAwayScore,
-					B.LiveIndicator, 
+					B.LiveIndicator,
+					m.FinalHomeScore,
+					m.FinalAwayScore, 
 					B.IP,		
 					B.Oddstype,		
 					B.DoubleCommLosing
@@ -152,6 +156,8 @@ BEGIN
 					0 AS LiveHomeScore, 
 					0 AS LiveAwayScore,
 					0 AS LiveIndicator ,
+					0 AS FinalHomeScore,
+					0 AS FinalAwayScore,
 					B.IP,		
 					0 as OddStype,		
 					B.DoubleCommLosing	
@@ -197,6 +203,8 @@ BEGIN
 					B.livehomescore,
 					B.liveawayscore,
 					B.liveindicator, 
+					0 AS FinalHomeScore,
+					0 AS FinalAwayScore,
 					B.IP as IP,		
 					0 as oddstype,		
 					B.DoubleCommLosing
@@ -247,6 +255,8 @@ BEGIN
 					B.LiveHomeScore,
 					B.LiveAwayScore,
 					B.LiveIndicator, 
+					m.FinalHomeScore,
+					m.FinalAwayScore,
 					B.IP,		
 					B.Oddstype,		
 					B.DoubleCommLosing
@@ -300,7 +310,9 @@ BEGIN
 					- (B.TComm) AS AComm,	
 					0 AS LiveHomeScore, 
 					0 AS LiveAwayScore,
-					0 AS LiveIndicator ,
+					0 AS LiveIndicator,
+					0 AS FinalHomeScore,
+					0 AS FinalAwayScore,
 					B.IP,		
 					0 as OddStype,		
 					B.DoubleCommLosing	
@@ -347,6 +359,8 @@ BEGIN
 					B.livehomescore,
 					B.liveawayscore,
 					B.liveindicator, 
+					0 AS FinalHomeScore,
+					0 AS FinalAwayScore,
 					B.IP as IP,		
 					0 as oddstype,		
 					B.DoubleCommLosing
@@ -401,6 +415,8 @@ BEGIN
 				B.LiveHomeScore,
 				B.LiveAwayScore,
 				B.LiveIndicator, 
+				m.FinalHomeScore,
+				m.FinalAwayScore,
 				B.IP,		
 				B.Oddstype,		
 				B.DoubleCommLosing
@@ -453,7 +469,9 @@ BEGIN
 				- (B.TComm) AS AComm,	
 				0 AS LiveHomeScore, 
 				0 AS LiveAwayScore,
-				0 AS LiveIndicator ,
+				0 AS LiveIndicator,
+				0 AS FinalHomeScore,
+				0 AS FinalAwayScore,
 				B.IP,		
 				0 as OddStype,		
 				B.DoubleCommLosing	
@@ -498,7 +516,9 @@ BEGIN
 				- (B.TComm) AS AComm,		
 				B.livehomescore,
 				B.liveawayscore,
-				B.liveindicator, 
+				B.liveindicator,
+				0 AS FinalHomeScore,
+				0 AS FinalAwayScore,
 				B.IP as IP,		
 				0 as oddstype,		
 				B.DoubleCommLosing
@@ -556,6 +576,8 @@ BEGIN
 				B.LiveHomeScore,
 				B.LiveAwayScore,
 				B.LiveIndicator, 
+				m.FinalHomeScore,
+				m.FinalAwayScore,
 				B.IP,		
 				B.Oddstype,		
 				B.DoubleCommLosing
@@ -610,6 +632,8 @@ BEGIN
 				0 AS LiveHomeScore, 
 				0 AS LiveAwayScore,
 				0 AS LiveIndicator ,
+				0 AS FinalHomeScore,
+				0 AS FinalAwayScore,
 				B.IP,		
 				0 as OddStype,		
 				B.DoubleCommLosing	
@@ -657,7 +681,9 @@ BEGIN
 				L.AComm - ISNULL(D.AComm, B.PlayerComm) as AComm,		
 				B.livehomescore,
 				B.liveawayscore,
-				B.liveindicator, 
+				B.liveindicator,
+				0 AS FinalHomeScore,
+				0 AS FinalAwayScore,
 				B.IP as IP,		
 				0 as oddstype,		
 				B.DoubleCommLosing
@@ -715,6 +741,8 @@ BEGIN
 				B.LiveHomeScore,
 				B.LiveAwayScore,
 				B.LiveIndicator, 
+				m.FinalHomeScore,
+				m.FinalAwayScore,
 				B.IP,		
 				B.Oddstype,		
 				B.DoubleCommLosing
@@ -768,6 +796,8 @@ BEGIN
 				0 AS LiveHomeScore, 
 				0 AS LiveAwayScore,
 				0 AS LiveIndicator ,
+				0 AS FinalHomeScore,
+				0 AS FinalAwayScore,
 				B.IP,		
 				0 as OddStype,		
 				B.DoubleCommLosing	
@@ -816,7 +846,9 @@ BEGIN
 				L.AComm - ISNULL(D.AComm, B.PlayerComm) as AComm,		
 				B.livehomescore,
 				B.liveawayscore,
-				B.liveindicator, 
+				B.liveindicator,
+				0 AS FinalHomeScore,
+				0 AS FinalAwayScore, 
 				B.IP as IP,		
 				0 as oddstype,		
 				B.DoubleCommLosing
@@ -885,6 +917,8 @@ BEGIN
 					B.LiveHomeScore,
 					B.LiveAwayScore,
 					B.LiveIndicator, 
+					m.FinalHomeScore,
+					m. FinalAwayScore,
 					B.IP,		
 					B.Oddstype,		
 					B.DoubleCommLosing
@@ -935,6 +969,8 @@ BEGIN
 					0 AS LiveHomeScore, 
 					0 AS LiveAwayScore,
 					0 AS LiveIndicator ,
+					0 AS FinalHomeScore,
+					0 AS FinalAwayScore,
 					B.IP,		
 					0 as OddStype,		
 					B.DoubleCommLosing	
@@ -980,6 +1016,8 @@ BEGIN
 					B.livehomescore,
 					B.liveawayscore,
 					B.liveindicator, 
+					0 AS FinalHomeScore,
+					0 AS FinalAwayScore,
 					B.IP as IP,		
 					0 as oddstype,		
 					B.DoubleCommLosing
@@ -1030,6 +1068,8 @@ BEGIN
 					B.LiveHomeScore,
 					B.LiveAwayScore,
 					B.LiveIndicator, 
+					m.FinalHomeScore,
+					m.FinalAwayScore,
 					B.IP,		
 					B.Oddstype,		
 					B.DoubleCommLosing
@@ -1084,6 +1124,8 @@ BEGIN
 					0 AS LiveHomeScore, 
 					0 AS LiveAwayScore,
 					0 AS LiveIndicator ,
+					0 AS FinalHomeScore,
+					0 AS FinalAwayScore,
 					B.IP,		
 					0 as OddStype,		
 					B.DoubleCommLosing	
@@ -1130,6 +1172,8 @@ BEGIN
 					B.livehomescore,
 					B.liveawayscore,
 					B.liveindicator, 
+					0 AS FinalHomeScore,
+					0 AS FinalAwayScore,
 					B.IP as IP,		
 					0 as oddstype,		
 					B.DoubleCommLosing
@@ -1184,6 +1228,8 @@ BEGIN
 				B.LiveHomeScore,
 				B.LiveAwayScore,
 				B.LiveIndicator, 
+				m.FinalHomeScore,
+				m.FinalAwayScore,
 				B.IP,		
 				B.Oddstype,		
 				B.DoubleCommLosing
@@ -1237,6 +1283,8 @@ BEGIN
 				0 AS LiveHomeScore, 
 				0 AS LiveAwayScore,
 				0 AS LiveIndicator ,
+				0 AS FinalHomeScore,				
+				0 AS FinalAwayScore,
 				B.IP,		
 				0 as OddStype,		
 				B.DoubleCommLosing	
@@ -1282,6 +1330,8 @@ BEGIN
 				B.livehomescore,
 				B.liveawayscore,
 				B.liveindicator, 
+				0 AS FinalHomeScore,				
+				0 AS FinalAwayScore,
 				B.IP as IP,		
 				0 as oddstype,		
 				B.DoubleCommLosing
@@ -1338,7 +1388,9 @@ BEGIN
 				L.AComm - ISNULL(D.AComm, B.PlayerComm) as AComm,
 				B.LiveHomeScore,
 				B.LiveAwayScore,
-				B.LiveIndicator, 
+				B.LiveIndicator,
+				m.FinalHomeScore,				
+				m.FinalAwayScore, 
 				B.IP,		
 				B.Oddstype,		
 				B.DoubleCommLosing
@@ -1393,6 +1445,8 @@ BEGIN
 				0 AS LiveHomeScore, 
 				0 AS LiveAwayScore,
 				0 AS LiveIndicator ,
+				0 AS FinalHomeScore,				
+				0 AS FinalAwayScore,
 				B.IP,		
 				0 as OddStype,		
 				B.DoubleCommLosing	
@@ -1440,7 +1494,9 @@ BEGIN
 				L.AComm - ISNULL(D.AComm, B.PlayerComm) as AComm,		
 				B.livehomescore,
 				B.liveawayscore,
-				B.liveindicator, 
+				B.liveindicator,
+				0 AS FinalHomeScore,				
+				0 AS FinalAwayScore, 
 				B.IP as IP,		
 				0 as oddstype,		
 				B.DoubleCommLosing
@@ -1498,6 +1554,8 @@ BEGIN
 				B.LiveHomeScore,
 				B.LiveAwayScore,
 				B.LiveIndicator, 
+				m.FinalHomeScore,				
+				m.FinalAwayScore,
 				B.IP,		
 				B.Oddstype,		
 				B.DoubleCommLosing
@@ -1551,6 +1609,8 @@ BEGIN
 				0 AS LiveHomeScore, 
 				0 AS LiveAwayScore,
 				0 AS LiveIndicator ,
+				0 AS FinalHomeScore,				
+				0 AS FinalAwayScore,
 				B.IP,		
 				0 as OddStype,		
 				B.DoubleCommLosing	
@@ -1600,6 +1660,8 @@ BEGIN
 				B.livehomescore,
 				B.liveawayscore,
 				B.liveindicator, 
+				0 AS FinalHomeScore,				
+				0 AS FinalAwayScore,
 				B.IP as IP,		
 				0 as oddstype,		
 				B.DoubleCommLosing

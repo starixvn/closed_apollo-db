@@ -23,8 +23,8 @@ BEGIN
 	SELECT  C.Username, C.AgentID, 1 as IsAgent,
 		ISNULL(SUM(CASE when BA.bettype < 31 OR BA.bettype between 121 and 999 OR BA.bettype between 1301 and 1334 then ABS(BA.actual_stake) END),0) Outstanding,  
 		ISNULL(SUM(CASE when BA.bettype < 31 OR BA.bettype between 121 and 999 OR BA.bettype between 1301 and 1334 then ABS(BA.actual_stake) * (1-B.TPositiontaking) END),0) Positiontaking,
-		ISNULL(SUM(CASE when BA.bettype BETWEEN 80 and 120 then  ABS(BA.actual_stake) END),0) Outstanding_NG,
-		ISNULL(SUM(CASE when BA.bettype BETWEEN 80 and 120 then  ABS(BA.actual_stake) * (1-B.TPositiontaking) END),0) Positiontaking_NG
+		ISNULL(SUM(CASE when BA.bettype BETWEEN 81 and 120 then  ABS(BA.actual_stake) END),0) Outstanding_NG,
+		ISNULL(SUM(CASE when BA.bettype BETWEEN 81 and 120 then  ABS(BA.actual_stake) * (1-B.TPositiontaking) END),0) Positiontaking_NG
 	FROM AgentInfo C WITH (NOLOCK)
 	INNER JOIN BetTrans_Agent BA WITH (NOLOCK)
 			ON BA.AgentID = C.AgentID		
@@ -40,8 +40,8 @@ BEGIN
 	SELECT  C.Username, C.AgentID, 1 as IsAgent,
 		ISNULL(SUM(CASE when BA.bettype < 31 OR BA.bettype between 121 and 999 OR BA.bettype between 1301 and 1334 then ABS(BA.actual_stake) END),0) Outstanding,  
 		ISNULL(SUM(CASE when BA.bettype < 31 OR BA.bettype between 121 and 999 OR BA.bettype between 1301 and 1334 then ABS(BA.actual_stake) * BP.APositiontaking END),0) Positiontaking,
-		ISNULL(SUM(CASE when BA.bettype BETWEEN 80 and 120 then ABS(BA.actual_stake) END),0) Outstanding_NG,
-		ISNULL(SUM(CASE when BA.bettype BETWEEN 80 and 120 then ABS(BA.actual_stake) * BP.APositiontaking END),0) Positiontaking_NG
+		ISNULL(SUM(CASE when BA.bettype BETWEEN 81 and 120 then ABS(BA.actual_stake) END),0) Outstanding_NG,
+		ISNULL(SUM(CASE when BA.bettype BETWEEN 81 and 120 then ABS(BA.actual_stake) * BP.APositiontaking END),0) Positiontaking_NG
 	FROM	AgentInfo C  WITH (NOLOCK)
 	INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK)
 			ON BA.AgentID = C.AgentID

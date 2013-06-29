@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[Age_Rpt_MatchSelResultEntered]   
+﻿ALTER PROCEDURE [dbo].[Age_Rpt_MatchSelResultEntered_xtest]   
 AS  
 /*  
 Created: Sophia 
@@ -23,9 +23,9 @@ SELECT 1, 0, NULL, 0, 0
 UNION ALL
 SELECT 2, 0, NULL, 0, 0
 UNION ALL
-SELECT 3, 0, NULL, 0, 0
+SELECT 5, 0, NULL, 0, 0
 UNION ALL
-SELECT 4, 0, NULL, 0, 0
+SELECT 6, 0, NULL, 0, 0
 UNION ALL
 SELECT 8, 0, NULL, 0, 0
 UNION ALL
@@ -33,6 +33,7 @@ SELECT -10, 0, NULL, 0, 0   ---- Outright
 UNION ALL
 SELECT -1, 0, NULL, 0, 0	---- Others
 
+ 
   
 UPDATE  r
 SET		IsToday = m.IsToday,
@@ -51,7 +52,7 @@ INNER JOIN (
 						SELECT	LeagueID, EventDate, Sporttype,  MAX(EventStatus) AS EventStatus  
 						FROM		Match WITH (NOLOCK)  
 						WHERE		Match.EventDate between @FromDate and @ToDate  
-								and Match.eventstatus NOT IN ( 'closed' ,'internal')
+								and Match.eventstatus NOT IN ( 'internal')
 								and Match.sporttype <= 99
 						GROUP BY 	leagueid, EventDate,Sporttype, matchid 
 	  
@@ -62,7 +63,7 @@ INNER JOIN (
 						INNER JOIN League with (NOLOCK)  
 							ON  m.LeagueId = League.LeagueId and League.Sporttype  < =99
 						WHERE		m.EventDate between @FromDate and @ToDate  
-								and m.OddsStatus <> 'closed'  
+								---and m.OddsStatus <> 'closed'  
 						GROUP BY  m.LeagueID, m.EventDate 	 
 		  
 					) as m  
@@ -73,7 +74,7 @@ ON r.Sporttype = m.sporttype
 
  
  SELECT * FROM @Rpt
-
+  
 GO
 GRANT EXECUTE ON [dbo].[Age_Rpt_MatchSelResultEntered] TO [aplweb]
 GO

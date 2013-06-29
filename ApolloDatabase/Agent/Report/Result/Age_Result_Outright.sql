@@ -1,7 +1,6 @@
 ﻿
 ALTER PROCEDURE [dbo].[Age_Result_Outright]
 	@FromDate DATETIME,
-	@ToDate DATETIME,
 	@isShowAll bit = 1 -- 1: Show All; 0: is NOT show Test	
 AS 
 
@@ -16,8 +15,10 @@ Revisions:
  
 */
 SET NOCOUNT ON 
- 
 
+DECLARE @ToDate datetime
+SELECT @ToDate = dateadd(s,-1, dateadd(d, 1, @FromDate))
+ 
 SELECT DISTINCT 
        league.sporttype,
        outright.leagueid,
@@ -34,16 +35,16 @@ FROM   (
                   AND [status] IN ('WON', 'REFUND')
                   AND eventdate >= @FromDate
                   AND eventdate <= @ToDate
-           UNION ALL
-           SELECT leagueid,
-                  eventdate,
-                  teamid,
-                  STATUS
-           FROM   dbo.outright14 AS o14 WITH (NOLOCK)
-           WHERE  oddsstatus = 'completed'
-                  AND [status] IN ('WON', 'REFUND')
-                  AND eventdate >= @FromDate
-                  AND eventdate <= @ToDate
+           --UNION ALL
+           --SELECT leagueid,
+           --       eventdate,
+           --       teamid,
+           --       STATUS
+           --FROM   dbo.outright14 AS o14 WITH (NOLOCK)
+           --WHERE  oddsstatus = 'completed'
+           --       AND [status] IN ('WON', 'REFUND')
+           --       AND eventdate >= @FromDate
+           --       AND eventdate <= @ToDate
        ) AS outright
        INNER JOIN dbo.league WITH (NOLOCK)
             ON  outright.leagueid = league.leagueid
