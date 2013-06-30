@@ -6,9 +6,9 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-ALTER PROCEDURE [dbo].[ReadLog_RunSpCust]	
+ALTER PROCEDURE [dbo].[ReadLog_RunSpCust]
 	@ActorAgentId		INT	
-	,@Username			NVARCHAR(50)	= ''	
+	,@Username			NVARCHAR(50)	= ''
 	,@ActionTypeId		INT				= 0
 	,@From				DATETIME
 	,@To				DATETIME
@@ -20,9 +20,9 @@ AS
 /*  
  * Created: 05162013@Edward
  * Task : Search execute SP log
- * DB: LogDB
+ * DB: SVRLOG.LogDB
  *  
- * Revisions:		
+ * Revisions:
  * Param's Explanation: 
 */
 
@@ -37,56 +37,49 @@ BEGIN
 	SELECT 
 		@FirstRec	= ((@PageIndex - 1) * @PageSize) + 1
 		,@LastRec	= ((@PageIndex * @PageSize + 1)) - 1
-	
+
+	DECLARE @Temp TABLE (
+		AgentId		INT,
+		AgentHId	HIERARCHYID,
+		Username	NVARCHAR(50) )
 
 	DECLARE 
-		@agentLevel		INT,
 		@agentHId		HIERARCHYID,
 		@actorAgentHId	HIERARCHYID,
 		@agentId		INT,
 		@uGroup			VARCHAR(3),
 		@isCheck		BIT				= 1
 
+	INSERT INTO @Temp
+	SELECT * FROM OPENQUERY(SVRAGE, 'SELECT AgentId, AgentHId, Username FROM [RepDB].[dbo].[AgentInfo] WITH (NOLOCK)')
+
 	SELECT @actorAgentHId = AgentHId
-	FROM RepDB.dbo.AgentInfo WITH (NOLOCK)
+	FROM @Temp
 	WHERE AgentId = @ActorAgentId
 
 	SELECT 
 		@agentId = AgentId,
-		@uGroup	= UGroup,
-		@Username = Username
-	FROM RepDB.dbo.CustInfo WITH (NOLOCK) 
+		@uGroup	= UGroup
+	FROM SVRAGE.RepDB.dbo.CustInfo WITH (NOLOCK) 
 	WHERE Username = @Username
 
-	SELECT 
-		@agentLevel	= AgentLevel,
-		@agentHId = AgentHId
-	FROM RepDB.dbo.AgentInfo WITH (NOLOCK)
+	SELECT @agentHId = AgentHId
+	FROM @Temp
 	WHERE AgentId = @agentId
 
-	IF NOT EXISTS (
-		SELECT TOP(1) *
-		FROM RepDB.dbo.AgentInfo WITH (NOLOCK)
-		WHERE 
-			@agentHId.IsDescendantOf(AgentHId) = 1
-			AND AgentId	= @ActorAgentId	
-	)
-		BEGIN					
+	IF @agentHId.IsDescendantOf(@actorAgentHId) <> 1
+		BEGIN
 			SET @isCheck = 0	
 		END
-	
-	
+
 	-- gets total rows
 	SET @TotalRows = (
 		SELECT COUNT(1)
 		FROM 
 			RunSpCust AS rsc WITH (NOLOCK)
-			INNER JOIN RepDB.dbo.CustInfo AS ci WITH (NOLOCK) 
-				ON rsc.CustId	= ci.CustId
-			INNER JOIN RepDB.dbo.AgentInfo AS ui WITH (NOLOCK) 
-				ON rsc.UserId	= ui.AgentId																
-			INNER JOIN LogAction AS la WITH (NOLOCK) 
-				ON rsc.ActionId = la.ActionId
+			INNER JOIN SVRAGE.RepDB.dbo.CustInfo AS ci WITH (NOLOCK) ON rsc.CustId	= ci.CustId
+			INNER JOIN @Temp AS ui ON rsc.UserId = ui.AgentId
+			INNER JOIN LogAction AS la WITH (NOLOCK) ON rsc.ActionId = la.ActionId
 		WHERE 
 			(@ActionTypeId = 0 OR (@ActionTypeId <> 0 AND (la.ActionTypeId = @ActionTypeId)))
 			AND rsc.LogDate BETWEEN @From AND @To
@@ -104,31 +97,26 @@ BEGIN
 			SELECT 
 				rsc.LogId,
 				rsc.LogDate,
-				ui.Username,							
+				ui.Username,
 				la.ActionTypeId,
 				la.ActionName,
-				rsc.OldData,					
-				rsc.Data,					
+				rsc.OldData,
+				rsc.Data,
 				ROW_NUMBER() OVER (ORDER BY rsc.LogDate DESC) AS num
 			FROM 
 				RunSpCust AS rsc WITH (NOLOCK)
-				INNER JOIN RepDB.dbo.CustInfo AS ci WITH (NOLOCK) 
-					ON rsc.CustId	= ci.CustId
-				INNER JOIN RepDB.dbo.AgentInfo AS ui WITH (NOLOCK) 
-					ON rsc.UserId	= ui.AgentId																
-				INNER JOIN LogAction AS la WITH (NOLOCK) 
-					ON rsc.ActionId = la.ActionId
+				INNER JOIN SVRAGE.RepDB.dbo.CustInfo AS ci WITH (NOLOCK) ON rsc.CustId = ci.CustId
+				INNER JOIN @Temp AS ui ON rsc.UserId = ui.AgentId
+				INNER JOIN LogAction AS la WITH (NOLOCK) ON rsc.ActionId = la.ActionId
 			WHERE 
-				(@ActionTypeId = 0 OR (@ActionTypeId <> 0 AND (la.ActionTypeId = @ActionTypeId)))
+				(@ActionTypeId = 0 OR la.ActionTypeId = @ActionTypeId)
 				AND rsc.LogDate BETWEEN @From AND @To
 				AND ci.Username = @Username
 				AND (ui.AgentHId.IsDescendantOf(@actorAgentHId) = 1 OR ui.AgentId = 0 )
 		) AS Temp
 	WHERE
-		Temp.num >= @FirstRec
-		AND Temp.num <= @LastRec
-		AND @isCheck = 1
-	ORDER BY
-		Temp.num
+		@isCheck = 1
+		AND Temp.num BETWEEN @FirstRec AND @LastRec
+	ORDER BY Temp.num
 		
 END
