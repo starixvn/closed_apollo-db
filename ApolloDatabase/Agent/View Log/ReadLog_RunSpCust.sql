@@ -1,21 +1,22 @@
 ﻿USE [LogDB]
 GO
-/****** Object:  StoredProcedure [dbo].[ReadLog_RunSpCust]    Script Date: 5/20/2013 5:24:22 PM ******/
+/****** Object:  StoredProcedure [dbo].[ReadLog_RunSpCust]    Script Date: 6/29/2013 5:46:10 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 ALTER PROCEDURE [dbo].[ReadLog_RunSpCust]	
-    @ActorAgentId		INT	
+	@ActorAgentId		INT	
 	,@Username			NVARCHAR(50)	= ''	
-    ,@ActionTypeId		INT				= 0
-    ,@From				DATETIME
+	,@ActionTypeId		INT				= 0
+	,@From				DATETIME
 	,@To				DATETIME
 	,@PageIndex			INT
 	,@PageSize			INT
 	,@TotalRows			INT				= 0	OUTPUT	
 AS
+
 /*  
  * Created: 05162013@Edward
  * Task : Search execute SP log
@@ -24,23 +25,31 @@ AS
  * Revisions:		
  * Param's Explanation: 
 */
+
 BEGIN
 	
 	SET NOCOUNT ON
 
-	DECLARE @FirstRec INT
-			,@LastRec INT
+	DECLARE 
+		@FirstRec INT
+		,@LastRec INT
 
-	SELECT @FirstRec	= ((@PageIndex - 1) * @PageSize) + 1
-			,@LastRec	= ((@PageIndex * @PageSize + 1)) - 1
+	SELECT 
+		@FirstRec	= ((@PageIndex - 1) * @PageSize) + 1
+		,@LastRec	= ((@PageIndex * @PageSize + 1)) - 1
 	
 
 	DECLARE 
-		@agentLevel			INT,
-		@agentHId			HIERARCHYID,
-		@agentId			INT,
-		@uGroup				VARCHAR(3),
-		@isCheck			BIT
+		@agentLevel		INT,
+		@agentHId		HIERARCHYID,
+		@actorAgentHId	HIERARCHYID,
+		@agentId		INT,
+		@uGroup			VARCHAR(3),
+		@isCheck		BIT				= 1
+
+	SELECT @actorAgentHId = AgentHId
+	FROM RepDB.dbo.AgentInfo WITH (NOLOCK)
+	WHERE AgentId = @ActorAgentId
 
 	SELECT 
 		@agentId = AgentId,
@@ -54,8 +63,6 @@ BEGIN
 		@agentHId = AgentHId
 	FROM RepDB.dbo.AgentInfo WITH (NOLOCK)
 	WHERE AgentId = @agentId
-
-	SET @isCheck = 1
 
 	IF NOT EXISTS (
 		SELECT TOP(1) *
@@ -85,7 +92,11 @@ BEGIN
 			AND rsc.LogDate BETWEEN @From AND @To
 			AND ci.Username = @Username
 			AND @isCheck = 1
+			AND (ui.AgentHId.IsDescendantOf(@actorAgentHId) = 1 OR ui.AgentId = 0 )
 	)
+
+	-- temp for not paging
+	SET @PageSize = @TotalRows
 
 	-- gets data
 	SELECT TOP (@PageSize) *
@@ -111,6 +122,7 @@ BEGIN
 				(@ActionTypeId = 0 OR (@ActionTypeId <> 0 AND (la.ActionTypeId = @ActionTypeId)))
 				AND rsc.LogDate BETWEEN @From AND @To
 				AND ci.Username = @Username
+				AND (ui.AgentHId.IsDescendantOf(@actorAgentHId) = 1 OR ui.AgentId = 0 )
 		) AS Temp
 	WHERE
 		Temp.num >= @FirstRec

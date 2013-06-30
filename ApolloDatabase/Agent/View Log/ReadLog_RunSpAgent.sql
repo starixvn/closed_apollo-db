@@ -1,60 +1,72 @@
 ﻿USE [LogDB]
 GO
-/****** Object:  StoredProcedure [dbo].[ReadLog_RunSpAgent]    Script Date: 5/20/2013 5:22:20 PM ******/
+/****** Object:  StoredProcedure [dbo].[ReadLog_RunSpAgent]    Script Date: 6/29/2013 4:08:53 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 ALTER PROCEDURE [dbo].[ReadLog_RunSpAgent]	
-    @ActorAgentId		INT	
-	,@Username			NVARCHAR(50)	= ''	
-    ,@ActionTypeId		INT				= 0
-    ,@From				DATETIME
-	,@To				DATETIME
-	,@PageIndex			INT
-	,@PageSize			INT
-	,@TotalRows			INT				= 0	OUTPUT	
+	@ActorAgentId	INT	
+	,@Username		NVARCHAR(50)	= ''	
+	,@ActionTypeId	INT				= 0
+	,@From			DATETIME
+	,@To			DATETIME
+	,@PageIndex		INT
+	,@PageSize		INT
+	,@TotalRows		INT				= 0		OUTPUT	
 AS
+
 /*  
  * Created: 05162013@Edward
  * Task : Search execute SP log
- * DB: LogDB
+ * DB: SVRLOG.LogDB
  *  
  * Revisions:		
  * Param's Explanation: 
 */
+
 BEGIN
 	
 	SET NOCOUNT ON
 
-	DECLARE @FirstRec INT
-			,@LastRec INT
-
-	SELECT @FirstRec	= ((@PageIndex - 1) * @PageSize) + 1
-			,@LastRec	= ((@PageIndex * @PageSize + 1)) - 1
-	
 	DECLARE 
-		@agentLevel			SMALLINT,
-		@agentHId			HIERARCHYID,
-		@isCheck			BIT
+		@FirstRec INT
+		,@LastRec INT
 
 	SELECT 
-		@agentLevel = AgentLevel,
+		@FirstRec	= ((@PageIndex - 1) * @PageSize) + 1
+		,@LastRec	= ((@PageIndex * @PageSize + 1)) - 1
+
+	DECLARE @Temp TABLE (
+		AgentId		INT,
+		AgentHId	HIERARCHYID,
+		Username	NVARCHAR(50) )
+	
+	DECLARE 
+		@agentId		INT,
+		@agentHId		HIERARCHYID,
+		@actorAgentHId	HIERARCHYID,
+		@actorUsername	NVARCHAR(50),
+		@isCheck		BIT				= 1
+
+	INSERT INTO @Temp
+	SELECT * FROM OPENQUERY(SVRAGE, 'SELECT AgentId, AgentHId, Username FROM [RepDB].[dbo].[AgentInfo] WITH (NOLOCK)')
+
+	SELECT 
+		@actorAgentHId = AgentHId,
+		@actorUsername = Username
+	FROM @Temp
+	WHERE AgentId = @ActorAgentId
+
+	SELECT 
+		@agentId = AgentId,
 		@agentHId = AgentHId
-	FROM RepDB.dbo.AgentInfo WITH (NOLOCK)
+	FROM @Temp
 	WHERE Username = @Username
 
-	SET @isCheck = 1
-
-	IF NOT EXISTS (
-		SELECT TOP(1) *
-		FROM RepDB.dbo.AgentInfo WITH (NOLOCK)
-		WHERE 
-			@agentHId.IsDescendantOf(AgentHId) = 1
-			AND AgentId	= @ActorAgentId	
-	)
-		BEGIN					
+	IF @agentHId.IsDescendantOf(@actorAgentHId) <> 1
+		BEGIN
 			SET @isCheck = 0	
 		END
 
@@ -62,15 +74,12 @@ BEGIN
 	SET @TotalRows = (
 		SELECT COUNT(1)
 		FROM 
-			RunSpAgent AS rsa WITH (NOLOCK)
-			INNER JOIN RepDB.dbo.AgentInfo AS ai WITH (NOLOCK) 
-				ON rsa.AgentId	= ai.AgentId	
-			INNER JOIN RepDB.dbo.AgentInfo AS ui WITH (NOLOCK) 
-				ON rsa.UserId	= ui.AgentId																
-			INNER JOIN LogAction AS la WITH (NOLOCK) 
-				ON rsa.ActionId = la.ActionId
+			dbo.RunSpAgent AS rsa WITH (NOLOCK)
+			INNER JOIN @Temp AS ai ON rsa.AgentId = ai.AgentId
+			INNER JOIN @Temp AS ui ON rsa.UserId = ui.AgentId
+			INNER JOIN dbo.LogAction AS la WITH (NOLOCK) ON rsa.ActionId = la.ActionId
 		WHERE 
-			(@ActionTypeId = 0 OR (@ActionTypeId <> 0 AND (la.ActionTypeId = @ActionTypeId)))
+			(@ActionTypeId = 0 OR la.ActionTypeId = @ActionTypeId)
 			AND rsa.LogDate BETWEEN @From AND @To
 			AND ai.Username = @Username
 			AND @isCheck = 1
@@ -82,29 +91,26 @@ BEGIN
 			SELECT 
 				rsa.LogId,
 				rsa.LogDate,
-				ui.Username,							
+				ui.Username,
 				la.ActionTypeId	,
 				la.ActionName,
-				rsa.OldData,					
+				rsa.OldData,
 				rsa.Data,
 				ROW_NUMBER() OVER (ORDER BY rsa.LogDate DESC) AS num
 			FROM 
-				RunSpAgent AS rsa WITH (NOLOCK)
-				INNER JOIN RepDB.dbo.AgentInfo AS ai WITH (NOLOCK) 
-					ON rsa.AgentId	= ai.AgentId	
-				INNER JOIN RepDB.dbo.AgentInfo AS ui WITH (NOLOCK) 
-					ON rsa.UserId	= ui.AgentId																
-				INNER JOIN LogAction AS la WITH (NOLOCK) 
-					ON rsa.ActionId = la.ActionId
+				dbo.RunSpAgent AS rsa WITH (NOLOCK)
+				INNER JOIN @Temp AS ai ON rsa.AgentId = ai.AgentId	
+				INNER JOIN @Temp AS ui ON rsa.UserId	= ui.AgentId
+				INNER JOIN dbo.LogAction AS la WITH (NOLOCK) ON rsa.ActionId = la.ActionId
 			WHERE 
-				(@ActionTypeId = 0 OR (@ActionTypeId <> 0 AND (la.ActionTypeId = @ActionTypeId)))
+				(@ActionTypeId = 0 OR la.ActionTypeId = @ActionTypeId)
 				AND rsa.LogDate BETWEEN @From AND @To
 				AND ai.Username = @Username
 		) AS Temp
-	WHERE
-		Temp.num >= @FirstRec
-		AND Temp.num <= @LastRec
-		AND @isCheck = 1
-	ORDER BY
-		Temp.num
+	WHERE 
+		@isCheck = 1 
+		AND Temp.num BETWEEN @FirstRec AND @LastRec
+	ORDER BY Temp.num
+
+	DELETE @Temp
 END
