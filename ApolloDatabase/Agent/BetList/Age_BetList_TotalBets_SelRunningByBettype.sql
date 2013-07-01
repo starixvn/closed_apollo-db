@@ -35,7 +35,7 @@ DECLARE @Betlist TABLE (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 						Username NVARCHAR(50), BetType SMALLINT, CustId INT , Hdp1 SMALLMONEY, Hdp2 SMALLMONEY, Odds SMALLMONEY, MOdds SMALLMONEY,
 						Status VARCHAR(10), Stake MONEY, Actual_Stake MONEY, TransDate DATETIME, BetTeam VARCHAR(10), BetId BIGINT, 
 						APositionTaking SMALLMONEY, ADiscount DECIMAL (9,8),  LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
-						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT, UGroup varchar(3))
+						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT, UGroup varchar(3),PlayerDiscount decimal(9,8))
 
 IF @LoggedId = 0 
 BEGIN 
@@ -76,7 +76,8 @@ BEGIN
 				B.IP,		
 				0 AS OddStype,		
 				B.DoubleCommLosing,
-				C.UGroup	
+				C.UGroup,
+				B.PlayerDiscount 
 			FROM BetTrans B  WITH (NOLOCK) 
 				INNER JOIN BetTrans_Agent BA WITH (NOLOCK) ON BA.TransId = B.TransId
 				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
@@ -123,7 +124,8 @@ BEGIN
 				B.IP AS IP,		
 				0 AS oddstype,		
 				B.DoubleCommLosing,
-				C.UGroup
+				C.UGroup,
+				B.PlayerDiscount 
 			FROM 		
 				bettrans b WITH (NOLOCK)
 				INNER JOIN BetTrans_Agent AS ba WITH (NOLOCK) ON BA.TransId = B.TransId
@@ -175,7 +177,8 @@ BEGIN
 				B.IP,		
 				B.Oddstype,		
 				B.DoubleCommLosing,
-				C.UGroup
+				C.UGroup,
+				B.PlayerDiscount 
  			FROM 	
 				BetTrans AS b  WITH (NOLOCK) 
 				INNER JOIN BetTrans_Agent AS ba WITH (NOLOCK) ON BA.TransId = B.TransId
@@ -227,7 +230,8 @@ BEGIN
 				B.IP,		
 				0 AS OddStype,		
 				B.DoubleCommLosing,
-				C.UGroup
+				C.UGroup,
+				B.PlayerDiscount 
 			FROM BetTrans AS B  WITH (NOLOCK) 
 				INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
 				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
@@ -274,7 +278,8 @@ BEGIN
 				B.IP AS IP,		
 				0 AS oddstype,		
 				B.DoubleCommLosing,
-				C.UGroup
+				C.UGroup,
+				B.PlayerDiscount 
 			FROM 		
 				bettrans b WITH (NOLOCK)
 				INNER JOIN BetTrans_Agent AS ba WITH (NOLOCK) ON BA.TransId = B.TransId
@@ -326,7 +331,8 @@ BEGIN
 				B.IP,		
 				B.Oddstype,		
 				B.DoubleCommLosing,
-				C.UGroup
+				C.UGroup,
+				B.PlayerDiscount 
  			FROM 	
 				BetTrans AS b  WITH (NOLOCK) 
 				INNER JOIN BetTrans_Agent AS ba WITH (NOLOCK) ON BA.TransId = B.TransId

@@ -26,44 +26,122 @@ Parameters
 				   0: All Member
  
 */
-SET NOCOUNT ON 
-	SELECT		B.Showtime, B.LiveIndicator,
-				B.leagueid, B.matchcode, B.HomeId, B.AwayId, B.UGroup,
-				SUM(CASE WHEN B.Bettype = 20 AND betteam = 'h' THEN B.Stake ELSE 0 END) AS HomeStakeMoney,
-				SUM(CASE WHEN B.Bettype = 20 AND betteam = 'a' THEN B.Stake ELSE 0 END) AS AwayStakeMoney,
-				 
-				SUM(CASE WHEN B.Bettype = 20 AND betteam = 'h' THEN B.BetCount ELSE 0 END) AS HomeCountMoney,
-				SUM(CASE WHEN B.Bettype = 20 AND betteam = 'a' THEN B.BetCount ELSE 0 END) AS AwayCountMoney		 
+SET NOCOUNT ON
+CREATE TABLE #SpecialWager (Showtime nvarchar(50), LiveIndicator BIT, leagueid INT, MatchId INT, HomeId INT , AwayId INT, UGroup varchar (3),
+							bettype INT, Stake MONEY, Count BIGINT, Type TINYINT)	----Type : 0 Total, 1 : Home, 2: Away, 3: Draw
 
-	FROM (		
-				SELECT		M.ShowTime, B.LiveIndicator,
-							M.leagueid, M.matchcode, M.HomeId, M.AwayId, 
-							B.Bettype, B.Stake, B.betteam, C.UGroup,
-							Count(B.TransID) as BetCount
-				FROM		Bettrans B WITH (NOLOCK)
-				INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
-					ON		B.TransId = BA.TransId AND BA.AgentID = @LoggedID  AND BA.Bettype = 20 AND BA.StatusId IN (0,1)
-				INNER JOIN	Match M WITH (NOLOCK)
-					ON		M.matchID = B.MatchID
-				INNER JOIN  CustInfo C WITH (NOLOCK)
-					ON		C.CustID = B.CustID
-				WHERE		B.Bettype = 20
-							AND B.StatusId IN (0,1)							
-							AND B.LiveIndicator = 0
-							AND M.Sporttype IN (SELECT val FROM StrSplit_Key(@Sporttypes, ','))
-							AND M.Eventdate = @Fromdate
-							AND M.EventStatus = 'running'
-							AND (M.Leagueid = @LeagueId OR @LeagueId = 0)
-							AND (C.UGroup = @UGroup OR @UGroup = 'ALL')
-							AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)											 
-				GROUP BY	M.ShowTime, B.LiveIndicator,
-							M.leagueid, M.matchcode, M.HomeId, M.AwayId, 
-							B.Bettype, B.Stake, B.betteam, C.UGroup
-				) B
 
-	GROUP BY 	B.ShowTime, B.LiveIndicator,
-				B.leagueid, B.matchcode, B.HomeId, B.AwayId, B.UGroup	 
-	ORDER BY 	B.ShowTime,B.leagueid, B.matchcode, B.HomeId, B.AwayId
+INSERT INTO #SpecialWager 
+SELECT		B.Showtime, B.LiveIndicator,
+			B.leagueid, B.MatchId, B.HomeId, B.AwayId, B.UGroup, B.bettype,
+			SUM(B.Stake) AS Stake,							 
+			SUM(B.BetCount) AS Count,
+			1 as Type 
+FROM (		
+			SELECT		M.ShowTime, B.LiveIndicator,
+						M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
+						B.Bettype, B.Stake, C.UGroup,
+						Count(B.TransID) as BetCount
+			FROM		Bettrans B WITH (NOLOCK)
+			INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
+				ON		B.TransId = BA.TransId AND BA.AgentID = @LoggedID  AND BA.Bettype IN (20)  AND BA.StatusId IN (0,1)
+			INNER JOIN	Match M WITH (NOLOCK)
+				ON		M.matchID = B.MatchID
+			INNER JOIN  CustInfo C WITH (NOLOCK)
+				ON		C.CustID = B.CustID
+			WHERE		B.Bettype IN (20) 
+						AND B.betteam = 'h'
+						AND B.StatusId IN (0,1)							
+						AND B.LiveIndicator = 0
+						AND M.Sporttype IN (SELECT val FROM StrSplit_Key(@Sporttypes, ','))
+						AND M.Eventdate = @Fromdate
+						AND M.EventStatus = 'running'
+						AND (M.Leagueid = @LeagueId OR @LeagueId = 0)
+						AND (C.UGroup = @UGroup OR @UGroup = 'ALL')
+						AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)											 
+			GROUP BY	M.ShowTime, B.LiveIndicator,
+						M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
+						B.Bettype, B.Stake, C.UGroup
+			) B
+GROUP BY 	B.ShowTime, B.LiveIndicator, B.Bettype,
+			B.leagueid, B.MatchId, B.HomeId, B.AwayId, B.UGroup	 
+
+UNION ALL
+SELECT		B.Showtime, B.LiveIndicator,
+			B.leagueid, B.MatchId, B.HomeId, B.AwayId, B.UGroup, B.bettype,
+			SUM(B.Stake) AS Stake,							 
+			SUM(B.BetCount) AS Count,
+			2 as Type 
+FROM (		
+			SELECT		M.ShowTime, B.LiveIndicator,
+						M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
+						B.Bettype, B.Stake, C.UGroup,
+						Count(B.TransID) as BetCount
+			FROM		Bettrans B WITH (NOLOCK)
+			INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
+				ON		B.TransId = BA.TransId AND BA.AgentID = @LoggedID  AND BA.Bettype IN (20) AND BA.StatusId IN (0,1)
+			INNER JOIN	Match M WITH (NOLOCK)
+				ON		M.matchID = B.MatchID
+			INNER JOIN  CustInfo C WITH (NOLOCK)
+				ON		C.CustID = B.CustID
+			WHERE		B.Bettype IN (20) 
+						AND B.betteam = 'a'
+						AND B.StatusId IN (0,1)							
+						AND B.LiveIndicator = 0
+						AND M.Sporttype IN (SELECT val FROM StrSplit_Key(@Sporttypes, ','))
+						AND M.Eventdate = @Fromdate
+						AND M.EventStatus = 'running'
+						AND (M.Leagueid = @LeagueId OR @LeagueId = 0)
+						AND (C.UGroup = @UGroup OR @UGroup = 'ALL')
+						AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)											 
+			GROUP BY	M.ShowTime, B.LiveIndicator,
+						M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
+						B.Bettype, B.Stake, C.UGroup
+			) B
+GROUP BY 	B.ShowTime, B.LiveIndicator, B.Bettype,
+			B.leagueid, B.MatchId, B.HomeId, B.AwayId, B.UGroup	 
+
+------------------------Others
+
+INSERT INTO #SpecialWager 
+SELECT		B.Showtime, B.LiveIndicator,
+			B.leagueid, B.MatchId, B.HomeId, B.AwayId, B.UGroup, B.bettype,
+			SUM(B.Stake) AS Stake,							 
+			SUM(B.BetCount) AS Count,
+			0 as Type 
+FROM (		
+			SELECT		M.ShowTime, B.LiveIndicator,
+						M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
+						B.Bettype, B.Stake, C.UGroup,
+						Count(B.TransID) as BetCount
+			FROM		Bettrans B WITH (NOLOCK)
+			INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
+				ON		B.TransId = BA.TransId AND BA.AgentID = @LoggedID  AND BA.Bettype NOT IN (1,2,3,7,8,12,9,29,20) AND BA.StatusId IN (0,1)
+			INNER JOIN	Match M WITH (NOLOCK)
+				ON		M.matchID = B.MatchID
+			INNER JOIN  CustInfo C WITH (NOLOCK)
+				ON		C.CustID = B.CustID
+			WHERE		B.Bettype NOT IN (1,2,3,7,8,12,9,29,20)
+						AND B.StatusId IN (0,1)							
+						AND B.LiveIndicator = 0
+						AND M.Sporttype IN (SELECT val FROM StrSplit_Key(@Sporttypes, ','))
+						AND M.Eventdate = @Fromdate
+						AND M.EventStatus = 'running'
+						AND (M.Leagueid = @LeagueId OR @LeagueId = 0)
+						AND (C.UGroup = @UGroup OR @UGroup = 'ALL')
+						AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)											 
+			GROUP BY	M.ShowTime, B.LiveIndicator,
+						M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
+						B.Bettype, B.Stake, C.UGroup
+			) B
+GROUP BY 	B.ShowTime, B.LiveIndicator, B.Bettype,
+			B.leagueid, B.MatchId, B.HomeId, B.AwayId, B.UGroup
+
+SELECT	* 
+FROM	#SpecialWager 
+ORDER BY ShowTime, leagueid,HomeId, AwayId
+
+
 GO
 GRANT EXECUTE ON [Age_Wagers_BK_Special] TO [aplweb]
 

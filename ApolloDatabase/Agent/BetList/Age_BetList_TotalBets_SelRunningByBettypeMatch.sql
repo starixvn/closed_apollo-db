@@ -56,7 +56,8 @@ BEGIN
 			'' as showtime,
 			B.refno,
 			B.DoubleCommLosing,
-			C.UGroup
+			C.UGroup, 
+			B.PlayerDiscount
 		FROM Bettrans B WITH (NOLOCK)
 		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
 			ON B.TransID = BA.TransID
@@ -110,7 +111,8 @@ BEGIN
 			m.showtime,
 			B.refno,
 			B.DoubleCommLosing,
-			C.UGroup
+			C.UGroup,
+			B.PlayerDiscount
 		FROM Bettrans B WITH (NOLOCK)
 		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
 			ON B.TransID = BA.TransID
@@ -163,7 +165,8 @@ BEGIN
 			'' as showtime,
 			B.refno,
 			B.DoubleCommLosing,
-			C.UGroup
+			C.UGroup,
+			B.PlayerDiscount
 		FROM Bettrans B WITH (NOLOCK)
 		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
 			ON B.TransID = BA.TransID
@@ -217,7 +220,8 @@ BEGIN
 			m.showtime,
 			B.refno,
 			B.DoubleCommLosing,
-			C.UGroup
+			C.UGroup,
+			B.PlayerDiscount
 		FROM Bettrans B WITH (NOLOCK)
 		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
 			ON B.TransID = BA.TransID
