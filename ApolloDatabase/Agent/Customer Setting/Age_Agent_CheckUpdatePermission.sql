@@ -1,10 +1,11 @@
-﻿USE [CustDB]
+﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_CheckUpdatePermission]    Script Date: 5/6/2013 10:29:48 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_CheckUpdatePermission]    Script Date: 6/29/2013 1:37:13 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+
 ALTER PROCEDURE [dbo].[Age_Agent_CheckUpdatePermission]
 	@ActorAgentId		INT,
 	@ObjectId			INT,
@@ -40,14 +41,12 @@ BEGIN
 	IF @ObjectTypeId = 1	-- Agent
 		BEGIN
 			
-			IF EXISTS (
-				SELECT *
-				FROM AgentInfo WITH (NOLOCK)
-				WHERE 
-					AgentHId.IsDescendantOf(@agentHId) = 1
-					AND AgentId	<> @ActorAgentId
-					AND AgentId	= @ObjectId
-			)
+			IF EXISTS (	SELECT 1
+						FROM AgentInfo WITH (NOLOCK)
+						WHERE 
+							AgentHId.IsDescendantOf(@agentHId) = 1
+							AND AgentId <> @ActorAgentId
+							AND AgentId = @ObjectId )
 				SET @HasPermission = 1
 
 			RETURN
@@ -55,15 +54,13 @@ BEGIN
 
 	IF @ObjectTypeId = 2	-- Customer
 		BEGIN
-			IF EXISTS (
-				SELECT *
-				FROM CustInfo WITH (NOLOCK)
-				WHERE 
-					CustId = @ObjectId
-					AND AgentId IN (	SELECT AgentId
-										FROM AgentInfo WITH (NOLOCK)
-										WHERE AgentHId.IsDescendantOf(@agentHId) = 1 )
-			)
+			IF EXISTS (	SELECT 1
+						FROM CustInfo WITH (NOLOCK)
+						WHERE 
+							CustId = @ObjectId
+							AND AgentId IN (	SELECT AgentId
+												FROM AgentInfo WITH (NOLOCK)
+												WHERE AgentHId.IsDescendantOf(@agentHId) = 1 ) )
 				SET @HasPermission = 1
 
 			RETURN
