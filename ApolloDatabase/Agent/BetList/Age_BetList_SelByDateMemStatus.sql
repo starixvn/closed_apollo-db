@@ -4,7 +4,9 @@
 	@CustId INT = -1,
 	@FromDate SMALLDATETIME, 
 	@Todate SMALLDATETIME,
-	@StatusIds VARCHAR(200)
+	@StatusIds VARCHAR(200),
+	@Sporttypes VARCHAR(MAX) ='0',
+	@Bettypes VARCHAR(MAX) = '0'
 
  AS
 /*

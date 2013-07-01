@@ -1,5 +1,5 @@
 ﻿ALTER PROCEDURE [dbo].[Age_Wagers_SelLeague]
-	@FromDate DATETIME,
+	@FromDate DATE,
 	@Sporttypes VARCHAR(MAX) = '0'
 AS
 /*
