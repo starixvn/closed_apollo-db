@@ -204,13 +204,13 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
  			FROM		Bettrans B WITH (NOLOCK)
 			INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
 				ON		B.TransId = BA.TransId AND BA.AgentID = @LoggedID 
-						AND (@Bettypes = '0' OR BA.Bettype IN (Select Bettype FROM #BettypeList WHERE Bettype NOT IN (9,10,29))) 
+						AND (@Bettypes = '0' OR BA.Bettype IN (Select Bettype FROM #BettypeList)) 
 						AND BA.StatusId IN (0,1)
 			INNER JOIN	Match M WITH (NOLOCK)
 				ON		M.matchID = B.MatchID
 			INNER JOIN  CustInfo C WITH (NOLOCK)
 				ON		C.CustID = B.CustID
-			WHERE		(@Bettypes = '0' OR B.Bettype IN (Select Bettype FROM #BettypeList WHERE Bettype NOT IN (9,10,29)))
+			WHERE		(@Bettypes = '0' OR B.Bettype IN (Select Bettype FROM #BettypeList ))
 						AND B.StatusId IN (0,1)							
 						AND B.LiveIndicator = @LiveIndicator
 						AND (B.betteam = @Betteam OR B.betteam = '0')
