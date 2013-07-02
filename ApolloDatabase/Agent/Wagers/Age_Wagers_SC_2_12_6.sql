@@ -50,7 +50,18 @@ SET NOCOUNT ON
 				SUM(CASE WHEN B.BetType = 6 AND betteam = '0-1' THEN B.BetCount ELSE 0 END) AS Total01Count,
 				SUM(CASE WHEN B.BetType = 6 AND betteam = '2-3' THEN B.BetCount ELSE 0 END) AS Total23Count,
 				SUM(CASE WHEN B.BetType = 6 AND betteam = '4-6' THEN B.BetCount ELSE 0 END) AS Total46Count,
-				SUM(CASE WHEN B.BetType = 6 AND betteam = '7-over' THEN B.BetCount ELSE 0 END) AS Total7OverCount
+				SUM(CASE WHEN B.BetType = 6 AND betteam = '7-over' THEN B.BetCount ELSE 0 END) AS Total7OverCount,
+
+				MAX(CASE WHEN B.Bettype = 2 AND betteam = 'h' THEN 'h' ELSE '0' END) AS HomeBetteamOE,
+				MAX(CASE WHEN B.Bettype = 2 AND betteam = 'a' THEN 'a' ELSE '0' END) AS AwayBetteamOE,
+
+				MAX(CASE WHEN B.Bettype = 12 AND betteam = 'h' THEN 'h' ELSE '0' END) AS HomeBetteamHTOE,
+				MAX(CASE WHEN B.Bettype = 12 AND betteam = 'a' THEN 'a' ELSE '0' END) AS AwayBetteamHTOE,
+
+				MAX(CASE WHEN B.BetType = 6 AND betteam = '0-1' THEN '0-1' ELSE '0' END) AS Total01Betteam,
+				MAX(CASE WHEN B.BetType = 6 AND betteam = '2-3' THEN '2-3' ELSE '0' END) AS Total23Betteam,
+				MAX(CASE WHEN B.BetType = 6 AND betteam = '4-6' THEN '4-6' ELSE '0' END) AS Total46Betteam,
+				MAX(CASE WHEN B.BetType = 6 AND betteam = '7-over' THEN '7-over' ELSE '0' END) AS Total7OverBetteam
 
 	FROM (		
 				SELECT		M.ShowTime, B.LiveIndicator,

@@ -46,7 +46,16 @@ SET NOCOUNT ON
 				SUM(CASE WHEN B.Bettype = 8 AND betteam = 'a' THEN B.BetCount ELSE 0 END) AS AwayCountHTOU,
 
 				SUM(CASE WHEN B.Bettype = 12 AND betteam = 'h' THEN B.BetCount ELSE 0 END) AS HomeCountHTOE,
-				SUM(CASE WHEN B.Bettype = 12 AND betteam = 'a' THEN B.BetCount ELSE 0 END) AS AwayCountHTOE
+				SUM(CASE WHEN B.Bettype = 12 AND betteam = 'a' THEN B.BetCount ELSE 0 END) AS AwayCountHTOE,
+
+				MAX(CASE WHEN B.Bettype = 7 AND betteam = 'h' THEN 'h' ELSE '0' END) AS HomeBetteamHTHDP,
+				MAX(CASE WHEN B.Bettype = 7 AND betteam = 'a' THEN 'a' ELSE '0' END) AS AwayBetteamHTHDP,
+
+				MAX(CASE WHEN B.Bettype = 8 AND betteam = 'h' THEN 'h' ELSE '0' END) AS HomeBetteamHTOU,
+				MAX(CASE WHEN B.Bettype = 8 AND betteam = 'a' THEN 'a' ELSE '0' END) AS AwayBetteamHTOU,
+
+				MAX(CASE WHEN B.Bettype = 12 AND betteam = 'h' THEN 'h' ELSE '0' END) AS HomeBetteamHTOE,
+				MAX(CASE WHEN B.Bettype = 12 AND betteam = 'a' THEN 'a' ELSE '0' END) AS AwayBetteamHTOE
 
 	FROM (		
 				SELECT		M.ShowTime, B.LiveIndicator,

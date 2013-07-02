@@ -194,6 +194,7 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 						 END AS Status,
 				B.Stake,
 				B.Actual_Stake,
+				B.PlayerDiscount,
 				B.TransDate,		
 				B.BetTeam,
 				B.BetId,					 
@@ -203,8 +204,8 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 				B.IP,		
 				B.Oddstype,		
 				B.DoubleCommLosing,
-				C.UGroup,
-				B.PlayerDiscount 
+				C.UGroup
+			
  			FROM		Bettrans B WITH (NOLOCK)
 			INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
 				ON		B.TransId = BA.TransId AND BA.AgentID = @LoggedID 
@@ -238,7 +239,7 @@ DROP TABLE #BettypeList
 DROP TABLE #SportsList
 
 GO
-GRANT VIEW DEFINITION ON [dbo].[Age_BetList_SelWagers] TO [aplweb]
+GRANT EXECUTE ON [dbo].[Age_BetList_SelWagers] TO [aplweb]
 
 
 

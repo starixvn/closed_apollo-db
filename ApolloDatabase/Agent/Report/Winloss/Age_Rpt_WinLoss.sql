@@ -4,7 +4,8 @@
 	@ToDate 	DATE,	
 	@BalanceUpDay DATE,
 	@Sporttypes VARCHAR(MAX) = '0',
-	@Bettypes VARCHAR(MAX) = '0' 	
+	@Bettypes VARCHAR(MAX) = '0'
+WITh RECOMPILE  	
 AS
     /*
     Created	: Sophia

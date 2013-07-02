@@ -31,6 +31,7 @@ SET NOCOUNT ON
 				SELECT		M.EventDate, B.LiveIndicator,
 							M.leagueid, M.TeamId, M.Orid,
 							B.Bettype, B.Stake, B.betteam, 
+							B.Status,
 							Count(B.TransID) as BetCount,
 							SUM(B.Stake) as Stake
 				FROM		Bettrans B WITH (NOLOCK)
@@ -50,7 +51,7 @@ SET NOCOUNT ON
 																 
 				GROUP BY	M.EventDate, B.LiveIndicator,
 							M.leagueid, M.TeamId, M.Orid,
-							B.Bettype, B.Stake, B.betteam
+							B.Bettype, B.Stake, B.betteam, B.Status
 			 
 				ORDER BY 	M.EventDate, M.leagueid, M.TeamId
 GO
