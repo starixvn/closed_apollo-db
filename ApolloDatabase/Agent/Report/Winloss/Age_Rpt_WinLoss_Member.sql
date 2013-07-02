@@ -24,14 +24,13 @@ SET NOCOUNT ON
 
 CREATE TABLE #WinLossMember ( Username NVARCHAR(50), CustID INT, PositionTaking SMALLINT, BetCount BIGINT, TurnOver MONEY, ActualTO MONEY, WinLost MONEY, PlayerComm MONEY, MemTotal MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, UplineTotal MONEY)
 
+CREATE TABLE #BettypeList (bettype SMALLINT)
+INSERT INTO #BettypeList
+SELECT val FROM dbo.strSplit_Key(@Bettypes,',')
 
-DECLARE @SportsList TABLE (Sporttype TINYINT)
-INSERT INTO @SportsList (Sporttype)
+CREATE TABLE #SportsList (Sporttype TINYINT)
+INSERT INTO #SportsList (Sporttype)
 SELECT val FROM strSplit_key (@Sporttypes, ',')
-
-DECLARE @BettypeList TABLE (Bettype SMALLINT)
-INSERT INTO @BettypeList (Bettype)
-SELECT val FROM strSplit_key (@Bettypes, ',')
 
 IF @Todate >= @BalanceUpDay
 BEGIN 
@@ -66,12 +65,12 @@ BEGIN
 				AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND BA.StatusID NOT IN (0,1)	
 				AND BA.bettype <= 19000
-				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM @BettypeList))			
+				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))			
 				AND B.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND B.StatusID NOT IN (0,1)	
 				AND B.bettype <= 19000
-				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM @BettypeList))
-				AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM @SportsList))
+				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
+				AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
 		GROUP BY C.Username, C.CustID, PT.PositionTaking
 
 	----Parlay
@@ -116,12 +115,12 @@ BEGIN
 						AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
 						AND BA.StatusID NOT IN (0,1)	
 						AND BA.bettype <= 19000
-						AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM @BettypeList))			
+						AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))			
 						AND B.Winlostdate BETWEEN @FromDate AND @ToDate 
 						AND B.StatusID NOT IN (0,1)	
 						AND B.bettype <= 19000
-						AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM @BettypeList))
-						AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM @SportsList))
+						AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
+						AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
 				GROUP BY	C.Username,C.CustID,PT.PositionTaking, 					
 		   					B.Stake, B.MOdds, B.StatusID,
 							B.WinLost , B.Actual_Stake,	B.PlayerComm,	
@@ -162,12 +161,12 @@ BEGIN
 				AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND BA.StatusID NOT IN (0,1)	
 				AND BA.bettype <= 19000
-				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM @BettypeList))			
+				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))			
 				AND B.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND B.StatusID NOT IN (0,1)	
 				AND B.bettype <= 19000
-				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM @BettypeList))
-				AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM @SportsList))
+				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
+				AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))
 		GROUP BY C.Username, C.CustID, PT.PositionTaking
 
 --##############################################		    
@@ -194,8 +193,8 @@ BEGIN
 				ON	PT.CustID = A.CustID AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
 		WHERE	A.AgentId = @AgentId 
 				AND WinLostDate BETWEEN @BalanceUpDay AND @ToDate 
-				AND (@Bettypes = '0' OR A.Bettype IN (Select bettype FROM @BettypeList))
-				AND (@Sporttypes = '0' OR A.sporttype IN (Select sporttype FROM @SportsList))
+				AND (@Bettypes = '0' OR A.Bettype IN (Select bettype FROM #BettypeList))
+				AND (@Sporttypes = '0' OR A.sporttype IN (Select sporttype FROM #SportsList))
 		GROUP BY A.Username, A.CustId, PT.PositionTaking
 END
 
@@ -224,8 +223,8 @@ BEGIN
 				ON	PT.CustID = A.CustID AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
 		WHERE	A.AgentId = @AgentId 
 				AND WinLostDate BETWEEN @FromDate AND @ToDate
-				AND (@Bettypes = '0' OR A.Bettype IN (Select bettype FROM @BettypeList))
-				AND (@Sporttypes = '0' OR A.sporttype IN (Select sporttype FROM @SportsList)) 
+				AND (@Bettypes = '0' OR A.Bettype IN (Select bettype FROM #BettypeList))
+				AND (@Sporttypes = '0' OR A.sporttype IN (Select sporttype FROM #SportsList)) 
 	    GROUP BY A.Username, A.CustId, PT.PositionTaking
 END 
  
@@ -248,6 +247,8 @@ GROUP BY Username, CustId, PositionTaking
 ORDER BY Username
  
 DROP TABLE #WinLossMember
+DROP TABLE #BettypeList
+DROp TABLE #SportsList
 
 
 GO

@@ -5,8 +5,8 @@
 	@IsDirectMem BIT = 0,
 	@LiveIndicator BIT = 0,
 	@LeagueId INT,
-	@Sporttypes VARCHAR(MAX) ='0',
-	@Bettypes VARCHAR(MAX) = '0',
+	@Sporttypes VARCHAR(1000) ='0',
+	@Bettypes VARCHAR(1000) = '0',
 	@Betteam VARCHAR(10) = '0'
  AS
  
@@ -96,6 +96,7 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 						AND (@Bettypes = '0' OR B.Bettype IN (Select Bettype FROM #BettypeList))
 						AND B.StatusId IN (0,1)							
 						AND B.LiveIndicator = @LiveIndicator 
+						
 						AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList))
 						AND M.Eventdate = @Fromdate
 						AND M.EventStatus = 'running'
@@ -153,13 +154,16 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 			INNER JOIN outright AS m WITH (NOLOCK) on  B.matchid=m.orid
 			INNER JOIN league l WITH (NOLOCK) on m.leagueid = l.leagueid	
 			WHERE		BA.AgentId = @LoggedId
+			
 						AND B.Bettype = 10						
 						AND B.StatusId IN (0,1)							
-						AND B.LiveIndicator = @LiveIndicator						
+						AND B.LiveIndicator = @LiveIndicator
+												
 						AND M.Eventdate = @Fromdate
 						AND M.Oddsstatus = 'running'
 						AND (M.Leagueid = @LeagueId OR @LeagueId = 0)						
 						AND (@Sporttypes = '0' OR L.sporttype IN (Select sporttype FROM #SportsList))
+						
 						AND (C.UGroup = @UGroup OR @UGroup = 'ALL')
 						AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)	
 		END
@@ -214,10 +218,12 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 						AND B.StatusId IN (0,1)							
 						AND B.LiveIndicator = @LiveIndicator
 						AND (B.betteam = @Betteam OR B.betteam = '0')
+						
 						AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList))
 						AND M.Eventdate = @Fromdate
 						AND M.EventStatus = 'running'
 						AND (M.Leagueid = @LeagueId OR @LeagueId = 0)
+						
 						AND (C.UGroup = @UGroup OR @UGroup = 'ALL')
 						AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)				
 			 				 
@@ -227,6 +233,9 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 SELECT * FROM #Betlist
 ORDER BY TransID
 
+DROP TABLE #Betlist
+DROP TABLE #BettypeList
+DROP TABLE #SportsList
 
 GO
 GRANT VIEW DEFINITION ON [dbo].[Age_BetList_SelWagers] TO [aplweb]
