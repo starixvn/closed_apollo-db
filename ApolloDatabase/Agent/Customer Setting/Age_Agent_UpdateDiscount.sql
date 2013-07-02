@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateDiscount]    Script Date: 5/6/2013 5:30:43 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateDiscount]    Script Date: 7/2/2013 12:40:48 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -238,7 +238,7 @@ BEGIN
 								@ErrCode	= 2007,
 								@ErrMsg		= 
 									CASE @Language
-										WHEN 'en-US' THEN 'Discount must be equal to or greater than Paret Agent discount'
+										WHEN 'en-US' THEN 'Discount must be equal to or greater than Parent Agent discount'
 										ELSE [dbo].f_Msg_GetContentById (2007, @Language)  
 									END	+ '(' + [dbo].f_Msg_GetContentById (@groupCode, @Language) + ')'
 
@@ -420,22 +420,22 @@ BEGIN
 	IF @@ERROR = 0
 		BEGIN TRY
 			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
-			@UserId		= @ActorAgentId,
-			@SPName		= 'Age_Agent_UpdateDiscount',
-			@LogDate	= @startRun,
-			@AgentId	= @AgentId,
-			@Duration	= @Duration,
-			@Data		= @logSPData,
-			@OldData	= @logSPDataOld
-		END	TRY
+				@UserId		= @ActorAgentId,
+				@SPName		= 'Age_Agent_UpdateDiscount',
+				@LogDate	= @startRun,
+				@AgentId	= @AgentId,
+				@Duration	= @Duration,
+				@Data		= @logSPData,
+				@OldData	= @logSPDataOld
+		END TRY
 		BEGIN CATCH
 			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
-			@UserId		= @ActorAgentId,
-			@SPName		= 'Age_Agent_UpdateDiscount',
-			@LogDate	= @startRun,
-			@AgentId	= @AgentId,
-			@Duration	= @Duration,
-			@Data		= @logSPData,
-			@OldData	= @logSPDataOld
+				@UserId		= @ActorAgentId,
+				@SPName		= 'Age_Agent_UpdateDiscount',
+				@LogDate	= @startRun,
+				@AgentId	= @AgentId,
+				@Duration	= @Duration,
+				@Data		= @logSPData,
+				@OldData	= @logSPDataOld
 		END CATCH 
 END

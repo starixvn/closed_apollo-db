@@ -148,7 +148,7 @@ BEGIN
 								@ErrCode = 3000,
 								@ErrMsg = 
 									CASE @Language
-										WHEN 'en-US' THEN 'Wrong Min bet/ Max bet/ Max per match' 
+										WHEN 'en-US' THEN 'Wrong Single Game / Single Bet / Min Single Bet' 
 										ELSE [dbo].f_Msg_GetContentById (3000, @Language)
 									END + ' (' 
 										+ CASE WHEN @sportType = 99 AND @betType = 9
@@ -175,7 +175,7 @@ BEGIN
 								@ErrCode = 3007,
 								@ErrMsg = 
 									CASE @Language
-										WHEN 'en-US' THEN 'Invalid Min bet/ Max bet/ Max per match' 
+										WHEN 'en-US' THEN 'Invalid Single Game / Single Bet / Min Single Bet' 
 										ELSE [dbo].f_Msg_GetContentById (3007, @Language)
 									END + ' (' 
 										+ CASE WHEN @sportType = 99 AND @betType = 9
@@ -200,7 +200,7 @@ BEGIN
 								@ErrCode = 3004,
 								@ErrMsg = 
 									CASE @Language
-										WHEN 'en-US' THEN 'Min Bet must be less than or equal to Max Bet' 
+										WHEN 'en-US' THEN 'Min Single Bet must be less than or equal to Single Bet' 
 										ELSE [dbo].f_Msg_GetContentById (3004, @Language)
 									END + ' (' 
 										+ CASE WHEN @sportType = 99 AND @betType = 9
@@ -224,7 +224,7 @@ BEGIN
 								@ErrCode = 3005,
 								@ErrMsg = 
 									CASE @Language
-										WHEN 'en-US' THEN 'Min Bet must be less than or equal to Max Per Match' 
+										WHEN 'en-US' THEN 'Min Single Bet must be less than or equal to Single Game' 
 										ELSE [dbo].f_Msg_GetContentById (3005, @Language)
 									END + ' (' 
 										+ CASE WHEN @sportType = 99 AND @betType = 9
@@ -249,7 +249,7 @@ BEGIN
 								@ErrCode = 3006,
 								@ErrMsg = 
 									CASE @Language
-										WHEN 'en-US' THEN 'Max Bet must be less than or equal to Max Per Match' 
+										WHEN 'en-US' THEN 'Single Bet must be less than or equal to Single Game' 
 										ELSE [dbo].f_Msg_GetContentById (3006, @Language)
 									END + ' (' 
 										+ CASE WHEN @sportType = 99 AND @betType = 9
@@ -301,7 +301,7 @@ BEGIN
 								@ErrCode = 3001,
 								@ErrMsg = 
 									CASE @Language
-										WHEN 'en-US' THEN 'Min bet must be equal to or greater than Parent Agent min bet' 
+										WHEN 'en-US' THEN 'Min Single Bet must be equal to or greater than Parent Agent Min Single Bet' 
 										ELSE [dbo].f_Msg_GetContentById (3001, @Language) 
 									END	+ ' (' 
 										+ CASE WHEN @sportType = 99 AND @betType = 9
@@ -331,7 +331,7 @@ BEGIN
 								@ErrCode	= 3002,
 								@ErrMsg		= 
 									CASE @Language
-										WHEN 'en-US' THEN 'Max bet must be equal to or less than Parent Agent max bet' 
+										WHEN 'en-US' THEN 'Single Bet must be equal to or less than Parent Agent Single Bet' 
 										ELSE [dbo].f_Msg_GetContentById (3002, @Language) 
 									END	+ ' (' 
 										+ CASE WHEN @sportType = 99 AND @betType = 9
@@ -361,7 +361,7 @@ BEGIN
 								@ErrCode	= 3003,
 								@ErrMsg		= 
 									CASE @Language
-										WHEN 'en-US' THEN 'Max per match must be equal to or less than Parent Agent max per match' 
+										WHEN 'en-US' THEN 'Single Game must be equal to or less than Parent Agent Single Game' 
 										ELSE [dbo].f_Msg_GetContentById (3003, @Language) 
 									END	+ ' (' 
 										+ CASE WHEN @sportType = 99 AND @betType = 9
@@ -432,23 +432,23 @@ BEGIN
 			IF @@ERROR = 0
 				BEGIN TRY
 					EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
-					@UserId			= @ActorAgentId,
-					@SPName			= 'Age_Agent_UpdateBetLimit',
-					@LogDate		= @startRun,
-					@AgentId		= @AgentId,
-					@Duration		= @Duration,
-					@Data			= @logSPData,
-					@OldData		= @logSPDataOld
+						@UserId			= @ActorAgentId,
+						@SPName			= 'Age_Agent_UpdateBetLimit',
+						@LogDate		= @startRun,
+						@AgentId		= @AgentId,
+						@Duration		= @Duration,
+						@Data			= @logSPData,
+						@OldData		= @logSPDataOld
 				END	TRY
 				BEGIN CATCH
 					EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
-					@UserId			= @ActorAgentId,
-					@SPName			= 'Age_Agent_UpdateBetLimit',
-					@LogDate		= @startRun,
-					@AgentId		= @AgentId,
-					@Duration		= @Duration,
-					@Data			= @logSPData,
-					@OldData		= @logSPDataOld
+						@UserId			= @ActorAgentId,
+						@SPName			= 'Age_Agent_UpdateBetLimit',
+						@LogDate		= @startRun,
+						@AgentId		= @AgentId,
+						@Duration		= @Duration,
+						@Data			= @logSPData,
+						@OldData		= @logSPDataOld
 				END CATCH
 		END 
 END
