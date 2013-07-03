@@ -1286,6 +1286,9 @@
     <NotInBuild Include="Agent\Wagers\Age_Wagers_SC_7_8_15.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="Agent\Wagers\Age_Wagers_SC_1_3_7_8_RunBall.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
     <NotInBuild Include="Agent\Wagers\Age_Wagers_SC_4_30_16.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1293,6 +1296,9 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Wagers\Age_Wagers_BK_1_2_3.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Wagers\Age_Wagers_BK_1_3_RunBall.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Wagers\Age_Wagers_BK_Special.sql">
@@ -1349,7 +1355,13 @@
     <NotInBuild Include="Agent\Wagers\Age_Wagers_Outright.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Wagers\Age_Wagers_RunningBall.sql">
+    <NotInBuild Include="Agent\Wagers\Age_Wagers_RunBall.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\Function\NAP_Functions_GenerateNAPFunction.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\User\NAP_User_ChangeUserSiteStatus.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
