@@ -18,6 +18,7 @@ Task : Betlist for Outstanding report/ Cancel Bets Report/ Account Info-Betlist 
 DB:  SVRAGE.RepDB
 Original:  
 Revisions:
+	- 20130703@Sophia: Revise
 
 Param's Explanation:  
 	@RptType = 0: Normal
