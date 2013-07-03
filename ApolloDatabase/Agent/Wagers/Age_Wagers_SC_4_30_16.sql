@@ -29,7 +29,7 @@ Parameters
 SET NOCOUNT ON 
 		
 		SELECT		M.ShowTime, B.LiveIndicator,
-					M.leagueid, M.matchcode, M.HomeId, M.AwayId, 
+					M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
 					B.Bettype, 
 					SUM (B.Stake) as Stake,
 					Count(*) as BetCount
@@ -50,7 +50,7 @@ SET NOCOUNT ON
 					AND (C.UGroup = @UGroup OR @UGroup = 'ALL')
 					AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)											 
 		GROUP BY	M.ShowTime, B.LiveIndicator,
-					M.leagueid, M.matchcode, M.HomeId, M.AwayId, 
+					M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
 					B.Bettype, B.Stake 		
 
 	

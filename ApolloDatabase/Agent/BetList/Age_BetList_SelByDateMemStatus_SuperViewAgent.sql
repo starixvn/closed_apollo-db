@@ -305,7 +305,7 @@ BEGIN
  				FROM 	
 					Bettrans14 AS B  WITH (NOLOCK) 
 					INNER JOIN Bettrans14_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId  
-					INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId					
+					INNER JOIN Match14 m WITH (NOLOCK) ON  B.MatchId = m.MatchId					
 					INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 				WHERE 
 					BA.AgentId = @AgentId 
@@ -372,7 +372,7 @@ BEGIN
 					C.UGroup	
 			FROM Bettrans14 AS B  WITH (NOLOCK) 
 			INNER JOIN BettransM14 BM WITH (NOLOCK) ON BM.RefNo = B.RefNo
-			INNER JOIN Match m WITH (NOLOCK) ON m.MatchID = BM.MatchID		
+			INNER JOIN Match14 m WITH (NOLOCK) ON m.MatchID = BM.MatchID		
 			INNER JOIN Bettrans14_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId 
 			INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 			WHERE	BA.AgentId = @AgentId 			

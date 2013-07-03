@@ -180,8 +180,7 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 				0 as OddStype,		
 				B.DoubleCommLosing,
 				C.UGroup	
-			FROM BetTrans AS B  WITH (NOLOCK) 		
-				INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
+			FROM BetTrans AS B  WITH (NOLOCK) 					
 				INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 				LEFT JOIN Bettrans_Agent D WITH (NOLOCK) 
 						ON D.TransID = B.TransID
@@ -191,18 +190,14 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 						AND D.BetType IN (9,29) 
 						AND (@Bettypes = '0' OR D.Bettype IN (Select bettype FROM #BettypeList)) 
 				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
-				INNER JOIN BettransM14 BM WITH (NOLOCK) ON BM.RefNo = B.RefNo
+				INNER JOIN BettransM BM WITH (NOLOCK) ON BM.RefNo = B.RefNo
 				INNER JOIN Match m WITH (NOLOCK) ON m.MatchID = BM.MatchID
 			WHERE   B.CustID = @CustId 				
 				AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
 				AND B.TransDate Between @FromDate AND @ToDate
 				AND B.BetType IN (9,29) 
-				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
+				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 			
 				
-				AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 
-				AND BA.TransDate Between @FromDate AND @ToDate
-				AND BA.BetType IN (9,29) 
-				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 
 				
 				AND L.StatusId in (SELECT StatusId FROM #StatusId ) 
 				AND L.TransDate Between @FromDate AND @ToDate
@@ -255,8 +250,7 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 				B.DoubleCommLosing,
 				C.UGroup
 			FROM 		
-				bettrans B WITH (NOLOCK)
-				INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
+				bettrans B WITH (NOLOCK)				
 				INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 				LEFT JOIN Bettrans_Agent D WITH (NOLOCK) 
 						ON D.TransID = B.TransID 
@@ -273,12 +267,7 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 				AND B.TransDate Between @FromDate AND @ToDate
 				AND B.bettype = 10
 				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
-				
-				AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 	
-				AND BA.TransDate Between @FromDate AND @ToDate
-				AND BA.bettype = 10
-				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 
-				
+											
 				AND L.StatusId in (SELECT StatusId FROM #StatusId ) 	
 				AND L.TransDate Between @FromDate AND @ToDate
 				AND L.bettype = 10
@@ -351,7 +340,7 @@ BEGIN
 								OR D.bettype between 1301 and 1334 				
 						)
 						AND (@Bettypes = '0' OR D.Bettype IN (Select bettype FROM #BettypeList)) 		 
-				INNER JOIN MatchId m WITH (NOLOCK) ON  B.MatchId = m.MatchId 						
+				INNER JOIN Match14 m WITH (NOLOCK) ON  B.MatchId = m.MatchId 						
 				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 			WHERE	B.CustID = @CustId  
 				AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
@@ -414,8 +403,7 @@ BEGIN
 				0 as OddStype,		
 				B.DoubleCommLosing,
 				C.UGroup	
-			FROM Bettrans14 AS B  WITH (NOLOCK) 		
-				INNER JOIN Bettrans14_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
+			FROM Bettrans14 AS B  WITH (NOLOCK) 					
 				INNER JOIN Bettrans14_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 				LEFT JOIN Bettrans14_Agent D WITH (NOLOCK) 
 						ON D.TransID = B.TransID
@@ -425,18 +413,13 @@ BEGIN
 						AND D.BetType IN (9,29) 
 						AND (@Bettypes = '0' OR D.Bettype IN (Select bettype FROM #BettypeList)) 
 				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
-				INNER JOIN BettransM1414 BM WITH (NOLOCK) ON BM.RefNo = B.RefNo
-				INNER JOIN MatchId m WITH (NOLOCK) ON m.MatchID = BM.MatchID
+				INNER JOIN BettransM14 BM WITH (NOLOCK) ON BM.RefNo = B.RefNo
+				INNER JOIN Match14 m WITH (NOLOCK) ON m.MatchID = BM.MatchID
 			WHERE   B.CustID = @CustId 				
 				AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
 				AND B.TransDate Between @FromDate AND @ToDate
 				AND B.BetType IN (9,29) 
 				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
-				
-				AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 
-				AND BA.TransDate Between @FromDate AND @ToDate
-				AND BA.BetType IN (9,29) 
-				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 
 				
 				AND L.StatusId in (SELECT StatusId FROM #StatusId ) 
 				AND L.TransDate Between @FromDate AND @ToDate
@@ -489,8 +472,7 @@ BEGIN
 				B.DoubleCommLosing,
 				C.UGroup
 			FROM 		
-				Bettrans14 B WITH (NOLOCK)
-				INNER JOIN Bettrans14_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
+				Bettrans14 B WITH (NOLOCK)				
 				INNER JOIN Bettrans14_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 				LEFT JOIN Bettrans14_Agent D WITH (NOLOCK) 
 						ON D.TransID = B.TransID 
@@ -507,11 +489,6 @@ BEGIN
 				AND B.TransDate Between @FromDate AND @ToDate
 				AND B.bettype = 10
 				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
-				
-				AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 	
-				AND BA.TransDate Between @FromDate AND @ToDate
-				AND BA.bettype = 10
-				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 
 				
 				AND L.StatusId in (SELECT StatusId FROM #StatusId ) 	
 				AND L.TransDate Between @FromDate AND @ToDate

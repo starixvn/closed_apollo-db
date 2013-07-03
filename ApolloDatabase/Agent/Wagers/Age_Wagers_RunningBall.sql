@@ -4,7 +4,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[Age_Wagers_RunningBall]
+ALTEr PROCEDURE [dbo].[Age_Wagers_RunningBall]
 @LoggedId INT = 0,
 @FromDate Date,
 @Sporttypes VARCHAR(MAX),
@@ -28,7 +28,7 @@ Parameters
 */
 SET NOCOUNT ON 
 	SELECT		B.ShowTime, B.LiveIndicator,
-				B.leagueid, B.matchcode, B.HomeId, B.AwayId, B.UGroup,
+				B.leagueid, B.MatchId, B.HomeId, B.AwayId, B.UGroup,
 				SUM(CASE WHEN B.Bettype = 1 AND betteam = 'h' THEN B.Stake ELSE 0 END) AS HomeStakeHDP,
 				SUM(CASE WHEN B.Bettype = 1 AND betteam = 'a' THEN B.Stake ELSE 0 END) AS AwayStakeHDP,
 
@@ -114,7 +114,7 @@ SET NOCOUNT ON
 				MAX(CASE WHEN B.BetType = 20 AND betteam = 'a' THEN 'a' ELSE '0' END) AS AwayBetteamMoney
 	FROM (		
 				SELECT		M.ShowTime, B.LiveIndicator,
-							M.leagueid, M.matchcode, M.HomeId, M.AwayId, 
+							M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
 							B.Bettype, B.Stake, B.betteam, C.UGroup,
 							Count(B.TransID) as BetCount
 				FROM		Bettrans B WITH (NOLOCK)
@@ -135,13 +135,13 @@ SET NOCOUNT ON
 							AND (C.UGroup = @UGroup OR @UGroup = 'ALL')
 							AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)											 
 				GROUP BY	M.ShowTime, B.LiveIndicator,
-							M.leagueid, M.matchcode, M.HomeId, M.AwayId, 
+							M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
 							B.Bettype, B.Stake, B.betteam, C.UGroup
 				) B
 
 	GROUP BY 	B.ShowTime, B.LiveIndicator,
-				B.leagueid, B.matchcode, B.HomeId, B.AwayId, B.UGroup	 
-	ORDER BY 	B.ShowTime,B.leagueid, B.matchcode, B.HomeId, B.AwayId
+				B.leagueid, B.MatchId, B.HomeId, B.AwayId, B.UGroup	 
+	ORDER BY 	B.ShowTime,B.leagueid, B.MatchId, B.HomeId, B.AwayId
 GO
 GRANT EXECUTE ON [Age_Wagers_RunningBall] TO [aplweb]
  

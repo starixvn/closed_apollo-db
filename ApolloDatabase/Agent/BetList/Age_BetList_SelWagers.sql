@@ -5,6 +5,7 @@
 	@IsDirectMem BIT = 0,
 	@LiveIndicator BIT = 0,
 	@LeagueId INT,
+	@MatchID INT, 
 	@Sporttypes VARCHAR(1000) ='0',
 	@Bettypes VARCHAR(1000) = '0',
 	@Betteam VARCHAR(10) = '0',
@@ -102,8 +103,9 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 						AND (@Bettypes = '0' OR B.Bettype IN (Select Bettype FROM #BettypeList))
 						AND B.StatusId IN (0,1)							
 						AND B.LiveIndicator = @LiveIndicator 
-						
+						AND M.MatchId = @MatchID 
 						AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList))
+						
 						AND M.Eventdate = @Fromdate
 						AND M.EventStatus = 'running'
 						AND (M.Leagueid = @LeagueId OR @LeagueId = 0)
@@ -167,7 +169,8 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 												
 						AND M.Eventdate = @Fromdate
 						AND M.Oddsstatus = 'running'
-						AND (M.Leagueid = @LeagueId OR @LeagueId = 0)						
+						AND (M.Leagueid = @LeagueId OR @LeagueId = 0)
+						AND M.orid = @MatchID 						
 						AND (@Sporttypes = '0' OR L.sporttype IN (Select sporttype FROM #SportsList))
 						
 						AND (C.UGroup = @UGroup OR @UGroup = 'ALL')
@@ -226,6 +229,7 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 						AND B.LiveIndicator = @LiveIndicator
 						AND (B.betteam = @Betteam OR B.betteam = '0')
 						
+						AND M.MatchId = @MatchID 
 						AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList))
 						AND M.Eventdate = @Fromdate
 						AND M.EventStatus = 'running'

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[Age_BetList_SelWinloss_AgentViewCust] 
+﻿ALTER PROCEDURE [dbo].[Age_BetList_SelWinloss_AgentViewCust] 
 	@LoggedId INT,
 	@AgentId INT = -1 ,
 	@CustId INT = -1,
@@ -183,7 +183,6 @@ BEGIN
 				FROM BetTrans AS B  WITH (NOLOCK)
 					INNER JOIN BettransM BM With (NOLOCK) ON BM.Refno = B.Refno
 					INNER JOIN Match M WITH (NOLOCK) ON M.MatchId = BM.MatchId
-					INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
 					INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 					LEFT JOIN Bettrans_Agent D WITH (NOLOCK) 
 							ON	D.TransID = B.TransID 
@@ -197,11 +196,6 @@ BEGIN
 					AND B.WinLostDate Between @FromDate AND @ToDate
 					AND B.BetType IN (9,29) 
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
-
-					AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 
-					AND BA.WinLostDate Between @FromDate AND @ToDate
-					AND BA.BetType IN (9,29) 
-					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 
 
 					AND L.StatusId in (SELECT StatusId FROM #StatusId ) 
 					AND L.WinLostDate Between @FromDate AND @ToDate
@@ -253,7 +247,6 @@ BEGIN
 					B.DoubleCommLosing
 				FROM 		
 					bettrans B WITH (NOLOCK)
-					INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
 					INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 					LEFT JOIN Bettrans_Agent D WITH (NOLOCK) 
 							ON D.TransID = B.TransID 
@@ -268,13 +261,8 @@ BEGIN
 					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
 					AND B.WinLostDate Between @FromDate AND @ToDate
 					AND B.bettype = 10
-					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-					
-					AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 	
-					AND BA.WinLostDate Between @FromDate AND @ToDate
-					AND BA.bettype = 10
-					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-					
+					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))					
+				
 					AND L.StatusId in (SELECT StatusId FROM #StatusId ) 	
 					AND L.WinLostDate Between @FromDate AND @ToDate
 					AND L.bettype = 10
@@ -406,8 +394,7 @@ BEGIN
 					B.DoubleCommLosing	
 				FROM BetTrans14 AS B  WITH (NOLOCK)
 					INNER JOIN BetTransM14 BM WITH (NOLOCK) ON BM.RefNo = B.RefNo
-					INNER JOIN Match14 M WITH (NOLOCK) ON M.matchID = BM.matchID  		
-					INNER JOIN BetTrans14_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
+					INNER JOIN Match14 M WITH (NOLOCK) ON M.matchID = BM.matchID  						
 					INNER JOIN BetTrans14_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 					LEFT JOIN BetTrans14_Agent D WITH (NOLOCK) 
 							ON D.TransID = B.TransID 
@@ -472,7 +459,6 @@ BEGIN
 					B.DoubleCommLosing
 				FROM 		
 					BetTrans14 B WITH (NOLOCK)
-					INNER JOIN BetTrans14_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
 					INNER JOIN BetTrans14_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 					LEFT JOIN BetTrans14_Agent D WITH (NOLOCK) 
 							ON D.TransID = B.TransID 
@@ -489,11 +475,6 @@ BEGIN
 					AND B.bettype = 10
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))	
 					
-					AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 	
-					AND BA.WinLostDate Between @FromDate AND @ToDate
-					AND BA.bettype = 10
-					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))	
-
 					AND L.StatusId in (SELECT StatusId FROM #StatusId ) 	
 					AND L.WinLostDate Between @FromDate AND @ToDate
 					AND L.bettype = 10

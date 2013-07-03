@@ -198,7 +198,7 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 							AND D.TransDate Between @FromDate AND @ToDate	
 							AND D.BetType IN (9,29)  			
 							AND (@Bettypes = '0' OR D.Bettype IN (Select bettype FROM #BettypeList))
-				INNER JOIN BettransM14 BM WITH (NOLOCK) ON BM.RefNo = B.RefNo
+				INNER JOIN BettransM BM WITH (NOLOCK) ON BM.RefNo = B.RefNo
 				INNER JOIN Match m WITH (NOLOCK) ON m.MatchID = BM.MatchID
 				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId 
 			WHERE BA.AgentId =  @AgentId				

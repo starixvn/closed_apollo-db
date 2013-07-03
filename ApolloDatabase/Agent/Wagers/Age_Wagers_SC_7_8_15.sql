@@ -27,7 +27,7 @@ Parameters
 */
 SET NOCOUNT ON 
 	SELECT		B.Showtime, B.LiveIndicator,
-				B.leagueid, B.matchcode, B.HomeId, B.AwayId,  
+				B.leagueid, B.MatchId, B.HomeId, B.AwayId,  
 				SUM(CASE WHEN B.Bettype = 7 AND betteam = 'h' THEN B.Stake ELSE 0 END) AS HomeStakeHTHDP,
 				SUM(CASE WHEN B.Bettype = 7 AND betteam = 'a' THEN B.Stake ELSE 0 END) AS AwayStakeHTHDP,
 
@@ -60,7 +60,7 @@ SET NOCOUNT ON
 
 	FROM (		
 				SELECT		M.Showtime, B.LiveIndicator,
-							M.leagueid, M.matchcode, M.HomeId, M.AwayId, 
+							M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
 							B.Bettype, B.Stake, B.betteam, 
 							Count(B.TransID) as BetCount
 				FROM		Bettrans B WITH (NOLOCK)
@@ -80,13 +80,13 @@ SET NOCOUNT ON
 							AND (C.UGroup = @UGroup OR @UGroup = 'ALL')
 							AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)											 
 				GROUP BY	M.Showtime, B.LiveIndicator,
-							M.leagueid, M.matchcode, M.HomeId, M.AwayId, 
+							M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
 							B.Bettype, B.Stake, B.betteam 
 				) B
 
 	GROUP BY 	B.Showtime, B.LiveIndicator,
-				B.leagueid, B.matchcode, B.HomeId, B.AwayId 
-	ORDER BY 	B.Showtime,B.leagueid, B.matchcode, B.HomeId, B.AwayId
+				B.leagueid, B.MatchId, B.HomeId, B.AwayId 
+	ORDER BY 	B.Showtime,B.leagueid, B.MatchId, B.HomeId, B.AwayId
 GO
 GRANT EXECUTE ON [Age_Wagers_SC_7_8_15] TO [aplweb]
 
