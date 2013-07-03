@@ -321,23 +321,23 @@ BEGIN
 			IF @@ERROR = 0
 				BEGIN TRY
 					EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
-					@UserId		= @ActorAgentId,
-					@SPName		= 'Age_Customer_UpdateDiscount',
-					@LogDate	= @startRun,
-					@CustId		= @CustId,
-					@Duration	= @Duration,
-					@Data		= @logSPData,
-					@OldData	= @logSPDataOld
+						@UserId		= @ActorAgentId,
+						@SPName		= 'Age_Customer_UpdateDiscount',
+						@LogDate	= @startRun,
+						@CustId		= @CustId,
+						@Duration	= @Duration,
+						@Data		= @logSPData,
+						@OldData	= @logSPDataOld
 				END	TRY
 				BEGIN CATCH
 					EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpCust
-					@UserId		= @ActorAgentId,
-					@SPName		= 'Age_Customer_UpdateDiscount',
-					@LogDate	= @startRun,
-					@CustId		= @CustId,
-					@Duration	= @Duration,
-					@Data		= @logSPData,
-					@OldData	= @logSPDataOld
+						@UserId		= @ActorAgentId,
+						@SPName		= 'Age_Customer_UpdateDiscount',
+						@LogDate	= @startRun,
+						@CustId		= @CustId,
+						@Duration	= @Duration,
+						@Data		= @logSPData,
+						@OldData	= @logSPDataOld
 				END CATCH
 		END
 END
