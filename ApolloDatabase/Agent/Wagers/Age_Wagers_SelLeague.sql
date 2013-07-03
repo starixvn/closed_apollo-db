@@ -18,7 +18,7 @@ Parameters
 SET NOCOUNT ON
  
 
-SELECT	m.LeagueId
+SELECT	DISTINCT m.LeagueId
 FROM	Match m WITH (NOLOCK) 
 	INNER JOIN League l WITH (NOLOCK) ON m.leagueid = l.leagueid
 WHERE	m.eventdate = @FromDate  
