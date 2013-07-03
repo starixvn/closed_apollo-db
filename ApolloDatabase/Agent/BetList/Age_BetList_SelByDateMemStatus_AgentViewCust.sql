@@ -128,13 +128,6 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 				)
 				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
 				
-				AND L.StatusId in (SELECT StatusId FROM #StatusId ) 	
-				AND L.TransDate Between @FromDate AND @ToDate	
-				AND (	L.bettype < 31 
-						OR L.bettype between 121 and 999
-						OR L.bettype between 1301 and 1334 				
-				)
-				AND (@Bettypes = '0' OR L.Bettype IN (Select bettype FROM #BettypeList)) 				
 				AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList)) 		
 				
 			
@@ -197,13 +190,7 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 				AND B.TransDate Between @FromDate AND @ToDate
 				AND B.BetType IN (9,29) 
 				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 			
-				
-				
-				AND L.StatusId in (SELECT StatusId FROM #StatusId ) 
-				AND L.TransDate Between @FromDate AND @ToDate
-				AND L.BetType IN (9,29) 
-				AND (@Bettypes = '0' OR L.Bettype IN (Select bettype FROM #BettypeList)) 
-								
+													
 				AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList)) 		
 
 
@@ -268,11 +255,6 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 				AND B.bettype = 10
 				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
 											
-				AND L.StatusId in (SELECT StatusId FROM #StatusId ) 	
-				AND L.TransDate Between @FromDate AND @ToDate
-				AND L.bettype = 10
-				AND (@Bettypes = '0' OR L.Bettype IN (Select bettype FROM #BettypeList)) 
-								
 				AND (@Sporttypes = '0' OR lg.sporttype IN (Select sporttype FROM #SportsList)) 	
 
 IF @RptType = 0
@@ -350,14 +332,7 @@ BEGIN
 						OR B.bettype between 1301 and 1334 				
 				)
 				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
-				
-				AND L.StatusId in (SELECT StatusId FROM #StatusId ) 	
-				AND L.TransDate Between @FromDate AND @ToDate	
-				AND (	L.bettype < 31 
-						OR L.bettype between 121 and 999
-						OR L.bettype between 1301 and 1334 				
-				)
-				AND (@Bettypes = '0' OR L.Bettype IN (Select bettype FROM #BettypeList)) 				
+			
 				AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList)) 		
 				
 			
@@ -420,12 +395,7 @@ BEGIN
 				AND B.TransDate Between @FromDate AND @ToDate
 				AND B.BetType IN (9,29) 
 				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
-				
-				AND L.StatusId in (SELECT StatusId FROM #StatusId ) 
-				AND L.TransDate Between @FromDate AND @ToDate
-				AND L.BetType IN (9,29) 
-				AND (@Bettypes = '0' OR L.Bettype IN (Select bettype FROM #BettypeList)) 
-								
+											
 				AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList)) 		
 
 
@@ -489,12 +459,7 @@ BEGIN
 				AND B.TransDate Between @FromDate AND @ToDate
 				AND B.bettype = 10
 				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
-				
-				AND L.StatusId in (SELECT StatusId FROM #StatusId ) 	
-				AND L.TransDate Between @FromDate AND @ToDate
-				AND L.bettype = 10
-				AND (@Bettypes = '0' OR L.Bettype IN (Select bettype FROM #BettypeList)) 
-								
+												
 				AND (@Sporttypes = '0' OR lg.sporttype IN (Select sporttype FROM #SportsList)) 	
 	END
 	
