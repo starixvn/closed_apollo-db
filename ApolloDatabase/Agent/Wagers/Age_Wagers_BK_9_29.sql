@@ -29,7 +29,7 @@ Parameters
 */
 SET NOCOUNT ON 
 	SELECT		B.Showtime, B.LiveIndicator,
-				B.leagueid, B.matchcode, B.HomeId, B.AwayId, B.UGroup,
+				B.leagueid, B.matchcode, B.HomeId, B.AwayId, 
 				
 				SUM(CASE WHEN B.Bettype = 9 THEN B.Stake ELSE 0 END) AS Stake9,
 				SUM(CASE WHEN B.BetType = 29 THEN B.Stake ELSE 0 END) AS Stake29,
@@ -40,7 +40,7 @@ SET NOCOUNT ON
 	FROM (		
 				SELECT		M.ShowTime, B.LiveIndicator,
 							M.leagueid, M.matchcode, M.HomeId, M.AwayId, 
-							B.Bettype, B.Stake, C.UGroup,
+							B.Bettype, B.Stake, 
 							Count(DISTINCT B.TransID) as BetCount
 				FROM		Bettrans B WITH (NOLOCK)
 				INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
@@ -63,11 +63,11 @@ SET NOCOUNT ON
 							AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)											 
 				GROUP BY	M.ShowTime, B.LiveIndicator,
 							M.leagueid, M.matchcode, M.HomeId, M.AwayId, 
-							B.Bettype, B.Stake, C.UGroup
+							B.Bettype, B.Stake
 				) B
 
 	GROUP BY 	B.ShowTime, B.LiveIndicator,
-				B.leagueid, B.matchcode, B.HomeId, B.AwayId, B.UGroup	 
+				B.leagueid, B.matchcode, B.HomeId, B.AwayId
 	ORDER BY 	B.ShowTime,B.leagueid, B.matchcode, B.HomeId, B.AwayId
 GO
 GRANT EXECUTE ON [Age_Wagers_BK_9_29] TO [aplweb]

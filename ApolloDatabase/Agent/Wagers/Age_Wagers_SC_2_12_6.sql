@@ -28,7 +28,7 @@ Parameters
 */
 SET NOCOUNT ON 
 	SELECT		B.Showtime, B.LiveIndicator,
-				B.leagueid, B.matchcode, B.HomeId, B.AwayId, B.UGroup,
+				B.leagueid, B.matchcode, B.HomeId, B.AwayId,
 				SUM(CASE WHEN B.BetType = 2 AND betteam = 'h' THEN B.Stake ELSE 0 END) AS HomeStakeOE,
 				SUM(CASE WHEN B.BetType = 2 AND betteam = 'a' THEN B.Stake ELSE 0 END) AS AwayStakeOE,
 
@@ -66,7 +66,7 @@ SET NOCOUNT ON
 	FROM (		
 				SELECT		M.ShowTime, B.LiveIndicator,
 							M.leagueid, M.matchcode, M.HomeId, M.AwayId, 
-							B.Bettype, B.Stake, B.betteam, C.UGroup,
+							B.Bettype, B.Stake, B.betteam, 
 							Count(B.TransID) as BetCount
 				FROM		Bettrans B WITH (NOLOCK)
 				INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
@@ -86,11 +86,11 @@ SET NOCOUNT ON
 							AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)											 
 				GROUP BY	M.ShowTime, B.LiveIndicator,
 							M.leagueid, M.matchcode, M.HomeId, M.AwayId, 
-							B.Bettype, B.Stake, B.betteam, C.UGroup
+							B.Bettype, B.Stake, B.betteam
 				) B
 
 	GROUP BY 	B.ShowTime, B.LiveIndicator,
-				B.leagueid, B.matchcode, B.HomeId, B.AwayId, B.UGroup	 
+				B.leagueid, B.matchcode, B.HomeId, B.AwayId 
 	ORDER BY 	B.ShowTime,B.leagueid, B.matchcode, B.HomeId, B.AwayId
 GO
 GRANT EXECUTE ON [Age_Wagers_SC_2_12_6] TO [aplweb]

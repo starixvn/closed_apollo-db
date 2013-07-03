@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[Age_BetList_SelWagers]
+﻿ALTER PROCEDURE [dbo].[Age_BetList_SelWagers_Xtest]
 	@LoggedId INT = 0,
 	@FromDate Date,
 	@UGroup varchar(3) = 'ALL',
@@ -7,7 +7,10 @@
 	@LeagueId INT,
 	@Sporttypes VARCHAR(1000) ='0',
 	@Bettypes VARCHAR(1000) = '0',
-	@Betteam VARCHAR(10) = '0'
+	@Betteam VARCHAR(10) = '0',
+	@PageSize int = 500,
+	@PageIndex int = 1,
+	@TotalPages int = 1 output
  AS
  
 /*
@@ -25,6 +28,9 @@ Parameters
 */
 
 SET NOCOUNT ON
+DECLARE @RowCount int, @RowStart int, @RowEnd int
+SELECT @PageIndex = @PageIndex - 1, @RowStart = @PageSize * @PageIndex + 1, @RowEnd = @RowStart + @PageSize - 1 
+
 
 CREATE TABLE #BettypeList (bettype SMALLINT)
 INSERT INTO #BettypeList
@@ -231,20 +237,27 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 		END
 
 
-SELECT * FROM #Betlist
-ORDER BY TransID
+--Paging
+IF @TotalPages = 0
+BEGIN
+	SELECT @TotalPages = COUNT(1), @TotalPages = @TotalPages/@PageSize + CASE WHEN @TotalPages%@PageSize > 0 THEN 1 ELSE 0 END
+	FROM #Betlist B
+END
+		
+SELECT B.*
+FROM 
+(	SELECT *, ROW_NUMBER() OVER (ORDER BY TransID) AS RowNumber  FROM #Betlist
+	
+) B
+WHERE B.RowNumber BETWEEN @RowStart AND @RowEnd
+ORDER BY B.TransID
+
 
 DROP TABLE #Betlist
 DROP TABLE #BettypeList
 DROP TABLE #SportsList
 
 GO
-GRANT EXECUTE ON [dbo].[Age_BetList_SelWagers] TO [aplweb]
+GRANT EXECUTE ON [dbo].[Age_BetList_SelWagers_Xtest] TO [aplweb]
 
-
-
-
-
-
-
-
+  

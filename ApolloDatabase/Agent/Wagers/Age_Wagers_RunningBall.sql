@@ -4,7 +4,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-ALTER PROCEDURE [dbo].[Age_Wagers_RunBall]
+CREATE PROCEDURE [dbo].[Age_Wagers_RunningBall]
 @LoggedId INT = 0,
 @FromDate Date,
 @Sporttypes VARCHAR(MAX),
@@ -143,6 +143,7 @@ SET NOCOUNT ON
 				B.leagueid, B.matchcode, B.HomeId, B.AwayId, B.UGroup	 
 	ORDER BY 	B.ShowTime,B.leagueid, B.matchcode, B.HomeId, B.AwayId
 GO
-GRANT EXECUTE ON [Age_Wagers_RunBall] TO [aplweb]
+GRANT EXECUTE ON [Age_Wagers_RunningBall] TO [aplweb]
+ 
 
 		 

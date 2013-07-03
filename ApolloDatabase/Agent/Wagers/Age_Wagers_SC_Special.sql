@@ -26,20 +26,20 @@ Parameters
  
 */
 SET NOCOUNT ON
-CREATE TABLE #SpecialWager (Showtime nvarchar(50), LiveIndicator BIT, leagueid INT, MatchId INT, HomeId INT , AwayId INT, UGroup varchar (3),
+CREATE TABLE #SpecialWager (Showtime nvarchar(50), LiveIndicator BIT, leagueid INT, MatchId INT, HomeId INT , AwayId INT, 
 							bettype INT, betteam VARCHAR(10), Stake MONEY, Count BIGINT, Type TINYINT)	----Type : 0 Total, 1 : Home, 2: Away, 3: Draw
 
 
 INSERT INTO #SpecialWager 
 SELECT		B.Showtime, B.LiveIndicator,
-			B.leagueid, B.MatchId, B.HomeId, B.AwayId, B.UGroup, B.bettype, B.betteam,
+			B.leagueid, B.MatchId, B.HomeId, B.AwayId,  B.bettype, B.betteam,
 			SUM(B.Stake) AS Stake,							 
 			SUM(B.BetCount) AS Count,
 			1 as Type 
 FROM (		
 			SELECT		M.ShowTime, B.LiveIndicator,
 						M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
-						B.Bettype, B.Betteam, B.Stake, C.UGroup,
+						B.Bettype, B.Betteam, B.Stake,
 						Count(B.TransID) as BetCount
 			FROM		Bettrans B WITH (NOLOCK)
 			INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
@@ -60,21 +60,21 @@ FROM (
 						AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)											 
 			GROUP BY	M.ShowTime, B.LiveIndicator,
 						M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
-						B.Bettype, B.Betteam, B.Stake, C.UGroup
+						B.Bettype, B.Betteam, B.Stake 
 			) B
 GROUP BY 	B.ShowTime, B.LiveIndicator, B.Bettype,B.Betteam, 
-			B.leagueid, B.MatchId, B.HomeId, B.AwayId, B.UGroup	 
+			B.leagueid, B.MatchId, B.HomeId, B.AwayId  
 
 UNION ALL
 SELECT		B.Showtime, B.LiveIndicator,
-			B.leagueid, B.MatchId, B.HomeId, B.AwayId, B.UGroup, B.bettype,B.Betteam, 
+			B.leagueid, B.MatchId, B.HomeId, B.AwayId,  B.bettype,B.Betteam, 
 			SUM(B.Stake) AS Stake,							 
 			SUM(B.BetCount) AS Count,
 			2 as Type 
 FROM (		
 			SELECT		M.ShowTime, B.LiveIndicator,
 						M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
-						B.Bettype, B.Betteam, B.Stake, C.UGroup,
+						B.Bettype, B.Betteam, B.Stake, 
 						Count(B.TransID) as BetCount
 			FROM		Bettrans B WITH (NOLOCK)
 			INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
@@ -95,21 +95,21 @@ FROM (
 						AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)											 
 			GROUP BY	M.ShowTime, B.LiveIndicator,
 						M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
-						B.Bettype, B.Betteam, B.Stake, C.UGroup
+						B.Bettype, B.Betteam, B.Stake 
 			) B
 GROUP BY 	B.ShowTime, B.LiveIndicator, B.Bettype,B.Betteam, 
-			B.leagueid, B.MatchId, B.HomeId, B.AwayId, B.UGroup	 
+			B.leagueid, B.MatchId, B.HomeId, B.AwayId 
 
 UNION ALL
 SELECT		B.Showtime, B.LiveIndicator,
-			B.leagueid, B.MatchId, B.HomeId, B.AwayId, B.UGroup, B.bettype,B.Betteam, 
+			B.leagueid, B.MatchId, B.HomeId, B.AwayId,  B.bettype,B.Betteam, 
 			SUM(B.Stake) AS Stake,							 
 			SUM(B.BetCount) AS Count,
 			3 as Type 
 FROM (		
 			SELECT		M.ShowTime, B.LiveIndicator,
 						M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
-						B.Bettype, B.Betteam, B.Stake, C.UGroup,
+						B.Bettype, B.Betteam, B.Stake, 
 						Count(B.TransID) as BetCount
 			FROM		Bettrans B WITH (NOLOCK)
 			INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
@@ -130,23 +130,23 @@ FROM (
 						AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)											 
 			GROUP BY	M.ShowTime, B.LiveIndicator,
 						M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
-						B.Bettype,B.Betteam,  B.Stake, C.UGroup
+						B.Bettype,B.Betteam,  B.Stake
 			) B
 GROUP BY 	B.ShowTime, B.LiveIndicator, B.Bettype,B.Betteam, 
-			B.leagueid, B.MatchId, B.HomeId, B.AwayId, B.UGroup	 
+			B.leagueid, B.MatchId, B.HomeId, B.AwayId 
 
 ------------------------Others
 
 INSERT INTO #SpecialWager 
 SELECT		B.Showtime, B.LiveIndicator,
-			B.leagueid, B.MatchId, B.HomeId, B.AwayId, B.UGroup, B.bettype, '0' as Betteam, 
+			B.leagueid, B.MatchId, B.HomeId, B.AwayId, B.bettype, '0' as Betteam, 
 			SUM(B.Stake) AS Stake,							 
 			SUM(B.BetCount) AS Count,
 			0 as Type 
 FROM (		
 			SELECT		M.ShowTime, B.LiveIndicator,
 						M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
-						B.Bettype, B.Stake, C.UGroup,
+						B.Bettype, B.Stake,  
 						Count(B.TransID) as BetCount
 			FROM		Bettrans B WITH (NOLOCK)
 			INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
@@ -166,10 +166,10 @@ FROM (
 						AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)											 
 			GROUP BY	M.ShowTime, B.LiveIndicator,
 						M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
-						B.Bettype, B.Stake, C.UGroup
+						B.Bettype, B.Stake 
 			) B
 GROUP BY 	B.ShowTime, B.LiveIndicator, B.Bettype, 
-			B.leagueid, B.MatchId, B.HomeId, B.AwayId, B.UGroup
+			B.leagueid, B.MatchId, B.HomeId, B.AwayId
 
 SELECT	* 
 FROM	#SpecialWager 
