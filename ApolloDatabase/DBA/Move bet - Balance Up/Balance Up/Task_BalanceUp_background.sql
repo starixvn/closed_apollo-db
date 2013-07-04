@@ -105,7 +105,7 @@ BEGIN
 	truncate table BalanceTable_Agent_Tmp
 
 	---later
-	---EXEC dbo.balancecheck @fdate, 11
+	EXEC dbo.Task_BalanceCheck @fdate, 11
 
 	-- doing backup
 	Declare @suffix varchar(10)
@@ -322,6 +322,7 @@ BEGIN
 
 	----later
 	--EXEC dbo.balancecheck @fdate, 21
+	EXEC dbo.Task_BalanceCheck @fdate, 12
 
 	UPDATE SVRCSD.RepDB.dbo.SystemSettings
 	SET VValue = '0'

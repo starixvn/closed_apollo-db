@@ -86,7 +86,9 @@ CREATE TABLE #matchList
 		goalrecord VARCHAR(50),                       		
 		IsHTCal BIT,	
 		IsKeyscore BIT,
-		IsFGLG BIT
+		IsFGLG BIT,
+		FailedActionID INT,
+		DisabledAutoSettle BIT
 	)
 
 

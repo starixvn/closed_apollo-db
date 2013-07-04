@@ -106,6 +106,7 @@
     <Folder Include="CSD\Admin\Log" />
     <Folder Include="DBA\Move bet - Balance Up\Balance Up" />
     <Folder Include="Agent\Wagers" />
+    <Folder Include="CSD\Settlement\Auto Settlement" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1287,6 +1288,27 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Task_BackupFull_TransDB.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Auto Settlement\Admin_AutoSettlement_GenerateCommand.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Auto Settlement\Task_AutoSettlement.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Auto Settlement\Task_AutoSettlement_CleanUp.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Auto Settlement\Task_AutoSettlement_Loop.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Auto Settlement\Admin_AutoSettlement_UpdateFlag.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\Task_BalanceCheck.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Auto Settlement\Admin_AutoSettlement_GetFlag.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>

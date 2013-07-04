@@ -67,7 +67,9 @@ FROM
 			CAST(CASE WHEN hthomescore IS NOT NULL AND htawayscore IS NOT NULL AND finalhomescore IS NOT NULL AND finalawayscore IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS IsKeyscore ,
 			c.betcount,
 			m.goalrecord,
-			CASE WHEN c.cntFGLG = 0 THEN 0 ELSE 1 END AS isExistFGLG
+			CASE WHEN c.cntFGLG = 0 THEN 0 ELSE 1 END AS isExistFGLG,
+			m.FailedActionID,
+			m.DisabledAutoSettle
 	FROM		
 		(
 		SELECT match.matchid, match.leagueid ,
@@ -87,7 +89,9 @@ FROM
 			match.isNeutral,  
 			match.eventdate,  			
 			mr.IsHTCal AS IsHTCal,
-			mr.goalrecord as goalrecord
+			mr.goalrecord as goalrecord,
+			mr.FailedActionID ,
+			mr.DisabledAutoSettle
 		FROM SVRPRO.ProdDB.dbo.match WITH (NOLOCK)   
 		LEFT JOIN SVRPRO.ProdDB.dbo.match_remark_ex mr WITH (NOLOCK) on match.matchid = mr.matchid                    		
 		WHERE match.eventdate BETWEEN @FromDate AND @ToDate  
@@ -121,7 +125,9 @@ FROM
 			match.isNeutral,  
 			match.eventdate,  			
 			mr.IsHTCal AS IsHTCal,
-			mr.goalrecord as goalrecord
+			mr.goalrecord as goalrecord,
+			mr.FailedActionID,
+			mr.DisabledAutoSettle
 		FROM SVRPRO.ProdDB.dbo.match WITH (NOLOCK)   
 		LEFT JOIN SVRPRO.ProdDB.dbo.match_remark_ex mr WITH (NOLOCK) on match.matchid = mr.matchid                    
 		LEFT JOIN SVRPRO.ProdDB.dbo.match_remark  WITH (NOLOCK) on match.matchid = match_remark.matchid                    
