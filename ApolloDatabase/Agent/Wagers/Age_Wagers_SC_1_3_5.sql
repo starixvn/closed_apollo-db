@@ -62,7 +62,8 @@ SET NOCOUNT ON
 	FROM (		
 				SELECT		M.ShowTime, B.LiveIndicator,
 							M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
-							B.Bettype, B.Stake, B.betteam, 
+							B.Bettype, B.betteam, 
+							SUM(B.Stake) Stake ,
 							Count(B.TransID) as BetCount
 				FROM		Bettrans B WITH (NOLOCK)
 				INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
@@ -82,7 +83,7 @@ SET NOCOUNT ON
 							AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)											 
 				GROUP BY	M.ShowTime, B.LiveIndicator,
 							M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
-							B.Bettype, B.Stake, B.betteam
+							B.Bettype, B.betteam
 				) B
 
 	GROUP BY 	B.ShowTime, B.LiveIndicator,

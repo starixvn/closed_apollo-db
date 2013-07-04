@@ -227,7 +227,7 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 			WHERE		(@Bettypes = '0' OR B.Bettype IN (Select Bettype FROM #BettypeList ))
 						AND B.StatusId IN (0,1)							
 						AND B.LiveIndicator = @LiveIndicator
-						AND (B.betteam = @Betteam OR B.betteam = '0')
+						AND (B.betteam = @Betteam OR @betteam = '0')
 						
 						AND M.MatchId = @MatchID 
 						AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList))

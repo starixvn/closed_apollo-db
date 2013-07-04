@@ -28,9 +28,9 @@ Parameters
  
 */
 SET NOCOUNT ON 
-				SELECT		M.EventDate, B.LiveIndicator,
-							M.leagueid, M.TeamId, M.Orid,
-							B.Bettype, B.Stake, B.betteam, 
+				SELECT		DISTINCT M.EventDate, B.LiveIndicator,
+							M.leagueid, M.TeamId, M.Orid as MatchID,
+							B.Bettype, B.betteam, 
 							B.Status,
 							Count(B.TransID) as BetCount,
 							SUM(B.Stake) as Stake
@@ -51,7 +51,7 @@ SET NOCOUNT ON
 																 
 				GROUP BY	M.EventDate, B.LiveIndicator,
 							M.leagueid, M.TeamId, M.Orid,
-							B.Bettype, B.Stake, B.betteam, B.Status
+							B.Bettype, B.betteam, B.Status
 			 
 				ORDER BY 	M.EventDate, M.leagueid, M.TeamId
 GO

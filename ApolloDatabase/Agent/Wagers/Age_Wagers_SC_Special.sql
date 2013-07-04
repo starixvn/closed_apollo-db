@@ -40,7 +40,8 @@ SELECT		B.Showtime, B.LiveIndicator,
 FROM (		
 			SELECT		M.ShowTime, B.LiveIndicator,
 						M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
-						B.Bettype, B.Stake,  
+						B.Bettype,
+						SUM(B.Stake) Stake,  
 						Count(B.TransID) as BetCount
 			FROM		Bettrans B WITH (NOLOCK)
 			INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
@@ -60,7 +61,7 @@ FROM (
 						AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)											 
 			GROUP BY	M.ShowTime, B.LiveIndicator,
 						M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
-						B.Bettype, B.Stake 
+						B.Bettype 
 			) B
 GROUP BY 	B.ShowTime, B.LiveIndicator, B.Bettype, 
 			B.leagueid, B.MatchId, B.HomeId, B.AwayId
