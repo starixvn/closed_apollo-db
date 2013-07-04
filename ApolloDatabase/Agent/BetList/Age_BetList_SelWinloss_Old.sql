@@ -4,7 +4,9 @@
 	@CustId INT = -1,
 	@FromDate DATE, 
 	@ToDate DATE,
-	@StatusIds VARCHAR(200)
+	@StatusIds VARCHAR(1000),
+	@Sporttypes VARCHAR(1000) = '0',
+	@Bettypes VARCHAR(1000) = '0'
 
  AS
 /*
@@ -51,7 +53,18 @@ FROM	OPENQUERY (SVRCUST, ''	SELECT	AgentLevel
 
 CREATE TABLE #StatusId ( StatusId TINYINT)
 INSERT INTO #StatusId
-SELECT val FROM dbo.strSplit_Key(''' + CONVERT (VARCHAR(200),@StatusIds) +''','','')
+SELECT val FROM dbo.strSplit_Key(''' + CONVERT (VARCHAR(1000),@StatusIds) +''','','')
+
+
+CREATE TABLE #BettypeList (bettype SMALLINT)
+INSERT INTO #BettypeList
+SELECT val FROM dbo.strSplit_Key(''' + CONVERT (VARCHAR(1000),@Bettypes) +''','','')
+
+CREATE TABLE #SportsList (Sporttype TINYINT)
+INSERT INTO #SportsList (Sporttype)
+SELECT val FROM strSplit_key (''' + CONVERT (VARCHAR(1000),@Sporttypes) +''','','')
+
+
 '
 
 SET @S1 = ' 
@@ -124,15 +137,17 @@ CREATE TABLE #Betlist  (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						AND	B.WinLostDate Between '''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 	
 						AND (	B.bettype < 31 
 								OR B.bettype between 121 and 999
-								OR B.bettype between 1301 and 1334 
-								OR B.bettype BETWEEN 81 AND 120 				
-							) 		
+								OR B.bettype between 1301 and 1334 									
+							) 
+						AND (@Bettypes = ''0'' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
+						AND (@Sporttypes = ''0'' OR M.sporttype IN (Select sporttype FROM #SportsList)) 	
 					
 
 
 				----- Parlay
 				INSERT INTO #Betlist
-				SELECT 	B.TransId,
+				SELECT  DISTINCT 
+						B.TransId,
 						B.RefNo,
 						0 as matchid,
 						'''' matchcode,
@@ -172,9 +187,15 @@ CREATE TABLE #Betlist  (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						0 as OddStype,		
 						B.DoubleCommLosing	
 				FROM BetTrans_BK AS B  WITH (NOLOCK) 
+				INNER JOIN BettransM AS BM WITH (NOLOCK)
+					ON	BM.RefNo = B.RefNo
+				INNER JOIN Match M WITH (NOLOCK) 
+					ON  M.matchID = BM.MatchId  
 				WHERE  B.StatusId in (SELECT StatusId FROM #StatusId ) 
 						AND B.WinLostDate Between '''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
 						AND B.BetType IN (9,29)
+						AND (@Bettypes = ''0'' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
+						AND (@Sporttypes = ''0'' OR M.sporttype IN (Select sporttype FROM #SportsList)) 
 					'
 SET @S2 = '
 				----- outright_BK
@@ -225,6 +246,8 @@ SET @S2 = '
 				WHERE 	B.StatusId in (SELECT StatusId FROM #StatusId ) 		
 						AND B.WinLostDate Between '''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
 						AND B.bettype = 10
+						AND (@Bettypes = ''0'' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
+						AND (@Sporttypes = ''0'' OR lg.sporttype IN (Select sporttype FROM #SportsList)) 
 				
 			END
 			------ 2: Super view by Agent
@@ -282,14 +305,23 @@ SET @S2 = '
 						AND BA.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 	
 						AND (	BA.bettype < 31 
 								OR BA.bettype between 121 and 999
-								OR BA.bettype between 1301 and 1334 
-								OR BA.bettype BETWEEN 81 AND 120 				
+								OR BA.bettype between 1301 and 1334 										
 							) 		
-					
+						AND (@Bettypes = ''0'' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 
+						
+						AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
+						AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 	
+						AND (	B.bettype < 31 
+								OR B.bettype between 121 and 999
+								OR B.bettype between 1301 and 1334 										
+							) 		
+						AND (@Bettypes = ''0'' OR B.Bettype IN (Select bettype FROM #BettypeList))
+						AND (@Sporttypes = ''0'' OR M.sporttype IN (Select sporttype FROM #SportsList)) 
 
 				---Parlay
 				INSERT INTO #Betlist
-				SELECT  B.TransId,
+				SELECT  DISTINCT
+						B.TransId,
 						B.RefNo,
 						0 as matchid,
 						'''' matchcode,
@@ -328,12 +360,24 @@ SET @S2 = '
 						B.IP,		
 						0 as OddStype,		
 						B.DoubleCommLosing	
-				FROM BetTrans_BK AS B  WITH (NOLOCK) 		
-				INNER JOIN BetTrans_Agent_BK AS BA WITH (NOLOCK) ON BA.TransId = B.TransId 
+				FROM BetTrans_BK AS B  WITH (NOLOCK)
+				INNER JOIN BettransM AS BM WITH (NOLOCK)
+					ON	BM.RefNo = B.RefNo
+				INNER JOIN Match_BK M WITH (NOLOCK) 
+					ON  M.matchID = BM.MatchId   		
+				INNER JOIN BetTrans_Agent_BK AS BA WITH (NOLOCK) 
+					ON BA.TransId = B.TransId 
 				WHERE	BA.AgentId = '+ CONVERT(VARCHAR(10),@AgentId) +'			
+					AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 
+					AND BA.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
+					AND BA.BetType IN (9,29) 
+					AND (@Bettypes = ''0'' OR BA.Bettype IN (Select bettype FROM #BettypeList))
+					
 					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
 					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
 					AND B.BetType IN (9,29) 
+					AND (@Bettypes = ''0'' OR B.Bettype IN (Select bettype FROM #BettypeList))
+					AND (@Sporttypes = ''0'' OR M.sporttype IN (Select sporttype FROM #SportsList))
 '
 SET @S3 = '
 
@@ -383,9 +427,16 @@ SET @S3 = '
 					INNER JOIN outright_BK as m WITH (NOLOCK) on  B.matchid=m.orid
 					INNER JOIN SVRPRO.ProdDB.dbo.League lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
 				WHERE 	BA.AgentId = '+ CONVERT(VARCHAR(10),@AgentId) +' 		
+					AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 	
+					AND BA.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
+					AND BA.bettype = 10
+					AND (@Bettypes = ''0'' OR BA.Bettype IN (Select bettype FROM #BettypeList))
+					
 					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
 					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
 					AND B.bettype = 10
+					AND (@Bettypes = ''0'' OR B.Bettype IN (Select bettype FROM #BettypeList))
+					AND (@Sporttypes = ''0'' OR LG.sporttype IN (Select sporttype FROM #SportsList))
 			END
 						
 		END
@@ -445,15 +496,16 @@ SET @S3 = '
 					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 	
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
-							OR B.bettype between 1301 and 1334 
-							OR B.bettype BETWEEN 81 AND 120 				
+							OR B.bettype between 1301 and 1334 				
 						) 		
-				
+					AND (@Bettypes = ''0'' OR B.Bettype IN (Select bettype FROM #BettypeList))				
+					AND (@Sporttypes = ''0'' OR LG.sporttype IN (Select sporttype FROM #SportsList))
 
 				
 			-----Parlay
 			INSERT INTO #Betlist
-			SELECT 	B.TransId,
+			SELECT 	DISTINCT
+					B.TransId,
 					B.RefNo,
 					0 as matchid,
 					'''' matchcode,
@@ -493,10 +545,16 @@ SET @S3 = '
 					0 as OddStype,		
 					B.DoubleCommLosing	
 				FROM BetTrans_BK AS B  WITH (NOLOCK) 
+				INNER JOIN BettransM AS BM WITH (NOLOCK)
+					ON	BM.RefNo = B.RefNo
+				INNER JOIN Match_BK M WITH (NOLOCK) 
+					ON  M.matchID = BM.MatchId  
 				WHERE B.CustID = '+ CONVERT(VARCHAR(10),@CustId) +'  				
 					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
 					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
 					AND B.BetType IN (9,29) 
+					AND (@Bettypes = ''0'' OR B.Bettype IN (Select bettype FROM #BettypeList))				
+					AND (@Sporttypes = ''0'' OR M.sporttype IN (Select sporttype FROM #SportsList))
 '
 SET @S4= '
 
@@ -550,6 +608,8 @@ SET @S4= '
 					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
 					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
 					AND B.bettype = 10
+					AND (@Bettypes = ''0'' OR B.Bettype IN (Select bettype FROM #BettypeList))				
+					AND (@Sporttypes = ''0'' OR LG.sporttype IN (Select sporttype FROM #SportsList))
 					
 		END
 	END 
@@ -612,15 +672,17 @@ SET @S4= '
 					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 	
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
-							OR B.bettype between 1301 and 1334 
-							OR B.bettype BETWEEN 81 AND 120 				
-						) 			
+							OR B.bettype between 1301 and 1334 				
+						) 
+					AND (@Bettypes = ''0'' OR B.Bettype IN (Select bettype FROM #BettypeList))				
+					AND (@Sporttypes = ''0'' OR M.sporttype IN (Select sporttype FROM #SportsList))			
 	'
 SET @S5 = '		
 
 			-----Parlay
 			INSERT INTO #Betlist
-			SELECT 	B.TransId,
+			SELECT 	DISTINCT
+					B.TransId,
 					B.RefNo,
 					0 as matchid,
 					'''' matchcode,
@@ -663,10 +725,14 @@ SET @S5 = '
 					INNER JOIN BetTrans_Agent_BK AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
 					INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = '+ CONVERT(VARCHAR(10),@LoggedId) +'
 					LEFT JOIN BetTrans_Agent_BK D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
+					INNER JOIN BettransM AS BM WITH (NOLOCK) ON	BM.RefNo = B.RefNo
+					INNER JOIN Match_BK M WITH (NOLOCK) oN  M.matchID = BM.MatchId  
 				WHERE BA.AgentId = '+ CONVERT(VARCHAR(10),@AgentId) +'				
 					AND B.StatusId in (SELECT StatusId FROM #StatusId )  	
 					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
-					AND B.BetType IN (9,29) 
+					AND B.BetType IN (9,29)
+					AND (@Bettypes = ''0'' OR B.Bettype IN (Select bettype FROM #BettypeList))				
+					AND (@Sporttypes = ''0'' OR M.sporttype IN (Select sporttype FROM #SportsList))
 
 			----- outright_BK
 			INSERT INTO #Betlist
@@ -722,6 +788,8 @@ SET @S5 = '
 					AND B.StatusId in (SELECT StatusId FROM #StatusId )  
 					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
 					AND B.bettype = 10
+					AND (@Bettypes = ''0'' OR B.Bettype IN (Select bettype FROM #BettypeList))				
+					AND (@Sporttypes = ''0'' OR LG.sporttype IN (Select sporttype FROM #SportsList))
 
 		END'
 	
@@ -782,14 +850,16 @@ SET @S6 = '
 					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 	
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
-							OR B.bettype between 1301 and 1334 
-							OR B.bettype BETWEEN 81 AND 120 				
-						) 		
+							OR B.bettype between 1301 and 1334 			
+						) 
+					AND (@Bettypes = ''0'' OR B.Bettype IN (Select bettype FROM #BettypeList))				
+					AND (@Sporttypes = ''0'' OR M.sporttype IN (Select sporttype FROM #SportsList))		
 				
 			
 			---- Parlay
 			INSERT INTO #Betlist
-			SELECT  B.TransId,
+			SELECT  DISTINCT
+					B.TransId,
 					B.RefNo,
 					0 as matchid,
 					'''' matchcode,
@@ -832,10 +902,14 @@ SET @S6 = '
 					INNER JOIN BetTrans_Agent_BK AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
 					INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = '+ CONVERT(VARCHAR(10),@LoggedId) +'
 					LEFT JOIN BetTrans_Agent_BK D WITH (NOLOCK) ON D.TransID = B.TransID AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
+					INNER JOIN BettransM AS BM WITH (NOLOCK) ON	BM.RefNo = B.RefNo
+					INNER JOIN Match_BK M WITH (NOLOCK) oN  M.matchID = BM.MatchId  
 				WHERE   B.CustID = '+ CONVERT(VARCHAR(10),@CustId) +'			
 					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
 					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
-					AND B.BetType IN (9,29) 
+					AND B.BetType IN (9,29)
+					AND (@Bettypes = ''0'' OR B.Bettype IN (Select bettype FROM #BettypeList))				
+					AND (@Sporttypes = ''0'' OR M.sporttype IN (Select sporttype FROM #SportsList)) 
 
 
 			----- outright_BK
@@ -891,6 +965,8 @@ SET @S6 = '
 					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
 					AND B.WinLostDate Between'''+ Convert(varchar(20),@Fromdate )+''' AND '''+ Convert(varchar(20),@Todate )+''' 
 					AND B.bettype = 10
+					AND (@Bettypes = ''0'' OR B.Bettype IN (Select bettype FROM #BettypeList))				
+					AND (@Sporttypes = ''0'' OR LG.sporttype IN (Select sporttype FROM #SportsList))
 
 		END 
 	END
