@@ -34,7 +34,7 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 
 IF @Todate >= @BalanceUpDay
 BEGIN 
-	
+		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
 		INSERT INTO #WinLossMember
 	    SELECT  C.Username,
 				C.CustID,
@@ -74,6 +74,7 @@ BEGIN
 		GROUP BY C.Username, C.CustID, PT.PositionTaking
 
 	----Parlay
+	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
 	 INSERT INTO #WinLossMember
 	 SELECT		B.Username,
 				B.CustID,
@@ -129,6 +130,7 @@ BEGIN
 		GROUP BY B.Username,B.CustID,B.PositionTaking
 
 ----- Outright
+	 IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype  IN ( 10) OR @Bettypes = '0')
 	 INSERT INTO #WinLossMember
 	 SELECT  C.Username,
 				C.CustID,

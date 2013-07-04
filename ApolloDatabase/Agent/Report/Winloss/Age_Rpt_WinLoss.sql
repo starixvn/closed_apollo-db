@@ -41,6 +41,7 @@ BEGIN
 	----Super view
 	--********************************
 		
+		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
 		----Sportsbook
 		INSERT INTO #WinLossAgent
 		SELECT  C.Username, C.AgentID, 1 as IsAgent,
@@ -76,6 +77,7 @@ BEGIN
 
 
 		----Parlay
+		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
 		INSERT INTO #WinLossAgent
 		SELECT  B.Username, B.AgentID, 1 as IsAgent,
 				B.MaxUpperPositionTaking as PositionTaking,	
@@ -122,7 +124,9 @@ BEGIN
 			 ) B
 		GROUP BY	B.Username, B.AgentID, B.MaxUpperPositionTaking  
 
+	
 	----Outright
+		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (10) OR @Bettypes = '0')
 		INSERT INTO #WinLossAgent
 		SELECT  C.Username, C.AgentID, 1 as IsAgent,
 				PT.MaxUpperPositionTaking as PositionTaking,	
@@ -170,6 +174,7 @@ BEGIN
 				ATotal MONEY,ChildAComm MONEY, Winlost MONEY, Actual_Stake MONEY) 
 
 		---Sportsbook
+		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
 		INSERT INTO	#Tmp
 		SELECT  C.Username, C.AgentID, PT.MaxUpperPositionTaking as PositionTaking,
 				COUNT(B.TransID) BetCount,			 
@@ -211,6 +216,7 @@ BEGIN
 
 	 
 		----Parlay	
+		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
 		INSERT INTO	#Tmp
 		SELECT  B.Username, B.AgentID, B.MaxUpperPositionTaking as PositionTaking,
 				SUM(B.BetCount) BetCount,			 
@@ -263,6 +269,7 @@ BEGIN
 		GROUP BY B.Username, B.AgentID , B.MaxUpperPositionTaking
 
 		---Outright
+		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (10) OR @Bettypes = '0')
 		INSERT INTO	#Tmp
 		SELECT  C.Username, C.AgentID, PT.MaxUpperPositionTaking as PositionTaking,
 				COUNT(B.TransID) BetCount,			 
@@ -328,6 +335,7 @@ BEGIN
 -----Member winloss
 --********************************	
 	---Sportsbook
+	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
 	INSERT INTO #WinLossMember  
 	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,
 			0 as PositionTaking,	
@@ -359,6 +367,7 @@ BEGIN
  
 
 	---Parlay	
+	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
 	INSERT INTO #WinLossMember  
 	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,
 			0 as PositionTaking,	
@@ -399,6 +408,7 @@ BEGIN
 			) B
 
 	---Outright
+	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (10) OR @Bettypes = '0')
 	INSERT INTO #WinLossMember  
 	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,
 			0 as PositionTaking,	
