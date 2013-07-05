@@ -107,6 +107,7 @@
     <Folder Include="DBA\Move bet - Balance Up\Balance Up" />
     <Folder Include="Agent\Wagers" />
     <Folder Include="CSD\Settlement\Auto Settlement" />
+    <Folder Include="DBA\Task" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1387,6 +1388,12 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="CSD\Settlement\Auto Settlement\Admin_AutoSettlement_GetFlag.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Task\Task_Sync_CustomerLog.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Auto Settlement\Admin_AutoSettlement_ClearFailAction.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>

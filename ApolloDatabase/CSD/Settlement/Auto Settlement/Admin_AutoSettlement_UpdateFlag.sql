@@ -42,6 +42,7 @@ BEGIN
 	BEGIN
 		Select @ErrMsg = 'Data updating process failed!!'
 				,@ErrCode = 100		
+		RETURN
 	END
 	
 	--OFF
@@ -60,6 +61,7 @@ BEGIN
 		BEGIN
 			Select @ErrMsg = 'Data updating process failed!!'
 					,@ErrCode = 101		
+			RETURN
 		END
 	END
 	
@@ -91,6 +93,7 @@ BEGIN
 	BEGIN
 		Select @ErrMsg = 'There are running auto settlement commands! Please try again later.'
 				,@ErrCode = 103		
+		RETURN
 	END
 
 	-- turn on and there is action settlement already
@@ -101,6 +104,7 @@ BEGIN
 	BEGIN
 		Select @ErrMsg = 'There was action settlement already so it cannot turn on to ensure consistency'
 			,@ErrCode = 104		
+		RETURN
 	END
 
 	BEGIN TRY
@@ -115,6 +119,7 @@ BEGIN
 	BEGIN CATCH
 		Select @ErrMsg = 'Data updating process failed!!'
 			,@ErrCode = 105		
+		RETURN
 	END CATCH
 
 	SELECT @LogData = 'Turn ' + CASE WHEN @isTurnOn =1 THEN 'on' ELSE 'off' END + ' auto settlement for matchid=' +  CAST(@matchid as varchar(50)) 

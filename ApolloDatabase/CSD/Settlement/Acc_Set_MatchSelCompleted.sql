@@ -48,7 +48,7 @@ Declare @m TABLE (
 		betstatus nvarchar(50),
 		GoalRecord varchar(50),
 		eventstatus nvarchar(50),
-		FailedActionID int NULL,
+		FailedActionID tinyint NULL,
 		DisabledAutoSettle BIT
 		)		
 INSERT INTO @m  
