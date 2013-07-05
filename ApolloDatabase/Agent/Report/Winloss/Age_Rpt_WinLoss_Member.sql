@@ -1,7 +1,8 @@
 ﻿ALTER PROCEDURE [dbo].[Age_Rpt_WinLoss_Member_Xtest]
 	@AgentID 	INT,
 	@FromDate 	DATE,
-	@ToDate 	DATE,	
+	@ToDate 	DATE,
+	@MovebetDay DATE,	
 	@BalanceUpDay DATE,
 	@Sporttypes VARCHAR(MAX) = '0',
 	@Bettypes VARCHAR(MAX) = '0' 		
@@ -32,7 +33,7 @@ CREATE TABLE #SportsList (Sporttype TINYINT)
 INSERT INTO #SportsList (Sporttype)
 SELECT val FROM strSplit_key (@Sporttypes, ',')
 
-IF @Todate >= @BalanceUpDay
+IF @Todate > @MovebetDay
 BEGIN 
 		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
 		INSERT INTO #WinLossMember
@@ -100,7 +101,7 @@ BEGIN
 						COUNT(DISTINCT B.TransID) as BetCount,
 		   				B.Stake, B.MOdds, B.StatusID,
 						B.WinLost , B.Actual_Stake,	B.PlayerComm,	
-						BA.AWinLost, BA.AComm
+						BA.AWinLost, BA.AComm, B.TransID
 				FROM		Bettrans B WITH (NOLOCK)
 				INNER JOIN	BetTrans_Agent BA WITH (NOLOCK)
 						ON	BA.TransID = B.TransID
@@ -115,17 +116,17 @@ BEGIN
 				WHERE		BA.AgentId = @AgentID
 						AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
 						AND BA.StatusID NOT IN (0,1)	
-						AND BA.bettype <= 19000
+						AND BA.bettype IN (9,29)
 						AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))			
 						AND B.Winlostdate BETWEEN @FromDate AND @ToDate 
 						AND B.StatusID NOT IN (0,1)	
-						AND B.bettype <= 19000
+						AND B.bettype IN (9,29)
 						AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
 						AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
 				GROUP BY	C.Username,C.CustID,PT.PositionTaking, 					
 		   					B.Stake, B.MOdds, B.StatusID,
 							B.WinLost , B.Actual_Stake,	B.PlayerComm,	
-							BA.AWinLost, BA.AComm
+							BA.AWinLost, BA.AComm, B.TransID
 				) B
 		GROUP BY B.Username,B.CustID,B.PositionTaking
 
@@ -162,72 +163,23 @@ BEGIN
 		WHERE		BA.AgentId = @AgentID
 				AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND BA.StatusID NOT IN (0,1)	
-				AND BA.bettype <= 19000
+				AND BA.bettype =10
 				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))			
 				AND B.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND B.StatusID NOT IN (0,1)	
-				AND B.bettype <= 19000
+				AND B.bettype =10
 				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
 				AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))
 		GROUP BY C.Username, C.CustID, PT.PositionTaking
 
 --##############################################		    
-	IF @BalanceUpDay < @FromDate --if this case occurs then there is no data from Sum_WinLoss_Cust_Old
-		SELECT @BalanceUpDay=@FromDate
-
-  		INSERT INTO #WinLossMember
-	    SELECT	A.Username, A.CustId,
-				PT.PositionTaking,
-				SUM(BetCount) as BetCount,						 
-				SUM(Turnover) TurnOver,
-				SUM(Actual_Turnover) ActualTO,	
-				SUM(WinLost) WinLost,
-				SUM(PlayerComm) as PlayerComm,
-				SUM(WinLost) + SUM(PlayerComm) as MemTotal,
-
-				SUM(UplineWinlost) as AWinLost,
-				SUM(UplineComm - PlayerComm) as AComm,
-				SUM(UplineWinlost) + SUM(UplineComm-PlayerComm) AS ATotal,
-
-				- (SUM(WinLost)  + SUM(UplineWinlost) + SUM(UplineComm)) as UplineTotal
-	    FROM	Sum_WinLoss_Cust A WITH(NOLOCK) 
-		INNER JOIN	CustPositionTaking PT WITH (NOLOCK) 
-				ON	PT.CustID = A.CustID AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
-		WHERE	A.AgentId = @AgentId 
-				AND WinLostDate BETWEEN @BalanceUpDay AND @ToDate 
-				AND (@Bettypes = '0' OR A.Bettype IN (Select bettype FROM #BettypeList))
-				AND (@Sporttypes = '0' OR A.sporttype IN (Select sporttype FROM #SportsList))
-		GROUP BY A.Username, A.CustId, PT.PositionTaking
+	 
 END
 
 --##############################################
-IF @FromDate < @BalanceUpDay 
+IF @FromDate <= @MovebetDay 
 BEGIN
-	IF @todate >= DATEADD(dd, -1, @BalanceUpDay)
-		SELECT @ToDate = DATEADD(dd, -1, @BalanceUpDay)
-		
-		INSERT INTO #WinLossMember
-	    SELECT	A.Username, A.CustId,
-				PT.PositionTaking,	
-				SUM(BetCount) as BetCount,				 
-				SUM(Turnover) TurnOver,
-				SUM(Actual_Turnover) ActualTO,	
-				SUM(WinLost) WinLost,
-				SUM(PlayerComm) as PlayerComm,
-				SUM(WinLost) + SUM(PlayerComm) as MemTotal,	
-
-				SUM(UplineWinlost) as AWinLost,
-				SUM(UplineComm-PlayerComm) as AComm,
-				SUM(UplineWinlost) + SUM(UplineComm-PlayerComm) AS ATotal,
-				- (SUM(WinLost) + SUM(UplineWinlost) + SUM(UplineComm)) as UplineTotal
-	    FROM	SVRARC.ArchiveDB.dbo.Sum_WinLoss_Cust_Old A WITH(NOLOCK) 
-		INNER JOIN	CustPositionTaking PT WITH (NOLOCK) 
-				ON	PT.CustID = A.CustID AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
-		WHERE	A.AgentId = @AgentId 
-				AND WinLostDate BETWEEN @FromDate AND @ToDate
-				AND (@Bettypes = '0' OR A.Bettype IN (Select bettype FROM #BettypeList))
-				AND (@Sporttypes = '0' OR A.sporttype IN (Select sporttype FROM #SportsList)) 
-	    GROUP BY A.Username, A.CustId, PT.PositionTaking
+	 Print 'a'
 END 
  
 SELECT	Username, CustId,  PositionTaking,
