@@ -2,7 +2,8 @@
 	@AgentID 	INT,
 	@FromDate 	DATE,
 	@ToDate 	DATE,	
-	@BalanceUpDay DATE,
+	@MoveBetDay DATE, 
+	@BalanceUpDay DATE,	
 	@Sporttypes VARCHAR(MAX) = '0',
 	@Bettypes VARCHAR(MAX) = '0'
 WITh RECOMPILE  	
@@ -93,7 +94,8 @@ BEGIN
 				SELECT		DISTINCT
 							C.Username, C.AgentID, PT.MaxUpperPositionTaking,	
 							COUNT(B.TransID) BetCount,
-							B.MOdds,B.StatusID,	B.Stake, 
+							SUM(ABS(B.Stake)) Stake,
+							B.MOdds,B.StatusID,	 
 							B.Winlost,B.Actual_Stake ,B.TWinlost, B.TComm	
 				FROM		AgentInfo C WITH (NOLOCK)
 				INNER JOIN	BetTrans_Agent BA WITH (NOLOCK)
@@ -232,7 +234,8 @@ BEGIN
 				SELECT  DISTINCT 
 						C.Username, C.AgentID, PT.MaxUpperPositionTaking,
 						COUNT(B.TransId) BetCount,			 
-		   				B.Stake,B.Winlost,B.Actual_Stake,
+		   				SUM(ABS(B.Stake)) as Stake,
+						B.Winlost,B.Actual_Stake,
 						B.MOdds,B.StatusID,
 						BP.AWinlost, BP.AComm, BA.AComm as ChildAComm							
 				FROM	Bettrans B WITH (NOLOCK) 
@@ -262,7 +265,7 @@ BEGIN
 						AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 						AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
 				GROUP BY C.Username, C.AgentID, PT.MaxUpperPositionTaking,						
-		   				B.Stake,B.Winlost,B.Actual_Stake,
+		   				B.Winlost,B.Actual_Stake,
 						B.MOdds,B.StatusID,
 						BP.AWinlost, BP.AComm, BP.AWinlost, BA.AComm
 			) B
@@ -328,7 +331,7 @@ BEGIN
 	 
 		DROP TABLE #Tmp 
 
-	END
+	
 
 
 --********************************
@@ -380,9 +383,11 @@ BEGIN
 			SUM (B.Winlost - B.Actual_Stake + B.PlayerComm) GrossTotal,
 			-(SUM (B.Winlost - B.Actual_Stake + B.PlayerComm) + SUM(B.AWinLost) + SUM(B.AComm) - SUM (B.PlayerComm)) UplineTotal
 	FROM (
-			SELECT 	COUNT(B.TransID) BetCount,	   			
+			SELECT DISTINCT 
+					COUNT(B.TransID) BetCount,	   			
 					B.MOdds,B.StatusID,	BA.AWinLost, BA.AComm,
-					B.Stake, B.Winlost, B.Actual_Stake,B.PlayerComm
+					SUM(ABS(B.Stake)) Stake , 
+					B.Winlost, B.Actual_Stake,B.PlayerComm
 					
 			FROM	Bettrans B WITH (NOLOCK)
 			INNER JOIN BetTrans_Agent BA WITH (NOLOCK ) 
@@ -404,7 +409,7 @@ BEGIN
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
 					AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
 			GROUP BY B.MOdds,B.StatusID,	BA.AWinLost, BA.AComm,
-					B.Stake, B.Winlost, B.Actual_Stake,B.PlayerComm
+					 B.Winlost, B.Actual_Stake,B.PlayerComm
 			) B
 
 	---Outright
@@ -484,7 +489,7 @@ BEGIN
 	   --- GROUP BY Username, CustId
 
 END
-
+END
 ----------------------------------------------------------------------------------------------
 IF @FromDate < @BalanceUpDay 
 BEGIN

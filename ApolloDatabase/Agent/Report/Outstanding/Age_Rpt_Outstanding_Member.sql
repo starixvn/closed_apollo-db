@@ -14,7 +14,7 @@ Revisions:
 
 */
 SET NOCOUNT ON
-DECLARE @MemberOutstanding TABLE (Username NVARCHAR(50), CustID INT, Outstanding MONEY, Positiontaking MONEY, Outstanding_NG MONEY, Positiontaking_NG MONEY)
+DECLARE @MemberOutstanding TABLE (Username NVARCHAR(50), CustID INT, Outstanding MONEY, Positiontaking MONEY)
 
 
 CREATE TABLE #BettypeList (bettype SMALLINT)
@@ -28,24 +28,24 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 
 -----Member Outstanding
 -- Sportsbook
+	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
 	INSERT INTO @MemberOutstanding
 	SELECT  C.Username, B.CustID, 
-			ISNULL(SUM(CASE when BA.bettype < 31 OR BA.bettype between 121 and 999 OR BA.bettype between 1301 and 1334 then ABS(BA.actual_stake) END),0) Outstanding,  
-			ISNULL(SUM(CASE when BA.bettype < 31 OR BA.bettype between 121 and 999 OR BA.bettype between 1301 and 1334 then ABS(BA.actual_stake) * BA.APositiontaking END),0) Positiontaking,
-			ISNULL(SUM(CASE when BA.bettype BETWEEN 81 and 120 then ABS(BA.actual_stake) END),0) Outstanding_NG,
-			ISNULL(SUM(CASE when BA.bettype BETWEEN 81 and 120 then ABS(BA.actual_stake) * BA.APositiontaking END),0) Positiontaking_NG
+			ISNULL(SUM(ABS(BA.actual_stake)),0) Outstanding,  
+			ISNULL(SUM(ABS(BA.actual_stake) * BA.APositiontaking),0) Positiontaking
 	FROM	bettrans B WITH (NOLOCK)
 	INNER JOIN BetTrans_Agent BA WITH (NOLOCK)
-		ON	BA.TransID = B.TransID
+		ON	BA.TransID = B.TransID AND BA.AgentId = @AgentID  
 	INNER JOIN CustInfo C WITH (NOLOCK)
 			ON B.CustID = C.CustID AND BA.AgentId = C.AgentId
 	INNER JOIN Match M WITH (NOLOCK) 
 			ON M.MatchId = B.MatchId
-	WHERE	BA.AgentId = @AgentID 
-			AND BA.StatusId IN (0,1)	
+	WHERE	BA.StatusId IN (0,1)	
+			AND BA.matchID > 0
 			AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 
 			AND B.StatusId IN (0,1)	
+			AND B.matchID > 0
 			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
 			AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
 	GROUP BY C.Username, B.CustID
@@ -53,30 +53,31 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 
 
 --Parlay
+	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
 	INSERT INTO @MemberOutstanding
 	SELECT  B.Username, B.CustID, 
-			ISNULL(SUM(CASE when B.bettype < 31 OR B.bettype between 121 and 999 OR B.bettype between 1301 and 1334 then ABS(B.actual_stake) END),0) Outstanding,  
-			ISNULL(SUM(CASE when B.bettype < 31 OR B.bettype between 121 and 999 OR B.bettype between 1301 and 1334 then ABS(B.actual_stake) * B.APositiontaking END),0) Positiontaking,
-			ISNULL(SUM(CASE when B.bettype BETWEEN 81 and 120 then ABS(B.actual_stake) END),0) Outstanding_NG,
-			ISNULL(SUM(CASE when B.bettype BETWEEN 81 and 120 then ABS(B.actual_stake) * B.APositiontaking END),0) Positiontaking_NG
+			ISNULL(SUM(ABS(B.actual_stake)),0) Outstanding,  
+			ISNULL(SUM(ABS(B.actual_stake) * B.APositiontaking ),0) Positiontaking
+			
 	FROM (
 			SELECT  DISTINCT C.Username, B.CustID, 
 					BA.bettype ,BA.actual_stake, BA.APositiontaking
 			FROM	bettrans B WITH (NOLOCK)
 			INNER JOIN BetTrans_Agent BA WITH (NOLOCK)
-				ON	BA.TransID = B.TransID
+				ON	BA.TransID = B.TransID AND BA.AgentId = @AgentID 
 			INNER JOIN CustInfo C WITH (NOLOCK)
 					ON B.CustID = C.CustID AND BA.AgentId = C.AgentId
 			INNER JOIN BettransM BM WITH (NOLOCK)
 					ON BM.RefNo = B.RefNo
 			INNER JOIN Match M WITH (NOLOCK) 
 					ON M.MatchId = BM.MatchId	
-			WHERE	BA.AgentId = @AgentID 
-					AND BA.StatusId IN (0,1)
+			WHERE	BA.StatusId IN (0,1)
+					AND BA.matchID IN (9,29)
 					AND BA.Bettype IN (9,29) 	
 					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 
 					AND B.StatusId IN (0,1)	
+					AND B.matchID IN (9,29)
 					AND B.Bettype IN (9,29) 
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
 					AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
@@ -86,27 +87,28 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 	ORDER BY B.Username
 
 --- Outright
+	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype = 10 OR @Bettypes = '0')
 	INSERT INTO @MemberOutstanding
 	SELECT  C.Username, B.CustID, 
-			ISNULL(SUM(CASE when BA.bettype < 31 OR BA.bettype between 121 and 999 OR BA.bettype between 1301 and 1334 then ABS(BA.actual_stake) END),0) Outstanding,  
-			ISNULL(SUM(CASE when BA.bettype < 31 OR BA.bettype between 121 and 999 OR BA.bettype between 1301 and 1334 then ABS(BA.actual_stake) * BA.APositiontaking END),0) Positiontaking,
-			ISNULL(SUM(CASE when BA.bettype BETWEEN 81 and 120 then ABS(BA.actual_stake) END),0) Outstanding_NG,
-			ISNULL(SUM(CASE when BA.bettype BETWEEN 81 and 120 then ABS(BA.actual_stake) * BA.APositiontaking END),0) Positiontaking_NG
+			ISNULL(SUM(ABS(BA.actual_stake) ),0) Outstanding,  
+			ISNULL(SUM(ABS(BA.actual_stake) * BA.APositiontaking ),0) Positiontaking
+			
 	FROM	bettrans B WITH (NOLOCK)
 	INNER JOIN BetTrans_Agent BA WITH (NOLOCK)
-		ON	BA.TransID = B.TransID
+		ON	BA.TransID = B.TransID AND BA.AgentId = @AgentID 
 	INNER JOIN CustInfo C WITH (NOLOCK)
 			ON B.CustID = C.CustID AND BA.AgentId = C.AgentId
 	INNER JOIN Outright M WITH (NOLOCK) 
 			ON M.orid = B.MatchId
 	INNER JOIN League l WITH (NOLOCK)
 			ON l.LeagueId = M.LeagueId	
-	WHERE	BA.AgentId = @AgentID 
-			AND BA.StatusId IN (0,1)
+	WHERE	BA.StatusId IN (0,1)
+			AND BA.matchID  > 0
 			AND BA.Bettype = 10 	
 			AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 
 			AND B.StatusId IN (0,1)	
+			AND B.matchID  > 0
 			AND B.Bettype = 10 	
 			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
 			AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))
@@ -114,13 +116,11 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 	ORDER BY C.Username
 
 
-SELECT Username, CustID , SUM (Outstanding) Outstanding , SUM (Positiontaking) Positiontaking , SUM(Outstanding_NG) Outstanding_NG , SUM (Positiontaking_NG)Positiontaking_NG 
+SELECT Username, CustID , SUM (Outstanding) Outstanding , SUM (Positiontaking) Positiontaking 
 FROM @MemberOutstanding 
 GROUP BY Username, CustID 
 ORDER BY Username ASC
  
 GO
 GRANT EXECUTE ON [dbo].[Age_Rpt_Outstanding_Member] TO [aplweb]
-GO
---GRANT VIEW DEFINITION ON [dbo].[Age_Rpt_Outstanding_Member] TO [vnteam]
-
+GO 

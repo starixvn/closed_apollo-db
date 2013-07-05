@@ -24,7 +24,7 @@ FROM		match m WITH (NOLOCK)
 INNER JOIN	bettrans b WITH (NOLOCK) 
 		ON	m.matchid = b.matchid
 WHERE	m.eventdate > @Date
-		AND m.sporttype IN (SELECT val FROM strSplit_Key (@Sporttypes,','))
+		AND (m.sporttype IN (SELECT val FROM strSplit_Key (@Sporttypes,',')) OR @Sporttypes = '0')
 
 GO 
 GRANT EXECUTE ON [Age_Wagers_SelDateBySports] To [aplweb]
