@@ -40,15 +40,17 @@ SET NOCOUNT ON
 				INNER JOIN	Outright M WITH (NOLOCK)
 					ON		M.orid = B.MatchID
 				INNER JOIN  League L WITH (NOLOCK) 
-					ON		L.LeagueId = M.LeagueId				
+					ON		L.LeagueId = M.LeagueId	
+				INNER JOIN  CustInfo C WITH (NOLOCK)
+					ON		C.CustID = B.CustID
 				WHERE		B.Bettype = 10
 							AND B.StatusId IN (0,1)							
 							AND B.LiveIndicator = 0
 							AND (@Sporttypes = '0' OR L.Sporttype IN (SELECT val FROM StrSplit_Key(@Sporttypes, ',')))
 							AND M.Eventdate BETWEEN @Fromdate AND @ToDate
 							AND M.OddsStatus = 'running'
-							AND (M.Leagueid = @LeagueId OR @LeagueId = 0)
-																 
+							AND (M.Leagueid = @LeagueId OR @LeagueId = 0)							
+							AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)										 
 				GROUP BY	M.EventDate, B.LiveIndicator,
 							M.leagueid, M.TeamId, M.Orid,
 							B.Bettype, B.betteam, B.Status

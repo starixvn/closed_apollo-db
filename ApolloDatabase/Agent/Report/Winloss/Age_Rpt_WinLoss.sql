@@ -34,7 +34,7 @@ CREATE TABLE #SportsList (Sporttype TINYINT)
 INSERT INTO #SportsList (Sporttype)
 SELECT val FROM strSplit_key (@Sporttypes, ',')
 
-IF @Todate >= @BalanceUpDay
+IF @Todate > @MoveBetDay
 BEGIN  
 	IF @AgentId = 0
 	BEGIN 
@@ -94,7 +94,7 @@ BEGIN
 				SELECT		DISTINCT
 							C.Username, C.AgentID, PT.MaxUpperPositionTaking,	
 							COUNT(B.TransID) BetCount,
-							SUM(ABS(B.Stake)) Stake,
+							B.Stake, B.TransID,
 							B.MOdds,B.StatusID,	 
 							B.Winlost,B.Actual_Stake ,B.TWinlost, B.TComm	
 				FROM		AgentInfo C WITH (NOLOCK)
@@ -121,8 +121,8 @@ BEGIN
 
 							AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList))
 				GROUP BY	C.Username, C.AgentID, PT.MaxUpperPositionTaking, 
-							B.MOdds,B.StatusID,	B.Stake, 
-							B.Winlost,B.Actual_Stake ,B.TWinlost, B.TComm	
+							B.MOdds,B.StatusID,	B.Stake, B.TransID,
+							B.Winlost,B.Actual_Stake ,B.TWinlost, B.TComm,B.Stake
 			 ) B
 		GROUP BY	B.Username, B.AgentID, B.MaxUpperPositionTaking  
 
@@ -172,8 +172,8 @@ BEGIN
 	--********************************
 		---Sportsbook
 		CREATE TABLE #Tmp (Username VARCHAR(50),  AgentID INT , PositionTaking smallint,
-				BetCount INT, TurnOver MONEY, ActualTO MONEY,AWinlost MONEY,	AComm MONEY,
-				ATotal MONEY,ChildAComm MONEY, Winlost MONEY, Actual_Stake MONEY) 
+				BetCount INT, TurnOver MONEY, ActualTO MONEY, AWinlost MONEY,AComm MONEY,
+				ATotal MONEY, ChildAComm MONEY, Winlost MONEY, Actual_Stake MONEY) 
 
 		---Sportsbook
 		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
@@ -186,7 +186,6 @@ BEGIN
 				SUM(BP.AComm) - SUM(BA.AComm) AS AComm,
 				SUM(BP.AWinlost) + SUM (BP.AComm) - SUM (BA.AComm)  AS ATotal,
 			    SUM(BA.AComm) ChildAComm  , 
-				--SUM (BA.AWinlost)  as ChildWinlost,
 				SUM(B.Winlost) as Winlost,
 				SUM(B.Actual_Stake) as Actual_Stake	   
 		FROM	Bettrans B WITH (NOLOCK) 
@@ -214,10 +213,28 @@ BEGIN
 				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 				AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
 		GROUP BY C.Username, C.AgentID ,  PT.MaxUpperPositionTaking
-				 
 
+ 	 
+		INSERT INTO #WinLossAgent
+		SELECT	T.Username, T.AgentID, 1 as IsAgent, T.PositionTaking as PositionTaking,
+				T.BetCount, T.TurnOver, T.ActualTO, T.AWinlost, T.AComm, T.ATotal, 
+				SUM(BA.AWINLOST) + (T.Winlost - T.Actual_Stake) + T.ChildAComm  AS GrossTotal,  
+				-(SUM(BA.AWINLOST) + (T.Winlost - T.Actual_Stake) + T.ChildAComm  + T.ATotal) AS UplineTotal
+		FROM	#Tmp T
+		INNER JOIN AgentInfo P with (nolock) ON  T.AgentID = P.AgentID
+		INNER JOIN AgentInfo C WITH(NOLOCK) ON C.AgentHId.IsDescendantOf(P.AgentHId ) =1  AND C.AgentLevel >= P.AgentLevel  --- Children of k+1 (k+1 -> k+...)
+		INNER JOIN Bettrans_Agent BA WITH (NOLOCK) ON BA.AgentID = C.AgentID
+		INNER JOIN Match M WITH (NOLOCK) ON M.matchID = BA.MatchId
+		WHERE	BA.Winlostdate BETWEEN @FromDate AND @ToDate
+				AND BA.StatusID NOT IN (0,1) 				 
+				AND BA.Bettype <=19000
+				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 	
+				AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))			
+		GROUP BY T.AgentID, T.Username,T.PositionTaking, T.TurnOver, T.ActualTO, T.AWinlost, T.AComm, T.ATotal, T.ChildAComm, T.Winlost , T.Actual_Stake, T.BetCount
 	 
-		----Parlay	
+		TRUNCATE TABLE #Tmp
+
+		------Parlay	
 		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
 		INSERT INTO	#Tmp
 		SELECT  B.Username, B.AgentID, B.MaxUpperPositionTaking as PositionTaking,
@@ -234,7 +251,7 @@ BEGIN
 				SELECT  DISTINCT 
 						C.Username, C.AgentID, PT.MaxUpperPositionTaking,
 						COUNT(B.TransId) BetCount,			 
-		   				SUM(ABS(B.Stake)) as Stake,
+		   				B.Stake,B.TransID,
 						B.Winlost,B.Actual_Stake,
 						B.MOdds,B.StatusID,
 						BP.AWinlost, BP.AComm, BA.AComm as ChildAComm							
@@ -266,12 +283,38 @@ BEGIN
 						AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
 				GROUP BY C.Username, C.AgentID, PT.MaxUpperPositionTaking,						
 		   				B.Winlost,B.Actual_Stake,
-						B.MOdds,B.StatusID,
+						B.MOdds,B.StatusID,B.Stake,B.TransID,
 						BP.AWinlost, BP.AComm, BP.AWinlost, BA.AComm
 			) B
 		GROUP BY B.Username, B.AgentID , B.MaxUpperPositionTaking
 
-		---Outright
+		INSERT INTO #WinLossAgent
+		SELECT	T.Username, T.AgentID, 1 as IsAgent, T.PositionTaking as PositionTaking,
+				T.BetCount, T.TurnOver, T.ActualTO, T.AWinlost, T.AComm, T.ATotal, 
+				SUM(T.LineWinLost) + (T.Winlost - T.Actual_Stake) + T.ChildAComm  AS GrossTotal,  
+				-(SUM(T.LineWinLost) + (T.Winlost - T.Actual_Stake) + T.ChildAComm  + T.ATotal) AS UplineTotal
+		FROM (	
+			SELECT  DISTINCT T.Username, T.AgentID, 1 as IsAgent, T.PositionTaking as PositionTaking,
+					T.BetCount, T.TurnOver, T.ActualTO, T.AWinlost, T.AComm, T.ATotal, 
+					BA.AWINLOST as LineWinLost, T.Winlost,T.Actual_Stake, T.ChildAComm			 		
+			FROM #Tmp T
+			INNER JOIN AgentInfo P with (nolock) ON  T.AgentID = P.AgentID
+			INNER JOIN AgentInfo C WITH(NOLOCK) ON C.AgentHId.IsDescendantOf(P.AgentHId ) =1  AND C.AgentLevel >= P.AgentLevel  --- Children of k+1 (k+1 -> k+...)
+			INNER JOIN Bettrans_Agent BA WITH (NOLOCK) ON BA.AgentID = C.AgentID
+			INNER JOIN BettransM BM WITH (NOLOCK) ON BM.RefNo = BA.RefNo
+			INNER JOIN Match M WITH (NOLOCK) ON M.matchID = BM.MatchId
+			WHERE	BA.Winlostdate BETWEEN @FromDate AND @ToDate
+					AND BA.StatusID NOT IN (0,1) 				 
+					AND BA.Bettype <=19000
+					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 	
+					AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))			
+					) T
+		GROUP BY T.AgentID, T.Username,T.PositionTaking, T.TurnOver, T.ActualTO, T.AWinlost, T.AComm, T.ATotal, T.ChildAComm, T.Winlost , T.Actual_Stake, T.BetCount
+	 
+		TRUNCATE TABLE #Tmp 
+
+
+		-----Outright
 		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (10) OR @Bettypes = '0')
 		INSERT INTO	#Tmp
 		SELECT  C.Username, C.AgentID, PT.MaxUpperPositionTaking as PositionTaking,
@@ -300,15 +343,15 @@ BEGIN
 				ON	l.leagueID = m.leagueId
 		WHERE	B.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND B.StatusID NOT IN (0,1)	
-				AND B.Bettype <=19000
+				AND B.Bettype =10
 				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))	
 				AND BP.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND BP.StatusID NOT IN (0,1)	
-				AND BP.Bettype <=19000
+				AND BP.Bettype = 10
 				AND (@Bettypes = '0' OR BP.Bettype IN (Select bettype FROM #BettypeList))
 				AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND BA.StatusID NOT IN (0,1)	
-				AND BA.Bettype <=19000
+				AND BA.Bettype = 10
 				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 				AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))
 		GROUP BY C.Username, C.AgentID ,  PT.MaxUpperPositionTaking
@@ -323,10 +366,13 @@ BEGIN
 		INNER JOIN AgentInfo P with (nolock) ON  T.AgentID = P.AgentID
 		INNER JOIN AgentInfo C WITH(NOLOCK) ON C.AgentHId.IsDescendantOf(P.AgentHId ) =1  AND C.AgentLevel >= P.AgentLevel  --- Children of k+1 (k+1 -> k+...)
 		INNER JOIN Bettrans_Agent BA WITH (NOLOCK) ON BA.AgentID = C.AgentID
+		INNER JOIN Outright M WITH (NOLOCK) ON M.OrId = BA.MatchId
+		INNER JOIN League L WITH (NOLOCK) ON L.LeagueId = M.leagueId
 		WHERE	BA.Winlostdate BETWEEN @FromDate AND @ToDate
 				AND BA.StatusID NOT IN (0,1) 				 
-				AND BA.Bettype <=19000
-				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 				
+				AND BA.Bettype = 10
+				AND (@Bettypes = '0' OR EXISTS (Select TOP 1 bettype FROM #BettypeList WHERE Bettype = 10)) 				
+				AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))
 		GROUP BY T.AgentID, T.Username,T.PositionTaking, T.TurnOver, T.ActualTO, T.AWinlost, T.AComm, T.ATotal, T.ChildAComm, T.Winlost , T.Actual_Stake, T.BetCount
 	 
 		DROP TABLE #Tmp 
@@ -369,7 +415,7 @@ BEGIN
 			AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
  
 
-	---Parlay	
+	-----Parlay	
 	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
 	INSERT INTO #WinLossMember  
 	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,
@@ -381,12 +427,12 @@ BEGIN
 			SUM(B.AComm) - SUM (B.PlayerComm) as AComm,
 			SUM(B.AWinLost) + SUM(B.AComm) - SUM (B.PlayerComm) AS ATotal,
 			SUM (B.Winlost - B.Actual_Stake + B.PlayerComm) GrossTotal,
-			-(SUM (B.Winlost - B.Actual_Stake + B.PlayerComm) + SUM(B.AWinLost) + SUM(B.AComm) - SUM (B.PlayerComm)) UplineTotal
+			-(SUM (B.Winlost - B.Actual_Stake ) + SUM(B.AWinLost) + SUM(B.AComm)) UplineTotal
 	FROM (
 			SELECT DISTINCT 
 					COUNT(B.TransID) BetCount,	   			
 					B.MOdds,B.StatusID,	BA.AWinLost, BA.AComm,
-					SUM(ABS(B.Stake)) Stake , 
+					B.Stake , B.TransID,
 					B.Winlost, B.Actual_Stake,B.PlayerComm
 					
 			FROM	Bettrans B WITH (NOLOCK)
@@ -409,10 +455,10 @@ BEGIN
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
 					AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
 			GROUP BY B.MOdds,B.StatusID,	BA.AWinLost, BA.AComm,
-					 B.Winlost, B.Actual_Stake,B.PlayerComm
+					 B.Winlost, B.Actual_Stake,B.PlayerComm, B.Stake , B.TransID
 			) B
 
-	---Outright
+	-----Outright
 	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (10) OR @Bettypes = '0')
 	INSERT INTO #WinLossMember  
 	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,
@@ -445,94 +491,14 @@ BEGIN
 			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
 			AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))
 
--------------------------------------------------------------------------------------------
-	    
-	IF @BalanceUpDay < @FromDate --if this case occurs then there is no data from sum_winloss_old
-		SELECT @BalanceUpDay=@FromDate
-
-        INSERT INTO #WinLossAgent
-	    SELECT	AgentUsername as Username, A.AgentId, 1 as IsAgent,
-				PT.MaxUpperPositionTaking as PositionTaking,
-				SUM(BetCount) as BetCount,				 
-				SUM(Turnover) TurnOver,
-				SUM(Actual_Turnover) ActualTO,		
-				SUM(UplineWinlost) as AWinLost,
-				SUM(UplineComm - AComm) as AComm,
-				SUM(UplineWinlost) + SUM(UplineComm - AComm) AS ATotal,
-				SUM(GrossTotal) AS GrossTotal,
-				-(SUM(GrossTotal) + SUM(UplineWinlost) + SUM(UplineComm - AComm)) as UplineTotal
-	    FROM	Sum_WinLoss_Agent A WITH(NOLOCK) 
-		INNER JOIN AgentPositionTaking PT WITH (NOLOCK) 
-				ON PT.AgentID = A.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
-		WHERE	ParentID = @AgentId 
-				AND WinLostDate BETWEEN @BalanceUpDay AND @ToDate 
-				AND (@Bettypes = '0' OR A.Bettype IN (Select bettype FROM #BettypeList))
-				AND (@Sporttypes = '0' OR A.sporttype IN (Select sporttype FROM #SportsList))
-	    GROUP BY AgentUsername, A.AgentId,PT.MaxUpperPositionTaking
-
-		INSERT INTO #WinLossMember
-	    SELECT	'' as Username, 0 as AgentID, 0 as IsAgent,
-				0 as PositionTaking,
-				SUM(BetCount) as BetCount,					 
-				SUM(Turnover) TurnOver,
-				SUM(Actual_Turnover) ActualTO,		
-				SUM(UplineWinlost) as AWinLost,
-				SUM(UplineComm-PlayerComm) as AComm,
-				SUM(UplineWinlost) + SUM(UplineComm-PlayerComm) AS ATotal,
-				SUM(WinLost + PlayerComm) AS GrossTotal,
-				-(SUM(WinLost) + SUM(UplineWinlost) + SUM(UplineComm)) as UplineTotal
-	    FROM	Sum_WinLoss_Cust b WITH(NOLOCK) 
-		WHERE	AgentId = @AgentId 
-				AND WinLostDate BETWEEN @BalanceUpDay AND @ToDate
-				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-				AND (@Sporttypes = '0' OR B.sporttype IN (Select sporttype FROM #SportsList)) 
-	   --- GROUP BY Username, CustId
-
 END
 END
 ----------------------------------------------------------------------------------------------
-IF @FromDate < @BalanceUpDay 
+IF @FromDate <= @MoveBetDay 
 BEGIN
-	IF @todate >= DATEADD(dd, -1, @BalanceUpDay)
-		SELECT @ToDate = DATEADD(dd, -1, @BalanceUpDay)
-		
-		INSERT INTO #WinLossAgent
-	    SELECT	AgentUsername as Username, A.AgentId, 1 as IsAgent,
-				PT.MaxUpperPositionTaking as PositionTaking,
-				SUM(BetCount) as BetCount,					 
-				SUM(Turnover) TurnOver,
-				SUM(Actual_Turnover) ActualTO,		
-				SUM(UplineWinlost) as AWinLost,
-				SUM(UplineComm - AComm) as AComm,
-				SUM(UplineWinlost) + SUM(UplineComm - AComm) AS ATotal,
-				SUM(GrossTotal) AS GrossTotal,
-				-(SUM(GrossTotal) + SUM(UplineWinlost) + SUM(UplineComm - AComm)) as UplineTotal				
-	    FROM	SVRARC.ArchiveDB.dbo.Sum_WinLoss_Agent_Old A WITH(NOLOCK) 
-		INNER JOIN AgentPositionTaking PT WITH (NOLOCK) 
-				ON PT.AgentID = A.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
-		WHERE	A.ParentID = @AgentId 
-				AND WinLostDate BETWEEN @FromDate AND @ToDate
-				AND (@Bettypes = '0' OR A.Bettype IN (Select bettype FROM #BettypeList))
-				AND (@Sporttypes = '0' OR A.sporttype IN (Select sporttype FROM #SportsList)) 
-	    GROUP BY AgentUsername, A.AgentId, PT.MaxUpperPositionTaking
+	
 
-		INSERT INTO #WinLossMember
-	    SELECT	'' as Username, 0 as AgentID, 0 as IsAgent,
-				0 as PositionTaking,		
-				SUM(BetCount) as BetCount,			 
-				SUM(Turnover) TurnOver,
-				SUM(Actual_Turnover) ActualTO,		
-				SUM(UplineWinlost) as AWinLost,
-				SUM(UplineComm-PlayerComm) as AComm,
-				SUM(UplineWinlost) + SUM(UplineComm-PlayerComm) AS ATotal,
-				SUM(WinLost + PlayerComm) AS GrossTotal,
-				-(SUM(WinLost) + SUM(UplineWinlost) + SUM(UplineComm)) as UplineTotal				
-	    FROM	SVRARC.ArchiveDB.dbo.Sum_WinLoss_Cust_Old B WITH(NOLOCK) 
-		WHERE	AgentId = @AgentId 
-				AND WinLostDate BETWEEN @FromDate AND @ToDate
-				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-				AND (@Sporttypes = '0' OR B.sporttype IN (Select sporttype FROM #SportsList)) 
-	    ---GROUP BY Username, CustId
+	Print 1
 	    
 END
 

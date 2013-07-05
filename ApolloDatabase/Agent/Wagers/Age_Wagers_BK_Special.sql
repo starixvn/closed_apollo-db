@@ -27,8 +27,8 @@ Parameters
  
 */
 SET NOCOUNT ON
-CREATE TABLE #SpecialWager (Showtime nvarchar(50), LiveIndicator BIT, leagueid INT, MatchId INT, HomeId INT , AwayId INT, betteam Varchar(10),
-							bettype INT, Stake MONEY, Count BIGINT) 
+CREATE TABLE #SpecialWager (Showtime nvarchar(50), LiveIndicator BIT, leagueid INT, MatchId INT, HomeId INT , AwayId INT,
+							bettype INT,  betteam Varchar(10), Stake MONEY, Count BIGINT) 
 
 
 ------------------------Others

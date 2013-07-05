@@ -42,7 +42,7 @@ SET NOCOUNT ON
 			ON		C.CustID = B.CustID
 		WHERE		B.Bettype = @Bettype
 					AND B.StatusId IN (0,1)							
-					AND B.LiveIndicator = 1
+					AND B.LiveIndicator = 0
 					AND M.Sporttype = 1	
 					AND M.Eventdate = @Fromdate
 					AND M.EventStatus = 'running'
