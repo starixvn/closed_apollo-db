@@ -73,7 +73,7 @@ SET NOCOUNT ON
 				WHERE		B.Bettype IN (1,2,3)
 							AND B.StatusId IN (0,1)							
 							AND B.LiveIndicator = 0
-							AND M.Sporttype IN (SELECT val FROM StrSplit_Key(@Sporttypes, ','))
+							AND (M.Sporttype IN (SELECT val FROM StrSplit_Key(@Sporttypes, ',')) OR @Sporttypes = '0')
 							AND M.Eventdate = @Fromdate
 							AND M.EventStatus = 'running'
 							AND (M.Leagueid = @LeagueId OR @LeagueId = 0)

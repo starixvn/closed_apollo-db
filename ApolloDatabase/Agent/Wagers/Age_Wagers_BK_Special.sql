@@ -27,7 +27,7 @@ Parameters
  
 */
 SET NOCOUNT ON
-CREATE TABLE #SpecialWager (Showtime nvarchar(50), LiveIndicator BIT, leagueid INT, MatchId INT, HomeId INT , AwayId INT, 
+CREATE TABLE #SpecialWager (Showtime nvarchar(50), LiveIndicator BIT, leagueid INT, MatchId INT, HomeId INT , AwayId INT, betteam Varchar(10),
 							bettype INT, Stake MONEY, Count BIGINT) 
 
 
@@ -46,12 +46,17 @@ FROM (
 						Count(B.TransID) as BetCount
 			FROM		Bettrans B WITH (NOLOCK)
 			INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
-				ON		B.TransId = BA.TransId AND BA.AgentID = @LoggedID  AND BA.Bettype NOT IN (1,2,3,7,8,12,9,29) AND BA.StatusId IN (0,1)
+				ON		B.TransId = BA.TransId 
+						AND BA.AgentID = @LoggedID  
+						AND BA.Bettype NOT IN (1,2,3,7,8,12,9,29,10) 
+						AND BA.Bettype <= 19000 
+						AND BA.StatusId IN (0,1)
 			INNER JOIN	Match M WITH (NOLOCK)
 				ON		M.matchID = B.MatchID
 			INNER JOIN  CustInfo C WITH (NOLOCK)
 				ON		C.CustID = B.CustID
-			WHERE		B.Bettype NOT IN (1,2,3,7,8,12,9,29)
+			WHERE		B.Bettype NOT IN (1,2,3,7,8,12,9,29,10)
+						AND B.Bettype <= 19000 
 						AND B.StatusId IN (0,1)							
 						AND B.LiveIndicator = 0
 						AND M.Sporttype IN (SELECT val FROM StrSplit_Key(@Sporttypes, ','))
