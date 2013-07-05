@@ -6,7 +6,7 @@ GO
 
 ALTER PROCEDURE  [dbo].[Acc_Set_ConfirmedAction]		
 @matchid INT,
-@action smallint,
+@action tinyint,
 @fth smallint = NULL,
 @fta smallint = NULL,
 @hth smallint = NULL,

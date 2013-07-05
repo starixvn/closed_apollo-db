@@ -31,12 +31,6 @@ BEGIN
 	RETURN
 END
 
-IF CONVERT(varchar(10), @winlostdate, 120) <> @winlostdate
-BEGIN
-	PRINT 'Invalid input parameters'
-	RETURN
-END
-
 --IF -- below is ACCEPTED case
 --(
 --	(@Command = 'ALL_DB') -- delete on all server

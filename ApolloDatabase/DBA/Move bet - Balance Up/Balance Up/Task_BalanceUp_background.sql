@@ -31,16 +31,27 @@ BEGIN
 	WHERE	matchid = 0 and bettype = 20000
 	ORDER BY transid
 	
+	IF @fdate IS NULL
+	BEGIN 
+	-- raiserror here to continue to next step of jobs
+		RAISERROR ('Please specify a balance up date (first time balance-up', -- Message text.
+					16, -- Severity.
+					1 -- State.
+					);
+	END
+
 	IF @fdate > CURRENT_TIMESTAMP
 		SET @fdate = DATEADD(day, -7, @fdate)
 END
 
-PRINT '@fdate = ' + CONVERT(varchar(10), @fdate, 120)
 
- 
+PRINT '@fdate = ' + CONVERT(varchar(10), @fdate, 120)
 
 SET @Doing = 'call Task_BalanceUp_background @fdate = ' + CONVERT(nvarchar(10), @fdate, 120) + ', @step = ' + CAST(@step as nvarchar(2))
 EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing  
+
+
+
 
 -- ================== STEP : 1 
 IF @step = 1
@@ -94,7 +105,7 @@ BEGIN
 	truncate table BalanceTable_Agent_Tmp
 
 	---later
-	---EXEC dbo.balancecheck @fdate, 11
+	EXEC dbo.Task_BalanceCheck @fdate, 11
 
 	-- doing backup
 	Declare @suffix varchar(10)
@@ -102,7 +113,7 @@ BEGIN
 
 	EXEC dbo.Task_BackupFULL_TransDB @suffix
 	EXEC SVRPRO.ProdDB.dbo.Task_BackupFULL_ProdDB @suffix
-	EXEC SVRCUST.ProdDB.dbo.Task_BackupFULL_CustDB @suffix
+	EXEC SVRCUST.CustDB.dbo.Task_BackupFULL_CustDB @suffix
 	-- doing backup : end
 
 -- ================== END STEP : 2
@@ -132,22 +143,54 @@ BEGIN
 		GROUP BY custid
 	 
 		-- Agent
-		INSERT INTO BalanceTable_Agent (AgentId, Amount, TicketCount, BalTicketCount)
-		SELECT	BP.AgentId, 
-				SUM(BP.AWinlost + BP.AComm  - ISNULL(BA.AComm, B.PlayerComm)) as Amount,
-				COUNT (*) TicketCount,
-				SUM(CASE BA.bettype WHEN 20000 THEN 1 ELSE 0 END) balTicketCount
-		FROM Bettrans_Agent BP  WITH (ROWLOCK, index =IX_WinlostDate_StatusId_Bettype) 
-		INNER JOIN Bettrans B WITH (ROWLOCK, index =IX_WinlostDate_StatusId_Bettype) ON B.TransId = BP.TransId	
-		LEFT JOIN AgentInfo A WITH (NOLOCK) ON A.ParentID = BP.AgentId
-		LEFT JOIN Bettrans_Agent BA WITH (ROWLOCK ) ON A.AgentId = BA.AgentId AND B.TransId = BA.TransId	
-		WHERE	BP.Winlostdate <  @Fdate		
-				AND BP.STatusID NOT IN (0,1)	 
-				AND BA.Winlostdate <  @Fdate	
-				AND BA.STatusID NOT IN (0,1)				
-				AND B.Winlostdate <  @Fdate 
-				AND B.STatusID NOT IN (0,1)
-		GROUP BY BP.AgentId 
+		INSERT INTO BalanceTable_Agent (AgentId, Amount, TicketCount, BalTicketCount)		
+		SELECT  AgentId, sum (Amount) Amount, 
+			sum(TicketCount) TicketCount, 
+			sum(balTicketCount) balTicketCount
+		FROM
+			(
+			-- get winlost for direct child agent
+			SELECT	BP.AgentId, 						
+						SUM(BP.AWinlost + BP.AComm  - BA.AComm) as Amount,
+						COUNT (*) TicketCount,
+						0 AS balTicketCount
+				FROM BetTrans_Agent BP  WITH (ROWLOCK, index =IX_WinlostDate_StatusId_Bettype) 		
+				JOIN AgentInfo A WITH (NOLOCK) ON A.ParentID = BP.AgentId
+				JOIN BetTrans_Agent BA WITH (ROWLOCK ) ON A.AgentId = BA.AgentId AND BP.TransId = BA.TransId										
+				WHERE	BP.Winlostdate <  @Fdate		
+						AND BP.STatusID NOT IN (0,1)	
+						AND BP.BETTYPE<20000
+						AND BA.Winlostdate <  @Fdate	
+						AND BA.STatusID NOT IN (0,1)	 				
+						AND BA.BETTYPE<20000							
+				GROUP BY BP.AgentId 
+			UNION ALL				
+			-- get winlost for direct member
+			SELECT	BP.AgentId, 
+						SUM(BP.AWinlost + BP.AComm  - B.PlayerComm) as Amount,
+						COUNT (*) TicketCount,
+						0 balTicketCount
+				FROM BetTrans_Agent BP  WITH (ROWLOCK, index =IX_WinlostDate_StatusId_Bettype) 
+					INNER JOIN bettrans B WITH (ROWLOCK, index =IX_WinlostDate_StatusId_Bettype) ON B.TransId = BP.TransId	
+					INNER  JOIN CustInfo c WITH (NOLOCK) ON c.AgentId = BP.AgentId	and c.CustId=b.CustId
+				WHERE	BP.Winlostdate <  @Fdate		
+						AND BP.STatusID NOT IN (0,1)					 							
+						AND B.Winlostdate <  @Fdate 
+						AND B.STatusID NOT IN (0,1)						
+				GROUP BY BP.AgentId 		
+			UNION ALL
+			-- for balance record
+			SELECT	BP.AgentId, 
+						SUM(BP.AWinlost) as Amount,
+						0 as TicketCount,
+						COUNT (*) balTicketCount
+				FROM BetTrans_Agent BP  WITH (ROWLOCK, index =IX_WinlostDate_StatusId_Bettype) 			
+				WHERE	BP.Winlostdate <  @Fdate		
+						AND BP.STatusID NOT IN (0,1)	
+						AND BP.bettype = 20000  --BALANCE 								
+				GROUP BY BP.AgentId 	
+			) T
+		GROUP BY AgentId  
  
 	 
 		UPDATE b
@@ -173,12 +216,56 @@ BEGIN
 
 
 		-- copy data, ready for insertion
-		INSERT INTO BalanceTable_tmp
-		SELECT @fdate, * FROM BalanceTable
+		-- customer
+		INSERT INTO BalanceTable_tmp(
+			[WinlostDate]
+			,[CustId]
+			,[Amount]
+			,[Currency]
+			,[Username]
+			,[CurrencyName]
+			,[ActualRate]
+			,[TicketCount]
+			,[BalTicketCount])
+		SELECT @fdate
+			,[CustId]
+			,[Amount]
+			,[Currency]
+			,[Username]
+			,[CurrencyName]
+			,[ActualRate]
+			,[TicketCount]
+			,[BalTicketCount]
+		FROM BalanceTable
 
+		--agent
+		DECLARE @TransID BIGINT
+
+		--create a dummy record in bettrans so that we can link to bettrans_agent Balance record
+		INSERT INTO dbo.bettrans
+			(transdate, winlostdate, custid, checktime,
+			winlost, PlayerComm, actual_stake, 
+			bettype, matchid, status, statusID, transdesc, refno, creator, ruben,
+			currency, username, currencyname, actualrate, virtualrate)
+
+		SELECT 	@fdate, @fdate, 0, CURRENT_TIMESTAMP,
+			0 as Winlost,
+			0 as PlayerComm,
+			0 as actual_stake,
+			20000, 0, 'BALANCE', 141, 'OPENING BALANCE', 260000000000, 148, 1,
+			0, '', '', 0, 0
 		
-		INSERT INTO BalanceTable_Agent_tmp
-		SELECT @fdate, * FROM BalanceTable_Agent
+		SELECT @TransID = SCOPE_IDENTITY()
+
+
+		INSERT INTO BalanceTable_Agent_tmp(
+				[TransID],[WinlostDate]
+				,[AgentId],[Amount]	,[Currency]	,[Username]	,[CurrencyName]	,[ActualRate]
+				,[TicketCount],[BalTicketCount])
+		SELECT @TransID, @fdate,
+				[AgentId],[Amount],[Currency],[Username],[CurrencyName],[ActualRate]
+				,[TicketCount],[BalTicketCount] 
+		FROM BalanceTable_Agent
  
 	-- =====================
 	--   CLEAN OLD EVENTS
@@ -216,6 +303,7 @@ IF @step = 5
 BEGIN
 -- ================== BalanceUp Agent
 	SET NOCOUNT ON
+
 	EXEC dbo.Task_BalanceUp_Agent @fdate
 	SET NOCOUNT OFF
 -- ================== END STEP : 5
@@ -234,6 +322,7 @@ BEGIN
 
 	----later
 	--EXEC dbo.balancecheck @fdate, 21
+	EXEC dbo.Task_BalanceCheck @fdate, 12
 
 	UPDATE SVRCSD.RepDB.dbo.SystemSettings
 	SET VValue = '0'

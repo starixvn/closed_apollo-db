@@ -47,7 +47,9 @@ Declare @m TABLE (
 		finalawayscore int,
 		betstatus nvarchar(50),
 		GoalRecord varchar(50),
-		eventstatus nvarchar(50)
+		eventstatus nvarchar(50),
+		FailedActionID int NULL,
+		DisabledAutoSettle BIT
 		)		
 INSERT INTO @m  
 SELECT  
@@ -60,7 +62,7 @@ SELECT
 		mr.calculate AS calculate,
 		mr.hthomescore, mr.htawayscore,
 		mr.finalhomescore, mr.finalawayscore,
-		mr.betstatus,	mr.GoalRecord, mr.eventstatus
+		mr.betstatus,	mr.GoalRecord, mr.eventstatus, mr.FailedActionID, mr.DisabledAutoSettle 
 FROM  SVRPRO.ProdDB.dbo.match m with (nolock)  
 	LEFT JOIN SVRPRO.ProdDB.dbo.match_remark_ex mr with (nolock) ON m.matchid = mr.matchid  		
 WHERE
@@ -84,7 +86,7 @@ SELECT
 		mr.calculate AS calculate,
 		mr.hthomescore, mr.htawayscore,
 		mr.finalhomescore, mr.finalawayscore,
-		mr.betstatus,	mr.GoalRecord, mr.eventstatus
+		mr.betstatus,	mr.GoalRecord, mr.eventstatus, mr.FailedActionID , mr.DisabledAutoSettle 
 FROM  SVRPRO.ProdDB.dbo.match m with (nolock)  
 	LEFT JOIN SVRPRO.ProdDB.dbo.match_remark_ex mr with (nolock) ON m.matchid = mr.matchid  
 	LEFT JOIN SVRPRO.ProdDB.dbo.match_remark with (nolock) ON m.matchid = match_remark.matchid  
@@ -128,7 +130,9 @@ FROM
 		ISNULL(tm.IsHTCal,0) as IsHTCal,  
 		ISNULL(tm.calculate,0) as calculate,  
 		CAST(CASE WHEN tm.hthomescore IS NOT NULL AND tm.htawayscore IS NOT NULL AND tm.finalhomescore IS NOT NULL AND tm.finalawayscore IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS IsKeyscore ,		
-		c.isExistFGLG
+		c.isExistFGLG,
+		tm.FailedActionID ,
+		DisabledAutoSettle 
 	FROM SVRPRO.ProdDB.dbo.match m with (nolock)  
 		INNER JOIN @m tm ON m.matchid = tm.matchid  
 		INNER JOIN (  

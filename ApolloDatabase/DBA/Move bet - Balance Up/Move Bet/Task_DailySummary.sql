@@ -3,7 +3,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 ALTER PROCEDURE [dbo].[Task_DailySummary]
-	@WinLostDate datetime,
+	@WinLostDate date,
 	@TestMode tinyint = 0
 AS
 
@@ -13,8 +13,7 @@ Date: 20130505
 Task:	- Daily Summary
 		- Update outright on ProdDB via linked server call: Task_DailySummary_DB02_Copy/Delete 
 DB: SVRTXN.TransDB
-Revisions:
-	-20130628@Sophia: Left Join Match14 to have Sporttype of outright = 0
+Revisions:	
 
 
  */
@@ -267,6 +266,7 @@ WAITFOR DELAY '000:00:30'
 
 DELETE FROM BetTrans_Sum WHERE winlostdate=@winlostdate
 DELETE FROM BetTrans_Agent_Sum WHERE winlostdate=@winlostdate
+DELETE FROM Task_BalanceRecord WHERE winlostdate=@winlostdate
 
 
 -- Get Exchange Rate
@@ -282,10 +282,11 @@ FROM @Exchange ex, dbo.exchange e WITH (NOLOCK)
 WHERE ex.currency = e.exchangeid
 
 -- Generate SUM record
-INSERT INTO dbo.Bettrans_Sum (custid, currency, winlostdate, stake, actual_stake, winlost, playercomm)
+INSERT INTO dbo.Bettrans_Sum (custid, currency, winlostdate, stake, actual_stake, winlost, playercomm, TWinLost, TComm)
 SELECT	custid, currency, winlostdate,
 		sum(stake) stake, sum(actual_stake) actual_stake,
-		sum(winlost) winlost, sum(playercomm) playercomm
+		sum(winlost) winlost, sum(playercomm) playercomm,
+		sum(TWinLost) TWinLost, sum(playercomm) TComm
 FROM	bettrans WITH (PAGLOCK)
 WHERE	winlostdate=@winlostdate and
 		bettype <=19000 and 	
@@ -321,7 +322,7 @@ GROUP BY ba.AgentId, b.CustID, ba.currency, ba.winlostdate
 EXEC SVRPRO.ProdDB.dbo.Task_DailySummary_ProdDB_Copy @winlostdate
 
 ---later
---EXEC Task_BalanceCheck @winlostdate, 1
+EXEC Task_BalanceCheck @winlostdate, 1
 
 
 UPDATE SVRCSD.RepDB.dbo.SystemSettings
@@ -391,7 +392,7 @@ BEGIN
 			b.custid, b.currency,
 			winlostdate, stake, winlost,
 			actual_stake, playercomm, 
-			0, 0, 0,
+			0, TWinlost, TComm,
 			e.actualrate, e.actualrate, c.username, e.CurrencyName, 0
 		FROM Bettrans_Sum b WITH (NOLOCK)
 			INNER JOIN @Exchange e ON b.currency = e.currency
@@ -477,7 +478,7 @@ EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing
  
 -- =====================
 --Later
---EXEC Task_BalanceCheck @winlostdate, 3
+EXEC Task_BalanceCheck @winlostdate, 2
 -- =====================
 
 -- =====================
@@ -492,17 +493,14 @@ EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing
 				SUM(BA.AComm) as AComm  , ---- k+1 Comm				
 				SUM(B.Winlost) as Winlost,  --- Mem Winlost
 				SUM(B.Actual_Stake) as Actual_Stake,
-				COUNT(B.TransID) as BetCount,
-				ISNULL(m.Sporttype,0) as Sporttype, ---- Outright will have Sporttype = 0
-				B.Bettype
+				COUNT(B.TransID) as BetCount
+								
 		INTO	#Tmp
 		FROM	Bettrans14 B  WITH (NOLOCK,INDEX (IX_bettrans14)) 
 		INNER JOIN Bettrans14_Agent BP WITH (NOLOCK,INDEX (IX_bettrans14_Agent)) 
 				ON BP.TransID = B.TransID ----Parent (k)
 		INNER JOIN AgentInfo C WITH (NOLOCK) --- Child direct (k+1)
-				ON C.ParentID =  BP.AgentID
-		LEFT JOIN Match14 m WITH (NOLOCK)   ----- Outright not have data on Match table, Left join to include Outright
-				ON m.matchId = b.matchId
+				ON C.ParentID =  BP.AgentID		
 		INNER JOIN Bettrans14_Agent BA WITH (NOLOCK, INDEX (IX_bettrans14_Agent)) 
 				ON C.AgentID = BA.AgentID AND BA.TransID = B.TransID ---- Child direct (k+1) 
 		WHERE	BA.bettype <=19000
@@ -517,7 +515,7 @@ EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing
 				AND B.StatusID NOT IN (0,1)	
 				AND B.Winlostdate = @WinlostDate	
 				AND B.MatchId > 0
-		GROUP BY C.Username, C.AgentID, C.ParentId, ISNULL(m.Sporttype,0), B.Bettype  
+		GROUP BY C.Username, C.AgentID, C.ParentId
 
 		INSERT INTO #Tmp
 		SELECT  C.Username, C.AgentID, C.ParentID,
@@ -529,21 +527,17 @@ EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing
 				SUM(BA.AComm) as AComm  , ---- Main SH Comm		
 				SUM(B.Winlost) as Winlost,  --- Mem Winlost
 				SUM(B.Actual_Stake) as Actual_Stake,
-				COUNT(B.TransID) as BetCount,
-				ISNULL(m.Sporttype,0) as Sporttype, ---- Outright will have Sporttype = 0
-				B.Bettype	
+				COUNT(B.TransID) as BetCount				
 		FROM		AgentInfo C WITH (NOLOCK)
 		INNER JOIN	BetTrans14_Agent BA WITH (NOLOCK, INDEX(IX_bettrans14_Agent)) 
 				ON	BA.AgentID = C.AgentID		
 		INNER JOIN	Bettrans14 B WITH (NOLOCK) 	
-				ON	B.TransID = BA.TransID
-		LEFT JOIN  Match14 m WITH (NOLOCK) ----- Outright not have data on Match table, Left join to include Outright
-				ON  m.matchId = b.matchId		
+				ON	B.TransID = BA.TransID			
 		WHERE		C.ParentId = 0 
 					AND B.StatusID NOT IN (0,1)
 					AND B.Winlostdate = @WinlostDate				   
 					AND BA.Winlostdate = @WinlostDate	  
-		GROUP BY	C.Username, C.AgentID, C.ParentID, ISNULL(m.Sporttype,0), B.Bettype
+		GROUP BY	C.Username, C.AgentID, C.ParentID
 
 		
 		INSERT INTO dbo.Sum_Winloss_Agent_Tmp
@@ -552,8 +546,8 @@ EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing
 		SELECT	@WinlostDate, T.AgentID, T.Username, T.ParentID, T.TurnOver, T.ActualTO, 
 				T.AWinlost, T.AComm,  
 				SUM(BA.AWinlost) + (T.Winlost - T.Actual_Stake) + T.AComm  AS GrossTotal,  --- money k+1 gives to k
-				T.UplineWinlost, T.UplineComm,
-				T.BetCount, T.SportType, T.BetType
+				T.UplineWinlost, T.UplineComm,				
+				T.BetCount, 0 as SportType, 0 as BetType
 		FROM AgentInfo P WITH (NOLOCK)  
 		INNER JOIN #Tmp T ON T.AgentID = P.AgentID
 		INNER JOIN AgentInfo C WITH(NOLOCK) 
@@ -581,23 +575,20 @@ EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing
 				SUM(B.PlayerComm) AS PlayerComm,				
 				SUM(BA.AWinLost) AS UplineWinlost,	
 				SUM(BA.AComm)  AS UplineComm,
-				COUNT(B.TransID) as BetCount, 
-				ISNULL(m.Sporttype,0) as Sporttype, ---- Outright will have Sporttype = 0
-				B.BetType
+				COUNT(B.TransID) as BetCount, 				
+				0 as SportType, 0 as BetType
 		FROM		Bettrans14 B WITH (NOLOCK)
 		INNER JOIN	BetTrans14_Agent BA WITH (NOLOCK, INDEX(IX_bettrans14_Agent))
 				ON	BA.TransID = B.TransID
 		INNER JOIN	CustInfo C WITH (NOLOCK)
-				ON	B.CustID = C.CustID AND  C.AgentId = BA.AgentId
-		LEFT JOIN  Match14 m WITH (NOLOCK) ----- Outright not have data on Match table, Left join to include Outright
-				ON  m.matchId = b.matchId		
+				ON	B.CustID = C.CustID AND  C.AgentId = BA.AgentId		
 		WHERE		BA.WinlostDate = @WinlostDate
 				AND BA.bettype <= 19000	
 				AND BA.StatusID NOT IN (0,1)
 				AND BA.WinlostDate = B.WinlostDate
 				AND BA.bettype = B.bettype
 				AND BA.StatusID = B.StatusID					
-		GROUP BY C.Username, C.CustID, C.AgentId, ISNULL(m.Sporttype,0), B.Bettype
+		GROUP BY C.Username, C.CustID, C.AgentId
 
 
 -- =====================
@@ -667,6 +658,8 @@ SET NOCOUNT OFF
 -- =====================
 
 Delete Match_Log where matchID IN (Select matchID From Match WITH (NOLOCK) Where eventdate=@winlostdate)
+
+EXEC [Task_AutoSettlement_CleanUp] @winlostdate
 
 EXEC SVRPRO.ProdDB.dbo.Task_DailySummary_ProdDB_Delete @winlostdate
 

@@ -84,7 +84,9 @@ SELECT m.matchid, m.leagueid ,
 		mr.GoalRecord AS GoalRecord, 
 		ISNULL(mr.IsHTCal,0) AS IsHTCal,  		
 		CAST(CASE WHEN mr.hthomescore IS NOT NULL AND mr.htawayscore IS NOT NULL AND mr.finalhomescore IS NOT NULL AND mr.finalawayscore IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS IsKeyscore
-		,0
+		,0 AS IsFGLG
+		,FailedActionID
+		,DisabledAutoSettle
 FROM dbo.match m WITH(NOLOCK) 
 	LEFT JOIN dbo.match_remark_ex mr WITH(NOLOCK) ON m.matchid = mr.matchid  	
 WHERE m.eventdate BETWEEN @FromDate AND @ToDate  
