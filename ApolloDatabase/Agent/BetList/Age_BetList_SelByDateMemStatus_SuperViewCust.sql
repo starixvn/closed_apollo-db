@@ -339,7 +339,7 @@ BEGIN
 				C.UGroup
 			FROM Bettrans14 AS B  WITH (NOLOCK) 
 			INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
-			INNER JOIN Bettrans14M BM WITH (NOLOCK) ON BM.RefNo = B.RefNo
+			INNER JOIN BettransM14 BM WITH (NOLOCK) ON BM.RefNo = B.RefNo
 			INNER JOIN Match14 m WITH (NOLOCK) ON m.MatchId = BM.MatchId
 			WHERE B.CustID = @CustId  				
 				AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	

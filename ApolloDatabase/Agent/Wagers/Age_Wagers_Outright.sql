@@ -44,7 +44,7 @@ SET NOCOUNT ON
 				GROUP BY	M.EventDate, B.bettype,
 							M.leagueid, M.TeamId, M.Orid, M.Status
 			 
-				ORDER BY 	M.EventDate, M.leagueid, M.TeamId
+				ORDER BY 	M.EventDate, M.leagueid, M.Status, M.TeamId
  
 
 
