@@ -38,7 +38,7 @@ BEGIN
 					@RetryCount = RetryCount
 				
 	FROM	AutoSettlementCommand WITH(NOLOCK)
-	WHERE	(	StatusID = 0 -- get pending command
+	WHERE	(	StatusID = 0 AND (AllowedDate IS NULL OR AllowedDate < GETDATE())-- get pending command
 				OR (StatusID = 2 AND AllowedDate < GETDATE()) -- get fail command and retry after a delay time
 			)
 			--AND StatusID <> 1  -- Running			
@@ -47,12 +47,14 @@ BEGIN
 	IF @execID IS NULL OR @sql IS NULL --no command in queue
 		RETURN
 
-	---waiting for any previous command which is not finish
+	---waiting for any previous running command 
 	IF EXISTS(SELECT 1 FROM [dbo].[AutoSettlementCommand] WITH (NOLOCK)
-			WHERE matchid=@matchid and statusid in (0,1,2) and [execID] < @execID)
+			WHERE matchid=@matchid and statusid in (1) and [execID] < @execID)
 	BEGIN	
 		RETURN
 	END
+	
+	----------------------
 
 	--has failed command, skip commands
 	IF EXISTS(SELECT 1 FROM [dbo].[AutoSettlementCommand] WITH (NOLOCK)
@@ -63,6 +65,24 @@ BEGIN
 		SET StatusID		= 5,
 			ExecutedDate	= GETDATE(),
 			Status			= 'skipped'
+		WHERE execID = @execID
+		RETURN
+	END	
+
+	---skip to execute later because of previous pending/fail commands 
+	DECLARE @prevAllowedDate datetime
+	
+	SELECT TOP 1 @prevAllowedDate = AllowedDate 
+	FROM [dbo].[AutoSettlementCommand] WITH (NOLOCK)
+	WHERE matchid=@matchid and statusid in (0,2) and [execID] < @execID
+	ORDER BY execID
+
+	IF (@prevAllowedDate IS NOT NULL)
+	BEGIN
+		--- UPDATE STATUS
+		UPDATE AutoSettlementCommand WITH(ROWLOCK,UPDLOCK)
+		SET ExecutedDate	= GETDATE(),
+			AllowedDate = @prevAllowedDate
 		WHERE execID = @execID
 		RETURN
 	END	

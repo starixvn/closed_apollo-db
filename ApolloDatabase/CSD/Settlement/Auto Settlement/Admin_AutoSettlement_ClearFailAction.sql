@@ -1,6 +1,7 @@
-CREATE PROCEDURE  [dbo].[Admin_AutoSettlement_ClearFailAction]		
+ALTER PROCEDURE  [dbo].[Admin_AutoSettlement_ClearFailAction]		
 	@creator int,
-	@matchid int,		
+	@matchid int,	
+	@matchids	VARCHAR(2000) = '',
 	@ErrCode int = 0 OUTPUT,
 	@ErrMsg nvarchar(200) = '' OUTPUT
 AS
@@ -11,23 +12,35 @@ AS
 	DB: SVRPROD/ProdDB	
 	Revisions:		
 
-	Param explanation:						
-		@isTurnOn: 0-off; 1-on
-		@matchid: 0-all; >0: a specific match
+	Param explanation:										
 			
 */
 BEGIN
 SET NOCOUNT ON
-
-	BEGIN TRY
-		UPDATE dbo.match_remark_ex WITH (ROWLOCK, UPDLOCK)
-		SET	FailedActionID = NULL
-		WHERE matchid=@matchid
-	END TRY
-	BEGIN CATCH
-		Select @ErrMsg = 'Data updating process failed!!'
-			,@ErrCode = 101		
-	END CATCH
+	IF @matchid>0
+	BEGIN
+		BEGIN TRY
+			UPDATE dbo.match_remark_ex WITH (ROWLOCK, UPDLOCK)
+			SET	FailedActionID = NULL
+			WHERE matchid=@matchid
+		END TRY
+		BEGIN CATCH
+			Select @ErrMsg = 'Data updating process failed!!'
+				,@ErrCode = 101		
+		END CATCH
+	END
+	ELSE
+	BEGIN		
+		BEGIN TRY
+			UPDATE dbo.match_remark_ex WITH (ROWLOCK, UPDLOCK)
+			SET	FailedActionID = NULL
+			WHERE matchid IN (SELECT val FROM dbo.strSplit(@matchids,','))
+		END TRY
+		BEGIN CATCH
+			Select @ErrMsg = 'Data updating process failed!!'
+				,@ErrCode = 102	
+		END CATCH
+	END
 END
 		
 GO 

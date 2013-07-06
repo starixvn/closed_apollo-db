@@ -165,4 +165,5 @@ SELECT ml.* FROM match_log ml WITH (NOLOCK) INNER JOIN #tmpMatch t WITH (NOLOCK)
 ON (ml.Matchid = t.matchid)
 ORDER BY LogId ASC
 
+GO
 GRANT EXECUTE ON [dbo].[Acc_Set_MatchSelCompletedHT] TO [aplweb]	

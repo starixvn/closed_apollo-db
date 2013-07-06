@@ -97,9 +97,8 @@ BEGIN
 		' @creator = 0 ' + ' ,' +
 		' @matchid = ' + CAST(@matchid AS varchar(50)) + ' ,' +		
 		' @goalrecord = ' + CASE WHEN @goalrecord IS NULL THEN 'NULL' ELSE '''' + CAST(@goalrecord AS varchar(50)) + '''' END + ',' + 
-		' @betstatus = ' + + CASE WHEN @betstatus IS NULL THEN 'NULL' ELSE '''' + CAST(@betstatus AS nvarchar(50)) + '''' END + ',' + 
-		' @action = ''' + @action + ''' ,' + 
-		' @IncludeLG = 0' + 
+		' @betstatus = ' + + CASE WHEN @betstatus IS NULL THEN 'NULL' ELSE '''' + CAST(@betstatus AS nvarchar(50)) + '''' END + ',' + 		
+		' @IncludeLG = 0,' + 
 		' @ErrCode = @ErrCode OUTPUT , ' +
 		' @ErrMsg = @ErrMsg OUTPUT '
 		, @SPName='Admin_Settlement_FGLG'
@@ -138,7 +137,7 @@ BEGIN
 	SELECT @SQLCommand = 'EXEC [dbo].[Admin_Settlement_Refund_FGLG] ' +
 		' @adminid = 0 ' + ' ,' +
 		' @matchid = ' + CAST(@matchid AS varchar(50)) + ' ,' +				
-		' @LGOnly = 0' + 
+		' @LGOnly = 0,' + 
 		' @ErrCode = @ErrCode OUTPUT , ' +
 		' @ErrMsg = @ErrMsg OUTPUT '
 		, @SPName='Admin_Settlement_Refund_FGLG'
@@ -149,7 +148,7 @@ BEGIN
 	SELECT @SQLCommand = 'EXEC [dbo].[Admin_Settlement_Refund_FGLG] ' +
 		' @adminid = 0 ' + ' ,' +
 		' @matchid = ' + CAST(@matchid AS varchar(50)) + ' ,' +				
-		' @LGOnly = 1' + 
+		' @LGOnly = 1,' + 
 		' @ErrCode = @ErrCode OUTPUT , ' +
 		' @ErrMsg = @ErrMsg OUTPUT '
 		, @SPName='Admin_Settlement_Refund_FGLG'

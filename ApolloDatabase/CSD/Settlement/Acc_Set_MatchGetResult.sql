@@ -75,4 +75,5 @@ ORDER BY
 	CASE eventstatus WHEN 'completed' THEN 1 WHEN 'Refund' THEN 1 ELSE 0 END,  
 	eventdate, kickofftime, matchid, matchcode
 
+GO
 GRANT EXECUTE ON [dbo].[Acc_Set_MatchGetResult] TO [aplweb]	

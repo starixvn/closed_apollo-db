@@ -130,4 +130,5 @@ ORDER BY LogId ASC
 
 DROP TABLE #matchList
 
+GO
 GRANT EXECUTE ON [dbo].[Acc_Set_MatchSel] TO [aplweb]
