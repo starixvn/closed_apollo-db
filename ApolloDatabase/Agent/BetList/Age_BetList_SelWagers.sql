@@ -1,6 +1,7 @@
 ﻿ALTER PROCEDURE [dbo].[Age_BetList_SelWagers]
 	@LoggedId INT = 0,
 	@FromDate Date,
+	@Todate Date = @FromDate, 
 	@UGroup varchar(3) = 'ALL',
 	@IsDirectMem BIT = 0,
 	@LiveIndicator BIT = 0,
@@ -162,7 +163,7 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 						AND B.StatusId IN (0,1)							
 						AND B.LiveIndicator = @LiveIndicator
 												
-						AND M.Eventdate = @Fromdate
+						AND M.Eventdate BETWEEN  @Fromdate AND @Todate
 						AND M.Oddsstatus = 'running'
 						AND (M.Leagueid = @LeagueId OR @LeagueId = 0)
 						AND M.orid = @MatchID 						

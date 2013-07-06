@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[Age_BetList_SelByDateMemStatus_AgentViewAgent]
+﻿ALTER PROCEDURE [dbo].[Age_BetList_SelByDateMemStatus_AgentViewAgent]
 	@LoggedId INT,
 	@AgentId INT = -1 ,
 	@CustId INT = -1,
@@ -62,6 +62,8 @@ CREATE TABLE #SportsList (Sporttype TINYINT)
 INSERT INTO #SportsList (Sporttype)
 SELECT val FROM strSplit_key (@Sporttypes, ',')
 
+		--- Sportsbook 
+		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
 		INSERT INTO #Betlist
 		SELECT 	B.TransId,
 				B.RefNo,
@@ -148,6 +150,7 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 			
 
 		-----Parlay
+		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
 		INSERT INTO #Betlist
 		SELECT 	DISTINCT B.TransId,
 				B.RefNo,
@@ -220,6 +223,7 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 				AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
 
 		----- Outright
+		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype = 10 OR @Bettypes = '0')
 		INSERT INTO #Betlist
 		SELECT 				
 				B.transid,
@@ -279,7 +283,7 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 				AND BA.StatusId in (SELECT StatusId FROM #StatusId )  
 				AND BA.TransDate Between @FromDate AND @ToDate
 				AND BA.bettype = 10
-				AND (@Bettypes = '0' OR A.Bettype IN (Select bettype FROM #BettypeList))
+				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 						
 				AND B.StatusId in (SELECT StatusId FROM #StatusId )  
 				AND B.TransDate Between @FromDate AND @ToDate
@@ -303,6 +307,8 @@ ELSE --- Called from report Transaction
 BEGIN
 	IF @FromDate <= @MoveBetsDay
 	BEGIN 
+		---Sportsbook
+		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
 		INSERT INTO #Betlist
 		SELECT 	B.TransId,
 				B.RefNo,
@@ -389,6 +395,7 @@ BEGIN
 			
 
 		-----Parlay
+		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
 		INSERT INTO #Betlist
 		SELECT 	DISTINCT B.TransId,
 				B.RefNo,
@@ -464,6 +471,7 @@ BEGIN
 				AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
 
 		----- Outright14
+		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype =10 OR @Bettypes = '0')
 		INSERT INTO #Betlist
 		SELECT 				
 				B.transid,
@@ -523,7 +531,7 @@ BEGIN
 				AND BA.StatusId in (SELECT StatusId FROM #StatusId )  
 				AND BA.TransDate Between @FromDate AND @ToDate
 				AND BA.bettype = 10
-				AND (@Bettypes = '0' OR A.Bettype IN (Select bettype FROM #BettypeList))
+				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 						
 				AND B.StatusId in (SELECT StatusId FROM #StatusId )  
 				AND B.TransDate Between @FromDate AND @ToDate

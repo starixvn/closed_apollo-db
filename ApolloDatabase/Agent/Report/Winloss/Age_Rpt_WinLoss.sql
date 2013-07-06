@@ -371,7 +371,7 @@ BEGIN
 		WHERE	BA.Winlostdate BETWEEN @FromDate AND @ToDate
 				AND BA.StatusID NOT IN (0,1) 				 
 				AND BA.Bettype = 10
-				AND (@Bettypes = '0' OR EXISTS (Select TOP 1 bettype FROM #BettypeList WHERE Bettype = 10)) 				
+				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))				
 				AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))
 		GROUP BY T.AgentID, T.Username,T.PositionTaking, T.TurnOver, T.ActualTO, T.AWinlost, T.AComm, T.ATotal, T.ChildAComm, T.Winlost , T.Actual_Stake, T.BetCount
 	 

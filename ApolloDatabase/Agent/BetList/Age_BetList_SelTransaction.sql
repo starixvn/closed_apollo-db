@@ -25,7 +25,7 @@ Param's Explanation:
 			   = 0 : by Member's Username
 				
 */  
-SET NOCOUNT ON
+ 
 SET NOCOUNT ON
 
 
@@ -43,7 +43,7 @@ BEGIN
 		RETURN				
 	END
 	ELSE
-	IF @AgentId = 0 AND @CustID = -1
+	IF @AgentId <> -1 AND @CustID = -1
 	------ 2: Super view by Agent		
 	BEGIN
 		EXEC Age_BetList_SelByDateMemStatus_SuperViewAgent
