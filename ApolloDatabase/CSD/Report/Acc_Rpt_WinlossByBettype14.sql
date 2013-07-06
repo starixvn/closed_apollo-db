@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[Acc_Rpt_WinlossByBettype14]
+ALTER PROCEDURE [dbo].[Acc_Rpt_WinlossByBettype14]
 	@winlostdate date
 AS
 /*	
@@ -24,9 +24,9 @@ BEGIN
 			sum((winlost-actual_stake)*actualrate) winlost,
 			sum(twinlost*actualrate) pos,
 			sum(tcomm*actualrate) comm,
-			sum(tcomm*virtualrate) VirtualComm,
-			sum((winlost-actual_stake+twinlost)*actualrate) LineTotal,
-			sum((winlost-actual_stake+twinlost)*virtualrate) VirtualLineTotal,
+			sum(tcomm*virtualrate) VirtualComm,			
+			sum((winlost-actual_stake+twinlost+tcomm) *actualrate) LineTotal,
+			sum((winlost-actual_stake+twinlost+tcomm)*virtualrate) VirtualLineTotal,
 			sum((1-tpositiontaking)*stake*actualrate) IBCTurnover
 	FROM	dbo.bettrans14 with(nolock)
 	WHERE	winlostdate = @winlostdate

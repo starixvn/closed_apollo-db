@@ -87,7 +87,7 @@ CREATE TABLE #matchList
 		IsHTCal BIT,	
 		IsKeyscore BIT,
 		IsFGLG BIT,
-		FailedActionID INT,
+		FailedActionID TINYINT,
 		DisabledAutoSettle BIT
 	)
 
