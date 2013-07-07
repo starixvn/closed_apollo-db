@@ -8,7 +8,7 @@ GO
 
 
 
- ALTER PROCEDURE [dbo].[Age_Betlist_SelSystemParlay_Details]
+ ALTER PROCEDURE [dbo].[Age_BetList_SelSystemParlay_Details]
 	@refno			bigint, 
 	@custid			INT,
 	@MoveBetsDay		DATETIME,

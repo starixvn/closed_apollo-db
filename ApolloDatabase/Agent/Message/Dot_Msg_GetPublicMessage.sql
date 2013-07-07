@@ -1,6 +1,6 @@
 ﻿USE [MsgDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetPublicMessage]    Script Date: 6/17/2013 3:49:50 PM ******/
+/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetPublicMessage]    Script Date: 7/7/2013 9:46:07 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -24,7 +24,7 @@ AS
  * DB			: SVRMSG.MsgDB
  * Original		:
  * Revisions	:
- *	• 20130418@Edward	: review, add @IsAgent parameter, check isDeleted
+ *	• 20130418@Edward	: review, add @IsAgent parameter, check isDeleted ,CAST DATETIME to DATE
  *
  *•	Param's Explanation:
  */ 
@@ -80,10 +80,10 @@ BEGIN
 				END = 1
 			AND CASE
 					WHEN (@Sdate IS NOT NULL AND @Edate IS NOT NULL 
-						AND m.PostTime BETWEEN @Sdate AND @Edate) THEN 1
+						AND CAST(m.PostTime AS DATE) BETWEEN CAST(@Sdate AS DATE) AND CAST(@Edate AS DATE)) THEN 1
 					WHEN (@Sdate IS NULL AND @Edate IS NULL) THEN 1
-					WHEN (@Sdate IS NOT NULL AND @Edate IS NULL AND m.PostTime >= @Sdate) THEN 1
-					WHEN (@Sdate IS NULL AND @Edate IS NOT NULL AND m.PostTime <= @Edate) THEN 1
+					WHEN (@Sdate IS NOT NULL AND @Edate IS NULL AND CAST(m.PostTime AS DATE) >= CAST(@Sdate AS DATE)) THEN 1
+					WHEN (@Sdate IS NULL AND @Edate IS NOT NULL AND CAST(m.PostTime AS DATE) <= CAST(@Edate AS DATE)) THEN 1
 					ELSE 0 
 				END = 1
 			AND (@IsTest = 1 OR (@IsTest <> 1 AND m.IsTest = @IsTest))
