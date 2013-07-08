@@ -108,6 +108,8 @@
     <Folder Include="Agent\Wagers" />
     <Folder Include="CSD\Settlement\Auto Settlement" />
     <Folder Include="DBA\Task" />
+    <Folder Include="DBA\Move bet - Balance Up\Move Bet\IBC" />
+    <Folder Include="DBA\Move bet - Balance Up\Balance Up\IBC" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1397,6 +1399,27 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\AccountInfo\Age_Agent_SuggestByUsername.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\IBC\ExecRep_APL_01.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\IBC\Task_DailySummary.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\IBC\Task_DailySummary_DB02_Delete.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\IBC\ExecRep_APL_02.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\IBC\ExecRep_APL_03.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\IBC\Task_BalanceUp_background.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\IBC\Task_BalanceUp_DB02.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
