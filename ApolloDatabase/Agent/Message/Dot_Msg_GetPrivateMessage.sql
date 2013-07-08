@@ -1,6 +1,6 @@
 ﻿USE [MsgDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetPrivateMessage]    Script Date: 6/17/2013 3:47:28 PM ******/
+/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetPrivateMessage]    Script Date: 7/7/2013 9:45:38 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -26,7 +26,7 @@ AS
  * Revisions	:
  *	• Don@20090923		: adapt for new design (Drop table BatchMsg)  
  *	• Scott@20120109	: add condition for new flag column [isDeleted] to filter deleted data. 
- *	• Edward@20130418	: review, add @IsAgent parameter
+ *	• Edward@20130418	: review, add @IsAgent parameter, CAST DATETIME to DATE
  *
  *•	Param's Explanation:
  */ 
@@ -155,10 +155,10 @@ BEGIN
 						END = 1 
 					AND CASE 
 							WHEN (@Sdate IS NOT NULL AND @Edate IS NOT NULL 
-								AND m.PostTime BETWEEN @Sdate AND @Edate) THEN 1 
-							WHEN (@Sdate IS NULL AND @Edate IS NULL) THEN 1  
-							WHEN (@Sdate IS NOT NULL AND @Edate IS NULL AND m.PostTime >= @Sdate) THEN 1  
-							WHEN (@Sdate IS NULL AND @Edate IS NOT NULL AND m.PostTime <= @Edate) THEN 1  
+								AND CAST(m.PostTime AS DATE) BETWEEN CAST(@Sdate AS DATE) AND CAST(@Edate AS DATE)) THEN 1
+							WHEN (@Sdate IS NULL AND @Edate IS NULL) THEN 1
+							WHEN (@Sdate IS NOT NULL AND @Edate IS NULL AND CAST(m.PostTime AS DATE) >= CAST(@Sdate AS DATE)) THEN 1
+							WHEN (@Sdate IS NULL AND @Edate IS NOT NULL AND CAST(m.PostTime AS DATE) <= CAST(@Edate AS DATE)) THEN 1
 							ELSE 0 
 						END = 1 
 					AND CASE 

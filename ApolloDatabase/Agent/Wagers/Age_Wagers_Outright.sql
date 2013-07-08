@@ -1,11 +1,4 @@
-﻿USE [RepDB]
-GO
-/****** Object:  StoredProcedure [dbo].[Age_Wagers_1_3_5]    Script Date: 6/29/2013 8:34:17 AM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-ALTER PROCEDURE [dbo].[Age_Wagers_Outright]
+﻿ALTER PROCEDURE [dbo].[Age_Wagers_Outright]
 @LoggedId INT = 0,
 @FromDate Date,
 @ToDate Date,
@@ -25,13 +18,11 @@ Revisions:
 Parameters
 	@IsDirectMem : 1: Direct Member
 				   0: All Member
- 
 */
 SET NOCOUNT ON 
-				SELECT		DISTINCT M.EventDate, B.LiveIndicator,
-							M.leagueid, M.TeamId, M.Orid as MatchID,
-							B.Bettype, B.betteam, 
-							B.Status,
+	 		SELECT	DISTINCT M.EventDate, 
+							M.leagueid, M.TeamId, M.Orid as MatchID, M.Status,
+							B.Bettype, '0' as betteam, 							
 							Count(B.TransID) as BetCount,
 							SUM(B.Stake) as Stake
 				FROM		Bettrans B WITH (NOLOCK)
@@ -44,19 +35,19 @@ SET NOCOUNT ON
 				INNER JOIN  CustInfo C WITH (NOLOCK)
 					ON		C.CustID = B.CustID
 				WHERE		B.Bettype = 10
-							AND B.StatusId IN (0,1)							
-							AND B.LiveIndicator = 0
+							AND B.StatusId IN (0,1)														
 							AND (@Sporttypes = '0' OR L.Sporttype IN (SELECT val FROM StrSplit_Key(@Sporttypes, ',')))
 							AND M.Eventdate BETWEEN @Fromdate AND @ToDate
 							AND M.OddsStatus = 'running'
 							AND (M.Leagueid = @LeagueId OR @LeagueId = 0)							
 							AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)										 
-				GROUP BY	M.EventDate, B.LiveIndicator,
-							M.leagueid, M.TeamId, M.Orid,
-							B.Bettype, B.betteam, B.Status
+				GROUP BY	M.EventDate, B.bettype,
+							M.leagueid, M.TeamId, M.Orid, M.Status
 			 
-				ORDER BY 	M.EventDate, M.leagueid, M.TeamId
-GO
-GRANT EXECUTE ON [Age_Wagers_Outright] TO [aplweb]
+				ORDER BY 	M.EventDate, M.leagueid, M.Status, M.TeamId
+ 
 
-		 
+
+  
+  GO
+GRANT EXECUTE ON [Age_Wagers_Outright] TO [aplweb]

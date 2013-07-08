@@ -25,11 +25,12 @@ AS
  *  @UserName		: Username of Agent
  */
 
-SET NOCOUNT ON
-
-DECLARE @agentHId HIERARCHYID
-
 BEGIN
+
+	SET NOCOUNT ON
+
+	DECLARE @agentHId HIERARCHYID
+
 	SELECT @agentHId = AgentHId 
 	FROM AgentInfo WITH (NOLOCK) 
 	WHERE AgentId = @ActorAgentId
@@ -41,8 +42,8 @@ BEGIN
 		b.Username AS ParentName,
 		a.UGroup
 	FROM 
-		CustInfo a WITH (NOLOCK) 
-		INNER JOIN AgentInfo b WITH (NOLOCK) ON a.AgentId = b.AgentId
+		CustInfo AS a WITH (NOLOCK) 
+		INNER JOIN AgentInfo AS b WITH (NOLOCK) ON a.AgentId = b.AgentId
 	WHERE 
 		(a.CustId = @CustId OR a.Username = @Username)
 		AND b.AgentHId.IsDescendantOf(@agentHId) = 1

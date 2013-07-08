@@ -13,8 +13,7 @@ DB: SVRAGE.REPDB
 Revisions:    
 
 Parameters
-	@isShowAll : 1: Show All
-				 0: is NOT show Test	
+ 
  
 */
 SET NOCOUNT ON
@@ -24,8 +23,7 @@ IF @IsOutright = 0
 	FROM	Match m WITH (NOLOCK) 
 		INNER JOIN League l WITH (NOLOCK) ON m.leagueid = l.leagueid
 	WHERE	m.eventdate = @FromDate  
-			AND (l.Sporttype IN (SELECT val FROM StrSplit_Key(@Sporttypes, ',') ) 
-				OR @Sporttypes = '0')
+			AND (l.Sporttype IN (SELECT val FROM StrSplit_Key(@Sporttypes, ',')) OR @Sporttypes = '0')
 			AND l.isTest = 0
 
 ELSE
@@ -33,8 +31,7 @@ ELSE
 	FROM	Outright m WITH (NOLOCK) 
 		INNER JOIN League l WITH (NOLOCK) ON m.orid = l.leagueid
 	WHERE	m.eventdate BETWEEN @FromDate AND @ToDate
-			AND (l.Sporttype IN (SELECT val FROM StrSplit_Key(@Sporttypes, ',') ) 
-				OR @Sporttypes = '0')
+			AND (l.Sporttype IN (SELECT val FROM StrSplit_Key(@Sporttypes, ',')) OR @Sporttypes = '0')
 			AND l.isTest = 0
 
 		 

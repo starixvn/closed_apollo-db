@@ -1,6 +1,6 @@
 ﻿USE [MsgDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Msg_GetByCustomer]    Script Date: 5/7/2013 4:20:42 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Msg_GetByCustomer]    Script Date: 7/7/2013 9:44:38 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -10,9 +10,12 @@ ALTER PROCEDURE [dbo].[Age_Msg_GetByCustomer]
 	@TargetId		INT				= 0,
 	@TargetId2		VARCHAR(100)	= '0',
 	@IsAgent		BIT				= 1,
-	@LastPostTime	DATETIME		= '9999-12-31',
-	@TotalMessage	INT				= 10,
-	@IsTest			BIT				= 0
+	@StartDate		DATETIME		= NULL,	
+	@LastPostTime	DATETIME		= '9999-12-31',	
+	@DateMode		INT				= 0,
+	@IsTest			BIT				= 0,
+	@Content		NVARCHAR(100)	= '',	
+	@Language		VARCHAR(5)		= 'en-US'		
 AS
 
 /**
@@ -23,17 +26,16 @@ AS
  * Revisions	:
  *	• 20132702@Kos		: Review
  *	• 20130405@Edward	: Add parameter @IsAgent
+ *	• 20130625@Edward	: Remove @TotalMessage and add @content
  * Parameters:
- *  
+
  */
  BEGIN
 
-	SET NOCOUNT ON
+	SET NOCOUNT ON	
 
-	DECLARE @startDate DATETIME
-	SELECT @startDate = DATEADD(MONTH, -1, CURRENT_TIMESTAMP)
-
-	SET ROWCOUNT @TotalMessage 
+	IF @StartDate IS NULL
+		SELECT @startDate = DATEADD(MONTH, -1, CURRENT_TIMESTAMP)	
 
 	SELECT DISTINCT 
 		m.MessageId, 
@@ -42,7 +44,7 @@ AS
 		m.Content_ch,
 		m.Content_jp, 
 		m.Content_th, 
-		m.Content_it, 
+		m.Content_vn, 
 		m.Content_ko,
 		m.Content_es, 
 		m.PostTime, 
@@ -55,8 +57,7 @@ AS
 		dbo.Msg AS m WITH (NOLOCK)
 		INNER JOIN MsgTarget AS mt WITH (NOLOCK) ON m.MessageId = mt.MessageId 
 	WHERE	
-		m.Posttime	>= @startDate
-		AND m.Posttime < @LastPostTime
+		 CAST(m.Posttime AS DATE) BETWEEN  CAST(@startDate AS DATE) AND  CAST(@LastPostTime AS DATE)		
 		AND mt.TargetID IN (
 			SELECT val FROM dbo.strSplit(@TargetId2, ',')
 			UNION ALL 
@@ -66,8 +67,17 @@ AS
 		AND mt.isDeleted	= 0
 		AND m.isDeleted		= 0
 		AND mt.IsAgent		= @IsAgent
+		AND CASE @Language	
+							WHEN 'en-US' THEN m.Content_en 
+							WHEN 'zh-CN' THEN m.Content_cs
+							WHEN 'zh-TW' THEN m.Content_ch
+							WHEN 'th-TH' THEN m.Content_th
+							WHEN 'ja-JP' THEN m.Content_jp
+							WHEN 'ko-KR' THEN m.Content_ko
+							WHEN 'es-ES' THEN m.Content_es
+							WHEN 'vi-VN' THEN m.Content_vn
+							ELSE m.Content_en  
+						END LIKE '%' + @Content + '%'
 	ORDER BY m.Posttime DESC
-
-	SET ROWCOUNT 0
 
 END

@@ -23,11 +23,12 @@ AS
  *  @Username		: username of Customer
  */
 
-SET NOCOUNT ON
-
-DECLARE @agentHId HIERARCHYID
-
 BEGIN
+
+	SET NOCOUNT ON
+
+	DECLARE @agentHId HIERARCHYID
+
 	SELECT @agentHId = AgentHId 
 	FROM AgentInfo WITH (NOLOCK) 
 	WHERE AgentId = @ActorAgentId
