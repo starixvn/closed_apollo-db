@@ -997,7 +997,7 @@
     <NotInBuild Include="Agent\BetList\Age_BetList_AgentDetail_Winloss_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_Betlist_SelSystemParlay_Details.sql">
+    <NotInBuild Include="Agent\BetList\Age_BetList_SelSystemParlay_Details.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\BetList\Age_BetList_SelParlayDetail.sql">
@@ -1394,6 +1394,9 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="CSD\Settlement\Auto Settlement\Admin_AutoSettlement_ClearFailAction.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\AccountInfo\Age_Agent_SuggestByUsername.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>

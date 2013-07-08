@@ -27,37 +27,41 @@ AS
  *	@TotalPages	: total pages
  */
 
-SET NOCOUNT ON
+BEGIN
 
-DECLARE 
-	@RowCount	INT, 
-	@RowStart	INT, 
-	@RowEnd		INT,
-	@TotalItems	INT
+	SET NOCOUNT ON
 
-SELECT	
-	@PageIndex = @PageIndex - 1,
-	@RowStart = @PageSize * @PageIndex + 1,
-	@RowEnd = @RowStart + @PageSize - 1
+	DECLARE 
+		@rowCount	INT, 
+		@rowStart	INT, 
+		@rowEnd		INT,
+		@totalItems	INT
 
-SELECT 
-	@TotalItems = COUNT(CustId), 
-	@TotalPages = @TotalItems/@PageSize + CASE WHEN @TotalItems % @PageSize > 0 THEN 1 ELSE 0 END
-FROM CustInfo WITH (NOLOCK) 				 
-WHERE AgentId = @AgentId
+	SELECT
+		@PageIndex = @PageIndex - 1,
+		@rowStart = @PageSize * @PageIndex + 1,
+		@rowEnd = @rowStart + @PageSize - 1
 
-SELECT 
-	CustId,
-	Username,
-	AgentId
-FROM 
-	(
-		SELECT 
-			CustId,
-			Username,
-			AgentId,
-			ROW_NUMBER() OVER(ORDER BY Username) AS RowNumber 
-		FROM CustInfo WITH (NOLOCK) 
-		WHERE AgentId = @AgentId
-	) AS p
-WHERE p.RowNumber BETWEEN @RowStart AND @RowEnd
+	SELECT 
+		@totalItems = COUNT(CustId), 
+		@TotalPages = @TotalItems/@PageSize + CASE WHEN @totalItems % @PageSize > 0 THEN 1 ELSE 0 END
+	FROM CustInfo WITH (NOLOCK)
+	WHERE AgentId = @AgentId
+
+	SELECT 
+		CustId,
+		Username,
+		AgentId
+	FROM 
+		(
+			SELECT 
+				CustId,
+				Username,
+				AgentId,
+				ROW_NUMBER() OVER(ORDER BY Username) AS RowNumber 
+			FROM CustInfo WITH (NOLOCK) 
+			WHERE AgentId = @AgentId
+		) AS p
+	WHERE p.RowNumber BETWEEN @rowStart AND @rowEnd
+
+END
