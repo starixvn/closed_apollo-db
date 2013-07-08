@@ -16,14 +16,15 @@ AS
  * Task			: Retrieve Total Bet values for bettype 10
  * DB			: SVRAGE.RepDB
  * Revisions	:
- *	- 20130513@Sophia: Add super view
+		- 20130513@Sophia: Add super view
+		- 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
  * Parameters:
  *	@AgentId: agent ID
  *  
  */
 
 SET NOCOUNT ON
-IF @LoggedId = 0
+IF @LoggedId = 1
 BEGIN 
 	SELECT
 		m.leagueid, 

@@ -347,7 +347,7 @@ SELECT	Username, CustId,  PositionTaking,
 		SUM(UplineTotal) as UplineTotal
 FROM	#WinLossMember 
 GROUP BY Username, CustId, PositionTaking
-ORDER BY Username
+ORDER BY PositionTaking ASC, Username ASC
  
 DROP TABLE #WinLossMember
 DROP TABLE #BettypeList

@@ -16,8 +16,10 @@ AS
  * Task			: Get Total Bets(Total Goal Bettype) data for Agent
  * DB			: SVRAGE.RepDB
  * Revisions	:
- *	• 20130128@Terry.Nguyen	: Implement
- *	• 20130629@Sophia: Add Showtime
+  - 20130128@Terry.Nguyen	: Implement
+  - 20130629@Sophia: Add Showtime
+  - 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
+
  * Parameters:
  *	•
  *	•
@@ -33,10 +35,10 @@ BEGIN
 		m.MatchCode,
 		m.kickofftime,
 		m.Showtime,
-		SUM((CASE BetTeam WHEN '0-1' THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END)) AS Total01,
-		SUM((CASE BetTeam WHEN '2-3' THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END)) AS Total23,
-		SUM((CASE BetTeam WHEN '4-6' THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END)) AS Total46,
-		SUM((CASE BetTeam WHEN '7-over' THEN (ba.Stake * b.Odds) - ba.Stake ELSE -ba.Stake END ) * (CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END)) AS Total7Over,
+		SUM((CASE BetTeam WHEN '0-1' THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * (CASE WHEN @LoggedId = 1 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END)) AS Total01,
+		SUM((CASE BetTeam WHEN '2-3' THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * (CASE WHEN @LoggedId = 1 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END)) AS Total23,
+		SUM((CASE BetTeam WHEN '4-6' THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * (CASE WHEN @LoggedId = 1 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END)) AS Total46,
+		SUM((CASE BetTeam WHEN '7-over' THEN (ba.Stake * b.Odds) - ba.Stake ELSE -ba.Stake END ) * (CASE WHEN @LoggedId = 1 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END)) AS Total7Over,
 		ISNULL(m.IsNeutral, CONVERT(BIT, 0)) AS IsNeutral
 	FROM  
 		BetTrans_Agent AS ba WITH (NOLOCK) 

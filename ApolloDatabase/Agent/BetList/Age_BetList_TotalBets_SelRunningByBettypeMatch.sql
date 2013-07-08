@@ -16,11 +16,12 @@ Original:  Age_BetList_SelRunningByBettypeMatch_Ag
 Revisions:    
 	- 20130507@Sophia: Add @AgentID for Super view total bets of Main shareholder
     - 20130627@Sophia: Add UGroup for Singbet
+	- 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
 */
 
 SET NOCOUNT ON
  
-IF @LoggedId = 0 
+IF @LoggedId = 1
 BEGIN 
 	IF @bettype = 10
 	BEGIN

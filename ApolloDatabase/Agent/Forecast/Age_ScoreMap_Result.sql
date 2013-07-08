@@ -16,8 +16,9 @@ AS
  * Task			: Get data for ScoreMap
  * DB			: SVRAGE.RepDB
  * Revisions	:
- *	• 20130128@Terry.Nguyen	: Implement
- *	• 20130514@Sophia	: Add Super View
+	 - 20130128@Terry.Nguyen	: Implement
+	 - 20130514@Sophia	: Add Super View
+	 - 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
  * Parameters:
  *	•
  *	•
@@ -72,7 +73,7 @@ BEGIN
 		b.LiveIndicator, 
 		b.LiveHomeScore, 
 		b.LiveAwayScore, 
-		CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END AS APositionTaking
+		CASE WHEN @LoggedId = 1 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END AS APositionTaking
 	FROM 
 		BetTrans_Agent AS ba WITH (NOLOCK) 
 		INNER JOIN BetTrans AS b WITH (NOLOCK) ON ba.TransId = b.TransId
@@ -84,7 +85,7 @@ BEGIN
 			)
 		AND b.ruben = 0
 		AND b.StatusId IN (0, 1)
-		AND CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END > 0 
+		AND CASE WHEN @LoggedId = 1 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END > 0 
 		
 	SELECT 
 		matchid, 

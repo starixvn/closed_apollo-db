@@ -20,6 +20,7 @@ AS
 	- 20132801@Terry.Nguyen	: Implement
 	- 20130509@Sophia: revise code, order by LeagueId
 	- 20130514@Sophia: Add super view
+	- 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
  * Parameters:
  *	•
  *	•
@@ -70,7 +71,7 @@ FROM
 			b.Stake,
 			b.Actual_Stake,
 			b.Odds,
-			(CASE WHEN @LoggedID = 0 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) AS PositionTaking,
+			(CASE WHEN @LoggedId = 1 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END) AS PositionTaking,
 			COUNT(*) AS BetCount 
 		FROM 
 			BetTrans_Agent AS ba WITH (NOLOCK)

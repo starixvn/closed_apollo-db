@@ -18,6 +18,8 @@ AS
 
     Revisions:
        - 20130625@Sophia: Modify for Singbet
+	   - 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
+						  Sort by PositionTaking
     */
     
 SET NOCOUNT ON
@@ -36,7 +38,7 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 
 IF @Todate > @MoveBetDay
 BEGIN  
-	IF @AgentId = 0
+	IF @AgentId = 1
 	BEGIN 
 	--********************************
 	----Super view
@@ -545,7 +547,7 @@ END
 ----------------------------------------------------------------------------------------------
 IF @FromDate <= @MoveBetDay 
 BEGIN  
-	IF @AgentId = 0
+	IF @AgentId = 1
 	BEGIN 
 	--********************************
 	----Super view
@@ -1102,7 +1104,7 @@ SELECT	Username, AgentId, isAgent, PositionTaking,
 		SUM(UplineTotal) as UplineTotal
 FROM	#WinLossMember 
 GROUP BY Username, AgentId, isAgent, PositionTaking
-ORDER BY IsAgent DESC, Username ASC
+ORDER BY IsAgent DESC, PositionTaking ASC, Username ASC
 
 DROP TABLE #WinLossAgent
 DROP TABLE #WinLossMember

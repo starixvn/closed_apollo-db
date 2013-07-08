@@ -12,6 +12,7 @@ DB:  SVRAGE.RepDB
 Original: [Age_Rpt_Outstanding_Ag]
 
 Revisions:
+- 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
 
 */
 SET NOCOUNT ON
@@ -28,7 +29,7 @@ INSERT INTO #SportsList (Sporttype)
 SELECT val FROM strSplit_key (@Sporttypes, ',')
 
 		 
-IF @AgentId = 0
+IF @AgentId = 1
 BEGIN 
 	----Super view
 	--Sportsbook
@@ -44,7 +45,7 @@ BEGIN
 			ON B.TransID = BA.TransID
 	INNER JOIN Match M WITH (NOLOCK) 
 			ON M.MatchId = B.MatchId			
-	WHERE	C.ParentId = 0 
+	WHERE	C.ParentId = 1 
 			AND B.StatusID IN (0,1) 
 			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
 			AND B.MatchID >0
@@ -74,7 +75,7 @@ BEGIN
 					ON BM.RefNo = B.RefNo  
 			INNER JOIN Match M WITH (NOLOCK) 
 					ON M.MatchId = BM.MatchId			
-			WHERE	C.ParentId = 0 
+			WHERE	C.ParentId = 1 
 					AND BA.StatusID IN (0,1)
 					AND BA.MatchID IN (9,29)
 					AND BA.Bettype IN (9,29) 					
