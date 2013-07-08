@@ -17,7 +17,8 @@ AS
  * TASk			: Get Total Bets(Number Game) data for Agent
  * DB			: SVRAGE.RepDB
  * Revisions	:
- *	• 20132801@Terry.Nguyen	: Implement
+  - 20132801@Terry.Nguyen	: Implement
+  - 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
  * Parameters:
  *	•
  *	•
@@ -141,7 +142,7 @@ BEGIN
 				ba.BetType, 
 				betteam,
 				liveindicator,
-				SUM(CASE WHEN @LoggedID = 0 THEN (1-TPositionTaking) ELSE ba.APositionTaking END * ba.Stake * CASE WHEN ABS(b.Odds) < 1 THEN 1 ELSE ABS(b.Odds) END) AS Stake,
+				SUM(CASE WHEN @LoggedId = 1 THEN (1-TPositionTaking) ELSE ba.APositionTaking END * ba.Stake * CASE WHEN ABS(b.Odds) < 1 THEN 1 ELSE ABS(b.Odds) END) AS Stake,
 				COUNT(1) AS BetCOUNT
 			FROM 
 				BetTrans_Agent AS ba WITH (NOLOCK) 

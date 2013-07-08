@@ -18,6 +18,7 @@ Original:
 Revisions:
    - 20130510@Sophia: Change @splitter of strSplit_Key from '^', to ','
    - 20130628@Sophia: Add FinalHomeScore, FinalAwayScore, UGroup for Singbet
+   - 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
 
 
 Param's Explanation:  
@@ -28,13 +29,13 @@ SET NOCOUNT ON
 
 
 ---*****************************  Super View ***************************--
-IF @LoggedId = 0 
+IF @LoggedId = 1 
 BEGIN 
-	IF @AgentId = 0 AND @CustID = -1
+	IF @AgentId = 1 AND @CustID = -1
 	----- 1: Super View by Super	
 	BEGIN 		
 		EXEC Age_BetList_SelByDateMemStatus_SuperViewSuper 
-			@LoggedId = 0, @AgentId = 0 ,@CustId = -1,
+			@LoggedId = 1, @AgentId = 1 ,@CustId = -1,
 			@FromDate = @FromDate, @Todate = @Todate, @StatusIds = @StatusIds,
 			@Sporttypes = @Sporttypes, @Bettypes = @Bettypes
 		RETURN				
@@ -44,7 +45,7 @@ BEGIN
 	------ 2: Super view by Agent		
 	BEGIN
 		EXEC Age_BetList_SelByDateMemStatus_SuperViewAgent
-			@LoggedId = 0, @AgentId = @AgentId ,@CustId = -1,
+			@LoggedId = 1, @AgentId = @AgentId ,@CustId = -1,
 			@FromDate = @FromDate, @Todate = @Todate, @StatusIds = @StatusIds,
 			@Sporttypes = @Sporttypes, @Bettypes = @Bettypes
 		RETURN
@@ -55,7 +56,7 @@ BEGIN
 	BEGIN 
 	---- 3: Super View By Member
 		EXEC Age_BetList_SelByDateMemStatus_SuperViewCust 
-				@LoggedId = 0, @AgentId = -1 ,@CustId = @CustId,
+				@LoggedId = 1, @AgentId = -1 ,@CustId = @CustId,
 				@FromDate = @FromDate, @Todate = @Todate, @StatusIds = @StatusIds,
 				@Sporttypes = @Sporttypes, @Bettypes = @Bettypes	
 		RETURN				

@@ -121,7 +121,7 @@ BEGIN
 
 						AND (@Sporttypes = '0' 
 							OR EXISTS (	SELECT	1 
-										FROM	BettransM BM WITH (NOLOCK, index=IX_bettransm_2) 
+										FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
 										INNER JOIN Match M WITH (NOLOCK) 
 											ON	 M.matchID = BM.MatchId 
 											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
@@ -270,7 +270,7 @@ BEGIN
 
 						AND (@Sporttypes = '0' 
 							OR EXISTS (	SELECT	1 
-										FROM	BettransM14 BM WITH (NOLOCK, index=IX_bettransm_2) 
+										FROM	BettransM14 BM WITH (NOLOCK, index=IX_RefNo) 
 										INNER JOIN Match14M WITH (NOLOCK) 
 											ON	 M.matchID = BM.MatchId 
 											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
@@ -347,7 +347,7 @@ SELECT	Username, CustId,  PositionTaking,
 		SUM(UplineTotal) as UplineTotal
 FROM	#WinLossMember 
 GROUP BY Username, CustId, PositionTaking
-ORDER BY Username
+ORDER BY PositionTaking ASC, Username ASC
  
 DROP TABLE #WinLossMember
 DROP TABLE #BettypeList

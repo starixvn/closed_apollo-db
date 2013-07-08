@@ -20,6 +20,7 @@ AS
   - 20132801@Terry.Nguyen	: Implement
   - 20130513@Sophia: add super view
   - 20130629@Sophia: Add Showtime
+  - 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
 
  * Parameters:
  *	•
@@ -30,7 +31,7 @@ AS
 BEGIN
 	SET NOCOUNT ON
 
-IF @LoggedID = 0 
+IF @LoggedId = 1 
 BEGIN 
 	SELECT
 		ba.MatchId,

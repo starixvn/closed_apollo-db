@@ -18,6 +18,8 @@ AS
 
     Revisions:
        - 20130625@Sophia: Modify for Singbet
+	   - 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
+						  Sort by PositionTaking
     */
     
 SET NOCOUNT ON
@@ -36,7 +38,7 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 
 IF @Todate > @MoveBetDay
 BEGIN  
-	IF @AgentId = 0
+	IF @AgentId = 1
 	BEGIN 
 	--********************************
 	----Super view
@@ -121,7 +123,7 @@ BEGIN
 
 							AND (@Sporttypes = '0' 
 							OR EXISTS (	SELECT	1 
-										FROM	BettransM BM WITH (NOLOCK, index=IX_bettransm_2) 
+										FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
 										INNER JOIN Match M WITH (NOLOCK) 
 											ON	 M.matchID = BM.MatchId 
 											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
@@ -294,7 +296,7 @@ BEGIN
 								
 						AND (@Sporttypes = '0' 
 							OR EXISTS (	SELECT	1 
-										FROM	BettransM BM WITH (NOLOCK, index=IX_bettransm_2) 
+										FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
 										INNER JOIN Match M WITH (NOLOCK) 
 											ON	 M.matchID = BM.MatchId 
 											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
@@ -330,7 +332,7 @@ BEGIN
 
 					AND (@Sporttypes = '0' 
 						OR EXISTS (	SELECT	1 
-									FROM	BettransM BM WITH (NOLOCK, index=IX_bettransm_2) 
+									FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
 									INNER JOIN Match M WITH (NOLOCK) 
 										ON	 M.matchID = BM.MatchId 
 										AND (m.sporttype IN (Select sporttype FROM #SportsList))							
@@ -487,7 +489,7 @@ BEGIN
 
 					AND (@Sporttypes = '0' 
 							OR EXISTS (	SELECT	1 
-										FROM	BettransM BM WITH (NOLOCK, index=IX_bettransm_2) 
+										FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
 										INNER JOIN Match M WITH (NOLOCK) 
 											ON	 M.matchID = BM.MatchId 
 											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
@@ -532,7 +534,7 @@ BEGIN
 
 			AND ( @Sporttypes = '0' 
 					OR EXISTS (	SELECT	1 
-								FROM	BettransM BM WITH (NOLOCK, index=IX_bettransm_2) 
+								FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
 								INNER JOIN Match M WITH (NOLOCK) 
 									ON	 M.matchID = BM.MatchId 
 									AND (M.sporttype IN (Select sporttype FROM #SportsList))							
@@ -545,7 +547,7 @@ END
 ----------------------------------------------------------------------------------------------
 IF @FromDate <= @MoveBetDay 
 BEGIN  
-	IF @AgentId = 0
+	IF @AgentId = 1
 	BEGIN 
 	--********************************
 	----Super view
@@ -630,7 +632,7 @@ BEGIN
 
 							AND (@Sporttypes = '0' 
 							OR EXISTS (	SELECT	1 
-										FROM	BettransM14 BM WITH (NOLOCK, index=IX_BettransM14_2) 
+										FROM	BettransM14 BM WITH (NOLOCK, index=IX_RefNo) 
 										INNER JOIN Match14 M WITH (NOLOCK) 
 											ON	 M.matchID = BM.MatchId 
 											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
@@ -803,7 +805,7 @@ BEGIN
 								
 						AND (@Sporttypes = '0' 
 							OR EXISTS (	SELECT	1 
-										FROM	BettransM14 BM WITH (NOLOCK, index=IX_BettransM14_2) 
+										FROM	BettransM14 BM WITH (NOLOCK, index=IX_RefNo) 
 										INNER JOIN Match14 M WITH (NOLOCK) 
 											ON	 M.matchID = BM.MatchId 
 											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
@@ -839,7 +841,7 @@ BEGIN
 
 					AND (@Sporttypes = '0' 
 						OR EXISTS (	SELECT	1 
-									FROM	BettransM14 BM WITH (NOLOCK, index=IX_BettransM14_2) 
+									FROM	BettransM14 BM WITH (NOLOCK, index=IX_RefNo) 
 									INNER JOIN Match14 M WITH (NOLOCK) 
 										ON	 M.matchID = BM.MatchId 
 										AND (m.sporttype IN (Select sporttype FROM #SportsList))							
@@ -996,7 +998,7 @@ BEGIN
 
 					AND (@Sporttypes = '0' 
 							OR EXISTS (	SELECT	1 
-										FROM	BettransM14 BM WITH (NOLOCK, index=IX_BettransM14_2) 
+										FROM	BettransM14 BM WITH (NOLOCK, index=IX_RefNo) 
 										INNER JOIN Match14 M WITH (NOLOCK) 
 											ON	 M.matchID = BM.MatchId 
 											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
@@ -1041,7 +1043,7 @@ BEGIN
 
 			AND ( @Sporttypes = '0' 
 					OR EXISTS (	SELECT	1 
-								FROM	BettransM14 BM WITH (NOLOCK, index=IX_BettransM14_2) 
+								FROM	BettransM14 BM WITH (NOLOCK, index=IX_RefNo) 
 								INNER JOIN Match14 M WITH (NOLOCK) 
 									ON	 M.matchID = BM.MatchId 
 									AND (M.sporttype IN (Select sporttype FROM #SportsList))							
@@ -1102,7 +1104,7 @@ SELECT	Username, AgentId, isAgent, PositionTaking,
 		SUM(UplineTotal) as UplineTotal
 FROM	#WinLossMember 
 GROUP BY Username, AgentId, isAgent, PositionTaking
-ORDER BY IsAgent DESC, Username ASC
+ORDER BY IsAgent DESC, PositionTaking ASC, Username ASC
 
 DROP TABLE #WinLossAgent
 DROP TABLE #WinLossMember

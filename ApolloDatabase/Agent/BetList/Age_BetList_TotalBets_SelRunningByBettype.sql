@@ -16,6 +16,7 @@ ALTER PROC [dbo].[Age_BetList_TotalBets_SelRunningByBettype]
 	- 20130507@Sophia: Add @AgentID for Super view total bets of Main shareholder
 	- 20130510@Sophia: Change @splitter of strSplit_Key from '^', to ','
 	- 20130627@Sophia: Add UGroup for Singbet
+	- 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
   Parameters:
  		@AgentId: agent ID
   		#Bettypes: string of bettypes , seperate by ,
@@ -37,7 +38,7 @@ DECLARE @Betlist TABLE (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 						APositionTaking SMALLMONEY, ADiscount DECIMAL (9,8),  LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
 						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT, UGroup varchar(3),PlayerDiscount decimal(9,8))
 
-IF @LoggedId = 0 
+IF @LoggedId = 1 
 BEGIN 
 		--inlcude mix parlay AND Combination mix parlay
 		IF EXISTS (SELECT TOP 1 1  FROM #Bettype WHERE Bettype IN (9,29))

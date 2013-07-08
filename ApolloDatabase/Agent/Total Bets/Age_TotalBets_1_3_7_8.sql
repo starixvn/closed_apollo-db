@@ -16,8 +16,9 @@ AS
  * Task			: Retrieve Total Bet values for bettype 1,3,7,8
  * DB			: SVRAGE.RepDB
  * Revisions	:
- *	- 20130509@Sophia: Revise code
- *  - 20130513@Sophia: Add super view
+ - 20130509@Sophia: Revise code
+ - 20130513@Sophia: Add super view
+ - 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
  * Parameters :
  *	@AgentId : agent ID
  *  
@@ -60,7 +61,7 @@ FROM
 		bt.LiveIndicator, 
 		bt.LiveHomeScore, 
 		bt.LiveAwayScore,
-		SUM( CASE WHEN @LoggedID = 0 THEN (1-bt.TPositionTaking) ELSE bta.APositionTaking END * bta.Stake * CASE WHEN ABS(bt.Odds) < 1 THEN 1 ELSE ABS(bt.Odds) END) AS Stake,
+		SUM( CASE WHEN @LoggedId = 1 THEN (1-bt.TPositionTaking) ELSE bta.APositionTaking END * bta.Stake * CASE WHEN ABS(bt.Odds) < 1 THEN 1 ELSE ABS(bt.Odds) END) AS Stake,
 		COUNT(*) AS BetCount
 	FROM 
 		BetTrans_Agent AS bta WITH (NOLOCK)

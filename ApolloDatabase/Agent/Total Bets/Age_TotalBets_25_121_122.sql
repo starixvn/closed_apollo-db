@@ -17,16 +17,17 @@ AS
  * TASk			: Get Total Bets(Home/Draw/Away/No Bet) data for Agent
  * DB			: SVRAGE.RepDB
  * Revisions	:
- *	• 20132801@Terry.Nguyen	: Implement
- *  • 20130509@Sophia: revise code, order by LeagueId
- *  • 20130514@Sophia: Add super view
+  - 20132801@Terry.Nguyen	: Implement
+  - 20130509@Sophia: revise code, order by LeagueId
+  - 20130514@Sophia: Add super view
+  - 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
  * Parameters:
  *	•
  *	•
  *  
  */
 SET NOCOUNT ON
-IF @LoggedID = 0 
+IF @LoggedId = 1 
 BEGIN 
 	SELECT 
 		m.ShowTime, 

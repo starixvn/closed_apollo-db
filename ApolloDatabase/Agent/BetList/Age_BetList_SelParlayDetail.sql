@@ -10,6 +10,7 @@ Original:
 
 Revisions:
 	- 20130628@Sophia: Add FinalHomeScore, FinalAwayScore
+	- 20130708@Sophia: Get Matchid
 
 */
 SET NOCOUNT ON
@@ -18,6 +19,7 @@ DECLARE	@tmpParlay	TABLE(
 	sporttype	TINYINT,
 	leagueid	INT,
 	bettype		INT,
+	MatchId		INT,
 	homeid		INT,
 	awayid		INT,
 	hdp1		FLOAT,
@@ -52,6 +54,7 @@ BEGIN
 		sporttype,
 		leagueid,
 		bettype,
+		MatchId,
 		homeid,
 		awayid,
 		hdp1,
@@ -72,6 +75,7 @@ BEGIN
 		m.Sporttype,
 		m.LeagueID,		
 		b.Bettype ,
+		m.MatchId,
 		m.homeID,
 		m.awayID,
 		convert(float, b.hdp1) as Hdp1, 
@@ -110,6 +114,7 @@ BEGIN
 		sporttype,
 		leagueid,
 		bettype,
+		MatchId,
 		homeid,
 		awayid,
 		hdp1,
@@ -130,6 +135,7 @@ BEGIN
 		m.Sporttype,
 		m.LeagueID,		
 		b.Bettype ,
+		m.MatchId,
 		m.homeID,
 		m.awayID,
 		convert(float, b.hdp1) as Hdp1, 
@@ -168,6 +174,7 @@ BEGIN
 		sporttype,
 		leagueid,
 		bettype,
+		MatchId,
 		homeid,
 		awayid,
 		hdp1,
@@ -188,6 +195,7 @@ BEGIN
 		m.Sporttype,
 		m.LeagueID,		
 		b.Bettype ,
+		m.MatchId,
 		m.homeID,
 		m.awayID,
 		convert(float, b.hdp1) as Hdp1, 

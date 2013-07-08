@@ -18,13 +18,14 @@ AS
  * Revisions	:
  	- 20130509@Sophia: revise code, order by LeagueId
 	- 20130513@Sophia: Add Super view
+	 - 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
  * Parameters:
  *	@AgentId: agent ID
  *  
  */
 
 SET NOCOUNT ON
-IF @LoggedID = 0 
+IF @LoggedId = 1 
 BEGIN 
 SELECT
 	m.ShowTime, 

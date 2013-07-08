@@ -10,6 +10,7 @@ AS
  * Revisions	:
 	-  20130508@Sophia: Check Main Shareholder's member having running tickets and filter by bettypes
 	-  20130703@Sophia: Revise
+	 - 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
  * Parameters:
  *	•
  *	•
@@ -24,7 +25,7 @@ IF @Bettypes = '0'
 	FROM	AgentInfo A WITH (NOLOCK)
 	INNER JOIN  Bettrans_Agent BA WITH (NOLOCK) 
 			ON A.AgentID = BA.AgentID
-	WHERE	A.ParentId = 0				
+	WHERE	A.ParentId =1				
 			AND BA.StatusID IN (0,1)
 	ORDER BY A.Username
 
@@ -38,14 +39,14 @@ BEGIN
 	FROM	AgentInfo A WITH (NOLOCK)
 	INNER JOIN  Bettrans_Agent BA WITH (NOLOCK) 
 			ON A.AgentID = BA.AgentID
-	WHERE	A.ParentId = 0				
+	WHERE	A.ParentId = 1			
 			AND BA.Bettype  IN (SELECT Bettype FROM @BettypeList )
 			AND BA.StatusID IN (0,1)
 	ORDER BY A.Username
 	*/
 	SELECT  A.AgentId, A.Username
 	FROM	AgentInfo A WITH (NOLOCK)
-	WHERE	A.ParentId = 0	
+	WHERE	A.ParentId = 1	
 	and exists (select 1
 			from Bettrans_Agent BA WITH (NOLOCK) 
 			where A.AgentID = BA.AgentID
