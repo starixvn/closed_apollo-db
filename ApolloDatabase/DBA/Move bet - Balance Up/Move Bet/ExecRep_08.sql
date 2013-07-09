@@ -29,12 +29,12 @@ IF @parlay = 1
 		INSERT INTO bettransm14
 			(TransId,CustId,TransDate,OddsId,Hdp1,Hdp2,Odds,Stake,Status,WinLost,LiveHomeScore,LiveAwayScore,LiveIndicator,
 			BetTeam,Creator,RefNo,ComStatus,WinLostDate,BetFrom,BetCheck,CheckTime,OddsSpread,PlayerDiscount,PlayerComm,
-			ActualRate,MatchId,MatchDate,FinalOdds,IsFinish,StatusWinLost,Ruben,Bettype,StatusId,RecommDate
+			ActualRate,MatchId,MatchDate,FinalOdds,IsFinish,StatusWinLost,Ruben,Bettype,StatusId
 			)
 		SELECT
 			TransId,CustId,TransDate,OddsId,Hdp1,Hdp2,Odds,Stake,Status,WinLost,LiveHomeScore,LiveAwayScore,LiveIndicator,
 			BetTeam,Creator,RefNo,ComStatus,WinLostDate,BetFrom,BetCheck,CheckTime,OddsSpread,PlayerDiscount,PlayerComm,
-			ActualRate,MatchId,MatchDate,FinalOdds,IsFinish,StatusWinLost,Ruben,Bettype,StatusId,RecommDate
+			ActualRate,MatchId,MatchDate,FinalOdds,IsFinish,StatusWinLost,Ruben,Bettype,StatusId
 		FROM bettransm b WITH (NOLOCK)			 
 		WHERE winlostdate=@winlostdate
 			 

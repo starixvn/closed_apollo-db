@@ -99,6 +99,8 @@ BEGIN
 END
 ELSE  --- refund all FGLG
 BEGIN
+	IF @betStatus = 'Refund' 
+		SET @betStatus = 'Refund;'
 	SET @betStatus = CASE WHEN CHARINDEX('FL:',@betstatus) > 0 THEN SUBSTRING(@betStatus,1,CHARINDEX(';FL:',@betStatus)) + 'FL:0-0'
 						ELSE ISNULL(@betstatus,'') + 'FL:0-0' END
 END

@@ -33,7 +33,7 @@ SELECT
 	TransId,CustId,TransDate,OddsId,Hdp1,Hdp2,Odds,Stake,WinLost,
 	LiveHomeScore,LiveAwayScore,LiveIndicator,Creator,RefNo,
 	WinLostDate,CheckTime,OddsSpread,PlayerDiscount,PlayerComm,
-	ActualRate,MatchId,MatchDate,FinalOdds,IsFinish,StatusWinLost,Ruben,Bettype,StatusId,RecommDate
+	ActualRate,MatchId,MatchDate,FinalOdds,IsFinish,StatusWinLost,Ruben,Bettype,StatusId
 FROM dbo.bettransm14
 WHERE winlostdate <= @max_winlostdate
 

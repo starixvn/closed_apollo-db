@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateDiscount]    Script Date: 6/29/2013 11:22:23 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateDiscount]    Script Date: 7/9/2013 10:56:00 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -112,7 +112,7 @@ BEGIN
 						@ErrCode	= 2008,
 						@ErrMsg		= 
 							CASE @Language
-								WHEN 'en-US' THEN 'Invalid commission group '
+								WHEN 'en-US' THEN 'Invalid commission line '
 								ELSE [dbo].f_Msg_GetContentById (2008, @Language)
 							END
 					RETURN	

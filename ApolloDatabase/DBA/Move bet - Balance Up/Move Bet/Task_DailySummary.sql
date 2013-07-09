@@ -533,7 +533,7 @@ EXEC Task_BalanceCheck @winlostdate, 2
 				ON	BA.AgentID = C.AgentID		
 		INNER JOIN	Bettrans14 B WITH (NOLOCK) 	
 				ON	B.TransID = BA.TransID			
-		WHERE		C.ParentId = 0 
+		WHERE		C.ParentId = 1
 					AND B.StatusID NOT IN (0,1)
 					AND B.Winlostdate = @WinlostDate				   
 					AND BA.Winlostdate = @WinlostDate	  

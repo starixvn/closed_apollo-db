@@ -70,7 +70,7 @@ BEGIN
 		' @hth = ' + CASE WHEN @hth IS NULL THEN 'NULL' ELSE CAST(@hth AS varchar(50)) END + ' ,' + 
 		' @hta = '  + CASE WHEN @hta IS NULL THEN 'NULL' ELSE CAST(@hta AS varchar(50)) END + ' ,' + 
 		' @goalrecord = ' + CASE WHEN @goalrecord IS NULL THEN 'NULL' ELSE '''' + CAST(@goalrecord AS varchar(50)) + '''' END + ',' + 
-		' @betstatus = ' + + CASE WHEN @betstatus IS NULL THEN 'NULL' ELSE '''' + CAST(@betstatus AS nvarchar(50)) + '''' END + ',' + 
+		' @betstatus = ' + + CASE WHEN @betstatus IS NULL THEN 'NULL' ELSE 'N''' + CAST(@betstatus AS nvarchar(50)) + '''' END + ',' + 
 		' @action = ''' + @action + ''' ,' + 
 		' @ErrCode = @ErrCode OUTPUT , ' +
 		' @ErrMsg = @ErrMsg OUTPUT '
@@ -96,8 +96,8 @@ BEGIN
 	SELECT @SQLCommand = 'EXEC [dbo].[Admin_Settlement_FGLG] ' +
 		' @creator = 0 ' + ' ,' +
 		' @matchid = ' + CAST(@matchid AS varchar(50)) + ' ,' +		
-		' @goalrecord = ' + CASE WHEN @goalrecord IS NULL THEN 'NULL' ELSE '''' + CAST(@goalrecord AS varchar(50)) + '''' END + ',' + 
-		' @betstatus = ' + + CASE WHEN @betstatus IS NULL THEN 'NULL' ELSE '''' + CAST(@betstatus AS nvarchar(50)) + '''' END + ',' + 		
+		' @goalrecord = ' + CASE WHEN @goalrecord IS NULL THEN 'NULL' ELSE '''' + CAST(@goalrecord AS varchar(50)) + '''' END + ',' + 		
+		' @betstatus = ' + + CASE WHEN @betstatus IS NULL THEN 'NULL' ELSE 'N''' + CAST(@betstatus AS nvarchar(50)) + '''' END + ',' + 
 		' @IncludeLG = 0,' + 
 		' @ErrCode = @ErrCode OUTPUT , ' +
 		' @ErrMsg = @ErrMsg OUTPUT '
@@ -116,8 +116,8 @@ ELSE IF @actionID IN (12) -- Refund FT
 BEGIN	
 	SELECT @SQLCommand = 'EXEC [dbo].[Admin_Settlement_RefundFT] ' +
 		' @adminid = 0 ' + ' ,' +
-		' @matchid = ' + CAST(@matchid AS varchar(50)) + ' ,' +				
-		' @betstatus = ' + + CASE WHEN @betstatus IS NULL THEN 'NULL' ELSE '''' + CAST(@betstatus AS nvarchar(50)) + '''' END + ',' + 
+		' @matchid = ' + CAST(@matchid AS varchar(50)) + ' ,' +						
+		' @betstatus = ' + + CASE WHEN @betstatus IS NULL THEN 'NULL' ELSE 'N''' + CAST(@betstatus AS nvarchar(50)) + '''' END + ',' + 
 		' @ErrCode = @ErrCode OUTPUT , ' +
 		' @ErrMsg = @ErrMsg OUTPUT '
 		, @SPName='Admin_Settlement_RefundFT'
@@ -126,8 +126,8 @@ ELSE IF @actionID IN (13) -- Refund All
 BEGIN	
 	SELECT @SQLCommand = 'EXEC [dbo].[Admin_Settlement_Refund_All] ' +
 		' @creator = 0 ' + ' ,' +
-		' @matchid = ' + CAST(@matchid AS varchar(50)) + ' ,' +				
-		' @betstatus = ' + + CASE WHEN @betstatus IS NULL THEN 'NULL' ELSE '''' + CAST(@betstatus AS nvarchar(50)) + '''' END + ',' + 
+		' @matchid = ' + CAST(@matchid AS varchar(50)) + ' ,' +						
+		' @betstatus = ' + + CASE WHEN @betstatus IS NULL THEN 'NULL' ELSE 'N''' + CAST(@betstatus AS nvarchar(50)) + '''' END + ',' + 
 		' @ErrCode = @ErrCode OUTPUT , ' +
 		' @ErrMsg = @ErrMsg OUTPUT '
 		, @SPName='Admin_Settlement_Refund_All'
