@@ -29,7 +29,7 @@ IF @IsOutright = 0
 ELSE
 	SELECT	DISTINCT m.LeagueId
 	FROM	Outright m WITH (NOLOCK) 
-		INNER JOIN League l WITH (NOLOCK) ON m.orid = l.leagueid
+		INNER JOIN League l WITH (NOLOCK) ON m.leagueid = l.leagueid
 	WHERE	m.eventdate BETWEEN @FromDate AND @ToDate
 			AND (l.Sporttype IN (SELECT val FROM StrSplit_Key(@Sporttypes, ',')) OR @Sporttypes = '0')
 			AND l.isTest = 0

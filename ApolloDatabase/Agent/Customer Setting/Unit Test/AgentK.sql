@@ -117,7 +117,7 @@ select @p9, @p10
 
 
 DECLARE @ActorAgentId INT
-SET @ActorAgentId = 0
+SET @ActorAgentId = 1
 
 DECLARE @actorAgentLevel	INT
 			,@agentLevel	INT
@@ -206,7 +206,7 @@ exec Age_Agent_UpdateSetting
 	,@ErrMsg=@p10 output
 select @p9, @p10
 
-SET @ActorAgentId = 0
+SET @ActorAgentId = 1
 
 	SELECT @actorAgentLevel = AgentLevel
 	FROM AgentInfo WITH (NOLOCK)
@@ -288,7 +288,7 @@ exec Age_Agent_UpdateSetting
 	,@ErrMsg=@p10 output
 select @p9, @p10
 
-SET @ActorAgentId = 0
+SET @ActorAgentId = 1
 
 	SELECT @actorAgentLevel = AgentLevel
 	FROM AgentInfo WITH (NOLOCK)
@@ -376,7 +376,7 @@ exec Age_Agent_UpdateSetting
 	,@ErrMsg=@p10 output
 select @p9, @p10
 
-SET @ActorAgentId = 0
+SET @ActorAgentId = 1
 
 	SELECT @actorAgentLevel = AgentLevel
 	FROM AgentInfo WITH (NOLOCK)
@@ -458,7 +458,7 @@ exec Age_Agent_UpdateSetting
 	,@ErrMsg=@p10 output
 select @p9, @p10
 
-SET @ActorAgentId = 0
+SET @ActorAgentId = 1
 
 	SELECT @actorAgentLevel = AgentLevel
 	FROM AgentInfo WITH (NOLOCK)
@@ -541,7 +541,7 @@ exec Age_Agent_UpdateSetting
 	,@ErrMsg=@p10 output
 select @p9, @p10
 
-SET @ActorAgentId = 0
+SET @ActorAgentId = 1
 
 	SELECT @actorAgentLevel = AgentLevel
 	FROM AgentInfo WITH (NOLOCK)
@@ -623,7 +623,7 @@ exec Age_Agent_UpdateSetting
 	,@ErrMsg=@p10 output
 select @p9, @p10
 
-SET @ActorAgentId = 0
+SET @ActorAgentId = 1
 
 	SELECT @actorAgentLevel = AgentLevel
 	FROM AgentInfo WITH (NOLOCK)
