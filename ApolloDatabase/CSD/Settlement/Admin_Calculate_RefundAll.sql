@@ -38,14 +38,13 @@ BEGIN
 			status = 'Refund',
 			statusID = 103,
 			awinlost=0,
-			acomm=0
-		FROM  BetTrans_Agent b
+			acomm=0		
 		where
-			b.matchid=@matchid
+			matchid=@matchid
 			--AND [status] not in ('Void', 'Reject')
-			AND b.statusID not in (103,101,102)
-			AND b.bettype <> 14			
-			and b.bettype not between 1301 and 1334 -- exclude sporting solution product
+			AND statusID not in (103,101,102)
+			AND bettype <> 14			
+			and bettype not between 1301 and 1334 -- exclude sporting solution product
     
 		IF @@ROWCOUNT < 10000 BREAK
 	END
