@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_Insert]    Script Date: 5/6/2013 12:41:32 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_Insert]    Script Date: 7/10/2013 9:09:08 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -32,6 +32,7 @@ AS
  *	• 20130227@Edward	: Implement
  *	• 20130415@Kos		: Add statuses
  *	• 20130415@Edward	: Write log
+ *	• 2013070/@Edward	: Insert CustPositionTaking
  * Parameters:
  *	•
  *	•
@@ -60,6 +61,15 @@ BEGIN
 			RETURN
 		END	
 
+	-- Check if agent ID exists
+	IF NOT EXISTS ( SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @AgentId )
+		BEGIN
+			SELECT 
+				@ErrCode = 5100, 
+				@ErrMsg = 'Agent ID not exist [AgentId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
+			RETURN
+		END	
+
 	-- For write log
 	DECLARE 
 		@startRun		DATETIME,
@@ -67,7 +77,12 @@ BEGIN
 		@duration		INT,
 		@logSPData		VARCHAR(5000),
 		@logSPDataOld	VARCHAR(5000),
-		@xml			XML
+		@xml			XML,
+		@agentHId		HIERARCHYID
+
+	SELECT @agentHId = AgentHId
+	FROM AgentInfo WITH (NOLOCK)
+	WHERE AgentId = @AgentId
 
 	SET @startRun = GETDATE()
 
@@ -162,7 +177,25 @@ BEGIN
 	FROM AgentDiscount WITH (NOLOCK)
 	WHERE AgentId = @AgentId
 
-	-- Insert default customer position taking (from it's parent)
+	-- Insert pt of direct agent 
+	INSERT CustPositionTaking (
+		CustId
+		,AgentId
+		,SportType
+		,BetType
+		,IsLive
+		,PositionTaking				
+		)
+	SELECT @custId
+		,@AgentId
+		,SportType
+		,BetType
+		,IsLive
+		,MaxGivenPositionTaking		
+	FROM AgentPositionTaking
+	WHERE AgentId = @AgentId
+
+	-- Insert pt for upline
 	INSERT INTO CustPositionTaking (
 		CustId,
 		AgentId,
@@ -172,13 +205,16 @@ BEGIN
 		PositionTaking )
 	SELECT
 		@CustId,
-		@AgentId,
-		SportType,
-		BetType,
-		IsLive,
-		MaxGivenPositionTaking
-	FROM AgentPositionTaking WITH (NOLOCK)
-	WHERE AgentId = @AgentId	
+		b.ParentId,
+		a.SportType,
+		a.BetType,
+		a.IsLive,
+		a.MaxGivenPositionTaking
+	FROM 
+		AgentPositionTaking AS a WITH (NOLOCK)
+		INNER JOIN AgentInfo AS b WITH (NOLOCK)	ON a.AgentId = b.AgentId
+	WHERE @agentHId.IsDescendantOf(b.AgentHId) = 1			
+		AND b.AgentLevel > 1	
 	
 	-- Insert into balance tables 	
 	INSERT INTO SVRTXN.TransDB.dbo.BalanceCredit (CustId, Balance)
