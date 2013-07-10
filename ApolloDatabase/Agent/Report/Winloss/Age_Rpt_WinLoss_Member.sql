@@ -212,7 +212,7 @@ BEGIN
 				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 		INNER JOIN	CustInfo C WITH (NOLOCK)
 				ON	B.CustID = C.CustID AND  C.AgentId = @AgentID
-		INNER JOIN  Match14  WITH (NOLOCK) 
+		INNER JOIN  Match14 M WITH (NOLOCK) 
 				ON  m.MatchID = B.MatchID
 		INNER JOIN	CustPositionTaking PT WITH (NOLOCK) 
 				ON	PT.CustID = C.CustID AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
@@ -271,7 +271,7 @@ BEGIN
 						AND (@Sporttypes = '0' 
 							OR EXISTS (	SELECT	1 
 										FROM	BettransM14 BM WITH (NOLOCK, index=IX_RefNo) 
-										INNER JOIN Match14 WITH (NOLOCK) 
+										INNER JOIN Match14 M WITH (NOLOCK) 
 											ON	 M.matchID = BM.MatchId 
 											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
 										WHERE	BM.RefNo = B.RefNo
