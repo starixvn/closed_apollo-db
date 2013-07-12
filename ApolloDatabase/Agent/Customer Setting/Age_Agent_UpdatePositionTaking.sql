@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking]    Script Date: 6/29/2013 10:20:04 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking]    Script Date: 7/12/2013 2:54:56 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -283,7 +283,7 @@ BEGIN
 						@ErrCode = 4002,
 						@ErrMsg	= 
 							CASE @Language
-								WHEN 'en-US' THEN 'Share must be equal or greater than zero' 
+								WHEN 'en-US' THEN '% must be equal or greater than zero' 
 								ELSE [dbo].f_Msg_GetContentById (4002, @Language)
 							END + ' (' 
 								+ CASE WHEN @sportType = 99 AND @betType = 9
@@ -313,7 +313,7 @@ BEGIN
 						@ErrCode = 4003,
 						@ErrMsg	= 
 							CASE @Language
-								WHEN 'en-US' THEN 'Min Given Share must be equal to or less than Max Given Share' 
+								WHEN 'en-US' THEN '% Min Downline must be equal to or less than % Downline' 
 								ELSE [dbo].f_Msg_GetContentById (4003, @Language)
 							END + ' (' 
 								+ CASE WHEN @sportType = 99 AND @betType = 9
@@ -352,7 +352,7 @@ BEGIN
 						@ErrCode = 4001,
 						@ErrMsg	= 
 							CASE @Language
-								WHEN 'en-US' THEN 'Sum Max Upper and Max Given Share must be equal or less than Max Given Share of Parent Agent' 
+								WHEN 'en-US' THEN 'Sum % Preset and % Downline must be equal or less than % Downline of Parent Agent' 
 								ELSE [dbo].f_Msg_GetContentById (4001, @Language)
 							END + ' ('+ @tempUsername +')' 
 								+ ' (' 
@@ -390,7 +390,7 @@ BEGIN
 							@ErrCode	= 4000,
 							@ErrMsg		= 
 								CASE @Language
-									WHEN 'en-US' THEN 'Invalid taken share range' 
+									WHEN 'en-US' THEN 'Invalid % range' 
 									ELSE [dbo].f_Msg_GetContentById (4000, @Language)
 								END + ' (' 
 									+ CASE WHEN @sportType = 99 AND @betType = 9
@@ -473,7 +473,7 @@ BEGIN
 												@ErrCode = 4004,
 												@ErrMsg	= 
 													CASE @Language
-														WHEN 'en-US' THEN 'Max Given Share must be equal to or less than 90%' 
+														WHEN 'en-US' THEN '% Downline must be equal to or less than 90%' 
 														ELSE [dbo].f_Msg_GetContentById (4004, @Language)
 													END + ' (' 
 														+ CASE WHEN @sportType = 99 AND @betType = 9
@@ -519,7 +519,7 @@ BEGIN
 												@ErrCode	= 4006,
 												@ErrMsg		= 
 													CASE @Language
-														WHEN 'en-US' THEN 'Invalid Max Given Share range' 
+														WHEN 'en-US' THEN 'Invalid % Downline range' 
 														ELSE [dbo].f_Msg_GetContentById (4006, @Language)
 													END + ' (' 
 														+ CASE WHEN @sportType = 99 AND @betType = 9
@@ -2047,7 +2047,7 @@ BEGIN
 														@ErrCode	= 4006,
 														@ErrMsg		= 
 															CASE @Language
-																WHEN 'en-US' THEN 'Invalid Max Given Share range' 
+																WHEN 'en-US' THEN 'Invalid % Downline range' 
 																ELSE [dbo].f_Msg_GetContentById (4006, @Language)
 															END + ' (' 
 																+ CASE WHEN @sportType = 99 AND @betType = 9
@@ -2112,7 +2112,7 @@ BEGIN
 														@ErrCode	= 4006,
 														@ErrMsg		= 
 															CASE @Language
-																WHEN 'en-US' THEN 'Invalid Max Given Share range' 
+																WHEN 'en-US' THEN 'Invalid % Downline range' 
 																ELSE [dbo].f_Msg_GetContentById (4006, @Language)
 															END + ' (' 
 																+ CASE WHEN @sportType = 99 AND @betType = 9
