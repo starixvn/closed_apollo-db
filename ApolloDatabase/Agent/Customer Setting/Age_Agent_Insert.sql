@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_Insert]    Script Date: 5/6/2013 11:24:17 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_Insert]    Script Date: 7/12/2013 3:04:27 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -247,7 +247,7 @@ BEGIN
 		SportType,
 		BetType,
 		IsLive,
-		0,			-- max upper
+		MaxGivenPositionTaking,			-- max upper
 		0,			-- max given
 		0			-- min given
 	FROM AgentPositionTaking WITH (NOLOCK)
