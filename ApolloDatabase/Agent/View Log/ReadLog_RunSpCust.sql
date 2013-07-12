@@ -1,6 +1,6 @@
 ﻿USE [LogDB]
 GO
-/****** Object:  StoredProcedure [dbo].[ReadLog_RunSpCust]    Script Date: 6/29/2013 5:46:10 PM ******/
+/****** Object:  StoredProcedure [dbo].[ReadLog_RunSpCust]    Script Date: 7/9/2013 4:08:48 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -85,7 +85,7 @@ BEGIN
 			AND rsc.LogDate BETWEEN @From AND @To
 			AND ci.Username = @Username
 			AND @isCheck = 1
-			AND (ui.AgentHId.IsDescendantOf(@actorAgentHId) = 1 OR ui.AgentId = 0 )
+			AND (ui.AgentHId.IsDescendantOf(@actorAgentHId) = 1 OR ui.AgentId = 1 )
 	)
 
 	-- temp for not paging
@@ -112,7 +112,7 @@ BEGIN
 				(@ActionTypeId = 0 OR la.ActionTypeId = @ActionTypeId)
 				AND rsc.LogDate BETWEEN @From AND @To
 				AND ci.Username = @Username
-				AND (ui.AgentHId.IsDescendantOf(@actorAgentHId) = 1 OR ui.AgentId = 0 )
+				AND (ui.AgentHId.IsDescendantOf(@actorAgentHId) = 1 OR ui.AgentId = 1 )
 		) AS Temp
 	WHERE
 		@isCheck = 1

@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdatePositionTaking]    Script Date: 6/29/2013 11:25:01 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdatePositionTaking]    Script Date: 7/12/2013 2:55:58 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -277,7 +277,7 @@ BEGIN
 										@ErrCode	= 4000,
 										@ErrMsg		= 
 											CASE @Language
-												WHEN 'en-US' THEN 'Invalid taken share range' 
+												WHEN 'en-US' THEN 'Invalid % range' 
 												ELSE [dbo].f_Msg_GetContentById (4000, @Language)
 											END + ' (' 
 												+ CASE WHEN @sportType = 99 AND @betType = 9
@@ -355,7 +355,7 @@ BEGIN
 										@ErrCode	= 4000,
 										@ErrMsg		= 
 											CASE @Language
-												WHEN 'en-US' THEN 'Invalid taken share range' 
+												WHEN 'en-US' THEN 'Invalid % range' 
 												ELSE [dbo].f_Msg_GetContentById (4000, @Language)
 											END + ' (' 
 												+ CASE WHEN @sportType = 99 AND @betType = 9

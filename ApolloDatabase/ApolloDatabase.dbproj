@@ -1422,6 +1422,9 @@
     <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\IBC\Task_BalanceUp_DB02.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="DBA\Task\DBA_ReIndex.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">

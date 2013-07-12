@@ -23,7 +23,9 @@ Revisions:
 BEGIN
 SET NOCOUNT ON
 	
-	
+	delete from odds_ex
+	where oddsid_ex in (select oddsid from odds where matchid in (select matchid from match where eventdate=@winlostdate))  
+
 	delete from odds
 	where matchid in (select matchid from match where eventdate=@winlostdate)
 
@@ -32,6 +34,9 @@ SET NOCOUNT ON
 
 	delete from match 
 	where eventdate=@winlostdate
+
+	delete from outright_ex
+	where orid_ex in (select orid from outright where eventdate = @winlostdate AND oddsstatus = 'Completed')
 
 	delete from outright
 	where eventdate = @winlostdate AND oddsstatus = 'Completed'

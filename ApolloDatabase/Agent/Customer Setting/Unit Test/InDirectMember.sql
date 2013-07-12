@@ -100,7 +100,7 @@ exec Age_Customer_UpdateSetting
 select @p9, @p10
 
 DECLARE @ActorAgentId INT
-SET @ActorAgentId = 0
+SET @ActorAgentId = 1
 
 DECLARE @actorAgentLevel	INT
 			,@agentLevel	INT

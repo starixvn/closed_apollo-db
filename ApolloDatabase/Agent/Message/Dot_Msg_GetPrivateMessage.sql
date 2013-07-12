@@ -1,6 +1,6 @@
 ﻿USE [MsgDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetPrivateMessage]    Script Date: 7/7/2013 9:45:38 AM ******/
+/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetPrivateMessage]    Script Date: 7/11/2013 1:16:13 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -55,7 +55,7 @@ BEGIN
 				dbo.Msg AS m WITH (NOLOCK)  
 				INNER JOIN dbo.MsgTarget AS mt WITH (NOLOCK) ON m.MessageId = mt.MessageId  
 			WHERE
-				m.PostTime BETWEEN @Sdate AND @Edate
+				CAST(m.PostTime AS DATE) BETWEEN CAST(@Sdate AS DATE) AND CAST(@Edate AS DATE)
 				AND m.MsgType = 1
 				AND m.isDeleted = 0 
 				AND mt.isDeleted = 0
