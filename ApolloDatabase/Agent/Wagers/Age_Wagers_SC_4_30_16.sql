@@ -5,6 +5,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 ALTER PROCEDURE [dbo].[Age_Wagers_SC_4_30_16]
+@IsSuperView BIT = 0,
 @LoggedId INT = 0,
 @FromDate Date,
 @UGroup varchar(3) = 'ALL',
@@ -20,10 +21,12 @@ Task:  Wagers for Soccer - Correct Score (4)/HT Correct Score (30)/HT/FT (16)
 DB: SVRAGE.REPDB
  
 Revisions:    
-
+	- 20130712@Sophia: Add @IsSuperView and calculate Stake after Share
 Parameters
 	@IsDirectMem : 1: Direct Member
 				   0: All Member
+	@IsSuperView =  1: Super view on Main shareholder @LoggedId
+				 =	0: @LoggedId view on his line
  
 */
 SET NOCOUNT ON 
@@ -31,7 +34,7 @@ SET NOCOUNT ON
 		SELECT		M.ShowTime, B.LiveIndicator,
 					M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
 					B.Bettype, 
-					SUM (B.Stake) as Stake,
+					SUM( CASE WHEN @IsSuperView = 1 THEN (1-B.TPositionTaking) ELSE BA.APositionTaking END * B.Stake) AS Stake,
 					Count(*) as BetCount
 		FROM		Bettrans B WITH (NOLOCK)
 		INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
