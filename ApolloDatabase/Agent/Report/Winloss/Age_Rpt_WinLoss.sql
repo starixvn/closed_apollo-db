@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[Age_Rpt_WinLoss_Xtest]
+﻿ALTER PROCEDURE [dbo].[Age_Rpt_WinLoss]
 	@AgentID 	INT,
 	@FromDate 	DATE,
 	@ToDate 	DATE,	
@@ -1111,7 +1111,7 @@ DROP TABLE #WinLossMember
 
 
 GO
-GRANT EXECUTE ON [dbo].[Age_Rpt_WinLoss_Xtest] TO [aplWeb]
+GRANT EXECUTE ON [dbo].[Age_Rpt_WinLoss] TO [aplWeb]
 Go 
 
 

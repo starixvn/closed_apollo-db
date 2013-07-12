@@ -1,11 +1,11 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Rpt_MatchSelResultEntered_xtest]    Script Date: 7/10/2013 9:40:10 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Rpt_MatchSelResultEntered]    Script Date: 7/10/2013 9:40:10 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-ALTER PROCEDURE [dbo].[Age_Rpt_MatchSelResultEntered_xtest]   
+ALTER PROCEDURE [dbo].[Age_Rpt_MatchSelResultEntered]   
 AS  
 /*  
 Created: Sophia 

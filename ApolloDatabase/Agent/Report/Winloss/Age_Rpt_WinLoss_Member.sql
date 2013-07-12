@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[Age_Rpt_WinLoss_Member_Xtest]
+﻿ALTER PROCEDURE [dbo].[Age_Rpt_WinLoss_Member]
 	@AgentID 	INT,
 	@FromDate 	DATE,
 	@ToDate 	DATE,
@@ -355,6 +355,6 @@ DROp TABLE #SportsList
 
 
 GO
-GRANT EXECUTE ON [dbo].[Age_Rpt_WinLoss_Member_Xtest] TO [aplWeb]
+GRANT EXECUTE ON [dbo].[Age_Rpt_WinLoss_Member] TO [aplWeb]
 GO
 
