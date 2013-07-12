@@ -5,6 +5,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 ALTER PROCEDURE [dbo].[Age_Wagers_BK_9_29]
+@IsSuperView BIT = 0,
 @LoggedId INT = 0,
 @FromDate Date,
 @Sporttypes VARCHAR(MAX),
@@ -20,11 +21,14 @@ Task:  Wagers for B.K/NFL/RUGBY - Parlay
 DB: SVRAGE.REPDB
  
 Revisions:    
-	- 20130629@Sophia: Add @Sporttypes or Tennis, VB/BDM/TT (=Volleyball, Badminton, Table Tennis), Baseball use 
+	- 20130629@Sophia: Add @Sporttypes o Tennis, VB/BDM/TT (=Volleyball, Badminton, Table Tennis), Baseball use 
+	- 20130712@Sophia: Add @IsSuperView and calculate Stake after Share
 
 Parameters
 	@IsDirectMem : 1: Direct Member
 				   0: All Member
+	 @IsSuperView =  1: Super view on Main shareholder @LoggedId
+				 =	0: @LoggedId view on his line
  
 */
 SET NOCOUNT ON 
@@ -41,11 +45,11 @@ SET NOCOUNT ON
 				SELECT		DISTINCT M.ShowTime, B.LiveIndicator,
 							M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
 							B.Bettype, B.TransID,
-							B.Stake , 
+							(CASE WHEN @IsSuperView = 1 THEN (1-B.TPositionTaking) ELSE BA.APositionTaking END * B.Stake) AS Stake,
 							Count(DISTINCT B.TransID) as BetCount
 				FROM		Bettrans B WITH (NOLOCK)
 				INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
-					ON		B.TransId = BA.TransId AND BA.AgentID = @LoggedId  AND BA.Bettype IN (9,29) AND BA.StatusId IN (0,1)
+					ON		B.TransId = BA.TransId AND BA.AgentID = @LoggedId AND BA.Bettype IN (9,29) AND BA.StatusId IN (0,1)
 				INNER JOIN  BetTransM BM WITH (NOLOCK) 
 					ON		BM.Refno = B.RefNo
 				INNER JOIN	Match M WITH (NOLOCK)
@@ -62,9 +66,10 @@ SET NOCOUNT ON
 
 							AND (C.UGroup = @UGroup OR @UGroup = 'ALL')
 							AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)											 
-				GROUP BY	M.ShowTime, B.LiveIndicator,
+				GROUP BY	M.ShowTime, B.LiveIndicator, 
 							M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
-							B.Bettype, B.Stake, B.TransID
+							B.Bettype, B.Stake, B.TransID,
+							B.TPositionTaking, BA.APositionTaking
 				) B
 
 	GROUP BY 	B.ShowTime, B.LiveIndicator,

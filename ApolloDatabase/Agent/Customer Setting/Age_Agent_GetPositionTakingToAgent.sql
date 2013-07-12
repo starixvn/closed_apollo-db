@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_GetPositionTakingToAgent]    Script Date: 5/3/2013 1:03:25 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_GetPositionTakingToAgent]    Script Date: 7/12/2013 1:43:14 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -21,7 +21,7 @@ AS
  * Task			: Get agent position taking from current login agent to agent
  * DB			: SVRAGE.RepDB
  * Revisions	:
- *	•	
+ *	•	07122013@Edward : Get the same structure in DB	
  * Parameters:
  *	•
  *	•
@@ -30,23 +30,29 @@ AS
 
 BEGIN
 	
-	SET NOCOUNT ON
+	SET NOCOUNT ON	
 	
-	DECLARE 
-		@actorAgentLevel	SMALLINT,
-		@agentLevel			SMALLINT,
-		@agentHId			HIERARCHYID
-
-	SELECT @actorAgentLevel = AgentLevel
+	DECLARE @agentHId			HIERARCHYID,
+			@isCheck			BIT
+	
+	SELECT @agentHId	= AgentHId
 	FROM AgentInfo WITH (NOLOCK)
-	WHERE AgentId = @ActorAgentId
+	WHERE AgentId = @AgentId OR Username = @Username	
+   
+	
+	SET @isCheck = 1
 
-	SELECT 
-		@agentLevel	= AgentLevel,
-		@agentHId	= AgentHId
-	FROM AgentInfo WITH (NOLOCK)
-	WHERE AgentId = @AgentId OR Username = @Username
-
+	IF NOT EXISTS (
+		SELECT TOP(1) *
+		FROM AgentInfo WITH (NOLOCK)
+		WHERE 
+			@agentHId.IsDescendantOf(AgentHId) = 1
+			AND AgentId	= @ActorAgentId	
+	)
+		BEGIN					
+			SET @isCheck = 0	
+		END
+	
 	DECLARE @TableAgent TABLE (
 		AgentId		INT, 
 		AgentLevel	SMALLINT, 
@@ -58,30 +64,23 @@ BEGIN
 		AgentLevel,
 		Username 
 	FROM AgentInfo WITH (NOLOCK) 
-	WHERE @agentHId.IsDescendantOf(AgentHId) = 1
+	WHERE @agentHId.IsDescendantOf(AgentHId) = 1		
 
 	SELECT 
 		apt.AgentId,
 		ai.AgentLevel,
 		ai.Username,
-		capt.MaxUpperPositionTaking,
+		apt.MaxUpperPositionTaking,
 		apt.MaxGivenPositionTaking,
 		apt.MinGivenPositionTaking
 	FROM 
 		AgentPositionTaking AS apt WITH (NOLOCK)
-		INNER JOIN @TableAgent AS ai ON apt.AgentId = ai.AgentId
-		LEFT JOIN @TableAgent AS cai ON ai.AgentLevel = cai.AgentLevel - 1
-		LEFT JOIN AgentPositionTaking AS capt WITH (NOLOCK)
-			ON 
-				apt.SportType	= capt.SportType
-				AND apt.BetType	= capt.BetType
-				AND apt.IsLive	= capt.IsLive
-				AND cai.AgentId	= capt.AgentId
+		INNER JOIN @TableAgent AS ai ON apt.AgentId = ai.AgentId				
 	WHERE 
 		apt.SportType	= @SportType
 		AND apt.BetType	= @BetType
-		AND apt.IsLive	= @IsLive
-		AND ai.AgentLevel BETWEEN @actorAgentLevel AND @agentLevel
+		AND apt.IsLive	= @IsLive		
+		AND @isCheck = 1
 	ORDER BY ai.AgentLevel
 	
 END

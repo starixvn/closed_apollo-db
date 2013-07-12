@@ -1,4 +1,11 @@
-﻿ALTER PROCEDURE [dbo].[Age_Rpt_MatchSelResultEntered_xtest]   
+﻿USE [RepDB]
+GO
+/****** Object:  StoredProcedure [dbo].[Age_Rpt_MatchSelResultEntered]    Script Date: 7/10/2013 9:40:10 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[Age_Rpt_MatchSelResultEntered]   
 AS  
 /*  
 Created: Sophia 
@@ -19,22 +26,35 @@ SELECT @FromDate = DATEADD(dd,-1,@ToDate)
 
 DECLARE @Rpt AS TABLE (Sporttype SMALLINT, IsToday BIT, EventDate DATETIME, Entered INT, NonEntered INT)
 INSERT INTO @Rpt (Sporttype,IsToday, EventDate, Entered, NonEntered )
-SELECT 1, 0, NULL, 0, 0
+SELECT 1, 0, @FromDate, 0, 0
 UNION ALL
-SELECT 2, 0, NULL, 0, 0
+SELECT 1, 1, @ToDate, 0, 0
 UNION ALL
-SELECT 5, 0, NULL, 0, 0
+SELECT 2, 0, @FromDate, 0, 0
 UNION ALL
-SELECT 6, 0, NULL, 0, 0
+SELECT 2, 1, @ToDate, 0, 0
 UNION ALL
-SELECT 8, 0, NULL, 0, 0
+SELECT 5, 0, @FromDate, 0, 0
 UNION ALL
-SELECT -10, 0, NULL, 0, 0   ---- Outright
+SELECT 5, 1, @ToDate, 0, 0
 UNION ALL
-SELECT -1, 0, NULL, 0, 0	---- Others
-
+SELECT 6, 0, @FromDate, 0, 0
+UNION ALL
+SELECT 6, 1, @ToDate, 0, 0
+UNION ALL
+SELECT 8, 0, @FromDate, 0, 0
+UNION ALL
+SELECT 8, 1, @ToDate, 0, 0
+UNION ALL
+SELECT -10, 0, @FromDate, 0, 0   ---- Outright
+UNION ALL
+SELECT -10, 1, @ToDate, 0, 0   ---- Outright
+UNION ALL
+SELECT -1, 0, @FromDate, 0, 0	---- Others
+UNION ALL
+SELECT -1, 1, @ToDate, 0, 0	---- Others
  
-  
+
 UPDATE  r
 SET		IsToday = m.IsToday,
 		EventDate= m.EventDate,
@@ -70,16 +90,8 @@ INNER JOIN (
 					INNER JOIN League WITH (NOLOCK) on m.LeagueID = League.LeagueID and League.isTest = 0 
 				GROUP BY CASE WHEN m.Sporttype NOT IN (1, 2, 5, 6, 8,-10) THEN -1 ELSE m.Sporttype END, EventDate
 			) m
-ON r.Sporttype = m.sporttype
+ON r.Sporttype = m.sporttype and m.IsToday = r.IsToday
 
  
  SELECT * FROM @Rpt
   
-GO
-GRANT EXECUTE ON [dbo].[Age_Rpt_MatchSelResultEntered] TO [aplweb]
-GO
-
-GRANT VIEW DEFINITION ON [dbo].[Age_Rpt_MatchSelResultEntered] TO [vnteam]
-GO
-  
-   

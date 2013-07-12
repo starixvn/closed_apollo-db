@@ -1,4 +1,5 @@
 ﻿ALTER  PROCEDURE [dbo].[Age_Wagers_SC_9_29]
+@IsSuperView BIT = 0,
 @LoggedId INT = 0,
 @FromDate Date,
 @UGroup varchar(3) = 'ALL',
@@ -13,11 +14,13 @@ Task:  Wagers for soccer - Parlay
 DB: SVRAGE.REPDB
  
 Revisions:    
-	
+	- 20130712@Sophia: Add @IsSuperView and calculate Stake after Share
 
 Parameters
 	@IsDirectMem : 1: Direct Member
 				   0: All Member
+	@IsSuperView =  1: Super view on Main shareholder @LoggedId
+				 =	0: @LoggedId view on his line
  
 */
 SET NOCOUNT ON 
@@ -34,7 +37,7 @@ SET NOCOUNT ON
 				SELECT		DISTINCT M.ShowTime, B.LiveIndicator,
 							M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
 							B.Bettype,B.TransID, 
-							B.Stake,  
+							( CASE WHEN @IsSuperView = 1 THEN (1-B.TPositionTaking) ELSE BA.APositionTaking END * B.Stake) AS Stake,  
 							Count(DISTINCT B.TransID) as BetCount
 				FROM		Bettrans B WITH (NOLOCK)
 				INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
@@ -57,7 +60,8 @@ SET NOCOUNT ON
 							AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)											 
 				GROUP BY	M.ShowTime, B.LiveIndicator,
 							M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
-							B.Bettype, B.Stake ,  B.TransID
+							B.Bettype, B.Stake, B.TransID,
+							B.TPositionTaking, BA.APositionTaking
 				) B
 
 	GROUP BY 	B.ShowTime, B.LiveIndicator,

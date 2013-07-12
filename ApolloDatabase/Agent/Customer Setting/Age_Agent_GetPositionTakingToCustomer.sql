@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_GetPositionTakingToCustomer]    Script Date: 5/3/2013 1:10:24 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_GetPositionTakingToCustomer]    Script Date: 7/12/2013 1:43:32 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -32,15 +32,9 @@ BEGIN
 	
 	SET NOCOUNT ON
 	
-	DECLARE 
-		@actorAgentLevel	SMALLINT,
-		@agentLevel			SMALLINT,
-		@agentHId			HIERARCHYID,
-		@agentId			INT
-
-	SELECT @actorAgentLevel = AgentLevel
-	FROM AgentInfo WITH (NOLOCK)
-	WHERE AgentId = @ActorAgentId
+	DECLARE @agentHId			HIERARCHYID,
+			@agentId			INT,
+			@isCheck			BIT	
 
 	SELECT 
 		@agentId = AgentId,
@@ -48,11 +42,22 @@ BEGIN
 	FROM CustInfo WITH (NOLOCK) 
 	WHERE CustId = @CustId OR Username = @Username
 
-	SELECT 
-		@agentLevel	= AgentLevel,
-		@agentHId	= AgentHId
+	SELECT @agentHId	= AgentHId
 	FROM AgentInfo WITH (NOLOCK)
 	WHERE AgentId	= @agentId
+
+	SET @isCheck = 1
+
+	IF NOT EXISTS (
+		SELECT TOP(1) *
+		FROM AgentInfo WITH (NOLOCK)
+		WHERE 
+			@agentHId.IsDescendantOf(AgentHId) = 1
+			AND AgentId	= @ActorAgentId	
+	)
+		BEGIN					
+			SET @isCheck = 0	
+		END
 
 	DECLARE @TableAgent TABLE (
 		AgentId		INT, 
@@ -72,19 +77,14 @@ BEGIN
 		apt.AgentId,
 		ai.AgentLevel,
 		ai.Username,
-		capt.MaxUpperPositionTaking,
+		apt.MaxUpperPositionTaking,
 		apt.MaxGivenPositionTaking,
 		apt.MinGivenPositionTaking,
 		cpt.PositionTaking
 	FROM 
 		AgentPositionTaking AS apt WITH (NOLOCK)
-		INNER JOIN AgentInfo AS ai WITH (NOLOCK) ON apt.AgentId = ai.AgentId
-		LEFT JOIN @TableAgent AS cai ON ai.AgentLevel = cai.AgentLevel - 1
-		LEFT JOIN AgentPositionTaking AS capt WITH (NOLOCK)
-			ON apt.SportType	= capt.SportType
-			AND apt.BetType		= capt.BetType
-			AND apt.IsLive		= capt.IsLive
-			AND cai.AgentId		= capt.AgentId
+		INNER JOIN AgentInfo AS ai WITH (NOLOCK) 
+			ON apt.AgentId = ai.AgentId
 		INNER JOIN CustPositionTaking AS cpt WITH (NOLOCK)
 			ON apt.SportType	= cpt.SportType
 			AND apt.BetType		= cpt.BetType
@@ -93,8 +93,8 @@ BEGIN
 	WHERE 
 		apt.SportType	= @SportType
 		AND apt.BetType	= @BetType
-		AND apt.IsLive	= @IsLive
-		AND ai.AgentLevel BETWEEN @actorAgentLevel AND @agentLevel
+		AND apt.IsLive	= @IsLive		
 		AND cpt.CustId	= @CustId
+		AND @isCheck = 1
 
 END

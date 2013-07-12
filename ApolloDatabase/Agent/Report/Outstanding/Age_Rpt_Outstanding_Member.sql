@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[Age_Rpt_Outstanding_Member_Xtest] 
+﻿ALTER PROCEDURE [dbo].[Age_Rpt_Outstanding_Member] 
 	@AgentId int,	
 	@Sporttypes VARCHAR(MAX)= '0',
 	@Bettypes VARCHAR(MAX) = '0'
@@ -67,10 +67,6 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 				ON	BA.TransID = B.TransID AND BA.AgentId = @AgentID 
 			INNER JOIN CustInfo C WITH (NOLOCK)
 					ON B.CustID = C.CustID AND BA.AgentId = C.AgentId
-			INNER JOIN BettransM BM WITH (NOLOCK)
-					ON BM.RefNo = B.RefNo
-			INNER JOIN Match M WITH (NOLOCK) 
-					ON M.MatchId = BM.MatchId	
 			WHERE	BA.StatusId IN (0,1)
 					AND BA.matchID IN (9,29)
 					AND BA.Bettype IN (9,29) 	
@@ -80,7 +76,16 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 					AND B.matchID IN (9,29)
 					AND B.Bettype IN (9,29) 
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-					AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
+					
+					AND (@Sporttypes = '0' 
+							OR EXISTS (	SELECT	1 
+										FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
+										INNER JOIN Match M WITH (NOLOCK) 
+											ON	 M.matchID = BM.MatchId 
+											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
+										WHERE	BM.RefNo = B.RefNo
+										 )	
+						)	
 			
 			) B
 	GROUP BY B.Username, B.CustID
@@ -98,10 +103,6 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 		ON	BA.TransID = B.TransID AND BA.AgentId = @AgentID 
 	INNER JOIN CustInfo C WITH (NOLOCK)
 			ON B.CustID = C.CustID AND BA.AgentId = C.AgentId
-	INNER JOIN Outright M WITH (NOLOCK) 
-			ON M.orid = B.MatchId
-	INNER JOIN League l WITH (NOLOCK)
-			ON l.LeagueId = M.LeagueId	
 	WHERE	BA.StatusId IN (0,1)
 			AND BA.matchID  > 0
 			AND BA.Bettype = 10 	
@@ -111,7 +112,15 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 			AND B.matchID  > 0
 			AND B.Bettype = 10 	
 			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-			AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))
+			AND (@Sporttypes = '0' 
+				 OR EXISTS (SELECT	1 
+							FROM	Outright M WITH (NOLOCK) 
+							INNER JOIN League L WITH (NOLOCK) 
+									ON L.leagueid = M.leagueid		
+									AND (L.sporttype IN (Select sporttype FROM #SportsList))				
+							WHERE	M.orid = B.MatchId
+							)	
+					)
 	GROUP BY C.Username, B.CustID
 	ORDER BY C.Username
 
