@@ -16,6 +16,7 @@ AS
     Original: Age_Rpt_WinLoss_Ag
     Revisions:
 		- 20130627@Sophia: Modify for Singbet: filter by Sporttype and Bettype
+		- 20130712@Sophia: add OutStanding
 	EX: EXEC Age_Rpt_WinLoss_Member @AgentId =3, @FromDate = '2013-01-01',  @ToDate = '2013-04-10', @BalanceUpDay = '2013-03-01'
 
        
@@ -329,27 +330,162 @@ BEGIN
  	    
 	 
 END
----------------------------------
- 
-SELECT	Username, CustId,  PositionTaking,
-		SUM(BetCount) as BetCount,	
-		SUM(TurnOver) as TurnOver,
-		SUM(ActualTO) as ActualTO,
+--############################################# Outstanding Section ##############################################
 
-		SUM(WinLost) as  WinLost, 
-		SUM(PlayerComm) as PlayerComm,
-		SUM(MemTotal) as MemTotal,
+CREATE TABLE #MemberOutstanding (Username NVARCHAR(50), CustID INT, Outstanding MONEY, OutstandingShare MONEY)
 
-		SUM(AWinLost) as  AWinLost, 
-		SUM(AComm) as AComm,
-		SUM(ATotal) as ATotal,
 
-		SUM(UplineTotal) as UplineTotal
-FROM	#WinLossMember 
-GROUP BY Username, CustId, PositionTaking
+-----Member Outstanding
+-- Sportsbook
+	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
+	INSERT INTO #MemberOutstanding
+	SELECT  C.Username, B.CustID, 
+			ISNULL(SUM(ABS(BA.actual_stake)),0) Outstanding,  
+			ISNULL(SUM(ABS(BA.actual_stake) * BA.APositiontaking),0) OutstandingShare
+	FROM	bettrans B WITH (NOLOCK)
+	INNER JOIN BetTrans_Agent BA WITH (NOLOCK)
+		ON	BA.TransID = B.TransID AND BA.AgentId = @AgentID  
+	INNER JOIN CustInfo C WITH (NOLOCK)
+			ON B.CustID = C.CustID AND BA.AgentId = C.AgentId
+	INNER JOIN Match M WITH (NOLOCK) 
+			ON M.MatchId = B.MatchId
+	WHERE	BA.StatusId IN (0,1)	
+			AND BA.matchID > 0
+			AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
+
+			AND B.StatusId IN (0,1)	
+			AND B.matchID > 0
+			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
+			AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
+	GROUP BY C.Username, B.CustID
+	ORDER BY C.Username
+
+
+--Parlay
+	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
+	INSERT INTO #MemberOutstanding
+	SELECT  B.Username, B.CustID, 
+			ISNULL(SUM(ABS(B.actual_stake)),0) Outstanding,  
+			ISNULL(SUM(ABS(B.actual_stake) * B.APositiontaking ),0) OutstandingShare
+			
+	FROM (
+			SELECT  DISTINCT C.Username, B.CustID, 
+					BA.bettype ,BA.actual_stake, BA.APositiontaking
+			FROM	bettrans B WITH (NOLOCK)
+			INNER JOIN BetTrans_Agent BA WITH (NOLOCK)
+				ON	BA.TransID = B.TransID AND BA.AgentId = @AgentID 
+			INNER JOIN CustInfo C WITH (NOLOCK)
+					ON B.CustID = C.CustID AND BA.AgentId = C.AgentId
+			WHERE	BA.StatusId IN (0,1)
+					AND BA.matchID IN (9,29)
+					AND BA.Bettype IN (9,29) 	
+					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
+
+					AND B.StatusId IN (0,1)	
+					AND B.matchID IN (9,29)
+					AND B.Bettype IN (9,29) 
+					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
+					
+					AND (@Sporttypes = '0' 
+							OR EXISTS (	SELECT	1 
+										FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
+										INNER JOIN Match M WITH (NOLOCK) 
+											ON	 M.matchID = BM.MatchId 
+											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
+										WHERE	BM.RefNo = B.RefNo
+										 )	
+						)	
+			
+			) B
+	GROUP BY B.Username, B.CustID
+	ORDER BY B.Username
+
+--- Outright
+	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype = 10 OR @Bettypes = '0')
+	INSERT INTO #MemberOutstanding
+	SELECT  C.Username, B.CustID, 
+			ISNULL(SUM(ABS(BA.actual_stake) ),0) Outstanding,  
+			ISNULL(SUM(ABS(BA.actual_stake) * BA.APositiontaking ),0) OutstandingShare
+			
+	FROM	bettrans B WITH (NOLOCK)
+	INNER JOIN BetTrans_Agent BA WITH (NOLOCK)
+		ON	BA.TransID = B.TransID AND BA.AgentId = @AgentID 
+	INNER JOIN CustInfo C WITH (NOLOCK)
+			ON B.CustID = C.CustID AND BA.AgentId = C.AgentId
+	WHERE	BA.StatusId IN (0,1)
+			AND BA.matchID  > 0
+			AND BA.Bettype = 10 	
+			AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
+
+			AND B.StatusId IN (0,1)	
+			AND B.matchID  > 0
+			AND B.Bettype = 10 	
+			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
+			AND (@Sporttypes = '0' 
+				 OR EXISTS (SELECT	1 
+							FROM	Outright M WITH (NOLOCK) 
+							INNER JOIN League L WITH (NOLOCK) 
+									ON L.leagueid = M.leagueid		
+									AND (L.sporttype IN (Select sporttype FROM #SportsList))				
+							WHERE	M.orid = B.MatchId
+							)	
+					)
+	GROUP BY C.Username, B.CustID
+	ORDER BY C.Username
+
+--####################################### GET DATA #####################################-- 
+
+SELECT	ISNULL(A.Username, B.Username) as Username, 
+		ISNULL(A.CustId, B.CustId) as CustId,
+		ISNULL(A.PositionTaking,B.PositionTaking) as PositionTaking,
+		ISNULL(BetCount,0) as BetCount,
+		ISNULL(TurnOver,0) as TurnOver,
+		ISNULL(ActualTO,0) as ActualTO,
+		ISNULL(WinLost,0) as WinLost,
+		ISNULL(PlayerComm,0) as PlayerComm,
+		ISNULL(MemTotal,0) as MemTotal,
+		ISNULL(AWinLost,0) as AWinLost,
+		ISNULL(AComm,0) as AComm,
+		ISNULL(ATotal,0) as ATotal,
+		ISNULL(UplineTotal,0) as UplineTotal,
+		ISNULL(Outstanding,0) as Outstanding,
+		ISNULL(OutstandingShare,0) as OutstandingShare
+FROM	(
+		SELECT	Username, CustId,  PositionTaking,
+				SUM(BetCount) as BetCount,	
+				SUM(TurnOver) as TurnOver,
+				SUM(ActualTO) as ActualTO,
+
+				SUM(WinLost) as  WinLost, 
+				SUM(PlayerComm) as PlayerComm,
+				SUM(MemTotal) as MemTotal,
+
+				SUM(AWinLost) as  AWinLost, 
+				SUM(AComm) as AComm,
+				SUM(ATotal) as ATotal,
+
+				SUM(UplineTotal) as UplineTotal
+		FROM	#WinLossMember 
+		GROUP BY Username, CustId, PositionTaking
+		) A
+FULL JOIN 
+		( 	
+		SELECT	M.Username, M.CustID , PT.PositionTaking as PositionTaking,  
+				SUM(Outstanding) Outstanding , 
+				SUM(OutstandingShare) OutstandingShare 
+		FROM	#MemberOutstanding M
+		INNER JOIN	CustPositionTaking PT WITH (NOLOCK) 
+				ON	PT.CustID = M.CustID AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0 
+		GROUP BY M.Username, M.CustID, PT.PositionTaking
+		) B
+	ON A.CustID = B.CustID
+
 ORDER BY PositionTaking ASC, Username ASC
- 
+
+
+
 DROP TABLE #WinLossMember
+DROP TABLE #MemberOutstanding
 DROP TABLE #BettypeList
 DROp TABLE #SportsList
 
