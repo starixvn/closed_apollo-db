@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateBetLimit]    Script Date: 7/12/2013 2:54:06 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateBetLimit]    Script Date: 7/15/2013 9:19:23 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -431,9 +431,9 @@ BEGIN
 
 					---- Update for direct member
 					UPDATE cbt
-					SET cbt.MinBet			= but.MinBet
-						,cbt.MaxBet			= but.MaxBet
-						,cbt.MaxPerMatch	= but.MaxPerMatch
+					SET cbt.MinBet			= CASE WHEN cbt.MinBet < but.MinBet THEN but.MinBet ELSE cbt.MinBet END
+						,cbt.MaxBet			= CASE WHEN cbt.MaxBet > but.MaxBet THEN but.MaxBet ELSE cbt.MaxBet END
+						,cbt.MaxPerMatch	= CASE WHEN cbt.MaxPerMatch > but.MaxPerMatch THEN but.MaxPerMatch ELSE cbt.MaxPerMatch END
 					FROM CustBetLimit AS cbt WITH (ROWLOCK, UPDLOCK)
 						INNER JOIN CustInfo AS ci WITH (NOLOCK)
 							ON cbt.CustId	= ci.CustId
@@ -473,9 +473,9 @@ BEGIN
 
 					---- Update for agent downline
 					UPDATE abt
-					SET abt.MinBet			= but.MinBet
-						,abt.MaxBet			= but.MaxBet
-						,abt.MaxPerMatch	= but.MaxPerMatch
+					SET abt.MinBet			= CASE WHEN abt.MinBet < but.MinBet THEN but.MinBet ELSE abt.MinBet END
+						,abt.MaxBet			= CASE WHEN abt.MaxBet > but.MaxBet THEN but.MaxBet ELSE abt.MaxBet END
+						,abt.MaxPerMatch	= CASE WHEN abt.MaxPerMatch > but.MaxPerMatch THEN but.MaxPerMatch ELSE abt.MaxPerMatch END
 					FROM AgentBetLimit AS abt WITH (ROWLOCK, UPDLOCK)
 						INNER JOIN @BetLimitUpdateTable AS but
 							ON abt.AgentId		= but.AgentId
@@ -484,9 +484,9 @@ BEGIN
 
 					---- Update for member downline
 					UPDATE cbt
-					SET cbt.MinBet			= but.MinBet
-						,cbt.MaxBet			= but.MaxBet
-						,cbt.MaxPerMatch	= but.MaxPerMatch
+					SET cbt.MinBet			= CASE WHEN cbt.MinBet < but.MinBet THEN but.MinBet ELSE cbt.MinBet END
+						,cbt.MaxBet			= CASE WHEN cbt.MaxBet > but.MaxBet THEN but.MaxBet ELSE cbt.MaxBet END
+						,cbt.MaxPerMatch	= CASE WHEN cbt.MaxPerMatch > but.MaxPerMatch THEN but.MaxPerMatch ELSE cbt.MaxPerMatch END
 					FROM CustBetLimit AS cbt WITH (ROWLOCK, UPDLOCK)
 						INNER JOIN CustInfo AS ci WITH (NOLOCK)
 							ON cbt.CustId	= ci.CustId
