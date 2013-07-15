@@ -32,7 +32,7 @@ IF (@@Error = 0)
 BEGIN
 	BEGIN TRY
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = 5838421, --dbaAdmin
+			@UserID = 0,
 			@Matchid = @matchid,
 			@KeyID = 2,
 			@ActionID = 0,
@@ -41,7 +41,7 @@ BEGIN
 	BEGIN CATCH
 		SELECT @Remark = 'ADD SUCCESS SPName = Dot_Admin_SettleOutright_Trans ErrMsg='+ left(error_message(), 400)
 		EXEC LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = 5838421, --dbaAdmin
+			@UserID = 0, 
 			@Matchid = @matchid,
 			@KeyID = 2,
 			@ActionID = 0,
@@ -121,7 +121,7 @@ IF (@@Error = 0)
 BEGIN
 	BEGIN TRY
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = 5838421, --dbaAdmin
+			@UserID = 0, --dbaAdmin
 			@Matchid = @matchid,
 			@KeyID = 2,
 			@ActionID = 0,
@@ -130,7 +130,7 @@ BEGIN
 	BEGIN CATCH
 		SELECT @Remark = 'DEL SUCCESS SPName = Dot_Admin_SettleOutright_Trans ErrMsg='+ left(error_message(), 400)
 		EXEC LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = 5838421, --dbaAdmin
+			@UserID = 0, 
 			@Matchid = @matchid,
 			@KeyID = 2,
 			@ActionID = 0,
@@ -141,7 +141,7 @@ ELSE
 BEGIN
 	BEGIN TRY
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = 5838421, --dbaAdmin
+			@UserID = 0, 
 			@Matchid = @matchid,
 			@KeyID = 2,
 			@ActionID = 0,
@@ -150,7 +150,7 @@ BEGIN
 	BEGIN CATCH
 		SELECT @Remark = 'DEL FAILED SPName = Dot_Admin_SettleOutright_Trans ErrMsg='+ left(error_message(), 400)
 		EXEC LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = 5838421, --dbaAdmin
+			@UserID = 0, 
 			@Matchid = @matchid,
 			@KeyID = 2,
 			@ActionID = 0,

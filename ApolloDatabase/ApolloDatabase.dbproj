@@ -111,6 +111,7 @@
     <Folder Include="DBA\Move bet - Balance Up\Move Bet\IBC" />
     <Folder Include="DBA\Move bet - Balance Up\Balance Up\IBC" />
     <Folder Include="CSD\Settlement\Outright" />
+    <Folder Include="CSD\Settlement\Outright\IBC" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1442,6 +1443,15 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="CSD\Settlement\Outright\Dot_Admin_SettleOutright_Trans.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Outright\IBC\Dot_Admin_SettleOutright_Event.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Outright\IBC\Dot_Admin_SettleOutright_Trans.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Outright\IBC\table outright_log.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>

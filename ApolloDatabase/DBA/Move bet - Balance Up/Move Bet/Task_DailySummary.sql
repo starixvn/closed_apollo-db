@@ -558,7 +558,7 @@ EXEC Task_BalanceCheck @winlostdate, 2
 				AND BA.MatchId > 0
 				AND BA.Winlostdate =  @WinlostDate	
 		GROUP BY T.AgentID, T.Username, T.ParentID, T.TurnOver, T.ActualTO, 
-				T.AWinlost, T.AComm,  T.UplineWinlost, T.UplineComm,T.Winlost ,T.Actual_Stake, T.BetCount, T.SportType, T.BetType 
+				T.AWinlost, T.AComm,  T.UplineWinlost, T.UplineComm,T.Winlost ,T.Actual_Stake, T.BetCount
 		
 		DROP TABLE 	#Tmp
 
@@ -656,8 +656,12 @@ END
 SET NOCOUNT OFF
 
 -- =====================
-
 Delete Match_Log where matchID IN (Select matchID From Match WITH (NOLOCK) Where eventdate=@winlostdate)
+
+Delete from outright_log
+where orid in (select orid from outright where eventdate = @winlostdate AND oddsstatus = 'Completed')
+
+-- =====================
 
 EXEC [Task_AutoSettlement_CleanUp] @winlostdate
 

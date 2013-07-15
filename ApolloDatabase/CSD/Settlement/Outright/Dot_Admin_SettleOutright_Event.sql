@@ -31,7 +31,7 @@ INSERT INTO SVRTXN.TransDB.dbo.TempVariableNumber (KeyID, KeyValue) VALUES (2, @
 IF (@@Error = 0)
 	BEGIN TRY
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = 5838421, --dbaAdmin
+			@UserID = 0, 
 			@Matchid = @matchid, 
 			@KeyID = 2,
 			@ActionID = 0, 
@@ -39,7 +39,7 @@ IF (@@Error = 0)
 	END TRY
 	BEGIN CATCH		
 		SELECT @LogData = 'ADD SUCCESS SPName = Dot_Admin_SettleOutright_Event MatchID=' + @matchid + ' KeyID=2 ErrMsg='+ left(error_message(), 70)		
-		EXEC WriteLog_UserLog_P  @UserID = 5838421, --dbaAdmin
+		EXEC WriteLog_UserLog_P  @UserID = 0, 
 							  @Doing = @LogData		
 	END CATCH
 ELSE 
@@ -97,7 +97,7 @@ IF (@@Error = 0)
 BEGIN
 	BEGIN TRY
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = 5838421, --dbaAdmin
+			@UserID = 0, 
 			@Matchid = @matchid, 
 			@KeyID = 2,
 			@ActionID = 0, 
@@ -105,7 +105,7 @@ BEGIN
 	END TRY
 	BEGIN CATCH		
 		SELECT @LogData = 'DEL SUCCESS SPName = Dot_Admin_SettleOutright_Event MatchID=' + @matchid + ' KeyID=2 ErrMsg='+ left(error_message(), 70)		
-		EXEC WriteLog_UserLog_P @UserID = 5838421, --dbaAdmin
+		EXEC WriteLog_UserLog_P @UserID = 0, --dbaAdmin
 							  @Doing = @LogData				
 	END CATCH
 END	
@@ -113,7 +113,7 @@ ELSE
 BEGIN
 	BEGIN TRY
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = 5838421, --dbaAdmin
+			@UserID = 0, 
 			@Matchid = @matchid, 
 			@KeyID = 2,
 			@ActionID = 0, 
@@ -121,30 +121,10 @@ BEGIN
 	END TRY
 	BEGIN CATCH		
 		SELECT @LogData = 'DEL FAILED SPName = Dot_Admin_SettleOutright_Event MatchID=' + @matchid + ' KeyID=2 ErrMsg='+ left(error_message(), 70)		
-		EXEC WriteLog_UserLog_P @UserID = 5838421, --dbaAdmin
+		EXEC WriteLog_UserLog_P @UserID = 0, 
 							  @Doing = @LogData					
 	END CATCH
 END
-/*
--- WRITE LOG
-DECLARE @Remark VARCHAR(500), @EventDate DATETIME
-SELECT @EventDate = convert(char(10),getdate(),111)
-BEGIN TRY
-	SELECT @Remark = 'Status=' + @status + 'IsDeadheat=' + CAST(@isDeadheat AS VARCHAR(5))
-	EXEC DBLOG.bodb_CustomerLog.dbo.WriteLog_UserLog_SettleOutright 
-		@UserID = 5838421, 
-		@MatchID = @matchid, 
-		@ActionID = 127, 
-		@LeagueID = 0, 
-		@EventDate = @EventDate,
-		@Remark = @Remark
-		
-END TRY
-BEGIN CATCH		
-	SELECT @Remark = 'MatchID=' + CAST(@matchid AS VARCHAR(10)) + 'EventDate=' + @EventDate + 'Status=' + @status + 'IsDeadheat=' + CAST(@isDeadheat AS VARCHAR(5))
-	EXEC WriteLog_UserLog @UserID = 5838421, --dbaAdmin
-						  @Doing = @Remark					
-END CATCH		
-*/
+
 GO
 GRANT EXECUTE ON [dbo].[Dot_Admin_SettleOutright_Event] TO aplweb
