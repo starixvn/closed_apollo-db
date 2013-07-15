@@ -1,4 +1,11 @@
-﻿ALTER PROCEDURE [dbo].[Age_Rpt_WinLoss_Member]
+﻿USE [RepDB]
+GO
+/****** Object:  StoredProcedure [dbo].[Age_Rpt_WinLoss_Member]    Script Date: 7/15/2013 1:08:38 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[Age_Rpt_WinLoss_Member]
 	@AgentID 	INT,
 	@FromDate 	DATE,
 	@ToDate 	DATE,
@@ -489,8 +496,4 @@ DROP TABLE #MemberOutstanding
 DROP TABLE #BettypeList
 DROp TABLE #SportsList
 
-
-GO
-GRANT EXECUTE ON [dbo].[Age_Rpt_WinLoss_Member] TO [aplWeb]
-GO
 
