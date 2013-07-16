@@ -104,5 +104,5 @@ WHERE m.eventdate BETWEEN @FromDate AND @ToDate
 	AND CASE WHEN @UncalMultiOnly = 0 THEN 1   
 			WHEN @UncalMultiOnly = 1 THEN mr.hthomescore*mr.htawayscore*mr.finalhomescore*mr.finalawayscore  
 	END IS NOT NULL 
-
+GO
 GRANT EXECUTE ON [dbo].[Acc_Set_MatchSelInfo] TO [aplweb]	

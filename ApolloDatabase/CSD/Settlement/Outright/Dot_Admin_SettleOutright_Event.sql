@@ -1,16 +1,18 @@
 ALTER PROCEDURE [dbo].[Dot_Admin_SettleOutright_Event]
+	@creator int = 0,
 	@matchid int,
 	@status nvarchar(10),
 	@isDeadheat bit=0,
+	@IP varchar(15) = '',
 	@ErrCode int = 0 OUTPUT,
 	@ErrMsg nvarchar(200) = '' OUTPUT
 AS
 /*
-Created: 
+Created: Dan
 Task : sp for outright settlement
 
-DB: DBPRO/BODB02
-Original: 
+DB: SVRPRO/ProdDB
+Original: DBPRO.BODB02.Dot_Admin_SettleOutright_Event 
 
 Revisions:						
 Param's Explanation:
@@ -26,21 +28,28 @@ BEGIN
 	RETURN
 END
 
+declare @ActionID int 
+set @ActionID=127
+
 DECLARE @LogData NVARCHAR(300)
 INSERT INTO SVRTXN.TransDB.dbo.TempVariableNumber (KeyID, KeyValue) VALUES (2, @matchid)
 IF (@@Error = 0)
 	BEGIN TRY
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = 0, 
+			@UserID = @creator, 
 			@Matchid = @matchid, 
 			@KeyID = 2,
-			@ActionID = 0, 
+			@ActionID = @ActionID, 
 			@Remark = 'ADD SUCCESS SPName = Dot_Admin_SettleOutright_Event'
 	END TRY
 	BEGIN CATCH		
 		SELECT @LogData = 'ADD SUCCESS SPName = Dot_Admin_SettleOutright_Event MatchID=' + @matchid + ' KeyID=2 ErrMsg='+ left(error_message(), 70)		
-		EXEC WriteLog_UserLog_P  @UserID = 0, 
-							  @Doing = @LogData		
+		EXEC LogDB.dbo.WriteLog_Settlement_Checking 
+			@UserID = @creator, 
+			@Matchid = @matchid, 
+			@KeyID = 2,
+			@ActionID = @ActionID, 
+			@Remark = @LogData
 	END CATCH
 ELSE 
 BEGIN
@@ -91,38 +100,76 @@ BEGIN
 END
 
 ----
+-------------------------------------------------------------
+---                      WRITE LOG                        ---
+---------------------------VVVV------------------------------
+
+BEGIN TRY
+	EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_SettleOutright
+		@UserID = @creator,
+		@OrId = @matchid,
+		@LeagueId = 0,
+		@ActionID = @ActionID,
+		@status = @status,
+		@deadheat = @isDeadheat, 
+		@Remark = null,
+		@IP = @IP	
+END TRY  
+BEGIN CATCH	
+	SELECT @LogData = ' ErrMsg=' + left(error_message(), 250)	
+	EXEC LogDB.dbo.WriteLog_Settlement_SettleOutright
+		@UserID = @creator,
+		@OrId = @matchid,
+		@LeagueId = 0,
+		@ActionID = @ActionID,
+		@status = @status,
+		@deadheat = @isDeadheat, 
+		@Remark = @LogData,
+		@IP = @IP	
+END CATCH
+
+---
 DELETE FROM SVRTXN.TransDB.dbo.TempVariableNumber WITH (ROWLOCK,UPDLOCK)
 WHERE KeyID = 2 AND KeyValue = @matchid
 IF (@@Error = 0)
 BEGIN
 	BEGIN TRY
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = 0, 
+			@UserID = @creator, 
 			@Matchid = @matchid, 
 			@KeyID = 2,
-			@ActionID = 0, 
+			@ActionID = @ActionID, 
 			@Remark = 'DEL SUCCESS SPName = Dot_Admin_SettleOutright_Event'
 	END TRY
 	BEGIN CATCH		
 		SELECT @LogData = 'DEL SUCCESS SPName = Dot_Admin_SettleOutright_Event MatchID=' + @matchid + ' KeyID=2 ErrMsg='+ left(error_message(), 70)		
-		EXEC WriteLog_UserLog_P @UserID = 0, --dbaAdmin
-							  @Doing = @LogData				
+		EXEC LogDB.dbo.WriteLog_Settlement_Checking 
+			@UserID = @creator, 
+			@Matchid = @matchid, 
+			@KeyID = 2,
+			@ActionID = @ActionID, 
+			@Remark = @LogData
 	END CATCH
 END	
 ELSE
 BEGIN
 	BEGIN TRY
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = 0, 
+			@UserID = @creator, 
 			@Matchid = @matchid, 
 			@KeyID = 2,
-			@ActionID = 0, 
+			@ActionID = @ActionID, 
 			@Remark = 'DEL FAILED SPName = Dot_Admin_SettleOutright_Event' 
 	END TRY
 	BEGIN CATCH		
 		SELECT @LogData = 'DEL FAILED SPName = Dot_Admin_SettleOutright_Event MatchID=' + @matchid + ' KeyID=2 ErrMsg='+ left(error_message(), 70)		
-		EXEC WriteLog_UserLog_P @UserID = 0, 
-							  @Doing = @LogData					
+		EXEC LogDB.dbo.WriteLog_Settlement_Checking 
+			@UserID = @creator, 
+			@Matchid = @matchid, 
+			@KeyID = 2,
+			@ActionID = @ActionID, 
+			@Remark = @LogData
+
 	END CATCH
 END
 

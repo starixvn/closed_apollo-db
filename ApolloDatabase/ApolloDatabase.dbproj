@@ -1454,6 +1454,21 @@
     <NotInBuild Include="CSD\Settlement\Outright\IBC\table outright_log.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Outright\Acc_Set_OutrightSel.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Outright\Acc_Set_OutrightSelDetail.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Outright\Admin_AutoSettlement_ClearFailActionOutright.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Outright\Admin_AutoSettlement_UpdateFlagOutright.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Write Log\WriteLog_Settlement_SettleOutright.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">

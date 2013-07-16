@@ -1,7 +1,9 @@
 ALTER PROCEDURE [dbo].[Dot_Admin_SettleOutright_Trans]
+	@creator int = 0,
 	@matchid int,
 	@status nvarchar(10),
 	@deadheat float = 1,
+	@IP varchar(15) = '',
 	@ErrCode int = 0 OUTPUT,
 	@ErrMsg nvarchar(200) = '' OUTPUT
 AS
@@ -26,25 +28,30 @@ BEGIN
 	RETURN
 END
 
-DECLARE @Remark VARCHAR(500)
+DECLARE @Remark VARCHAR(500), @ActionID int 
+SET @ActionID=128
+
+Declare @start datetime, @stop datetime 
+SELECT @start = CURRENT_TIMESTAMP
+
 INSERT INTO dbo.TempVariableNumber (KeyID, KeyValue) VALUES (2, @matchid)
 IF (@@Error = 0)
 BEGIN
 	BEGIN TRY
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = 0,
+			@UserID = @creator,
 			@Matchid = @matchid,
 			@KeyID = 2,
-			@ActionID = 0,
+			@ActionID = @ActionID,
 			@Remark = 'ADD SUCCESS SPName = Dot_Admin_SettleOutright_Trans'
 	END TRY
 	BEGIN CATCH
 		SELECT @Remark = 'ADD SUCCESS SPName = Dot_Admin_SettleOutright_Trans ErrMsg='+ left(error_message(), 400)
-		EXEC LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = 0, 
+		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
+			@UserID = @creator,
 			@Matchid = @matchid,
 			@KeyID = 2,
-			@ActionID = 0,
+			@ActionID = @ActionID,
 			@Remark = @Remark
 	END CATCH
 END
@@ -62,6 +69,8 @@ select @winlostdate = convert(char(10),getdate(),111)
 -------------------------------------------------------------
 ---        CAPTURE value BALANCE before settlement        ---
 ---------------------------VVVV------------------------------
+Declare @TotalAccount int, @TotalAccount_BalanceUpdate int
+
 CREATE TABLE #BalanceBefore (custid int PRIMARY KEY, balance money)
 
     INSERT INTO #BalanceBefore
@@ -69,6 +78,8 @@ CREATE TABLE #BalanceBefore (custid int PRIMARY KEY, balance money)
     FROM dbo.bettrans with (rowlock)
     WHERE matchid = @matchid and bettype = 10 and statusID NOT IN (101, 102)
 	Group by custid
+
+	SET @TotalAccount = @@ROWCOUNT
 
 EXEC Admin_Calculate_10 @matchid, @status, @deadheat, @winlostdate
 
@@ -98,6 +109,8 @@ FROM #BalanceBefore b
         INNER JOIN #BalanceAfter a ON b.custid = a.custid
 WHERE b.balance <> a.balance
 
+SET @TotalAccount_BalanceUpdate = @@ROWCOUNT
+
 CREATE INDEX IX_Balance_Increased ON #Balance (Increased)
 
 INSERT INTO dbo.BalancePendingDebit (custid, balance)
@@ -114,6 +127,40 @@ DROP TABLE #Balance
 DROP TABLE #BalanceBefore
 DROP TABLE #BalanceAfter
 
+
+
+-------------------------------------------------------------
+---                      WRITE LOG                        ---
+---------------------------VVVV------------------------------
+SELECT @stop = CURRENT_TIMESTAMP
+
+--Write Log Settle
+SELECT @Remark = 'Duration:' + CAST(DATEDIFF(millisecond, @start, @stop) as nvarchar(50)) + ' ms;' 	
+	+ ' Bal:' + CAST(IsNull(@TotalAccount_BalanceUpdate,0) as varchar(20)) + '/' + CAST(IsNull(@TotalAccount,0) as varchar(20))	
+	
+BEGIN TRY
+	EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_SettleOutright
+		@UserID = @creator,
+		@OrId = @matchid,
+		@LeagueId = 0,
+		@ActionID = @ActionID,
+		@status = @status,
+		@deadheat = @deadheat, 
+		@Remark = @Remark,
+		@IP = @IP		
+END TRY  
+BEGIN CATCH	
+	SELECT @Remark = @Remark + ' ErrMsg=' + left(error_message(), 250)	
+	EXEC LogDB.dbo.WriteLog_Settlement_SettleOutright
+		@UserID = @creator,
+		@OrId = @matchid,
+		@LeagueId = 0,
+		@ActionID = @ActionID,
+		@status = @status,
+		@deadheat = @deadheat, 
+		@Remark = @Remark,
+		@IP = @IP	
+END CATCH
 ----
 DELETE FROM dbo.TempVariableNumber WITH (ROWLOCK,UPDLOCK)
 WHERE KeyID = 2 AND KeyValue = @matchid
@@ -121,19 +168,19 @@ IF (@@Error = 0)
 BEGIN
 	BEGIN TRY
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = 0, --dbaAdmin
+			@UserID = @creator, 
 			@Matchid = @matchid,
 			@KeyID = 2,
-			@ActionID = 0,
+			@ActionID = @ActionID,
 			@Remark = 'DEL SUCCESS SPName = Dot_Admin_SettleOutright_Trans'
 	END TRY
 	BEGIN CATCH
 		SELECT @Remark = 'DEL SUCCESS SPName = Dot_Admin_SettleOutright_Trans ErrMsg='+ left(error_message(), 400)
 		EXEC LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = 0, 
+			@UserID = @creator, 
 			@Matchid = @matchid,
 			@KeyID = 2,
-			@ActionID = 0,
+			@ActionID = @ActionID,
 			@Remark = @Remark
 	END CATCH
 END
@@ -141,19 +188,19 @@ ELSE
 BEGIN
 	BEGIN TRY
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = 0, 
+			@UserID = @creator, 
 			@Matchid = @matchid,
 			@KeyID = 2,
-			@ActionID = 0,
+			@ActionID = @ActionID,
 			@Remark = 'DEL FAILED SPName = Dot_Admin_SettleOutright_Trans'
 	END TRY
 	BEGIN CATCH
 		SELECT @Remark = 'DEL FAILED SPName = Dot_Admin_SettleOutright_Trans ErrMsg='+ left(error_message(), 400)
 		EXEC LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = 0, 
+			@UserID = @creator, 
 			@Matchid = @matchid,
 			@KeyID = 2,
-			@ActionID = 0,
+			@ActionID = @ActionID,
 			@Remark = @Remark
 	END CATCH
 END
