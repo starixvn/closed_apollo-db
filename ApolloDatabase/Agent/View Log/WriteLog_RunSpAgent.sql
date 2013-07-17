@@ -1,6 +1,6 @@
 ﻿USE [LogDB]
 GO
-/****** Object:  StoredProcedure [dbo].[WriteLog_RunSpAgent]    Script Date: 5/20/2013 5:24:44 PM ******/
+/****** Object:  StoredProcedure [dbo].[WriteLog_RunSpAgent]    Script Date: 7/17/2013 4:25:15 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -8,6 +8,7 @@ GO
 
 ALTER PROCEDURE [dbo].[WriteLog_RunSpAgent]
 	@UserId			INT,
+	@AdminId		INT				= NULL,
 	@SPName			NVARCHAR(50)	= NULL,
 	@LogDate		DATETIME,
 	@AgentId		INT				= NULL,
@@ -35,6 +36,7 @@ BEGIN
 	
 	INSERT INTO RunSpAgent (
 		UserId,
+		AdminId,
 		SPName,
 		LogDate,
 		AgentId,
@@ -44,6 +46,7 @@ BEGIN
 		OldData )
 	SELECT
 		@UserId,
+		@AdminId,
 		@SPName,
 		@LogDate,
 		@AgentId,
