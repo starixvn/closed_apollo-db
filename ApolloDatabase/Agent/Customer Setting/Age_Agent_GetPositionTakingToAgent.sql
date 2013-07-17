@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_GetPositionTakingToAgent]    Script Date: 7/12/2013 1:43:14 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_GetPositionTakingToAgent]    Script Date: 7/15/2013 2:00:15 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -30,41 +30,31 @@ AS
 
 BEGIN
 	
-	SET NOCOUNT ON	
+	SET NOCOUNT ON
 	
-	DECLARE @agentHId			HIERARCHYID,
-			@isCheck			BIT
+	DECLARE 
+		@agentHId			HIERARCHYID,
+		@isCheck			BIT,
+		@actorAgentLevel	SMALLINT	
 	
-	SELECT @agentHId	= AgentHId
+	SELECT @agentHId = AgentHId
 	FROM AgentInfo WITH (NOLOCK)
 	WHERE AgentId = @AgentId OR Username = @Username	
-   
+
+	SELECT @actorAgentLevel = AgentLevel
+	FROM AgentInfo WITH (NOLOCK)
+	WHERE AgentId = @ActorAgentId
 	
 	SET @isCheck = 1
 
-	IF NOT EXISTS (
-		SELECT TOP(1) *
-		FROM AgentInfo WITH (NOLOCK)
-		WHERE 
-			@agentHId.IsDescendantOf(AgentHId) = 1
-			AND AgentId	= @ActorAgentId	
-	)
-		BEGIN					
+	IF NOT EXISTS (	SELECT 1
+					FROM AgentInfo WITH (NOLOCK)
+					WHERE 
+						@agentHId.IsDescendantOf(AgentHId) = 1
+						AND AgentId = @ActorAgentId	)
+		BEGIN
 			SET @isCheck = 0	
 		END
-	
-	DECLARE @TableAgent TABLE (
-		AgentId		INT, 
-		AgentLevel	SMALLINT, 
-		Username	NVARCHAR(50) )
-
-	INSERT INTO @TableAgent
-	SELECT 
-		AgentId,
-		AgentLevel,
-		Username 
-	FROM AgentInfo WITH (NOLOCK) 
-	WHERE @agentHId.IsDescendantOf(AgentHId) = 1		
 
 	SELECT 
 		apt.AgentId,
@@ -75,12 +65,14 @@ BEGIN
 		apt.MinGivenPositionTaking
 	FROM 
 		AgentPositionTaking AS apt WITH (NOLOCK)
-		INNER JOIN @TableAgent AS ai ON apt.AgentId = ai.AgentId				
+		INNER JOIN AgentInfo AS ai WITH (NOLOCK) ON apt.AgentId = ai.AgentId
 	WHERE 
 		apt.SportType	= @SportType
 		AND apt.BetType	= @BetType
-		AND apt.IsLive	= @IsLive		
+		AND apt.IsLive	= @IsLive
+		AND ai.AgentLevel >= @actorAgentLevel
 		AND @isCheck = 1
+		AND @agentHId.IsDescendantOf(ai.AgentHId) = 1
 	ORDER BY ai.AgentLevel
 	
 END

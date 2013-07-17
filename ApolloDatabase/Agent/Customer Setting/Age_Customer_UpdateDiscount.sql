@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateDiscount]    Script Date: 7/9/2013 10:56:00 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateDiscount]    Script Date: 7/17/2013 4:21:36 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -8,6 +8,7 @@ GO
 
 ALTER PROCEDURE [dbo].[Age_Customer_UpdateDiscount]
 	@ActorAgentId	INT				= NULL,
+	@AdminId		INT				= NULL,
 	@CustId			INT,	
 	@UGroup			VARCHAR(3),
 	@Discount		VARCHAR(MAX)	= '',
@@ -22,7 +23,7 @@ AS
  * Task			: Update customer discount
  * DB			: SVRCUST.CustDB
  * Revisions	:
- *	• 
+ *	• 20131707@Edward	: Add parameter @AdminId for write log
  * Parameters:
  *	• @Discount :
 		<ROOT>
@@ -322,6 +323,7 @@ BEGIN
 				BEGIN TRY
 					EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
 						@UserId		= @ActorAgentId,
+						@AdminId	= @AdminId,
 						@SPName		= 'Age_Customer_UpdateDiscount',
 						@LogDate	= @startRun,
 						@CustId		= @CustId,
@@ -332,6 +334,7 @@ BEGIN
 				BEGIN CATCH
 					EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpCust
 						@UserId		= @ActorAgentId,
+						@AdminId	= @AdminId,
 						@SPName		= 'Age_Customer_UpdateDiscount',
 						@LogDate	= @startRun,
 						@CustId		= @CustId,

@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateSetting]    Script Date: 5/6/2013 12:43:08 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateSetting]    Script Date: 7/17/2013 4:20:47 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -8,6 +8,7 @@ GO
 
 ALTER PROCEDURE [dbo].[Age_Customer_UpdateSetting]
 	@ActorAgentId		INT				= NULL,
+	@AdminId			INT				= NULL,
 	@AgentId			INT,
 	@CustId				INT,
 	@UGroup				VARCHAR(3),
@@ -63,17 +64,17 @@ BEGIN
 			RETURN
 		END	
 
-	EXEC Age_Customer_UpdateBetLimit @ActorAgentId, @CustId, @BetLimit, @Language, @ErrCode OUTPUT, @ErrMsg OUTPUT
+	EXEC Age_Customer_UpdateBetLimit @ActorAgentId, @AdminId, @CustId, @BetLimit, @Language, @ErrCode OUTPUT, @ErrMsg OUTPUT
 	
 	IF @ErrCode > 0
 		RETURN
 
-	EXEC Age_Customer_UpdateDiscount @ActorAgentId, @CustId, @UGroup, @Discount, @Language, @ErrCode OUTPUT, @ErrMsg OUTPUT	
+	EXEC Age_Customer_UpdateDiscount @ActorAgentId, @AdminId, @CustId, @UGroup, @Discount, @Language, @ErrCode OUTPUT, @ErrMsg OUTPUT	
 
 	IF @ErrCode > 0
 		RETURN
 
-	EXEC Age_Customer_UpdatePositionTaking @ActorAgentId, @AgentId, @CustId, @PositionTaking, @Language, @ErrCode OUTPUT, @ErrMsg OUTPUT	
+	EXEC Age_Customer_UpdatePositionTaking @ActorAgentId, @AdminId, @AgentId, @CustId, @PositionTaking, @Language, @ErrCode OUTPUT, @ErrMsg OUTPUT	
 
 	IF @ErrCode > 0
 		RETURN

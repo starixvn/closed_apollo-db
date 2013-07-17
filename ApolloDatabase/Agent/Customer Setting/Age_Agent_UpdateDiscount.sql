@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateDiscount]    Script Date: 7/2/2013 12:40:48 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateDiscount]    Script Date: 7/17/2013 4:22:40 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -30,6 +30,7 @@ SELECT	'Return Value' = @return_value
 
 ALTER PROCEDURE [dbo].[Age_Agent_UpdateDiscount]
 	@ActorAgentId	INT				= NULL,
+	@AdminId		INT				= NULL,
 	@AgentId		INT,
 	@Discount		VARCHAR(MAX)	= '',
 	@Language		VARCHAR(5)		= 'en-US',
@@ -44,6 +45,7 @@ AS
  * DB			: SVRCUST.CustDB
  * Revisions	:
  *	• 20132702@Edward	: Implement
+ *	• 20131707@Edward	: Add parameter @AdminId for write log
  * Parameters:
  *	• @Discount :
 		<ROOT>
@@ -412,30 +414,32 @@ BEGIN
 					-- end write log
 				END
 
-		END
-
-	SET @endRun		= GETDATE()  
-	SET @duration	= DATEDIFF(MILLISECOND, @startRun, @endRun) 
+				SET @endRun		= GETDATE()  
+				SET @duration	= DATEDIFF(MILLISECOND, @startRun, @endRun) 
 		
-	IF @@ERROR = 0
-		BEGIN TRY
-			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
-				@UserId		= @ActorAgentId,
-				@SPName		= 'Age_Agent_UpdateDiscount',
-				@LogDate	= @startRun,
-				@AgentId	= @AgentId,
-				@Duration	= @Duration,
-				@Data		= @logSPData,
-				@OldData	= @logSPDataOld
-		END TRY
-		BEGIN CATCH
-			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
-				@UserId		= @ActorAgentId,
-				@SPName		= 'Age_Agent_UpdateDiscount',
-				@LogDate	= @startRun,
-				@AgentId	= @AgentId,
-				@Duration	= @Duration,
-				@Data		= @logSPData,
-				@OldData	= @logSPDataOld
-		END CATCH 
+				IF @@ERROR = 0
+					BEGIN TRY
+						EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
+							@UserId		= @ActorAgentId,
+							@AdminId	= @AdminId,
+							@SPName		= 'Age_Agent_UpdateDiscount',
+							@LogDate	= @startRun,
+							@AgentId	= @AgentId,
+							@Duration	= @Duration,
+							@Data		= @logSPData,
+							@OldData	= @logSPDataOld
+					END TRY
+					BEGIN CATCH
+						EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
+							@UserId		= @ActorAgentId,
+							@AdminId	= @AdminId,
+							@SPName		= 'Age_Agent_UpdateDiscount',
+							@LogDate	= @startRun,
+							@AgentId	= @AgentId,
+							@Duration	= @Duration,
+							@Data		= @logSPData,
+							@OldData	= @logSPDataOld
+					END CATCH 
+
+		END
 END

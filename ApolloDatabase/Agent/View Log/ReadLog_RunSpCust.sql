@@ -1,6 +1,6 @@
 ﻿USE [LogDB]
 GO
-/****** Object:  StoredProcedure [dbo].[ReadLog_RunSpCust]    Script Date: 7/9/2013 4:08:48 PM ******/
+/****** Object:  StoredProcedure [dbo].[ReadLog_RunSpCust]    Script Date: 7/17/2013 4:24:58 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -98,6 +98,7 @@ BEGIN
 				rsc.LogId,
 				rsc.LogDate,
 				ui.Username,
+				adi.Username AS AdminUsername,
 				la.ActionTypeId,
 				la.ActionName,
 				rsc.OldData,
@@ -108,6 +109,7 @@ BEGIN
 				INNER JOIN SVRAGE.RepDB.dbo.CustInfo AS ci WITH (NOLOCK) ON rsc.CustId = ci.CustId
 				INNER JOIN @Temp AS ui ON rsc.UserId = ui.AgentId
 				INNER JOIN LogAction AS la WITH (NOLOCK) ON rsc.ActionId = la.ActionId
+				LEFT JOIN SVRAGE.RepDB.dbo.AdminInfo AS adi WITH (NOLOCK) ON rsc.AdminId = adi.AdminId
 			WHERE 
 				(@ActionTypeId = 0 OR la.ActionTypeId = @ActionTypeId)
 				AND rsc.LogDate BETWEEN @From AND @To
