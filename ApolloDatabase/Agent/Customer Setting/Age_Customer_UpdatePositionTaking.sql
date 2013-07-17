@@ -421,7 +421,9 @@ BEGIN
 								INNER JOIN dbo.AgentInfo AS ai WITH (NOLOCK)
 									ON ai.AgentId		= apt.AgentId
 									AND ai.ParentId		= cpt.AgentId
-									AND ai.AgentId IN (SELECT DISTINCT AgentId FROM CustPositionTaking WHERE CustId = @CustId) 		 	
+									AND ai.AgentId IN (	SELECT DISTINCT AgentId 
+														FROM dbo.CustPositionTaking WITH (NOLOCK)
+														WHERE CustId = @CustId) 		 	
 							WHERE 
 								cpt.CustId = @CustId
 								AND apt.MaxUpperPositionTaking < cpt.PositionTaking
