@@ -80,10 +80,10 @@ Revisions:
 
 	insert into outright_ex14
 		( [orid_ex],[oddsstatus_ex],[odds_adj],[maxbet_ex],[gapodds_ex] ,[status_ex],[bal_ex],[risk_ex],[DisplayMode_ex]      
-		,[PlaceOdds_adj],[FOddsStatus_ex],[changetime_ex],[IsDeadheat_ex] ,[StdDelBetCheck_ex])
+		,[PlaceOdds_adj],[FOddsStatus_ex],[changetime_ex],[IsDeadheat_ex] ,[StdDelBetCheck_ex], DisabledAutoSettle)
 	select
 		 [orid_ex],[oddsstatus_ex],[odds_adj],[maxbet_ex],[gapodds_ex] ,[status_ex],[bal_ex],[risk_ex],[DisplayMode_ex]      
-		,[PlaceOdds_adj],[FOddsStatus_ex],[changetime_ex],[IsDeadheat_ex] ,[StdDelBetCheck_ex]
+		,[PlaceOdds_adj],[FOddsStatus_ex],[changetime_ex],[IsDeadheat_ex] ,[StdDelBetCheck_ex], DisabledAutoSettle
 	from outright_ex
 	where orid_ex in (select orid from outright where eventdate = @winlostdate AND oddsstatus = 'Completed')
 

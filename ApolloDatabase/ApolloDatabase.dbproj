@@ -1364,15 +1364,6 @@
     <NotInBuild Include="Agent\Wagers\Age_Wagers_RunningBall.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Task_BackupFull_CustDB.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Task_BackupFull_ProdDB.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Task_BackupFull_TransDB.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="CSD\Settlement\Auto Settlement\Admin_AutoSettlement_GenerateCommand.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1467,6 +1458,24 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="CSD\Write Log\WriteLog_Settlement_SettleOutright.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Task\DBA_GetSQLErrorLogEvents.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Task\Task_BackupFull_CustDB.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Task\Task_BackupFull_ProdDB.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Task\Task_BackupFull_TransDB.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Task\TASK_CheckFreeSpace.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Outright\Acc_Set_LeagueSelOutright.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
