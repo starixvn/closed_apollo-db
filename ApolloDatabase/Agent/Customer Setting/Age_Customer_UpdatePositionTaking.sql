@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdatePositionTaking]    Script Date: 7/15/2013 10:18:07 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdatePositionTaking]    Script Date: 7/17/2013 4:21:18 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -31,6 +31,7 @@ GO
 
 ALTER PROCEDURE [dbo].[Age_Customer_UpdatePositionTaking]
 	@ActorAgentId		INT				= NULL,
+	@AdminId			INT				= NULL,
 	@AgentId			INT,
 	@CustId				INT,
 	@PositionTaking		VARCHAR(MAX)	= '',
@@ -45,7 +46,7 @@ AS
  * Task			: Update customer position taking
  * DB			: SVRCUST.CustDB
  * Revisions	:
- *	
+ *	• 20131707@Edward	: Add parameter @AdminId for write log
  * Parameters:
  * • @AgentID			: Parent agent ID
  * • @PositionTaking	: 
@@ -421,7 +422,9 @@ BEGIN
 								INNER JOIN dbo.AgentInfo AS ai WITH (NOLOCK)
 									ON ai.AgentId		= apt.AgentId
 									AND ai.ParentId		= cpt.AgentId
-									AND ai.AgentId IN (SELECT DISTINCT AgentId FROM CustPositionTaking WHERE CustId = @CustId) 		 	
+									AND ai.AgentId IN (	SELECT DISTINCT AgentId 
+														FROM dbo.CustPositionTaking WITH (NOLOCK)
+														WHERE CustId = @CustId) 		 	
 							WHERE 
 								cpt.CustId = @CustId
 								AND apt.MaxUpperPositionTaking < cpt.PositionTaking
@@ -838,6 +841,7 @@ BEGIN
 						BEGIN TRY
 							EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
 								@UserId		= @ActorAgentId,
+								@AdminId	= @AdminId,
 								@SPName		= 'Age_Customer_UpdatePositionTaking',
 								@LogDate	= @startRun,
 								@CustId		= @CustId,
@@ -848,6 +852,7 @@ BEGIN
 						BEGIN CATCH
 							EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpCust
 								@UserId		= @ActorAgentId,
+								@AdminId	= @AdminId,
 								@SPName		= 'Age_Customer_UpdatePositionTaking',
 								@LogDate	= @startRun,
 								@CustId		= @CustId,

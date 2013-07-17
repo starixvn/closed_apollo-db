@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking]    Script Date: 7/17/2013 9:18:25 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking]    Script Date: 7/17/2013 4:22:56 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -35,6 +35,7 @@ GO
 */
 ALTER PROCEDURE [dbo].[Age_Agent_UpdatePositionTaking]
 	@ActorAgentId		INT				= NULL,
+	@AdminId			INT				= NULL,
 	@AgentId			INT,
 	@PositionTaking		VARCHAR(MAX)	= '',	
 	@Language			VARCHAR(5)		= 'en-US',	
@@ -48,7 +49,7 @@ AS
  * Task			: Update agent position taking
  * DB			: SVRCUST.CustDB
  * Revisions	:
- *	
+ *	• 20131707@Edward	: Add parameter @AdminId for write log
  * Parameters:
  *	@PositionTaking :
 		<ROOT><PositionTaking SportType="1" BetType="1" IsLive="0" MaxUpper="122" MaxGiven="7761" MinGiven="0"></PositionTaking></ROOT>		
@@ -2720,6 +2721,7 @@ BEGIN
 					BEGIN TRY
 						EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
 						@UserId		= @ActorAgentId,
+						@AdminId	= @AdminId,
 						@SPName		= 'Age_Agent_UpdatePositionTaking',
 						@LogDate	= @startRun,
 						@AgentId	= @AgentId,
@@ -2730,6 +2732,7 @@ BEGIN
 					BEGIN CATCH
 						EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
 						@UserId		= @ActorAgentId,
+						@AdminId	= @AdminId,
 						@SPName		= 'Age_Agent_UpdatePositionTaking',
 						@LogDate	= @startRun,
 						@AgentId	= @AgentId,
