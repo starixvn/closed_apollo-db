@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdatePositionTaking]    Script Date: 7/12/2013 2:55:58 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdatePositionTaking]    Script Date: 7/15/2013 10:18:07 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -167,7 +167,7 @@ BEGIN
 			DELETE tpt
 			FROM 
 				@TablePositionTaking AS tpt
-				INNER JOIN CustPositionTaking AS cpt WITH (NOLOCK)
+				INNER JOIN dbo.CustPositionTaking AS cpt WITH (NOLOCK)
 				ON 	cpt.SportType	= tpt.SportType
 					AND cpt.BetType	= tpt.BetType
 					AND cpt.IsLive	= tpt.IsLive
@@ -186,7 +186,7 @@ BEGIN
 							,cpt.IsLive			AS '@i'
 							,cpt.PositionTaking	AS '@p'
 						FROM 
-							CustPositionTaking AS cpt WITH (NOLOCK)
+							dbo.CustPositionTaking AS cpt WITH (NOLOCK)
 							--INNER JOIN @TablePositionTaking AS tpt
 							--	ON cpt.SportType	= tpt.SportType
 							--	AND cpt.BetType		= tpt.BetType
@@ -218,7 +218,7 @@ BEGIN
 					SELECT 
 						@agentLevel = AgentLevel,
 						@agentHId = AgentHId
-					FROM AgentInfo WITH (NOLOCK)
+					FROM dbo.AgentInfo WITH (NOLOCK)
 					WHERE AgentId = @AgentId
 
 					INSERT INTO @UplineAgentInfo (
@@ -229,12 +229,12 @@ BEGIN
 						AgentId,
 						AgentLevel,
 						ParentId
-					FROM AgentInfo WITH (NOLOCK)
+					FROM dbo.AgentInfo WITH (NOLOCK)
 					WHERE
 						@agentHId.IsDescendantOf(AgentHId) = 1
 						AND AgentId <> @AgentId
 						AND AgentId IN (	SELECT DISTINCT AgentId
-											FROM CustPositionTaking WITH (NOLOCK)
+											FROM dbo.CustPositionTaking WITH (NOLOCK)
 											WHERE CustId = @CustId )
 
 					INSERT INTO @DownlineAgentInfo (
@@ -245,24 +245,24 @@ BEGIN
 						AgentId,
 						AgentLevel,
 						ParentId
-					FROM AgentInfo WITH (NOLOCK)
+					FROM dbo.AgentInfo WITH (NOLOCK)
 					WHERE
 						AgentHId.IsDescendantOf(@agentHId) = 1
 						AND AgentId <> @AgentId
 						AND AgentId IN (	SELECT DISTINCT AgentId
-											FROM CustPositionTaking WITH (NOLOCK)
+											FROM dbo.CustPositionTaking WITH (NOLOCK)
 											WHERE CustId = @CustId )
 					---- End set value
 
 					-- Check for direct member or indirect member
-					IF EXISTS (	SELECT 1 FROM CustInfo WHERE CustId = @CustId AND AgentId = @AgentId )		-- direct member
+					IF EXISTS (	SELECT 1 FROM dbo.CustInfo WITH (NOLOCK) WHERE CustId = @CustId AND AgentId = @AgentId )		-- direct member
 						BEGIN
 							SELECT TOP(1) 
 								@sportType	= apt.SportType 
 								,@betType	= apt.BetType
 								,@isLive	= apt.IsLive
 							FROM 
-								AgentPositionTaking AS apt WITH (NOLOCK)
+								dbo.AgentPositionTaking AS apt WITH (NOLOCK)
 								INNER JOIN @TablePositionTaking AS ptt
 								ON apt.SportType	= ptt.SportType
 									AND apt.BetType	= ptt.BetType
@@ -317,8 +317,8 @@ BEGIN
 											ELSE apt.MinGivenPositionTaking - downCust.SumOfDownlinePT
 										END AS MaxOfPositionTaking
 									FROM 
-										AgentPositionTaking AS apt WITH (NOLOCK)
-										INNER JOIN AgentPositionTaking AS capt WITH (NOLOCK)
+										dbo.AgentPositionTaking AS apt WITH (NOLOCK)
+										INNER JOIN dbo.AgentPositionTaking AS capt WITH (NOLOCK)
 											ON 	apt.SportType	= capt.SportType
 												AND apt.BetType = capt.BetType
 												AND apt.IsLive	= capt.IsLive
@@ -328,7 +328,7 @@ BEGIN
 												BetType,
 												IsLive,
 												SUM(PositionTaking) AS SumOfDownlinePT
-											FROM CustPositionTaking WITH (NOLOCK)
+											FROM dbo.CustPositionTaking WITH (NOLOCK)
 											WHERE 
 												CustId = @custId
 												AND AgentId IN ( SELECT AgentId FROM @DownlineAgentInfo )
@@ -376,7 +376,7 @@ BEGIN
 					-- If New Position Taking greater than Current Position Taking
 					IF EXISTS (	SELECT 1
 								FROM 
-									CustPositionTaking AS cpt WITH (NOLOCK)
+									dbo.CustPositionTaking AS cpt WITH (NOLOCK)
 									INNER JOIN @TablePositionTaking AS tpt
 									ON 
 										cpt.SportType	= tpt.SportType
@@ -408,17 +408,17 @@ BEGIN
 								,cpt.PositionTaking
 								,apt.MaxUpperPositionTaking
 							FROM 
-								CustPositionTaking AS cpt WITH (NOLOCK)	
+								dbo.CustPositionTaking AS cpt WITH (NOLOCK)	
 								INNER JOIN @UplineAgentInfo AS uai ON cpt.AgentId = uai.AgentId
 								INNER JOIN @TablePositionTaking AS tpt 
 									ON cpt.SportType	= tpt.SportType
 									AND cpt.BetType		= tpt.BetType
 									AND cpt.IsLive		= tpt.IsLive
-								INNER JOIN AgentPositionTaking AS apt WITH (NOLOCK)
+								INNER JOIN dbo.AgentPositionTaking AS apt WITH (NOLOCK)
 									ON cpt.SportType	= apt.SportType
 									AND cpt.BetType		= apt.BetType
 									AND cpt.IsLive		= apt.IsLive
-								INNER JOIN AgentInfo AS ai WITH (NOLOCK)
+								INNER JOIN dbo.AgentInfo AS ai WITH (NOLOCK)
 									ON ai.AgentId		= apt.AgentId
 									AND ai.ParentId		= cpt.AgentId
 									AND ai.AgentId IN (SELECT DISTINCT AgentId FROM CustPositionTaking WHERE CustId = @CustId) 		 	
@@ -471,7 +471,7 @@ BEGIN
 									ON tupt.SportType	= tpt.SportType
 									AND tupt.BetType	= tpt.BetType
 									AND tupt.IsLive		= tpt.IsLive
-								INNER JOIN CustPositionTaking AS cpt WITH (NOLOCK)
+								INNER JOIN dbo.CustPositionTaking AS cpt WITH (NOLOCK)
 									ON tupt.SportType	= cpt.SportType
 									AND tupt.BetType	= cpt.BetType
 									AND tupt.IsLive		= cpt.IsLive
@@ -490,7 +490,7 @@ BEGIN
 											ELSE tupt.PT - tupt.Result
 										END
 									FROM 
-										CustPositionTaking AS cpt WITH (ROWLOCK, UPDLOCK)
+										dbo.CustPositionTaking AS cpt WITH (ROWLOCK, UPDLOCK)
 										INNER JOIN @TableUpdatePositionTaking AS tupt
 											ON cpt.SportType	= tupt.SportType
 											AND cpt.BetType		= tupt.BetType
@@ -504,7 +504,7 @@ BEGIN
 										tupt.IsDeleted = 1
 									FROM 
 										@TableUpdatePositionTaking AS tupt
-										INNER JOIN CustPositionTaking AS cpt WITH (NOLOCK)
+										INNER JOIN dbo.CustPositionTaking AS cpt WITH (NOLOCK)
 											ON tupt.SportType	= cpt.SportType
 											AND tupt.BetType	= cpt.BetType
 											AND tupt.IsLive		= cpt.IsLive
@@ -532,25 +532,25 @@ BEGIN
 												,cpt.PositionTaking
 												,apt.MaxUpperPositionTaking
 											FROM 
-												CustPositionTaking AS cpt WITH (NOLOCK)	
+												dbo.CustPositionTaking AS cpt WITH (NOLOCK)	
 												INNER JOIN @UplineAgentInfo AS uai ON cpt.AgentId = uai.AgentId
 												INNER JOIN @TablePositionTaking AS tpt 
 													ON cpt.SportType	= tpt.SportType
 													AND cpt.BetType		= tpt.BetType
 													AND cpt.IsLive		= tpt.IsLive
-												INNER JOIN AgentPositionTaking AS apt WITH (NOLOCK)
+												INNER JOIN dbo.AgentPositionTaking AS apt WITH (NOLOCK)
 													ON cpt.SportType	= apt.SportType
 													AND cpt.BetType		= apt.BetType
 													AND cpt.IsLive		= apt.IsLive
-												INNER JOIN AgentInfo AS ai WITH (NOLOCK)
+												INNER JOIN dbo.AgentInfo AS ai WITH (NOLOCK)
 													ON ai.AgentId		= apt.AgentId
 													AND ai.ParentId		= cpt.AgentId
-													AND ai.AgentId IN (SELECT DISTINCT AgentId FROM CustPositionTaking WHERE CustId = @CustId)
+													AND ai.AgentId IN (SELECT DISTINCT AgentId FROM dbo.CustPositionTaking WHERE CustId = @CustId)
 											WHERE 
 												cpt.CustId = @CustId
 												AND apt.MaxUpperPositionTaking < cpt.PositionTaking
 
-											INSERT INTO @TableUpdatePositionTaking(
+											INSERT INTO @TableUpdatePositionTaking (
 												AgentId
 												,SportType
 												,BetType
@@ -609,7 +609,7 @@ BEGIN
 							UPDATE cpt
 							SET	cpt.PositionTaking = tpt.PT
 							FROM 
-								CustPositionTaking AS cpt WITH (ROWLOCK,UPDLOCK)
+								dbo.CustPositionTaking AS cpt WITH (ROWLOCK,UPDLOCK)
 								INNER JOIN @TablePositionTaking	AS tpt
 									ON tpt.SportType	= cpt.SportType
 									AND tpt.BetType		= cpt.BetType
@@ -626,7 +626,7 @@ BEGIN
 					-- If New Position Taking less than Current Position Taking
 					IF EXISTS (	SELECT 1
 								FROM 
-									CustPositionTaking AS cpt WITH (NOLOCK)
+									dbo.CustPositionTaking AS cpt WITH (NOLOCK)
 									INNER JOIN @TablePositionTaking AS tpt
 									ON 
 										cpt.SportType	= tpt.SportType
@@ -653,7 +653,7 @@ BEGIN
 								AND tpt.PT < cpt.PositionTaking
 
 							-- End update Position Taking
-							DECLARE @currentAgentId		INT
+							DECLARE @currentAgentId	INT
 
 							SET @currentAgentId = @AgentId
 
@@ -676,9 +676,9 @@ BEGIN
 										,cpt.PositionTaking
 										,apt.MinGivenPositionTaking
 									FROM 
-										AgentPositionTaking AS apt WITH (NOLOCK)
+										dbo.AgentPositionTaking AS apt WITH (NOLOCK)
 										INNER JOIN @UplineAgentInfo AS uai ON apt.AgentId = uai.AgentId
-										INNER JOIN CustPositionTaking AS cpt WITH (NOLOCK)
+										INNER JOIN dbo.CustPositionTaking AS cpt WITH (NOLOCK)
 											ON apt.SportType	= cpt.SportType
 											AND apt.BetType		= cpt.BetType
 											AND apt.IsLive		= cpt.IsLive
@@ -710,8 +710,8 @@ BEGIN
 														tcpt.IsLive,
 														SUM(tcpt.PositionTaking) AS Sum
 													FROM 
-														CustPositionTaking AS tcpt WITH (NOLOCK)
-														INNER JOIN AgentInfo AS tai WITH (NOLOCK) ON tcpt.AgentId = tai.AgentId
+														dbo.CustPositionTaking AS tcpt WITH (NOLOCK)
+														INNER JOIN dbo.AgentInfo AS tai WITH (NOLOCK) ON tcpt.AgentId = tai.AgentId
 													WHERE 
 														tcpt.CustId = @CustId
 														AND tai.AgentLevel >= @tempLevel
@@ -763,19 +763,19 @@ BEGIN
 													AgentId,
 													AgentLevel,
 													ParentId
-												FROM AgentInfo WITH (NOLOCK)
+												FROM dbo.AgentInfo WITH (NOLOCK)
 												WHERE
 													@agentHId.IsDescendantOf(AgentHId) = 1
 													AND AgentId <> @AgentId
 													AND AgentId IN (	SELECT DISTINCT AgentId
-																		FROM CustPositionTaking WITH (NOLOCK)
+																		FROM dbo.CustPositionTaking WITH (NOLOCK)
 																		WHERE CustId = @CustId )
 											END
 										
 										UPDATE cpt
 										SET cpt.PositionTaking = tempUpdate.MinPT - tempUpdate.SumDownPT + tempUpdate.PT
 										FROM 
-											CustPositionTaking AS cpt WITH (ROWLOCK, UPDLOCK)
+											dbo.CustPositionTaking AS cpt WITH (ROWLOCK, UPDLOCK)
 											INNER JOIN (
 												SELECT 
 													tspt.AgentId
@@ -837,23 +837,23 @@ BEGIN
 					IF @@ERROR = 0
 						BEGIN TRY
 							EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
-							@UserId		= @ActorAgentId,
-							@SPName		= 'Age_Customer_UpdatePositionTaking',
-							@LogDate	= @startRun,
-							@CustId		= @CustId,
-							@Duration	= @Duration,
-							@Data		= @logSPData,
-							@OldData	= @logSPDataOld
+								@UserId		= @ActorAgentId,
+								@SPName		= 'Age_Customer_UpdatePositionTaking',
+								@LogDate	= @startRun,
+								@CustId		= @CustId,
+								@Duration	= @Duration,
+								@Data		= @logSPData,
+								@OldData	= @logSPDataOld
 						END TRY
 						BEGIN CATCH
 							EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpCust
-							@UserId		= @ActorAgentId,
-							@SPName		= 'Age_Customer_UpdatePositionTaking',
-							@LogDate	= @startRun,
-							@CustId		= @CustId,
-							@Duration	= @Duration,
-							@Data		= @logSPData,
-							@OldData	= @logSPDataOld
+								@UserId		= @ActorAgentId,
+								@SPName		= 'Age_Customer_UpdatePositionTaking',
+								@LogDate	= @startRun,
+								@CustId		= @CustId,
+								@Duration	= @Duration,
+								@Data		= @logSPData,
+								@OldData	= @logSPDataOld
 						END CATCH
 				END
 		END

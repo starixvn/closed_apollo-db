@@ -28,7 +28,9 @@ BEGIN
 			@ErrMsg			NVARCHAR(200) = '' ,
 			@ActionId		TINYINT,
 			@action			VARCHAR(10),
-			@RetryCount		TINYINT			
+			@RetryCount		TINYINT,
+			@isOutright		BIT,
+			@prevAllowedDate datetime
 
 	SELECT TOP 1	@sql = SQLCommand, 
 					@execID = execID, 
@@ -47,46 +49,103 @@ BEGIN
 	IF @execID IS NULL OR @sql IS NULL --no command in queue
 		RETURN
 
-	---waiting for any previous running command 
-	IF EXISTS(SELECT 1 FROM [dbo].[AutoSettlementCommand] WITH (NOLOCK)
-			WHERE matchid=@matchid and statusid in (1) and [execID] < @execID)
-	BEGIN	
-		RETURN
+	SELECT  @isOutright= CASE WHEN @ActionId IN (30,31) THEN 1 ELSE 0 END
+
+	IF (@isOutright=0)
+	BEGIN
+		---waiting for any previous running command 
+		IF EXISTS(SELECT 1 FROM [dbo].[AutoSettlementCommand] WITH (NOLOCK)
+				WHERE matchid=@matchid and statusid in (1) 
+					and ActionId NOT IN (30,31)
+					and [execID] < @execID)
+		BEGIN	
+			RETURN
+		END
+	
+		----------------------
+
+		--has failed command, skip commands
+		IF EXISTS(SELECT 1 FROM [dbo].[AutoSettlementCommand] WITH (NOLOCK)
+				WHERE matchid=@matchid and statusid in (3,5) 
+					and ActionId NOT IN (30,31)
+					and [execID] < @execID)
+		BEGIN
+			--- UPDATE STATUS
+			UPDATE AutoSettlementCommand WITH(ROWLOCK,UPDLOCK)
+			SET StatusID		= 5,
+				ExecutedDate	= GETDATE(),
+				Status			= 'skipped'
+			WHERE execID = @execID
+			RETURN
+		END	
+
+		---skip to execute later because of previous pending/fail commands 
+			
+		SELECT TOP 1 @prevAllowedDate = AllowedDate 
+		FROM [dbo].[AutoSettlementCommand] WITH (NOLOCK)
+		WHERE matchid=@matchid and statusid in (0,2) 
+			and ActionId NOT IN (30,31)
+			and [execID] < @execID
+		ORDER BY execID
+
+		IF (@prevAllowedDate IS NOT NULL)
+		BEGIN
+			--- UPDATE STATUS
+			UPDATE AutoSettlementCommand WITH(ROWLOCK,UPDLOCK)
+			SET ExecutedDate	= GETDATE(),
+				AllowedDate = @prevAllowedDate
+			WHERE execID = @execID
+			RETURN
+		END	
 	END
-	
-	----------------------
-
-	--has failed command, skip commands
-	IF EXISTS(SELECT 1 FROM [dbo].[AutoSettlementCommand] WITH (NOLOCK)
-			WHERE matchid=@matchid and statusid in (3,5) and [execID] < @execID)
+	ELSE -- for outright (same rule with match, but check ActionId IN (30,31) for outright
 	BEGIN
-		--- UPDATE STATUS
-		UPDATE AutoSettlementCommand WITH(ROWLOCK,UPDLOCK)
-		SET StatusID		= 5,
-			ExecutedDate	= GETDATE(),
-			Status			= 'skipped'
-		WHERE execID = @execID
-		RETURN
-	END	
-
-	---skip to execute later because of previous pending/fail commands 
-	DECLARE @prevAllowedDate datetime
+		---waiting for any previous running command 
+		IF EXISTS(SELECT 1 FROM [dbo].[AutoSettlementCommand] WITH (NOLOCK)
+				WHERE matchid=@matchid and statusid in (1) 
+					and ActionId IN (30,31)
+					and [execID] < @execID)
+		BEGIN	
+			RETURN
+		END
 	
-	SELECT TOP 1 @prevAllowedDate = AllowedDate 
-	FROM [dbo].[AutoSettlementCommand] WITH (NOLOCK)
-	WHERE matchid=@matchid and statusid in (0,2) and [execID] < @execID
-	ORDER BY execID
+		----------------------
 
-	IF (@prevAllowedDate IS NOT NULL)
-	BEGIN
-		--- UPDATE STATUS
-		UPDATE AutoSettlementCommand WITH(ROWLOCK,UPDLOCK)
-		SET ExecutedDate	= GETDATE(),
-			AllowedDate = @prevAllowedDate
-		WHERE execID = @execID
-		RETURN
-	END	
-		
+		--has failed command, skip commands
+		IF EXISTS(SELECT 1 FROM [dbo].[AutoSettlementCommand] WITH (NOLOCK)
+				WHERE matchid=@matchid and statusid in (3,5) 
+					and ActionId IN (30,31)
+					and [execID] < @execID)
+		BEGIN
+			--- UPDATE STATUS
+			UPDATE AutoSettlementCommand WITH(ROWLOCK,UPDLOCK)
+			SET StatusID		= 5,
+				ExecutedDate	= GETDATE(),
+				Status			= 'skipped'
+			WHERE execID = @execID
+			RETURN
+		END	
+
+		---skip to execute later because of previous pending/fail commands 		
+	
+		SELECT TOP 1 @prevAllowedDate = AllowedDate 
+		FROM [dbo].[AutoSettlementCommand] WITH (NOLOCK)
+		WHERE matchid=@matchid and statusid in (0,2) 
+			and ActionId IN (30,31)
+			and [execID] < @execID
+		ORDER BY execID
+
+		IF (@prevAllowedDate IS NOT NULL)
+		BEGIN
+			--- UPDATE STATUS
+			UPDATE AutoSettlementCommand WITH(ROWLOCK,UPDLOCK)
+			SET ExecutedDate	= GETDATE(),
+				AllowedDate = @prevAllowedDate
+			WHERE execID = @execID
+			RETURN
+		END	
+	END
+
 	--- UPDATE STATUS
 	UPDATE AutoSettlementCommand WITH(ROWLOCK,UPDLOCK)
 	SET StatusID		= 1,
@@ -157,14 +216,28 @@ BEGIN
 	
 		if (@StatusID=3)
 		BEGIN
-			--notify fail for match
-			UPDATE SVRPRO.ProdDB.dbo.match_remark_ex WITH(ROWLOCK,UPDLOCK)
-			SET FailedActionID = @ActionId
-			WHERE matchid=@matchid
+			IF (@isOutright=0)
+			BEGIN
+				--notify fail for match
+				UPDATE SVRPRO.ProdDB.dbo.match_remark_ex WITH(ROWLOCK,UPDLOCK)
+				SET FailedActionID = @ActionId
+				WHERE matchid=@matchid
 
-			IF @@ROWCOUNT=0
-				INSERT  SVRPRO.ProdDB.dbo.match_remark_ex (matchid, FailedActionID)
-				VALUES(@matchid, @ActionId)
+				IF @@ROWCOUNT=0
+					INSERT  SVRPRO.ProdDB.dbo.match_remark_ex (matchid, FailedActionID)
+					VALUES(@matchid, @ActionId)
+			END
+			ELSE --for outright
+			BEGIN
+				--notify fail for outright
+				UPDATE SVRPRO.ProdDB.dbo.outright_ex WITH(ROWLOCK,UPDLOCK)
+				SET FailedActionID = @ActionId
+				WHERE orid_ex=@matchid
+
+				IF @@ROWCOUNT=0
+					INSERT  SVRPRO.ProdDB.dbo.outright_ex (orid_ex, FailedActionID)
+					VALUES(@matchid, @ActionId)
+			END
 		END
 
 	END CATCH

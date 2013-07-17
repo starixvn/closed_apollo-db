@@ -104,6 +104,7 @@ BEGIN
 	FROM	#tmpBettrans b with(nolock)
 	WHERE	bettype = 10 			
 	
+	/*
 		-- Number Game
 	UNION ALL
 	SELECT	@winlostdate winlostdate,
@@ -117,6 +118,8 @@ BEGIN
 			'Number Game' as bettype
 	FROM	#tmpBettrans b with(nolock)
 	WHERE	bettype BETWEEN 81 AND 120
+	*/
+
 	-- END - Resultset of 3rd products and Parlay, Outright
 		
     DROP TABLE #tmpBettrans
