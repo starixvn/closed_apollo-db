@@ -475,7 +475,7 @@ FROM	(
 		FROM	#WinLossMember 
 		GROUP BY Username, CustId, PositionTaking
 		) A
-FULL JOIN 
+LEFT JOIN 
 		( 	
 		SELECT	M.Username, M.CustID , PT.PositionTaking as PositionTaking,  
 				SUM(Outstanding) Outstanding , 

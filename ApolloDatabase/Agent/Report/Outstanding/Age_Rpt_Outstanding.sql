@@ -42,7 +42,7 @@ BEGIN
 	FROM AgentInfo C WITH (NOLOCK)
 	INNER JOIN BetTrans_Agent BA WITH (NOLOCK) -- MAIN SH 
 			ON BA.AgentID = C.AgentID		
-	INNER JOIN Bettrans B WITH (NOLOCK, index =IX_StatusId_Bettype) 
+	INNER JOIN Bettrans B WITH (NOLOCK)
 			ON B.TransID = BA.TransID
 	INNER JOIN Match M WITH (NOLOCK) 
 			ON M.MatchId = B.MatchId			
@@ -110,7 +110,7 @@ BEGIN
 	FROM AgentInfo C WITH (NOLOCK)
 	INNER JOIN BetTrans_Agent BA WITH (NOLOCK)  --- Main SH 
 			ON BA.AgentID = C.AgentID		
-	INNER JOIN Bettrans B WITH (NOLOCK, index =IX_StatusId_Bettype ) 
+	INNER JOIN Bettrans B WITH (NOLOCK)
 			ON B.TransID = BA.TransID						
 	WHERE	C.ParentId = @AgentID 
 			AND BA.StatusID IN (0,1)
@@ -237,7 +237,7 @@ BEGIN
 	-- SportsBook 
 	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
 	INSERT INTO @MemberOutstanding 
-	SELECT  '', C.AgentId, 0 as IsAgent,
+	SELECT  '', 0 as AgentId, 0 as IsAgent,
 			ISNULL(SUM (ABS(BA.actual_stake)),0) as Outstanding,
 			ISNULL(SUM(ABS(BA.actual_stake) * BA.APositiontaking),0) as Positiontaking
 	FROM Bettrans B WITH (NOLOCK)
@@ -258,7 +258,7 @@ BEGIN
 	-- Parlay 
 	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
 	INSERT INTO @MemberOutstanding 
-	SELECT  '', B.AgentId, 0 as IsAgent,
+	SELECT  '', 0 as AgentId, 0 as IsAgent,
 			ISNULL(SUM (ABS(B.actual_stake)),0) as Outstanding,
 			ISNULL(SUM(ABS(B.actual_stake) * B.APositiontaking),0) as Positiontaking
 	FROM (
@@ -291,7 +291,7 @@ BEGIN
 	-- Outright 
 	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype = 10 OR @Bettypes = '0')
 	INSERT INTO @MemberOutstanding 
-	SELECT  '', C.AgentId, 0 as IsAgent,
+	SELECT  '', 0 as AgentId, 0 as IsAgent,
 			ISNULL(SUM (ABS(BA.actual_stake)),0) as Outstanding,
 			ISNULL(SUM(ABS(BA.actual_stake) * BA.APositiontaking),0) as Positiontaking
 	FROM Bettrans B WITH (NOLOCK)

@@ -277,7 +277,7 @@ BEGIN
 						B.Winlost,B.Actual_Stake,
 						B.MOdds,B.StatusID,
 						BP.AWinlost, BP.AComm, BA.AComm as ChildAComm							
-				FROM	Bettrans B WITH (NOLOCK, index = IX_Winlostdate_Bettype_StatusId) 
+				FROM	Bettrans B WITH (NOLOCK)---, index = IX_Winlostdate_Bettype_StatusId) 
 				INNER JOIN Bettrans_Agent BP WITH (NOLOCK) 
 						ON BP.TransID = B.TransID 
 						AND BP.AgentID = @AgentID ---Parent (k)
@@ -366,8 +366,8 @@ BEGIN
 			    SUM(BA.AComm) ChildAComm  , 
 				SUM(B.Winlost) as Winlost,
 				SUM(B.Actual_Stake) as Actual_Stake	   
-		FROM	Bettrans B WITH (NOLOCK , index = IX_Winlostdate_Bettype_StatusId) 
-		INNER JOIN Bettrans_Agent BP WITH (NOLOCK, index =IX_WinLostDate_Bettype_StatusId) 
+		FROM	Bettrans B WITH (NOLOCK)--- , index = IX_Winlostdate_Bettype_StatusId) 
+		INNER JOIN Bettrans_Agent BP WITH (NOLOCK)---, index =IX_WinLostDate_Bettype_StatusId) 
 				ON BP.TransID = B.TransID 
 				AND BP.AgentID = @AgentID ---Parent (k)
 				AND BP.Winlostdate BETWEEN @FromDate AND @ToDate 
@@ -378,7 +378,7 @@ BEGIN
 				ON C.ParentID = @AgentID  
 		INNER JOIN AgentPositionTaking PT WITH (NOLOCK) 
 				ON PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
-		INNER JOIN Bettrans_Agent BA WITH (NOLOCK,  index =IX_WinLostDate_Bettype_StatusId) 
+		INNER JOIN Bettrans_Agent BA WITH (NOLOCK)---,  index =IX_WinLostDate_Bettype_StatusId) 
 				ON BA.TransID = B.TransID 
 				AND C.AgentID = BA.AgentID ---- Child direct (k+1)
 				AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
@@ -788,7 +788,7 @@ BEGIN
 						B.Winlost,B.Actual_Stake,
 						B.MOdds,B.StatusID,
 						BP.AWinlost, BP.AComm, BA.AComm as ChildAComm							
-				FROM	Bettrans14 B WITH (NOLOCK, index = IX_Winlostdate_Bettype_StatusId) 
+				FROM	Bettrans14 B WITH (NOLOCK)---, index = IX_Winlostdate_Bettype_StatusId) 
 				INNER JOIN Bettrans14_Agent BP WITH (NOLOCK) 
 						ON BP.TransID = B.TransID 
 						AND BP.AgentID = @AgentID ---Parent (k)
@@ -877,8 +877,8 @@ BEGIN
 			    SUM(BA.AComm) ChildAComm  , 
 				SUM(B.Winlost) as Winlost,
 				SUM(B.Actual_Stake) as Actual_Stake	   
-		FROM	Bettrans14 B WITH (NOLOCK , index = IX_Winlostdate_Bettype_StatusId) 
-		INNER JOIN Bettrans14_Agent BP WITH (NOLOCK, index =IX_WinLostDate_Bettype_StatusId) 
+		FROM	Bettrans14 B WITH (NOLOCK)--, index = IX_Winlostdate_Bettype_StatusId) 
+		INNER JOIN Bettrans14_Agent BP WITH (NOLOCK)---, index =IX_WinLostDate_Bettype_StatusId) 
 				ON BP.TransID = B.TransID 
 				AND BP.AgentID = @AgentID ---Parent (k)
 				AND BP.Winlostdate BETWEEN @FromDate AND @ToDate 
@@ -889,7 +889,7 @@ BEGIN
 				ON C.ParentID = @AgentID  
 		INNER JOIN AgentPositionTaking PT WITH (NOLOCK) 
 				ON PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
-		INNER JOIN Bettrans14_Agent BA WITH (NOLOCK,  index =IX_WinLostDate_Bettype_StatusId) 
+		INNER JOIN Bettrans14_Agent BA WITH (NOLOCK)---,  index =IX_WinLostDate_Bettype_StatusId) 
 				ON BA.TransID = B.TransID 
 				AND C.AgentID = BA.AgentID ---- Child direct (k+1)
 				AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
@@ -1101,7 +1101,7 @@ BEGIN
 	FROM AgentInfo C WITH (NOLOCK)
 	INNER JOIN BetTrans_Agent BA WITH (NOLOCK) -- MAIN SH 
 			ON BA.AgentID = C.AgentID		
-	INNER JOIN Bettrans B WITH (NOLOCK, index =IX_StatusId_Bettype) 
+	INNER JOIN Bettrans B WITH (NOLOCK)
 			ON B.TransID = BA.TransID
 	INNER JOIN Match M WITH (NOLOCK) 
 			ON M.MatchId = B.MatchId			
@@ -1169,7 +1169,7 @@ BEGIN
 	FROM AgentInfo C WITH (NOLOCK)
 	INNER JOIN BetTrans_Agent BA WITH (NOLOCK)  --- Main SH 
 			ON BA.AgentID = C.AgentID		
-	INNER JOIN Bettrans B WITH (NOLOCK, index =IX_StatusId_Bettype ) 
+	INNER JOIN Bettrans B WITH (NOLOCK)
 			ON B.TransID = BA.TransID						
 	WHERE	C.ParentId = @AgentID 
 			AND BA.StatusID IN (0,1)
@@ -1296,7 +1296,7 @@ BEGIN
 	-- SportsBook 
 	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
 	INSERT INTO #MemberOutstanding 
-	SELECT  '', C.AgentId, 0 as IsAgent,
+	SELECT  '', 0 as AgentId, 0 as IsAgent,
 			ISNULL(SUM (ABS(BA.actual_stake)),0) as Outstanding,
 			ISNULL(SUM(ABS(BA.actual_stake) * BA.APositiontaking),0) as Positiontaking
 	FROM Bettrans B WITH (NOLOCK)
@@ -1317,7 +1317,7 @@ BEGIN
 	-- Parlay 
 	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
 	INSERT INTO #MemberOutstanding 
-	SELECT  '', B.AgentId, 0 as IsAgent,
+	SELECT  '', 0 as AgentId, 0 as IsAgent,
 			ISNULL(SUM (ABS(B.actual_stake)),0) as Outstanding,
 			ISNULL(SUM(ABS(B.actual_stake) * B.APositiontaking),0) as Positiontaking
 	FROM (
@@ -1350,7 +1350,7 @@ BEGIN
 	-- Outright 
 	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype = 10 OR @Bettypes = '0')
 	INSERT INTO #MemberOutstanding 
-	SELECT  '', C.AgentId, 0 as IsAgent,
+	SELECT  '',0 as AgentId, 0 as IsAgent,
 			ISNULL(SUM (ABS(BA.actual_stake)),0) as Outstanding,
 			ISNULL(SUM(ABS(BA.actual_stake) * BA.APositiontaking),0) as Positiontaking
 	FROM Bettrans B WITH (NOLOCK)
@@ -1423,7 +1423,7 @@ FROM 	(
 			FROM	#WinLossMember 
 			GROUP BY Username, AgentId, isAgent, PositionTaking
 		) A
-FULL JOIN (	 
+LEFT JOIN (	 
 			SELECT	Username, A.AgentID, IsAgent,PT.MaxUpperPositionTaking as PositionTaking,
 					SUM (Outstanding) as Outstanding, 
 					SUM (OutstandingShare) as OutstandingShare

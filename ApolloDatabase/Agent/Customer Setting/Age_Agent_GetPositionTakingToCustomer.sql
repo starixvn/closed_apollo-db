@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_GetPositionTakingToCustomer]    Script Date: 7/12/2013 1:43:32 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_GetPositionTakingToCustomer]    Script Date: 7/15/2013 2:02:27 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -32,9 +32,11 @@ BEGIN
 	
 	SET NOCOUNT ON
 	
-	DECLARE @agentHId			HIERARCHYID,
-			@agentId			INT,
-			@isCheck			BIT	
+	DECLARE 
+		@agentHId			HIERARCHYID,
+		@agentId			INT,
+		@isCheck			BIT,
+		@actorAgentLevel	SMALLINT	
 
 	SELECT 
 		@agentId = AgentId,
@@ -42,36 +44,24 @@ BEGIN
 	FROM CustInfo WITH (NOLOCK) 
 	WHERE CustId = @CustId OR Username = @Username
 
-	SELECT @agentHId	= AgentHId
+	SELECT @agentHId = AgentHId
 	FROM AgentInfo WITH (NOLOCK)
 	WHERE AgentId	= @agentId
 
+	SELECT @actorAgentLevel = AgentLevel
+	FROM AgentInfo WITH (NOLOCK)
+	WHERE AgentId	= @ActorAgentId
+
 	SET @isCheck = 1
 
-	IF NOT EXISTS (
-		SELECT TOP(1) *
-		FROM AgentInfo WITH (NOLOCK)
-		WHERE 
-			@agentHId.IsDescendantOf(AgentHId) = 1
-			AND AgentId	= @ActorAgentId	
-	)
-		BEGIN					
+	IF NOT EXISTS (	SELECT 1
+					FROM AgentInfo WITH (NOLOCK)
+					WHERE 
+						@agentHId.IsDescendantOf(AgentHId) = 1
+						AND AgentId	= @ActorAgentId )
+		BEGIN
 			SET @isCheck = 0	
-		END
-
-	DECLARE @TableAgent TABLE (
-		AgentId		INT, 
-		AgentLevel	SMALLINT, 
-		Username	NVARCHAR(50) 
-	)
-
-	INSERT INTO @TableAgent
-	SELECT 
-		AgentId,
-		AgentLevel,
-		Username 
-	FROM AgentInfo WITH (NOLOCK) 
-	WHERE @agentHId.IsDescendantOf(AgentHId) = 1
+		END	
 
 	SELECT
 		apt.AgentId,
@@ -83,8 +73,7 @@ BEGIN
 		cpt.PositionTaking
 	FROM 
 		AgentPositionTaking AS apt WITH (NOLOCK)
-		INNER JOIN AgentInfo AS ai WITH (NOLOCK) 
-			ON apt.AgentId = ai.AgentId
+		INNER JOIN AgentInfo AS ai WITH (NOLOCK) ON apt.AgentId = ai.AgentId
 		INNER JOIN CustPositionTaking AS cpt WITH (NOLOCK)
 			ON apt.SportType	= cpt.SportType
 			AND apt.BetType		= cpt.BetType
@@ -95,6 +84,7 @@ BEGIN
 		AND apt.BetType	= @BetType
 		AND apt.IsLive	= @IsLive		
 		AND cpt.CustId	= @CustId
+		AND ai.AgentLevel >= @actorAgentLevel
 		AND @isCheck = 1
 
 END

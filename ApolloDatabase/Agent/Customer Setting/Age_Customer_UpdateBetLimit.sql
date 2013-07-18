@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateBetLimit]    Script Date: 7/2/2013 1:45:15 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateBetLimit]    Script Date: 7/17/2013 4:21:57 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -8,6 +8,7 @@ GO
 
 ALTER PROCEDURE [dbo].[Age_Customer_UpdateBetLimit]
 	@ActorAgentId	INT				= NULL,
+	@AdminId		INT				= NULL,
 	@CustId			INT,	
 	@BetLimit		VARCHAR(MAX)	= '',
 	@Language		VARCHAR(5)		= 'en-US',
@@ -21,7 +22,7 @@ AS
  * Task			: Update customer bet limit
  * DB			: SVRCUST.CustDB
  * Revisions	:
- *	• 
+ *	• 20131707@Edward	: Add parameter @AdminId for write log
  * Parameters:
  *	• @BetLimit : 
 		<ROOT>
@@ -342,6 +343,7 @@ BEGIN
 				BEGIN TRY
 					EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
 						@UserId		= @ActorAgentId,
+						@AdminId	= @AdminId,
 						@SPName		= 'Age_Agent_UpdateBetLimit',
 						@LogDate	= @startRun,
 						@CustId		= @CustId,
@@ -352,6 +354,7 @@ BEGIN
 				BEGIN CATCH
 					EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpCust
 						@UserId		= @ActorAgentId,
+						@AdminId	= @AdminId,
 						@SPName		= 'Age_Agent_UpdateBetLimit',
 						@LogDate	= @startRun,
 						@CustId		= @CustId,

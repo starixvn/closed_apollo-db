@@ -1,6 +1,6 @@
 ﻿USE [LogDB]
 GO
-/****** Object:  StoredProcedure [dbo].[WriteLog_RunSpCust]    Script Date: 5/20/2013 5:25:00 PM ******/
+/****** Object:  StoredProcedure [dbo].[WriteLog_RunSpCust]    Script Date: 7/17/2013 4:25:25 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -8,6 +8,7 @@ GO
 
 ALTER PROCEDURE [dbo].[WriteLog_RunSpCust]
 	@UserId			INT,
+	@AdminId		INT				= NULL,
 	@SPName			VARCHAR(50)		= NULL,
 	@LogDate		DATETIME,
 	@CustId			INT				= NULL,
@@ -35,6 +36,7 @@ BEGIN
 	
 	INSERT INTO RunSpCust (
 		UserId,
+		AdminId,
 		SPName,
 		LogDate,
 		CustId,
@@ -44,6 +46,7 @@ BEGIN
 		OldData )
 	SELECT
 		@UserId,
+		@AdminId,
 		@SPName,
 		@LogDate,
 		@CustId,

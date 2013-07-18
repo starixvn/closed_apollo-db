@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking]    Script Date: 7/12/2013 2:54:56 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking]    Script Date: 7/17/2013 4:22:56 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -35,6 +35,7 @@ GO
 */
 ALTER PROCEDURE [dbo].[Age_Agent_UpdatePositionTaking]
 	@ActorAgentId		INT				= NULL,
+	@AdminId			INT				= NULL,
 	@AgentId			INT,
 	@PositionTaking		VARCHAR(MAX)	= '',	
 	@Language			VARCHAR(5)		= 'en-US',	
@@ -48,7 +49,7 @@ AS
  * Task			: Update agent position taking
  * DB			: SVRCUST.CustDB
  * Revisions	:
- *	
+ *	• 20131707@Edward	: Add parameter @AdminId for write log
  * Parameters:
  *	@PositionTaking :
 		<ROOT><PositionTaking SportType="1" BetType="1" IsLive="0" MaxUpper="122" MaxGiven="7761" MinGiven="0"></PositionTaking></ROOT>		
@@ -109,14 +110,13 @@ BEGIN
 				,@isLastAgent		BIT
 				,@currentCustId		INT
 				,@data				VARCHAR(MAX)
+				,@tempLevel			INT
 
 			---- Declare agentId
 			DECLARE 
 				@agentParentLevel		SMALLINT
 				,@agentParentHId		HIERARCHYID
 				,@parentOfParentAgentId	INT
-				,@childAgentId			INT
-				,@index					INT
 				,@currentAgentId		INT
 				,@childCurrentAgentId	INT
 			---- End declare
@@ -137,7 +137,6 @@ BEGIN
 			FROM AgentInfo WITH (NOLOCK)
 			WHERE AgentId = @parentAgentId
 
-			SET @index = @agentParentLevel - 1
 			---- End set value
 
 			-- Declare constant
@@ -147,14 +146,7 @@ BEGIN
 				,@MAINAGENTLEVEL		SMALLINT	= 3
 				,@MAXPT					SMALLINT	= 10000
 				,@MAXSHAREHOLDERPT		SMALLINT	= 9000
-
-			-- Get agent Hierarchy ID, Parent ID and Agent Level
-			SELECT 
-				@agentHId		= AgentHId
-				,@parentAgentId	= ParentId
-				,@agentLevel	= AgentLevel
-			FROM AgentInfo WITH (NOLOCK)
-			WHERE AgentId = @AgentId
+				,@MINSHAREMUSTCOVER		SMALLINT	= 5000
 
 			-- Check current agent is last agent ?
 			IF EXISTS ( SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE ParentId = @AgentId )
@@ -179,9 +171,9 @@ BEGIN
 				MaxGivenPT	SMALLINT,
 				MinGivenPT	SMALLINT)		
 	
-			DECLARE @TableAgent	TABLE(AgentId INT)
+			DECLARE @TableCust TABLE (CustId INT)
 
-			DECLARE @TableCust	TABLE(CustId INT)
+			DECLARE @TableChildAgent TABLE (AgentId INT)
 
 			DECLARE @TableCustPositionTaking TABLE (
 				CustId				INT,
@@ -221,14 +213,12 @@ BEGIN
 				PT			SMALLINT,
 				Preset		SMALLINT)
 
-			DECLARE @TableTempAgent TABLE(AgentId INT)
+			DECLARE @TableTempAgent TABLE (AgentId INT)
 
 			DECLARE @TableCustAgent TABLE (
 				CustId		INT, 
 				AgentId		INT,
 				AgentLevel	SMALLINT)
-
-			DECLARE @tempLevel		INT
 
 			DECLARE @UplineAgentInfo TABLE (
 				AgentId		INT,
@@ -369,42 +359,76 @@ BEGIN
 					RETURN
 				END	
 		
-				SELECT TOP(1) 
-					@sportType	= tpt.SportType
-					,@betType	= tpt.BetType
-					,@isLive	= tpt.IsLive
-				FROM @TablePositionTaking AS tpt
-					INNER JOIN AgentPositionTaking AS papt WITH (NOLOCK)
-						ON tpt.SportType	= papt.SportType
-						AND tpt.BetType		= papt.BetType
-						AND tpt.IsLive		= papt.IsLive
-				WHERE papt.AgentId = @parentAgentId
-					AND tpt.MaxUpperPT NOT BETWEEN CASE WHEN papt.MinGivenPositionTaking - tpt.MaxGivenPT > 0 
-														THEN papt.MinGivenPositionTaking - tpt.MaxGivenPT
-														ELSE 0
-													END AND papt.MaxGivenPositionTaking - tpt.MaxGivenPT
+			SELECT TOP(1) 
+				@sportType	= tpt.SportType
+				,@betType	= tpt.BetType
+				,@isLive	= tpt.IsLive
+			FROM 
+				@TablePositionTaking AS tpt
+				INNER JOIN AgentPositionTaking AS papt WITH (NOLOCK)
+					ON tpt.SportType	= papt.SportType
+					AND tpt.BetType		= papt.BetType
+					AND tpt.IsLive		= papt.IsLive
+			WHERE 
+				papt.AgentId = @parentAgentId
+				AND tpt.MaxUpperPT NOT BETWEEN CASE WHEN papt.MinGivenPositionTaking - tpt.MaxGivenPT > 0 
+													THEN papt.MinGivenPositionTaking - tpt.MaxGivenPT
+													ELSE 0
+												END AND papt.MaxGivenPositionTaking - tpt.MaxGivenPT
 
-				IF @sportType IS NOT NULL 
-					BEGIN
-						SELECT 
-							@ErrCode	= 4000,
-							@ErrMsg		= 
-								CASE @Language
-									WHEN 'en-US' THEN 'Invalid % range' 
-									ELSE [dbo].f_Msg_GetContentById (4000, @Language)
-								END + ' (' 
-									+ CASE WHEN @sportType = 99 AND @betType = 9
-											THEN [dbo].f_Msg_GetContentById (4009, @Language)
-											ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
-										END
-									+ CASE WHEN @isLive = 1 THEN + ' ' + [dbo].f_Msg_GetContentById (4008, @Language) 
-											ELSE '' 
-										END
-									+ ' - ' + dbo.f_Bet_GetNameByType(@betType, @Language) 
-									+')'
+			IF @sportType IS NOT NULL 
+				BEGIN
+					SELECT 
+						@ErrCode	= 4000,
+						@ErrMsg		= 
+							CASE @Language
+								WHEN 'en-US' THEN 'Invalid % range' 
+								ELSE [dbo].f_Msg_GetContentById (4000, @Language)
+							END + ' (' 
+								+ CASE WHEN @sportType = 99 AND @betType = 9
+										THEN [dbo].f_Msg_GetContentById (4009, @Language)
+										ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+									END
+								+ CASE WHEN @isLive = 1 THEN + ' ' + [dbo].f_Msg_GetContentById (4008, @Language) 
+										ELSE '' 
+									END
+								+ ' - ' + dbo.f_Bet_GetNameByType(@betType, @Language) 
+								+')'
 
-						RETURN
-					END
+					RETURN
+				END
+
+			SELECT TOP(1) 
+				@sportType	= tpt.SportType
+				,@betType	= tpt.BetType
+				,@isLive	= tpt.IsLive
+			FROM @TablePositionTaking AS tpt					
+			WHERE (@agentLevel < @MAINAGENTLEVEL AND tpt.MaxGivenPT	< @MINSHAREMUSTCOVER)
+					OR( @agentLevel			= @MAINAGENTLEVEL
+						AND (tpt.MaxGivenPT	< @MINSHAREMUSTCOVER					   
+						OR tpt.MinGivenPT	< @MINSHAREMUSTCOVER ))
+
+			IF @sportType IS NOT NULL 
+				BEGIN
+					SELECT 
+						@ErrCode	= 4010,
+						@ErrMsg		= 
+							CASE @Language
+								WHEN 'en-US' THEN 'Invalid % share' 
+								ELSE [dbo].f_Msg_GetContentById (4010, @Language)
+							END + ' (' 
+								+ CASE WHEN @sportType = 99 AND @betType = 9
+										THEN [dbo].f_Msg_GetContentById (4009, @Language)
+										ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+									END
+								+ CASE WHEN @isLive = 1 THEN + ' ' + [dbo].f_Msg_GetContentById (4008, @Language) 
+										ELSE '' 
+									END
+								+ ' - ' + dbo.f_Bet_GetNameByType(@betType, @Language) 
+								+')'
+
+					RETURN
+				END
 
 			-- Update new position taking if had changed
 			IF EXISTS (	SELECT 1
@@ -421,22 +445,14 @@ BEGIN
 					-- write log before update
 					SET @xml = (
 						SELECT  
-							apt.SportType				AS '@s'
-							,apt.BetType				AS '@b'
-							,apt.IsLive					AS '@i'
-							,apt.MaxUpperPositionTaking	AS '@p'
-							,apt.MaxGivenPositionTaking	AS '@ma'
-							,apt.MinGivenPositionTaking	AS '@mi'
-						FROM 
-							AgentPositionTaking AS apt WITH (NOLOCK)
-							--INNER JOIN @TablePositionTaking AS tpt
-							--	ON apt.SportType	= tpt.SportType
-							--	AND apt.BetType		= tpt.BetType
-							--	AND apt.IsLive		= tpt.IsLive
-						WHERE apt.AgentId = @AgentId	
-						--ORDER BY apt.SportType
-						--		,apt.BetType
-						--		,apt.IsLive			
+							SportType				AS '@s'
+							,BetType				AS '@b'
+							,IsLive					AS '@i'
+							,MaxUpperPositionTaking	AS '@p'
+							,MaxGivenPositionTaking	AS '@ma'
+							,MinGivenPositionTaking	AS '@mi'
+						FROM AgentPositionTaking WITH (NOLOCK)							
+						WHERE AgentId = @AgentId	
 						FOR XML PATH('z'), ROOT('r')
 					)
 
@@ -444,11 +460,16 @@ BEGIN
 
 					-- end write log before update
 
+					INSERT INTO @TableChildAgent (AgentId)
+					SELECT AgentId
+					FROM AgentInfo WITH (NOLOCK)
+					WHERE ParentId = @AgentId
+
 					-- Edit Main Share Holder Position Taking
 					IF @agentLevel = @MAINSHAREHOLDERLEVEL
 						BEGIN
 							-- If Max Given PT change
-							IF EXISTS(	SELECT TOP(1) * 
+							IF EXISTS(	SELECT 1
 										FROM AgentPositionTaking AS apt WITH (NOLOCK)
 											INNER JOIN @TablePositionTaking AS tpt
 												ON tpt.SportType	= apt.SportType
@@ -491,22 +512,19 @@ BEGIN
 
 									-- Max given position taking must be greater or equal Max[Sum(PreK+MaxK)]
 									SELECT TOP(1) 
-										@sportType		= tpt.SportType
-										,@tempAgentId	= shareHolderTemp.AgentId
-										,@betType		= tpt.BetType
-										,@isLive		= tpt.IsLive
+										@sportType	= tpt.SportType
+										,@betType	= tpt.BetType
+										,@isLive	= tpt.IsLive
 									FROM @TablePositionTaking AS tpt
 										INNER JOIN (
 											SELECT 
-												apt.AgentId
-												,apt.SportType
-												,apt.BetType
-												,apt.IsLive												
-												,apt.MaxUpperPositionTaking + apt.MaxGivenPositionTaking AS SumMaxUpperAndGiven
-											FROM 
-												AgentPositionTaking AS apt WITH (NOLOCK)
-												INNER JOIN AgentInfo AS ai WITH (NOLOCK) ON apt.AgentId = ai.AgentId
-											WHERE ai.ParentId = @AgentId
+												AgentId
+												,SportType
+												,BetType
+												,IsLive												
+												,MaxUpperPositionTaking + MaxGivenPositionTaking AS SumMaxUpperAndGiven
+											FROM AgentPositionTaking WITH (NOLOCK)
+											WHERE AgentId IN ( SELECT AgentId FROM @TableChildAgent)
 										) AS shareHolderTemp
 											ON tpt.SportType	= shareHolderTemp.SportType
 											AND tpt.BetType		= shareHolderTemp.BetType
@@ -2703,6 +2721,7 @@ BEGIN
 					BEGIN TRY
 						EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
 						@UserId		= @ActorAgentId,
+						@AdminId	= @AdminId,
 						@SPName		= 'Age_Agent_UpdatePositionTaking',
 						@LogDate	= @startRun,
 						@AgentId	= @AgentId,
@@ -2713,6 +2732,7 @@ BEGIN
 					BEGIN CATCH
 						EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
 						@UserId		= @ActorAgentId,
+						@AdminId	= @AdminId,
 						@SPName		= 'Age_Agent_UpdatePositionTaking',
 						@LogDate	= @startRun,
 						@AgentId	= @AgentId,

@@ -35,7 +35,7 @@ Revisions:
 	- 20120927@Sophia: Add column comstatus when insert into bettrans tabble
 	- 20130313@Viet: add netTurnover
 	- 20130520@Victor: add VSOutright
-	- 20130626@Dan: delete match_log
+	- 20130715@Dan: delete match_log, outright_log
  */
 
 SET NOCOUNT ON
@@ -676,6 +676,10 @@ SET NOCOUNT OFF
 -- =====================
 Delete Match_Log where matchID IN (Select matchID From Match WITH (NOLOCK) Where eventdate=@winlostdate)
 
+Delete from outright_log
+where orid in (select orid from outright where eventdate = @winlostdate AND oddsstatus = 'Completed')
+
+-- =====================
 EXEC DB02.bodb02.dbo.Task_DailySummary_DB02_Delete @winlostdate
 
 SET @Doing = 'Task_DailySummary : End (with Finish)'

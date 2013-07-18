@@ -56,6 +56,7 @@ BEGIN
 	WHERE   ((bettype < 31 and bettype <> 10) OR bettype between 121 and 999)
 	GROUP BY b.bettype
 	
+	/*
 	    -- Number Game
 	UNION ALL
 	SELECT	bettype,
@@ -72,7 +73,7 @@ BEGIN
 	FROM	#tmpBettrans with (nolock)
 	WHERE	bettype BETWEEN 81 AND 120			
 	GROUP BY bettype
-	
+	*/
 	    -- Parlay
 	UNION ALL 
 	SELECT 	m1.bettype,
