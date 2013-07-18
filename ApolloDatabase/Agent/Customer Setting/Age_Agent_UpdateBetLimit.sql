@@ -1,10 +1,11 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateBetLimit]    Script Date: 7/17/2013 4:22:26 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateBetLimit]    Script Date: 7/18/2013 1:51:59 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+
 
 
 ALTER PROCEDURE [dbo].[Age_Agent_UpdateBetLimit]
@@ -68,7 +69,13 @@ BEGIN
 	IF @BetLimit <> ''
 		BEGIN
 			DECLARE @agentHId		HIERARCHYID,
-					@SUPERLEVEL		INT
+					@SUPERLEVEL		INT,
+					@tempUsername	NVARCHAR(100),
+					@lblMember		NVARCHAR(100),
+					@lblAgent		NVARCHAR(100)
+
+			SELECT @lblAgent = [dbo].f_Msg_GetContentById (3008, @Language)
+					,@lblMember = [dbo].f_Msg_GetContentById (3009, @Language)
 
 			SET @SUPERLEVEL = 0
 
@@ -105,12 +112,20 @@ BEGIN
 				MinMaxBet MONEY,
 				MinMaxPerMatch MONEY)
 			
-			DECLARE @BetLimitUpdateTable TABLE (
-				AgentId	INT,
-				SportType SMALLINT,
-				BetType SMALLINT,
-				MinBet MONEY,
-				MaxBet MONEY,
+			DECLARE @BetLimitAgentUpdateTable TABLE (
+				AgentId		INT,
+				SportType	SMALLINT,
+				BetType		SMALLINT,
+				MinBet		MONEY,
+				MaxBet		MONEY,
+				MaxPerMatch MONEY)
+
+			DECLARE @BetLimitCustUpdateTable TABLE (
+				CustId		INT,
+				SportType	SMALLINT,
+				BetType		SMALLINT,
+				MinBet		MONEY,
+				MaxBet		MONEY,
 				MaxPerMatch MONEY)
 
 			-- For read xml
@@ -418,37 +433,115 @@ BEGIN
 
 					-- end write log
 
-					---- Update for current agent, not effect for all line
-					UPDATE abt 
-					SET 
-						abt.MinBet		= blt.MinBet,
-						abt.MaxBet		= blt.MaxBet,
-						abt.MaxPerMatch	= blt.MaxPerMatch
-					FROM 
-						AgentBetLimit AS abt WITH (ROWLOCK, UPDLOCK)
-						INNER JOIN @BetLimitTable AS blt 
-							ON blt.SportType	= abt.SportType 
-							AND blt.BetType		= abt.BetType
-					WHERE AgentId = @AgentId 
-
-					---- Update for direct member
-					UPDATE cbt
-					SET cbt.MinBet			= CASE WHEN cbt.MinBet < but.MinBet THEN but.MinBet ELSE cbt.MinBet END
-						,cbt.MaxBet			= CASE WHEN cbt.MaxBet > but.MaxBet THEN but.MaxBet ELSE cbt.MaxBet END
-						,cbt.MaxPerMatch	= CASE WHEN cbt.MaxPerMatch > but.MaxPerMatch THEN but.MaxPerMatch ELSE cbt.MaxPerMatch END
+					---- Get agent downline break rule
+					INSERT INTO @BetLimitCustUpdateTable(
+						CustId
+						,SportType
+						,BetType
+						,MinBet
+						,MaxBet
+						,MaxPerMatch
+					)
+					SELECT
+						cbt.CustId
+						,cbt.SportType
+						,cbt.BetType
+						,CASE WHEN cbt.MinBet < but.MinBet THEN but.MinBet ELSE cbt.MinBet END
+						,CASE WHEN cbt.MaxBet > but.MaxBet THEN but.MaxBet ELSE cbt.MaxBet END
+						,CASE WHEN cbt.MaxPerMatch > but.MaxPerMatch THEN but.MaxPerMatch ELSE cbt.MaxPerMatch END
 					FROM CustBetLimit AS cbt WITH (ROWLOCK, UPDLOCK)
 						INNER JOIN CustInfo AS ci WITH (NOLOCK)
 							ON cbt.CustId	= ci.CustId
 						INNER JOIN @BetLimitTable AS but
 							ON cbt.SportType	= but.SportType
 							AND cbt.BetType		= but.BetType
-					WHERE (cbt.MinBet		< but.MinBet
+					WHERE (cbt.MinBet			< but.MinBet
 							OR cbt.MaxBet		> but.MaxBet
 							OR cbt.MaxPerMatch	> but.MaxPerMatch)
-						AND	ci.AgentId = @AgentId
+						AND	ci.AgentId = @AgentId					
+
+
+					-- Min Bet > Max Bet
+					SELECT TOP(1) 
+						@tempUsername		= ci.Username,
+						@sportType	= SportType,
+						@betType	= BetType 
+					FROM @BetLimitCustUpdateTable AS bt
+						INNER JOIN CustInfo AS ci WITH (NOLOCK) ON bt.CustId = ci.CustId 
+					WHERE MinBet > MaxBet
+	
+					IF @sportType IS NOT NULL 
+						BEGIN
+							SELECT
+								@ErrCode = 3004,
+								@ErrMsg = 
+									CASE @Language
+										WHEN 'en-US' THEN 'Min Single Bet must be less than or equal to Single Bet' 
+										ELSE [dbo].f_Msg_GetContentById (3004, @Language)
+									END + ' (' 
+										+ CASE WHEN @sportType = 99 AND @betType = 9
+												THEN [dbo].f_Msg_GetContentById (4009, @Language)
+												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+											END
+										+ ')' + '['+@lblMember+' : ' + @tempUsername +']'
+							RETURN
+						END	
+	
+					-- Min Bet > Max Per Match
+					SELECT TOP(1) 
+						@tempUsername		= ci.Username,
+						@sportType	= SportType,
+						@betType	= BetType
+					FROM @BetLimitCustUpdateTable AS bt 
+						INNER JOIN CustInfo AS ci WITH (NOLOCK) ON bt.CustId = ci.CustId 
+					WHERE MinBet > MaxPerMatch
+	
+					IF @sportType IS NOT NULL 
+						BEGIN
+							SELECT
+								@ErrCode = 3005,
+								@ErrMsg = 
+									CASE @Language
+										WHEN 'en-US' THEN 'Min Single Bet must be less than or equal to Single Game' 
+										ELSE [dbo].f_Msg_GetContentById (3005, @Language)
+									END + ' (' 
+										+ CASE WHEN @sportType = 99 AND @betType = 9
+												THEN [dbo].f_Msg_GetContentById (4009, @Language)
+												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+											END
+										+ ')' + '['+@lblMember+' : ' + @tempUsername +']'
+
+							RETURN
+						END	
+
+					-- Max Bet > Max Per Match
+					SELECT TOP(1) 
+						@tempUsername	= ci.Username,
+						@sportType	= SportType,
+						@betType	= BetType 
+					FROM @BetLimitCustUpdateTable AS bt 
+						INNER JOIN CustInfo AS ci WITH (NOLOCK) ON bt.CustId = ci.CustId 
+					WHERE MaxBet > MaxPerMatch
+	
+					IF @sportType IS NOT NULL 
+						BEGIN
+							SELECT 
+								@ErrCode = 3006,
+								@ErrMsg = 
+									CASE @Language
+										WHEN 'en-US' THEN 'Single Bet must be less than or equal to Single Game' 
+										ELSE [dbo].f_Msg_GetContentById (3006, @Language)
+									END + ' (' 
+										+ CASE WHEN @sportType = 99 AND @betType = 9
+												THEN [dbo].f_Msg_GetContentById (4009, @Language)
+												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+											END
+										+ ')' + '['+@lblMember+' : ' + @tempUsername +']'
+							RETURN
+						END	
 
 					---- Get agent downline break rule
-					INSERT INTO @BetLimitUpdateTable(
+					INSERT INTO @BetLimitAgentUpdateTable(
 						AgentId
 						,SportType
 						,BetType
@@ -460,9 +553,9 @@ BEGIN
 						abt.AgentId
 						,abt.SportType
 						,abt.BetType
-						,bt.MinBet
-						,bt.MaxBet
-						,bt.MaxPerMatch
+						,CASE WHEN abt.MinBet < bt.MinBet THEN bt.MinBet ELSE abt.MinBet END
+						,CASE WHEN abt.MaxBet > bt.MaxBet THEN bt.MaxBet ELSE abt.MaxBet END
+						,CASE WHEN abt.MaxPerMatch > bt.MaxPerMatch THEN bt.MaxPerMatch ELSE abt.MaxPerMatch END
 					FROM AgentBetLimit AS abt WITH (NOLOCK)
 						INNER JOIN @TableAgent AS ta 
 							ON abt.AgentId		= ta.AgentId
@@ -472,33 +565,226 @@ BEGIN
 					WHERE abt.MinBet		< bt.MinBet
 						OR abt.MaxBet		> bt.MaxBet
 						OR abt.MaxPerMatch	> bt.MaxPerMatch
+					
+					-- Min Bet > Max Bet
+					SELECT TOP(1) 
+						@tempUsername	= ai.Username,
+						@sportType	= SportType,
+						@betType	= BetType 
+					FROM @BetLimitAgentUpdateTable AS bt
+						INNER JOIN AgentInfo AS ai WITH (NOLOCK) ON bt.AgentId = ai.AgentId
+					WHERE MinBet > MaxBet
+	
+					IF @sportType IS NOT NULL 
+						BEGIN
+							SELECT
+								@ErrCode = 3004,
+								@ErrMsg = 
+									CASE @Language
+										WHEN 'en-US' THEN 'Min Single Bet must be less than or equal to Single Bet' 
+										ELSE [dbo].f_Msg_GetContentById (3004, @Language)
+									END + ' (' 
+										+ CASE WHEN @sportType = 99 AND @betType = 9
+												THEN [dbo].f_Msg_GetContentById (4009, @Language)
+												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+											END
+										+ ')' + '['+@lblAgent+' : ' + @tempUsername +']'
+							RETURN
+						END	
+	
+					-- Min Bet > Max Per Match
+					SELECT TOP(1) 
+						@tempUsername	= ai.Username,
+						@sportType	= SportType,
+						@betType	= BetType
+					FROM @BetLimitAgentUpdateTable AS bt 
+						INNER JOIN AgentInfo AS ai WITH (NOLOCK) ON bt.AgentId = ai.AgentId
+					WHERE MinBet > MaxPerMatch
+	
+					IF @sportType IS NOT NULL 
+						BEGIN
+							SELECT
+								@ErrCode = 3005,
+								@ErrMsg = 
+									CASE @Language
+										WHEN 'en-US' THEN 'Min Single Bet must be less than or equal to Single Game' 
+										ELSE [dbo].f_Msg_GetContentById (3005, @Language)
+									END + ' (' 
+										+ CASE WHEN @sportType = 99 AND @betType = 9
+												THEN [dbo].f_Msg_GetContentById (4009, @Language)
+												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+											END
+										+ ')' + '['+@lblAgent+' : ' + @tempUsername +']'
 
-					---- Update for agent downline
-					UPDATE abt
-					SET abt.MinBet			= CASE WHEN abt.MinBet < but.MinBet THEN but.MinBet ELSE abt.MinBet END
-						,abt.MaxBet			= CASE WHEN abt.MaxBet > but.MaxBet THEN but.MaxBet ELSE abt.MaxBet END
-						,abt.MaxPerMatch	= CASE WHEN abt.MaxPerMatch > but.MaxPerMatch THEN but.MaxPerMatch ELSE abt.MaxPerMatch END
-					FROM AgentBetLimit AS abt WITH (ROWLOCK, UPDLOCK)
-						INNER JOIN @BetLimitUpdateTable AS but
-							ON abt.AgentId		= but.AgentId
-							AND abt.SportType	= but.SportType
-							AND abt.BetType		= but.BetType
+							RETURN
+						END	
 
-					---- Update for member downline
-					UPDATE cbt
-					SET cbt.MinBet			= CASE WHEN cbt.MinBet < but.MinBet THEN but.MinBet ELSE cbt.MinBet END
-						,cbt.MaxBet			= CASE WHEN cbt.MaxBet > but.MaxBet THEN but.MaxBet ELSE cbt.MaxBet END
-						,cbt.MaxPerMatch	= CASE WHEN cbt.MaxPerMatch > but.MaxPerMatch THEN but.MaxPerMatch ELSE cbt.MaxPerMatch END
+					-- Max Bet > Max Per Match
+					SELECT TOP(1) 
+						@tempUsername	= ai.Username,
+						@sportType	= SportType,
+						@betType	= BetType 
+					FROM @BetLimitAgentUpdateTable AS bt
+						INNER JOIN AgentInfo AS ai WITH (NOLOCK) ON bt.AgentId = ai.AgentId
+					WHERE MaxBet > MaxPerMatch
+	
+					IF @sportType IS NOT NULL 
+						BEGIN
+							SELECT 
+								@ErrCode = 3006,
+								@ErrMsg = 
+									CASE @Language
+										WHEN 'en-US' THEN 'Single Bet must be less than or equal to Single Game' 
+										ELSE [dbo].f_Msg_GetContentById (3006, @Language)
+									END + ' (' 
+										+ CASE WHEN @sportType = 99 AND @betType = 9
+												THEN [dbo].f_Msg_GetContentById (4009, @Language)
+												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+											END
+										+ ')' + '['+@lblAgent+' : ' + @tempUsername +']'
+							RETURN
+						END	
+
+					INSERT INTO @BetLimitCustUpdateTable(
+						CustId
+						,SportType
+						,BetType
+						,MinBet
+						,MaxBet
+						,MaxPerMatch
+					)
+					SELECT cbt.CustId
+						,cbt.SportType
+						,cbt.BetType
+						,CASE WHEN cbt.MinBet < but.MinBet THEN but.MinBet ELSE cbt.MinBet END
+						,CASE WHEN cbt.MaxBet > but.MaxBet THEN but.MaxBet ELSE cbt.MaxBet END
+						,CASE WHEN cbt.MaxPerMatch > but.MaxPerMatch THEN but.MaxPerMatch ELSE cbt.MaxPerMatch END
 					FROM CustBetLimit AS cbt WITH (ROWLOCK, UPDLOCK)
 						INNER JOIN CustInfo AS ci WITH (NOLOCK)
 							ON cbt.CustId	= ci.CustId
-						INNER JOIN @BetLimitUpdateTable AS but
+						INNER JOIN @BetLimitAgentUpdateTable AS but
 							ON ci.AgentId		= but.AgentId
 							AND cbt.SportType	= but.SportType
 							AND cbt.BetType		= but.BetType
 					WHERE cbt.MinBet		< but.MinBet
 						OR cbt.MaxBet		> but.MaxBet
-						OR cbt.MaxPerMatch	> but.MaxPerMatch					
+						OR cbt.MaxPerMatch	> but.MaxPerMatch
+					
+					-- Min Bet > Max Bet
+					SELECT TOP(1) 
+						@tempUsername		= ci.Username,
+						@sportType	= SportType,
+						@betType	= BetType 
+					FROM @BetLimitCustUpdateTable AS bt
+						INNER JOIN CustInfo AS ci WITH (NOLOCK) ON bt.CustId = ci.CustId 
+					WHERE MinBet > MaxBet
+	
+					IF @sportType IS NOT NULL 
+						BEGIN
+							SELECT
+								@ErrCode = 3004,
+								@ErrMsg = 
+									CASE @Language
+										WHEN 'en-US' THEN 'Min Single Bet must be less than or equal to Single Bet' 
+										ELSE [dbo].f_Msg_GetContentById (3004, @Language)
+									END + ' (' 
+										+ CASE WHEN @sportType = 99 AND @betType = 9
+												THEN [dbo].f_Msg_GetContentById (4009, @Language)
+												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+											END
+										+ ')' + '['+@lblMember+' : ' + @tempUsername +']'
+							RETURN
+						END	
+	
+					-- Min Bet > Max Per Match
+					SELECT TOP(1) 
+						@tempUsername		= ci.Username,
+						@sportType	= SportType,
+						@betType	= BetType
+					FROM @BetLimitCustUpdateTable AS bt 
+						INNER JOIN CustInfo AS ci WITH (NOLOCK) ON bt.CustId = ci.CustId 
+					WHERE MinBet > MaxPerMatch
+	
+					IF @sportType IS NOT NULL 
+						BEGIN
+							SELECT
+								@ErrCode = 3005,
+								@ErrMsg = 
+									CASE @Language
+										WHEN 'en-US' THEN 'Min Single Bet must be less than or equal to Single Game' 
+										ELSE [dbo].f_Msg_GetContentById (3005, @Language)
+									END + ' (' 
+										+ CASE WHEN @sportType = 99 AND @betType = 9
+												THEN [dbo].f_Msg_GetContentById (4009, @Language)
+												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+											END
+										+ ')' + '['+@lblMember+' : ' + @tempUsername +']'
+
+							RETURN
+						END	
+
+					-- Max Bet > Max Per Match
+					SELECT TOP(1) 
+						@tempUsername	= ci.Username,
+						@sportType	= SportType,
+						@betType	= BetType 
+					FROM @BetLimitCustUpdateTable AS bt 
+						INNER JOIN CustInfo AS ci WITH (NOLOCK) ON bt.CustId = ci.CustId 
+					WHERE MaxBet > MaxPerMatch
+	
+					IF @sportType IS NOT NULL 
+						BEGIN
+							SELECT 
+								@ErrCode = 3006,
+								@ErrMsg = 
+									CASE @Language
+										WHEN 'en-US' THEN 'Single Bet must be less than or equal to Single Game' 
+										ELSE [dbo].f_Msg_GetContentById (3006, @Language)
+									END + ' (' 
+										+ CASE WHEN @sportType = 99 AND @betType = 9
+												THEN [dbo].f_Msg_GetContentById (4009, @Language)
+												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
+											END
+										+ ')' + '['+@lblMember+' : ' + @tempUsername +']'
+							RETURN
+						END	
+
+					---- Update for current agent, not effect for all line
+					UPDATE abt 
+					SET 
+						abt.MinBet		= blt.MinBet,
+						abt.MaxBet		= blt.MaxBet,
+						abt.MaxPerMatch	= blt.MaxPerMatch
+					FROM 
+						AgentBetLimit AS abt WITH (ROWLOCK, UPDLOCK)
+						INNER JOIN @BetLimitTable AS blt 
+							ON blt.SportType	= abt.SportType 
+							AND blt.BetType		= abt.BetType
+					WHERE AgentId = @AgentId
+					
+					UPDATE abt 
+					SET 
+						abt.MinBet		= blt.MinBet,
+						abt.MaxBet		= blt.MaxBet,
+						abt.MaxPerMatch	= blt.MaxPerMatch
+					FROM 
+						AgentBetLimit AS abt WITH (ROWLOCK, UPDLOCK)
+						INNER JOIN @BetLimitAgentUpdateTable AS blt 
+							ON blt.SportType	= abt.SportType 
+							AND blt.BetType		= abt.BetType
+							AND blt.AgentId		= abt.AgentId
+					
+					UPDATE cbt 
+					SET 
+						cbt.MinBet		= blt.MinBet,
+						cbt.MaxBet		= blt.MaxBet,
+						cbt.MaxPerMatch	= blt.MaxPerMatch
+					FROM 
+						CustBetLimit AS cbt WITH (ROWLOCK, UPDLOCK)
+						INNER JOIN @BetLimitCustUpdateTable AS blt 
+							ON blt.SportType	= cbt.SportType 
+							AND blt.BetType		= cbt.BetType
+							AND blt.CustId		= cbt.CustId
 					-- write log after update
 				
 					SET @xml = (
@@ -546,4 +832,5 @@ BEGIN
 				END CATCH
 		END 
 END
+
 
