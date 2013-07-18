@@ -23,6 +23,7 @@ DB: SVRAGE.REPDB
 Revisions:    
 	- 20130629@Sophia: Add @Sporttypes or Tennis, VB/BDM/TT (=Volleyball, Badminton, Table Tennis), Baseball use 
 	- 20130712@Sophia: Add @IsSuperView and calculate Stake after Share
+	- 20130718@Sophia: Add Stake berfore Share
 
 Parameters
 	@IsDirectMem : 1: Direct Member
@@ -35,6 +36,16 @@ Parameters
 SET NOCOUNT ON 
 	SELECT		B.Showtime, B.LiveIndicator,
 				B.leagueid, B.MatchId, B.HomeId, B.AwayId, 
+
+				SUM(CASE WHEN B.Bettype = 7 AND betteam = 'h' THEN B.StakeBefore ELSE 0 END) AS HomeStakeBeforeHTHDP,
+				SUM(CASE WHEN B.Bettype = 7 AND betteam = 'a' THEN B.StakeBefore ELSE 0 END) AS AwayStakeBeforeHTHDP,
+
+				SUM(CASE WHEN B.Bettype = 8 AND betteam = 'h' THEN B.StakeBefore ELSE 0 END) AS HomeStakeBeforeHTOU,
+				SUM(CASE WHEN B.Bettype = 8 AND betteam = 'a' THEN B.StakeBefore ELSE 0 END) AS AwayStakeBeforeHTOU,
+
+				SUM(CASE WHEN B.BetType = 12 AND betteam = 'h' THEN B.StakeBefore ELSE 0 END) AS HomeStakeBeforeHTOE,
+				SUM(CASE WHEN B.BetType = 12 AND betteam = 'a' THEN B.StakeBefore ELSE 0 END) AS AwayStakeBeforeHTOE,
+				--------------------------------------
 				SUM(CASE WHEN B.Bettype = 7 AND betteam = 'h' THEN B.Stake ELSE 0 END) AS HomeStakeHTHDP,
 				SUM(CASE WHEN B.Bettype = 7 AND betteam = 'a' THEN B.Stake ELSE 0 END) AS AwayStakeHTHDP,
 
@@ -43,7 +54,7 @@ SET NOCOUNT ON
 
 				SUM(CASE WHEN B.BetType = 12 AND betteam = 'h' THEN B.Stake ELSE 0 END) AS HomeStakeHTOE,
 				SUM(CASE WHEN B.BetType = 12 AND betteam = 'a' THEN B.Stake ELSE 0 END) AS AwayStakeHTOE,
-
+				--------------------------------------
 				SUM(CASE WHEN B.Bettype = 7 AND betteam = 'h' THEN B.BetCount ELSE 0 END) AS HomeCountHTHDP,
 				SUM(CASE WHEN B.Bettype = 7 AND betteam = 'a' THEN B.BetCount ELSE 0 END) AS AwayCountHTHDP,
 
@@ -52,7 +63,7 @@ SET NOCOUNT ON
 
 				SUM(CASE WHEN B.Bettype = 12 AND betteam = 'h' THEN B.BetCount ELSE 0 END) AS HomeCountHTOE,
 				SUM(CASE WHEN B.Bettype = 12 AND betteam = 'a' THEN B.BetCount ELSE 0 END) AS AwayCountHTOE,
-
+				--------------------------------------
 				MAX(CASE WHEN B.Bettype = 7 AND betteam = 'h' THEN 'h' ELSE '0' END) AS HomeBetteamHTHDP,
 				MAX(CASE WHEN B.Bettype = 7 AND betteam = 'a' THEN 'a' ELSE '0' END) AS AwayBetteamHTHDP,
 
@@ -66,6 +77,7 @@ SET NOCOUNT ON
 				SELECT		M.ShowTime, B.LiveIndicator,
 							M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
 							B.Bettype, B.betteam, 
+							SUM(B.Stake) AS StakeBefore,
 							SUM( CASE WHEN @IsSuperView = 1 THEN (1-B.TPositionTaking) ELSE BA.APositionTaking END * B.Stake) AS Stake,
 							Count(B.TransID) as BetCount
 				FROM		Bettrans B WITH (NOLOCK)

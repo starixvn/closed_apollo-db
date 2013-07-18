@@ -69,10 +69,10 @@ Param's Explanation:
 
 	INSERT INTO SVRARC.ArchiveDB.dbo.match_remark_ex (
 			matchid, eventstatus, betstatus, finalhomescore, finalawayscore, hthomescore, htawayscore, GoalRecord, 
-			ruben, changetime, settletime, calculate, multiple, calrefund, refund, IsHTCal)
+			ruben, changetime, settletime, calculate, multiple, calrefund, refund, IsHTCal, DisabledAutoSettle)
 	SELECT	e.matchid, e.eventstatus, e.betstatus, e.finalhomescore, e.finalawayscore, 
 			e.hthomescore, e.htawayscore, e.GoalRecord, e.ruben, e.changetime, e.settletime, 
-			e.calculate, e.multiple, e.calrefund, e.refund, e.IsHTCal
+			e.calculate, e.multiple, e.calrefund, e.refund, e.IsHTCal, DisabledAutoSettle
 	FROM	Match_remark_ex e
 	WHERE	matchid in (select matchid from match14 where eventdate = @winlostdate)
 
