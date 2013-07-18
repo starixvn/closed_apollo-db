@@ -32,7 +32,7 @@ Parameters
 */
 SET NOCOUNT ON
 CREATE TABLE #SpecialWager (Showtime nvarchar(50), LiveIndicator BIT, leagueid INT, MatchId INT, HomeId INT , AwayId INT, 
-							bettype INT, betteam VARCHAR(10), Stake MONEY, Count BIGINT) 
+							bettype INT, betteam VARCHAR(10), StakeBefore MONEY, Stake MONEY, Count BIGINT) 
 
 ------------------------Others
 
@@ -82,8 +82,9 @@ SELECT	*
 FROM	#SpecialWager 
 ORDER BY ShowTime, leagueid,HomeId, AwayId
 
+DROP TABLE #SpecialWager
 
 GO
-GRANT EXECUTE ON [Age_Wagers_SC_Special] TO [aplweb]
+GRANT EXECUTE ON  [Age_Wagers_SC_Special]TO [aplweb]
 
  
