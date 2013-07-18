@@ -15,7 +15,8 @@ Task:  Wagers outright
 DB: SVRAGE.REPDB
  
 Revisions:    
-	-- 20130712@Sophia: Add @IsSuperView and calculate Stake after Share
+	- 20130712@Sophia: Add @IsSuperView and calculate Stake after Share
+	- 20130718@Sophia: Add Stake berfore Share
 
 Parameters
 	@IsDirectMem : 1: Direct Member
@@ -28,6 +29,7 @@ SET NOCOUNT ON
 					M.leagueid, M.TeamId, M.Orid as MatchID, M.Status,
 					B.Bettype, '0' as betteam, 							
 					Count(B.TransID) as BetCount,
+					SUM( B.Stake) AS StakeBefore,
 					SUM( CASE WHEN @IsSuperView = 1 THEN (1-B.TPositionTaking) ELSE BA.APositionTaking END * B.Stake) AS Stake						
 		FROM		Bettrans B WITH (NOLOCK)
 		INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)

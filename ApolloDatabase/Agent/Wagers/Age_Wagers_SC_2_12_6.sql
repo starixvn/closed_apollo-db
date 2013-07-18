@@ -22,6 +22,8 @@ DB: SVRAGE.REPDB
  
 Revisions:    
 	- 20130712@Sophia: Add @IsSuperView and calculate Stake after Share
+	- 20130718@Sophia: Add Stake berfore Share
+
 Parameters
 	@IsDirectMem : 1: Direct Member
 				   0: All Member
@@ -32,6 +34,18 @@ Parameters
 SET NOCOUNT ON 
 	SELECT		B.Showtime, B.LiveIndicator,
 				B.leagueid, B.MatchId, B.HomeId, B.AwayId,
+				SUM(CASE WHEN B.BetType = 2 AND betteam = 'h' THEN B.StakeBefore ELSE 0 END) AS HomeStakeBeforeOE,
+				SUM(CASE WHEN B.BetType = 2 AND betteam = 'a' THEN B.StakeBefore ELSE 0 END) AS AwayStakeBeforeOE,
+
+				SUM(CASE WHEN B.BetType = 12 AND betteam = 'h' THEN B.StakeBefore ELSE 0 END) AS HomeStakeBeforeHTOE,
+				SUM(CASE WHEN B.BetType = 12 AND betteam = 'a' THEN B.StakeBefore ELSE 0 END) AS AwayStakeBeforeHTOE,
+
+				SUM(CASE WHEN B.BetType = 6 AND betteam = '0-1' THEN B.StakeBefore ELSE 0 END) AS Total01StakeBefore,
+				SUM(CASE WHEN B.BetType = 6 AND betteam = '2-3' THEN B.StakeBefore ELSE 0 END) AS Total23StakeBefore,
+				SUM(CASE WHEN B.BetType = 6 AND betteam = '4-6' THEN B.StakeBefore ELSE 0 END) AS Total46StakeBefore,
+				SUM(CASE WHEN B.BetType = 6 AND betteam = '7-over' THEN B.StakeBefore ELSE 0 END) AS Total7OverStakeBefore,
+
+				--------------------------
 				SUM(CASE WHEN B.BetType = 2 AND betteam = 'h' THEN B.Stake ELSE 0 END) AS HomeStakeOE,
 				SUM(CASE WHEN B.BetType = 2 AND betteam = 'a' THEN B.Stake ELSE 0 END) AS AwayStakeOE,
 
@@ -42,8 +56,8 @@ SET NOCOUNT ON
 				SUM(CASE WHEN B.BetType = 6 AND betteam = '2-3' THEN B.Stake ELSE 0 END) AS Total23Stake,
 				SUM(CASE WHEN B.BetType = 6 AND betteam = '4-6' THEN B.Stake ELSE 0 END) AS Total46Stake,
 				SUM(CASE WHEN B.BetType = 6 AND betteam = '7-over' THEN B.Stake ELSE 0 END) AS Total7OverStake,
-
-
+								
+				--------------------------
 				SUM(CASE WHEN B.Bettype = 2 AND betteam = 'h' THEN B.BetCount ELSE 0 END) AS HomeCountOE,
 				SUM(CASE WHEN B.Bettype = 2 AND betteam = 'a' THEN B.BetCount ELSE 0 END) AS AwayCountOE,
 
@@ -55,6 +69,7 @@ SET NOCOUNT ON
 				SUM(CASE WHEN B.BetType = 6 AND betteam = '4-6' THEN B.BetCount ELSE 0 END) AS Total46Count,
 				SUM(CASE WHEN B.BetType = 6 AND betteam = '7-over' THEN B.BetCount ELSE 0 END) AS Total7OverCount,
 
+				--------------------------
 				MAX(CASE WHEN B.Bettype = 2 AND betteam = 'h' THEN 'h' ELSE '0' END) AS HomeBetteamOE,
 				MAX(CASE WHEN B.Bettype = 2 AND betteam = 'a' THEN 'a' ELSE '0' END) AS AwayBetteamOE,
 
@@ -70,6 +85,7 @@ SET NOCOUNT ON
 				SELECT		M.ShowTime, B.LiveIndicator,
 							M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
 							B.Bettype, B.betteam, 
+							SUM( B.Stake) AS StakeBefore,	
 							SUM( CASE WHEN @IsSuperView = 1 THEN (1-B.TPositionTaking) ELSE BA.APositionTaking END * B.Stake) AS Stake,	
 							Count(B.TransID) as BetCount
 				FROM		Bettrans B WITH (NOLOCK)

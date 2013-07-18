@@ -15,7 +15,7 @@ DB: SVRAGE.REPDB
  
 Revisions:    
 	- 20130712@Sophia: Add @IsSuperView and calculate Stake after Share
-
+	- 20130718@Sophia: Add Stake berfore Share
 Parameters
 	@IsDirectMem : 1: Direct Member
 				   0: All Member
@@ -26,6 +26,8 @@ Parameters
 SET NOCOUNT ON 
 	SELECT		B.Showtime, B.LiveIndicator,
 				B.leagueid, B.MatchId, B.HomeId, B.AwayId,
+				SUM(CASE WHEN B.Bettype = 9 THEN B.StakeBefore ELSE 0 END) AS StakeBefore9,
+				SUM(CASE WHEN B.BetType = 29 THEN B.StakeBefore ELSE 0 END) AS StakeBefore29,
 				
 				SUM(CASE WHEN B.Bettype = 9 THEN B.Stake ELSE 0 END) AS Stake9,
 				SUM(CASE WHEN B.BetType = 29 THEN B.Stake ELSE 0 END) AS Stake29,
@@ -37,6 +39,7 @@ SET NOCOUNT ON
 				SELECT		DISTINCT M.ShowTime, B.LiveIndicator,
 							M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
 							B.Bettype,B.TransID, 
+							B.Stake AS StakeBefore, 
 							( CASE WHEN @IsSuperView = 1 THEN (1-B.TPositionTaking) ELSE BA.APositionTaking END * B.Stake) AS Stake,  
 							Count(DISTINCT B.TransID) as BetCount
 				FROM		Bettrans B WITH (NOLOCK)
