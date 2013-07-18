@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking]    Script Date: 7/17/2013 4:22:56 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking]    Script Date: 7/18/2013 1:52:52 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -403,8 +403,8 @@ BEGIN
 				,@betType	= tpt.BetType
 				,@isLive	= tpt.IsLive
 			FROM @TablePositionTaking AS tpt					
-			WHERE (@agentLevel < @MAINAGENTLEVEL AND tpt.MaxGivenPT	< @MINSHAREMUSTCOVER)
-					OR( @agentLevel			= @MAINAGENTLEVEL
+			WHERE (@agentLevel < @SHAREHOLDERLEVEL AND tpt.MaxGivenPT	< @MINSHAREMUSTCOVER)
+					OR( @agentLevel			= @SHAREHOLDERLEVEL
 						AND (tpt.MaxGivenPT	< @MINSHAREMUSTCOVER					   
 						OR tpt.MinGivenPT	< @MINSHAREMUSTCOVER ))
 

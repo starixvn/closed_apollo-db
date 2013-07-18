@@ -19,8 +19,8 @@ Date: 20130701
 Task: Betlist for Wagers
 DB: SVRAGE.REPDB
  
-Revisions:    
-	- 20130715@Sophia: Add @IsSuperView and calculate Stake after Share
+Revisions:   
+ - 20130718@Sophia: Get APositionTaking and ADiscount
 	
 Parameters
 	@IsDirectMem : 1: Direct Member
@@ -43,12 +43,13 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, MatchCode NVARCHAR(50), 
 						HomeId INT, AwayId INT, SportType TINYINT, LeagueId INT, IsNeutral BIT,  Showtime NVARCHAR(50),
 						Username NVARCHAR(50), BetType SMALLINT, CustId INT , Hdp1 SMALLMONEY, Hdp2 SMALLMONEY, Odds SMALLMONEY, MOdds SMALLMONEY,
-						Status VARCHAR(10), Stake MONEY, Actual_Stake MONEY, PlayerDiscount decimal(9,8), TransDate DATETIME, BetTeam VARCHAR(10), BetId BIGINT, 
+						Status VARCHAR(10), Stake MONEY, Actual_Stake MONEY, PlayerDiscount decimal(9,8), APositionTaking SMALLMONEY, ADiscount decimal(9,8), 
+						TransDate DATETIME, BetTeam VARCHAR(10), BetId BIGINT, 
 						LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
 						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT, 
 						UGroup varchar(3))
-
-	---Sportsbook
+	
+ 
 		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (10,9,29) OR @Bettypes = '0')
 		BEGIN
 			INSERT INTO #Betlist
@@ -73,9 +74,11 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 				CASE WHEN B.Status = 'running' AND IsNull(B.SecAcceptFlag, 0) = 1 AND IsNull(B.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 						 ELSE B.Status 
 						 END AS Status,
-				CASE WHEN @IsSuperView = 1 THEN (1-B.TPositionTaking) ELSE BA.APositionTaking END * B.Stake as Stake,
+				B.Stake,
 				B.Actual_Stake,
 				B.PlayerDiscount,
+				CASE WHEN @IsSuperView = 1 THEN (1-B.TPositionTaking) ELSE BA.APositionTaking END AS APositionTaking,
+				CASE WHEN @IsSuperView = 1 THEN NULL ELSE BA.ADiscount END AS ADiscount, 
 				B.TransDate,		
 				B.BetTeam,
 				B.BetId,					 
@@ -110,9 +113,10 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 						AND (C.UGroup = @UGroup OR @UGroup = 'ALL')
 						AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)				
 			 				 
-		END
-		
-	--inlcude mix parlay AND Combination mix parlay
+			END
+
+
+		--include mix parlay AND Combination mix parlay
 		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
 		BEGIN
 			INSERT INTO #Betlist
@@ -135,9 +139,11 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 				B.Odds,
 				B.MOdds,
 				B.Status,
-				CASE WHEN @IsSuperView = 1 THEN (1-B.TPositionTaking) ELSE BA.APositionTaking END * B.Stake as Stake, 
+				B.Stake,
 				B.Actual_Stake,
 				B.PlayerDiscount,
+				CASE WHEN @IsSuperView = 1 THEN (1-B.TPositionTaking) ELSE BA.APositionTaking END AS APositionTaking,
+				CASE WHEN @IsSuperView = 1 THEN NULL ELSE BA.ADiscount END AS ADiscount, 				
 				B.TransDate,		
 				B.BetTeam,
 				B.BetId,
@@ -201,9 +207,11 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 				B.odds,
 				B.modds,
 				B.Status,
-				CASE WHEN @IsSuperView = 1 THEN (1-B.TPositionTaking) ELSE BA.APositionTaking END * B.Stake as Stake,
+				B.stake,
 				B.actual_stake,
 				B.PlayerDiscount,
+				CASE WHEN @IsSuperView = 1 THEN (1-B.TPositionTaking) ELSE BA.APositionTaking END AS APositionTaking,
+				CASE WHEN @IsSuperView = 1 THEN NULL ELSE BA.ADiscount END AS ADiscount,  
 				B.transdate,		
 				B.betteam,
 				B.betID,					
@@ -239,9 +247,6 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 		END
 
 
-
-
-
 SELECT * FROM #Betlist
 ORDER BY TransID
 
@@ -250,6 +255,6 @@ DROP TABLE #BettypeList
 DROP TABLE #SportsList
 
 GO
-GRANT EXECUTE ON [dbo].[Age_BetList_SelWagers ] TO [aplweb]
+GRANT EXECUTE ON [dbo].[Age_BetList_SelWagers] TO [aplweb]
 
   

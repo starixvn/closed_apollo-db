@@ -23,6 +23,8 @@ DB: SVRAGE.REPDB
 Revisions:    
 	- 20130629@Sophia: Add @Sporttypes or Tennis, VB/BDM/TT (=Volleyball, Badminton, Table Tennis), Baseball use 
 	- 20130712@Sophia: Add @IsSuperView and calculate Stake after Share
+	- 20130718@Sophia: Add Stake berfore Share
+
 Parameters
 	@IsDirectMem : 1: Direct Member
 				   0: All Member
@@ -32,7 +34,7 @@ Parameters
 */
 SET NOCOUNT ON
 CREATE TABLE #SpecialWager (Showtime nvarchar(50), LiveIndicator BIT, leagueid INT, MatchId INT, HomeId INT , AwayId INT,
-							bettype INT,  betteam Varchar(10), Stake MONEY, Count BIGINT) 
+							bettype INT,  betteam Varchar(10),StakeBefore MONEY, Stake MONEY, Count BIGINT) 
 
 
 ------------------------Others
@@ -40,12 +42,14 @@ CREATE TABLE #SpecialWager (Showtime nvarchar(50), LiveIndicator BIT, leagueid I
 INSERT INTO #SpecialWager 
 SELECT		B.Showtime, B.LiveIndicator,
 			B.leagueid, B.MatchId, B.HomeId, B.AwayId,B.bettype,  '0' as Betteam,
+			SUM(B.StakeBefore) AS StakeBefore,
 			SUM(B.Stake) AS Stake,							 
 			SUM(B.BetCount) AS Count
 FROM (		
 			SELECT		M.ShowTime, B.LiveIndicator,
 						M.leagueid, M.MatchId, M.HomeId, M.AwayId, 
 						B.Bettype, 
+						SUM (B.Stake) AS StakeBefore ,
 						SUM (CASE WHEN @IsSuperView = 1 THEN (1-B.TPositionTaking) ELSE BA.APositionTaking END * B.Stake) AS Stake ,
 						Count(B.TransID) as BetCount
 			FROM		Bettrans B WITH (NOLOCK)

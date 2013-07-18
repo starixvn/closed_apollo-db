@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_GetPositionTakingToCustomer]    Script Date: 7/15/2013 2:02:27 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_GetPositionTakingToCustomer]    Script Date: 7/18/2013 1:53:57 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -36,7 +36,9 @@ BEGIN
 		@agentHId			HIERARCHYID,
 		@agentId			INT,
 		@isCheck			BIT,
-		@actorAgentLevel	SMALLINT	
+		@actorAgentLevel	SMALLINT,			
+		@MAXPISITIONTAKING	SMALLINT	= 10000,
+		@SUPPERID			INT			= 1
 
 	SELECT 
 		@agentId = AgentId,
@@ -63,6 +65,24 @@ BEGIN
 			SET @isCheck = 0	
 		END	
 
+	DECLARE @TablePositionTaking TABLE( 
+		AgentId			INT
+		,AgentLevel		SMALLINT
+		,Username		NVARCHAR(50)
+		,MaxUpper		SMALLINT
+		,MaxGiven		SMALLINT
+		,MinGiven		SMALLINT
+		,PositionTaking	SMALLINT)
+
+	INSERT @TablePositionTaking(
+		AgentId
+		,AgentLevel
+		,Username
+		,MaxUpper
+		,MaxGiven
+		,MinGiven
+		,PositionTaking
+	)
 	SELECT
 		apt.AgentId,
 		ai.AgentLevel,
@@ -85,6 +105,29 @@ BEGIN
 		AND apt.IsLive	= @IsLive		
 		AND cpt.CustId	= @CustId
 		AND ai.AgentLevel >= @actorAgentLevel
-		AND @isCheck = 1
-
+		AND @isCheck = 1	
+	ORDER BY ai.AgentLevel
+	
+	SELECT
+		AgentId,
+		AgentLevel,
+		Username,
+		MaxUpper	AS MaxUpperPositionTaking,
+		MaxGiven	AS MaxGivenPositionTaking,
+		MinGiven	AS MinGivenPositionTaking,
+		PositionTaking
+	FROM @TablePositionTaking 
+	UNION
+	SELECT
+		ai.AgentId
+		,ai.AgentLevel
+		,ai.Username
+		,apt.MaxUpperPositionTaking
+		,apt.MaxGivenPositionTaking
+		,apt.MinGivenPositionTaking
+		,@MAXPISITIONTAKING - CONVERT(SMALLINT,(SELECT SUM(PositionTaking) FROM @TablePositionTaking)) AS PositionTaking
+	FROM AgentInfo AS ai WITH (NOLOCK)
+		INNER JOIN AgentPositionTaking AS apt WITH (NOLOCK)
+			ON ai.AgentId	= apt.AgentId
+	WHERE ai.AgentId = @SUPPERID
 END
