@@ -1,4 +1,5 @@
 ﻿ALTER PROCEDURE [dbo].[Age_BetList_SelWagers]
+	@IsSuperView BIT = 0,
 	@LoggedId INT = 0,
 	@FromDate Date,
 	@Todate Date = @FromDate, 
@@ -18,7 +19,8 @@ Date: 20130701
 Task: Betlist for Wagers
 DB: SVRAGE.REPDB
  
-Revisions:    
+Revisions:   
+ - 20130718@Sophia: Get APositionTaking and ADiscount
 	
 Parameters
 	@IsDirectMem : 1: Direct Member
@@ -41,13 +43,80 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, MatchCode NVARCHAR(50), 
 						HomeId INT, AwayId INT, SportType TINYINT, LeagueId INT, IsNeutral BIT,  Showtime NVARCHAR(50),
 						Username NVARCHAR(50), BetType SMALLINT, CustId INT , Hdp1 SMALLMONEY, Hdp2 SMALLMONEY, Odds SMALLMONEY, MOdds SMALLMONEY,
-						Status VARCHAR(10), Stake MONEY, Actual_Stake MONEY, PlayerDiscount decimal(9,8), TransDate DATETIME, BetTeam VARCHAR(10), BetId BIGINT, 
+						Status VARCHAR(10), Stake MONEY, Actual_Stake MONEY, PlayerDiscount decimal(9,8), APositionTaking SMALLMONEY, ADiscount decimal(9,8), 
+						TransDate DATETIME, BetTeam VARCHAR(10), BetId BIGINT, 
 						LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
 						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT, 
 						UGroup varchar(3))
+	
+ 
+		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (10,9,29) OR @Bettypes = '0')
+		BEGIN
+			INSERT INTO #Betlist
+			SELECT			
+				B.TransId,
+				B.RefNo,
+				m.MatchId,
+				m.MatchCode ,
+				m.HomeId,
+				m.AwayId,
+				m.SportType,
+				m.LeagueId,
+				m.IsNeutral,
+				m.ShowTime,
+				B.Username,
+				B.BetType,
+				B.CustId,
+				B.Hdp1, 
+				B.Hdp2, 
+				B.Odds,
+				B.MOdds,
+				CASE WHEN B.Status = 'running' AND IsNull(B.SecAcceptFlag, 0) = 1 AND IsNull(B.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
+						 ELSE B.Status 
+						 END AS Status,
+				B.Stake,
+				B.Actual_Stake,
+				B.PlayerDiscount,
+				CASE WHEN @IsSuperView = 1 THEN (1-B.TPositionTaking) ELSE BA.APositionTaking END AS APositionTaking,
+				CASE WHEN @IsSuperView = 1 THEN NULL ELSE BA.ADiscount END AS ADiscount, 
+				B.TransDate,		
+				B.BetTeam,
+				B.BetId,					 
+				B.LiveHomeScore,
+				B.LiveAwayScore,
+				B.LiveIndicator, 
+				B.IP,		
+				B.Oddstype,		
+				B.DoubleCommLosing,
+				C.UGroup
+			
+ 			FROM		Bettrans B WITH (NOLOCK)
+			INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
+				ON		B.TransId = BA.TransId AND BA.AgentID = @LoggedID 
+						AND (@Bettypes = '0' OR BA.Bettype IN (Select Bettype FROM #BettypeList)) 
+						AND BA.StatusId IN (0,1)
+			INNER JOIN	Match M WITH (NOLOCK)
+				ON		M.matchID = B.MatchID
+			INNER JOIN  CustInfo C WITH (NOLOCK)
+				ON		C.CustID = B.CustID
+			WHERE		(@Bettypes = '0' OR B.Bettype IN (Select Bettype FROM #BettypeList ))
+						AND B.StatusId IN (0,1)							
+						AND B.LiveIndicator = @LiveIndicator
+						AND (B.betteam = @Betteam OR @betteam = '0')
+						
+						AND M.MatchId = @MatchID 
+						AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList))
+						AND M.Eventdate = @Fromdate
+						AND M.EventStatus = 'running'
+						AND (M.Leagueid = @LeagueId OR @LeagueId = 0)
+						
+						AND (C.UGroup = @UGroup OR @UGroup = 'ALL')
+						AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)				
+			 				 
+			END
 
 
-		--inlcude mix parlay AND Combination mix parlay
+		--include mix parlay AND Combination mix parlay
 		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
 		BEGIN
 			INSERT INTO #Betlist
@@ -73,6 +142,8 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 				B.Stake,
 				B.Actual_Stake,
 				B.PlayerDiscount,
+				CASE WHEN @IsSuperView = 1 THEN (1-B.TPositionTaking) ELSE BA.APositionTaking END AS APositionTaking,
+				CASE WHEN @IsSuperView = 1 THEN NULL ELSE BA.ADiscount END AS ADiscount, 				
 				B.TransDate,		
 				B.BetTeam,
 				B.BetId,
@@ -139,6 +210,8 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 				B.stake,
 				B.actual_stake,
 				B.PlayerDiscount,
+				CASE WHEN @IsSuperView = 1 THEN (1-B.TPositionTaking) ELSE BA.APositionTaking END AS APositionTaking,
+				CASE WHEN @IsSuperView = 1 THEN NULL ELSE BA.ADiscount END AS ADiscount,  
 				B.transdate,		
 				B.betteam,
 				B.betID,					
@@ -172,70 +245,6 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 						AND (C.UGroup = @UGroup OR @UGroup = 'ALL')
 						AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)	
 		END
- 
-		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (10,9,29) OR @Bettypes = '0')
-		BEGIN
-			INSERT INTO #Betlist
-			SELECT			
-				B.TransId,
-				B.RefNo,
-				m.MatchId,
-				m.MatchCode ,
-				m.HomeId,
-				m.AwayId,
-				m.SportType,
-				m.LeagueId,
-				m.IsNeutral,
-				m.ShowTime,
-				B.Username,
-				B.BetType,
-				B.CustId,
-				B.Hdp1, 
-				B.Hdp2, 
-				B.Odds,
-				B.MOdds,
-				CASE WHEN B.Status = 'running' AND IsNull(B.SecAcceptFlag, 0) = 1 AND IsNull(B.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
-						 ELSE B.Status 
-						 END AS Status,
-				B.Stake,
-				B.Actual_Stake,
-				B.PlayerDiscount,
-				B.TransDate,		
-				B.BetTeam,
-				B.BetId,					 
-				B.LiveHomeScore,
-				B.LiveAwayScore,
-				B.LiveIndicator, 
-				B.IP,		
-				B.Oddstype,		
-				B.DoubleCommLosing,
-				C.UGroup
-			
- 			FROM		Bettrans B WITH (NOLOCK)
-			INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
-				ON		B.TransId = BA.TransId AND BA.AgentID = @LoggedID 
-						AND (@Bettypes = '0' OR BA.Bettype IN (Select Bettype FROM #BettypeList)) 
-						AND BA.StatusId IN (0,1)
-			INNER JOIN	Match M WITH (NOLOCK)
-				ON		M.matchID = B.MatchID
-			INNER JOIN  CustInfo C WITH (NOLOCK)
-				ON		C.CustID = B.CustID
-			WHERE		(@Bettypes = '0' OR B.Bettype IN (Select Bettype FROM #BettypeList ))
-						AND B.StatusId IN (0,1)							
-						AND B.LiveIndicator = @LiveIndicator
-						AND (B.betteam = @Betteam OR @betteam = '0')
-						
-						AND M.MatchId = @MatchID 
-						AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList))
-						AND M.Eventdate = @Fromdate
-						AND M.EventStatus = 'running'
-						AND (M.Leagueid = @LeagueId OR @LeagueId = 0)
-						
-						AND (C.UGroup = @UGroup OR @UGroup = 'ALL')
-						AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)				
-			 				 
-		END
-		
 
 
 SELECT * FROM #Betlist
@@ -246,6 +255,6 @@ DROP TABLE #BettypeList
 DROP TABLE #SportsList
 
 GO
-GRANT EXECUTE ON [dbo].[Age_BetList_SelWagers ] TO [aplweb]
+GRANT EXECUTE ON [dbo].[Age_BetList_SelWagers] TO [aplweb]
 
   
