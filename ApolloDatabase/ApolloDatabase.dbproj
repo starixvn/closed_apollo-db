@@ -1478,6 +1478,21 @@
     <NotInBuild Include="CSD\Settlement\Outright\Acc_Set_LeagueSelOutright.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="DBA\Task\Task_BackupFull_RepDB.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\Task_DailySummary_Verify.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\Task_DailySummary_VerifyJob.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Task\Task_BackupFull_LogDB.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Outright\Acc_Set_GetConfirmedActionOutright.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">

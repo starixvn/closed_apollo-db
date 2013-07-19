@@ -112,7 +112,7 @@ BEGIN
 	SET @suffix = 'bbu' + RIGHT(CONVERT(varchar(10), @fdate,120),5)
 
 	EXEC dbo.Task_BackupFULL_TransDB @suffix
-	EXEC SVRPRO.ProdDB.dbo.Task_BackupFULL_ProdDB @suffix
+	--EXEC SVRPRO.ProdDB.dbo.Task_BackupFULL_ProdDB @suffix
 	EXEC SVRCUST.CustDB.dbo.Task_BackupFULL_CustDB @suffix
 	-- doing backup : end
 
