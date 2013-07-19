@@ -20,7 +20,7 @@ Revisions:
 */
 SET NOCOUNT ON
 
-	EXEC ExecRep_APL_03 @fdate
+	EXEC ExecRep_APL_02 @fdate
 
 Go
  

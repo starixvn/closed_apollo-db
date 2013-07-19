@@ -4,27 +4,20 @@ AS
 /*
 Created by:Sophia
 Date: 20130601
-Task:	Called by Task_BalanceUp_background
-		Delete match (put this code from Task_BalanceUp_background to a new Sp)
-DB: DBTXN.BODB02 / SVRTXN.TRANSDB
+Task: Called by Task_BalanceUp_DB02 
+DB: DB02.BODB02 / SVRPRO.ProdDB
 Revisions:
     
- */
+ */ 
+SET NOCOUNT ON 
 
-SET NOCOUNT ON
 
-IF @@SERVERNAME IN ('SDBTRANS1','SDBTRANS2') --- TransDB of Apollo
+IF @@SERVERNAME LIKE 'DBCLS1\SDBPROD' --- ProdDB of Apollo
 	RETURN
+	
+SET @fdate = CONVERT(varchar(10), @fdate, 120)
+	
+delete from odds where matchid not in (select matchid from match)
+delete from liveScore where matchid not in (select matchid from match (nolock) union all select matchid from match14 (nolock))
 
-----Put into string because linked-server DB02 does not exists
-DECLARE @S VARCHAR(4000)	
-SET @S = '
-DELETE FROM DB02.bodb02.dbo.match
-WHERE	matchid not in (select distinct matchid from bettrans where bettype <= 19000)
-		and kickofftime < '''+ CONVERT(VARCHAR(10),@fdate,120)+''''
 
--- PRINT @S
-EXEC (@S)
-
-GO
- 

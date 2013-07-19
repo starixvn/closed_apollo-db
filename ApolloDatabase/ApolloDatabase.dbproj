@@ -1403,10 +1403,10 @@
     <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\IBC\Task_DailySummary_DB02_Delete.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\IBC\ExecRep_APL_02.sql">
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\IBC\Acc_Apl_ExecRep_03.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\IBC\ExecRep_APL_03.sql">
+    <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\IBC\ExecRep_APL_02.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\IBC\Task_BalanceUp_background.sql">
