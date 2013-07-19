@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateBetLimit]    Script Date: 7/18/2013 1:51:59 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateBetLimit]    Script Date: 7/19/2013 9:42:52 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -478,12 +478,13 @@ BEGIN
 									CASE @Language
 										WHEN 'en-US' THEN 'Min Single Bet must be less than or equal to Single Bet' 
 										ELSE [dbo].f_Msg_GetContentById (3004, @Language)
-									END + ' (' 
+									END + ' ('+@lblMember+' : ' + @tempUsername +')'
+										+ ' (' 
 										+ CASE WHEN @sportType = 99 AND @betType = 9
 												THEN [dbo].f_Msg_GetContentById (4009, @Language)
 												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
 											END
-										+ ')' + '['+@lblMember+' : ' + @tempUsername +']'
+										+ ')' 
 							RETURN
 						END	
 	
@@ -504,12 +505,13 @@ BEGIN
 									CASE @Language
 										WHEN 'en-US' THEN 'Min Single Bet must be less than or equal to Single Game' 
 										ELSE [dbo].f_Msg_GetContentById (3005, @Language)
-									END + ' (' 
+									END + ' ('+@lblMember+' : ' + @tempUsername +')'
+										+ ' (' 
 										+ CASE WHEN @sportType = 99 AND @betType = 9
 												THEN [dbo].f_Msg_GetContentById (4009, @Language)
 												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
 											END
-										+ ')' + '['+@lblMember+' : ' + @tempUsername +']'
+										+ ')'
 
 							RETURN
 						END	
@@ -531,12 +533,13 @@ BEGIN
 									CASE @Language
 										WHEN 'en-US' THEN 'Single Bet must be less than or equal to Single Game' 
 										ELSE [dbo].f_Msg_GetContentById (3006, @Language)
-									END + ' (' 
+									END + ' ('+@lblMember+' : ' + @tempUsername +')'
+										+ ' (' 
 										+ CASE WHEN @sportType = 99 AND @betType = 9
 												THEN [dbo].f_Msg_GetContentById (4009, @Language)
 												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
 											END
-										+ ')' + '['+@lblMember+' : ' + @tempUsername +']'
+										+ ')'
 							RETURN
 						END	
 
@@ -562,9 +565,10 @@ BEGIN
 						INNER JOIN @BetLimitTable AS bt
 							ON abt.SportType	= bt.SportType
 							AND abt.BetType		= bt.BetType
-					WHERE abt.MinBet		< bt.MinBet
+					WHERE (abt.MinBet		< bt.MinBet
 						OR abt.MaxBet		> bt.MaxBet
-						OR abt.MaxPerMatch	> bt.MaxPerMatch
+						OR abt.MaxPerMatch	> bt.MaxPerMatch)
+						AND abt.AgentId <> @AgentId
 					
 					-- Min Bet > Max Bet
 					SELECT TOP(1) 
@@ -574,7 +578,7 @@ BEGIN
 					FROM @BetLimitAgentUpdateTable AS bt
 						INNER JOIN AgentInfo AS ai WITH (NOLOCK) ON bt.AgentId = ai.AgentId
 					WHERE MinBet > MaxBet
-	
+					
 					IF @sportType IS NOT NULL 
 						BEGIN
 							SELECT
@@ -583,12 +587,13 @@ BEGIN
 									CASE @Language
 										WHEN 'en-US' THEN 'Min Single Bet must be less than or equal to Single Bet' 
 										ELSE [dbo].f_Msg_GetContentById (3004, @Language)
-									END + ' (' 
+									END + ' ('+@lblAgent+' : ' + @tempUsername +')'
+										+ ' (' 
 										+ CASE WHEN @sportType = 99 AND @betType = 9
 												THEN [dbo].f_Msg_GetContentById (4009, @Language)
 												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
 											END
-										+ ')' + '['+@lblAgent+' : ' + @tempUsername +']'
+										+ ')' 							
 							RETURN
 						END	
 	
@@ -609,12 +614,13 @@ BEGIN
 									CASE @Language
 										WHEN 'en-US' THEN 'Min Single Bet must be less than or equal to Single Game' 
 										ELSE [dbo].f_Msg_GetContentById (3005, @Language)
-									END + ' (' 
+									END + ' ('+@lblAgent+' : ' + @tempUsername +')'
+										+ ' (' 
 										+ CASE WHEN @sportType = 99 AND @betType = 9
 												THEN [dbo].f_Msg_GetContentById (4009, @Language)
 												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
 											END
-										+ ')' + '['+@lblAgent+' : ' + @tempUsername +']'
+										+ ')'
 
 							RETURN
 						END	
@@ -636,12 +642,13 @@ BEGIN
 									CASE @Language
 										WHEN 'en-US' THEN 'Single Bet must be less than or equal to Single Game' 
 										ELSE [dbo].f_Msg_GetContentById (3006, @Language)
-									END + ' (' 
+									END + ' ('+@lblAgent+' : ' + @tempUsername +')'
+										+ ' (' 
 										+ CASE WHEN @sportType = 99 AND @betType = 9
 												THEN [dbo].f_Msg_GetContentById (4009, @Language)
 												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
 											END
-										+ ')' + '['+@lblAgent+' : ' + @tempUsername +']'
+										+ ')' 
 							RETURN
 						END	
 
@@ -687,12 +694,13 @@ BEGIN
 									CASE @Language
 										WHEN 'en-US' THEN 'Min Single Bet must be less than or equal to Single Bet' 
 										ELSE [dbo].f_Msg_GetContentById (3004, @Language)
-									END + ' (' 
+									END + ' ('+@lblMember+' : ' + @tempUsername +')'
+										+ ' (' 
 										+ CASE WHEN @sportType = 99 AND @betType = 9
 												THEN [dbo].f_Msg_GetContentById (4009, @Language)
 												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
 											END
-										+ ')' + '['+@lblMember+' : ' + @tempUsername +']'
+										+ ')'
 							RETURN
 						END	
 	
@@ -713,12 +721,13 @@ BEGIN
 									CASE @Language
 										WHEN 'en-US' THEN 'Min Single Bet must be less than or equal to Single Game' 
 										ELSE [dbo].f_Msg_GetContentById (3005, @Language)
-									END + ' (' 
+									END + ' ('+@lblMember+' : ' + @tempUsername +')'
+										+ ' (' 
 										+ CASE WHEN @sportType = 99 AND @betType = 9
 												THEN [dbo].f_Msg_GetContentById (4009, @Language)
 												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
 											END
-										+ ')' + '['+@lblMember+' : ' + @tempUsername +']'
+										+ ')'
 
 							RETURN
 						END	
@@ -740,12 +749,13 @@ BEGIN
 									CASE @Language
 										WHEN 'en-US' THEN 'Single Bet must be less than or equal to Single Game' 
 										ELSE [dbo].f_Msg_GetContentById (3006, @Language)
-									END + ' (' 
+									END + ' ('+@lblMember+' : ' + @tempUsername +')'
+										+ ' (' 
 										+ CASE WHEN @sportType = 99 AND @betType = 9
 												THEN [dbo].f_Msg_GetContentById (4009, @Language)
 												ELSE dbo.f_Sport_GetNameByType(@sportType, @Language) 
 											END
-										+ ')' + '['+@lblMember+' : ' + @tempUsername +']'
+										+ ')'
 							RETURN
 						END	
 
