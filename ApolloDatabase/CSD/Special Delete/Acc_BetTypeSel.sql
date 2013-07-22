@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[Acc_BetTypeSel]
+﻿ALTER PROCEDURE [dbo].[Acc_BetTypeSel]
 	@Mode SMALLINT = 0 
 AS
 /*
@@ -9,13 +9,14 @@ DB:  SVRCSD.RepDB
 Original:
 
 Revisions:    
-    
+    -20130719@Sophia: Add @Mode = 4 for early KO
 Param's Explanation:
 @Mode: 
 	0: Special Delete
 	1: Number game
 	2: Mix Parlay 
 	3: TicketListing
+	4: Early KO
 	
 
 */		
@@ -69,6 +70,18 @@ BEGIN
 	WHERE	typeid in (85,86,87,89,90)
 END 
  
+---- Early KO
+IF @Mode = 4
+BEGIN
+
+	INSERT INTO #TmpBettype (typeid, bettypename, type, liveindicator)
+	SELECT	typeid , typenamee as bettypename, 0 as type, CASE WHEN typeid IN (1,2,3,5,7,8,12,13,15,24,25,26,27,28) THEN 1 ELSE 0 END AS liveindicator
+	FROM	bettype WITH (NOLOCK)
+	WHERE	typeid IN (1,2,3,4,5,6,7,8,12,13,14,15,16,20,21,24,25,26,27,28,30) 
+			OR typeid = 9 
+			OR typeid = 29
+			OR (typeid between 121 and 999 AND typeid NOT IN (124,125))
+END
 
 SELECT	* 
 FROM	#TmpBettype

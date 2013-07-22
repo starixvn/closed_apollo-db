@@ -1,11 +1,4 @@
-﻿USE [RepDB]
-GO
-/****** Object:  StoredProcedure [dbo].[Age_Rpt_WinLoss]    Script Date: 7/15/2013 1:08:28 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-ALTER PROCEDURE [dbo].[Age_Rpt_WinLoss]
+﻿ALTER PROCEDURE [dbo].[Age_Rpt_WinLoss]
 	@AgentID 	INT,
 	@FromDate 	DATE,
 	@ToDate 	DATE,	
@@ -28,6 +21,7 @@ AS
 	   - 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
 						  Sort by PositionTaking
 	   - 20130712@Sophia: add OutStanding
+	   - 20130718@Sophia: Remove OutStanding
     */
     
 SET NOCOUNT ON
@@ -1084,371 +1078,43 @@ WHERE	TurnOver IS NULL
 		AND GrossTotal IS NULL
 		AND UplineTotal IS NULL
 
---################################################# OUTSTANDING SECTION ####################################################--
-
-CREATE TABLE #AgentOutstanding (Username NVARCHAR(50), AgentID INT, IsAgent BIT, Outstanding MONEY, OutstandingShare MONEY)
-CREATE TABLE #MemberOutstanding (Username NVARCHAR(50), AgentID INT, IsAgent BIT, Outstanding MONEY, OutstandingShare MONEY)
-	 
-IF @AgentId = 1
-BEGIN 
-	----Super view
-	--Sportsbook
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
-	INSERT INTO #AgentOutstanding
-	SELECT  C.Username, C.AgentID, 1 as IsAgent,
-			ISNULL(SUM (ABS(B.actual_stake)),0) as Outstanding,
-			ISNULL(SUM(ABS(B.actual_stake) * (1-B.TPositiontaking)),0) as Positiontaking
-	FROM AgentInfo C WITH (NOLOCK)
-	INNER JOIN BetTrans_Agent BA WITH (NOLOCK) -- MAIN SH 
-			ON BA.AgentID = C.AgentID		
-	INNER JOIN Bettrans B WITH (NOLOCK)
-			ON B.TransID = BA.TransID
-	INNER JOIN Match M WITH (NOLOCK) 
-			ON M.MatchId = B.MatchId			
-	WHERE	C.ParentId = 1 
-			AND B.StatusID IN (0,1) 			
-			AND (	B.bettype < 31 
-					OR B.bettype between 121 and 999
-					OR B.bettype between 1301 and 1334 					 				
-					) 
-			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-		
-			AND BA.StatusID IN (0,1) 
-			AND (	BA.bettype < 31 
-					OR BA.bettype between 121 and 999
-					OR BA.bettype between 1301 and 1334 					 				
-					)
-			AND (@Bettypes = '0' OR BA.Bettype in (Select bettype FROM #BettypeList))
-
-			AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))						
-	GROUP BY  C.Username, C.AgentID
-
-	--Parlay
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
-	INSERT INTO #AgentOutstanding
-	SELECT		B.Username, B.AgentID, 1 as IsAgent,
-				ISNULL(SUM (ABS(B.actual_stake)),0) as Outstanding,
-				ISNULL(SUM(ABS(B.actual_stake) * (1-B.TPositiontaking)),0) as Positiontaking
-	FROM (
-			SELECT  DISTINCT C.Username, C.AgentID, 1 as IsAgent,
-					B.bettype , B.actual_stake, B.TPositiontaking
-			FROM AgentInfo C WITH (NOLOCK)
-			INNER JOIN BetTrans_Agent BA WITH (NOLOCK) ---Main SH
-					ON BA.AgentID = C.AgentID		
-			INNER JOIN Bettrans B WITH (NOLOCK) 
-					ON B.TransID = BA.TransID		 			
-			WHERE	C.ParentId = 1 
-					AND BA.StatusID IN (0,1)
-					AND BA.Bettype IN (9,29) 					
-					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-
-					AND B.StatusID IN (0,1)
-					AND B.Bettype IN (9,29) 
-					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-
-					AND (@Sporttypes = '0' 
-							OR EXISTS (	SELECT	1 
-										FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
-										INNER JOIN Match M WITH (NOLOCK) 
-											ON	 M.matchID = BM.MatchId 
-											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
-										WHERE	BM.RefNo = B.RefNo
-										 )	
-						)	
-			)B	
-				 
-	GROUP BY  B.Username, B.AgentID
-
-
-	--Outright
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype=10 OR @Bettypes = '0')
-	INSERT INTO #AgentOutstanding
-	SELECT  DISTINCT C.Username, C.AgentID, 1 as IsAgent,
-			ISNULL(SUM (ABS(B.actual_stake)),0) as Outstanding,
-			ISNULL(SUM(ABS(B.actual_stake) * (1-B.TPositiontaking)),0) as Positiontaking
-	FROM AgentInfo C WITH (NOLOCK)
-	INNER JOIN BetTrans_Agent BA WITH (NOLOCK)  --- Main SH 
-			ON BA.AgentID = C.AgentID		
-	INNER JOIN Bettrans B WITH (NOLOCK)
-			ON B.TransID = BA.TransID						
-	WHERE	C.ParentId = @AgentID 
-			AND BA.StatusID IN (0,1)
-			AND BA.Bettype = 10
-			AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-
-			AND B.StatusID IN (0,1)
-			AND B.Bettype = 10
-			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-
-			--AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))					
-			AND (@Sporttypes = '0' 
-				 OR EXISTS (SELECT	1 
-							FROM	Outright M WITH (NOLOCK) 
-							INNER JOIN League L WITH (NOLOCK) 
-									ON L.leagueid = M.leagueid		
-									AND (L.sporttype IN (Select sporttype FROM #SportsList))				
-							WHERE	M.orid = B.MatchId
-							)	
-					)
-	GROUP BY  C.Username, C.AgentID
-
-END
-ELSE 
-BEGIN
-	----- Agent Outstanding
-	---Sportsbook
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
-	INSERT INTO #AgentOutstanding
-	SELECT  C.Username, C.AgentID, 1 as IsAgent,
-			ISNULL(SUM (ABS(BA.actual_stake)),0) as Outstanding,
-			ISNULL(SUM(ABS(BA.actual_stake) * BP.APositiontaking),0) as Positiontaking
-	FROM	AgentInfo C  WITH (NOLOCK)
-	INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) -- child
-			ON BA.AgentID = C.AgentID
-	INNER JOIN BetTrans_Agent AS BP WITH (NOLOCK) --- parent
-			ON BP.TransID = BA.TransID AND BP.AgentID = @AgentID
-	INNER JOIN Match M WITH (NOLOCK) 
-			ON M.MatchId = BA.MatchId
-	WHERE	C.ParentId = @AgentID 
-			AND BA.StatusID IN (0,1)	
-			AND BA.Bettype<=19000
-			AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-	
-			AND BP.StatusID IN (0,1)
-			AND BP.Bettype<=19000	
-			AND (@Bettypes = '0' OR BP.Bettype IN (Select bettype FROM #BettypeList))
-			AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList))		
-	GROUP BY C.Username, C.AgentID
-
-
-	----- Parlay
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
-	INSERT INTO #AgentOutstanding 
-	SELECT	B.Username, B.AgentID, 1 as IsAgent,
-			ISNULL(SUM (ABS(B.actual_stake)),0) as Outstanding,
-			ISNULL(SUM(ABS(B.actual_stake) * B.APositiontaking),0) as Positiontaking
-	FROM 
-	( 
-		SELECT  DISTINCT C.Username, C.AgentID,  BP.bettype, BP.actual_stake, BP.APositiontaking  
-		FROM	AgentInfo C  WITH (NOLOCK)
-		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK, index =IX_StatusID_AgentID_Bettype)
-				ON BA.AgentID = C.AgentID
-		INNER JOIN BetTrans_Agent AS BP WITH (NOLOCK)
-				ON BP.TransID = BA.TransID AND BP.AgentID = @AgentID
-		WHERE	C.ParentId = @AgentID 
-				AND BA.StatusID IN (0,1)
-				AND BA.Bettype IN (9,29)
-				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-
-				AND BP.StatusID IN (0,1)
-				AND BP.Bettype IN (9,29)	
-				AND (@Bettypes = '0' OR BP.Bettype IN (Select bettype FROM #BettypeList))
-
-				AND (@Sporttypes = '0' 
-							OR EXISTS (	SELECT	1 
-										FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
-										INNER JOIN Match M WITH (NOLOCK) 
-											ON	 M.matchID = BM.MatchId 
-											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
-										WHERE	BM.RefNo = BA.RefNo
-										 )	
-						)	
-		) B	
-		GROUP BY B.Username, B.AgentID 
-
-	----- Outright
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype = 10 OR @Bettypes = '0')
-	INSERT INTO #AgentOutstanding
-	SELECT  C.Username, C.AgentID, 1 as IsAgent,
-			ISNULL(SUM (ABS(BP.actual_stake)),0) as Outstanding,
-			ISNULL(SUM(ABS(BP.actual_stake) * BP.APositiontaking),0) as Positiontaking
-	FROM	AgentInfo C  WITH (NOLOCK)
-	INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK)
-			ON BA.AgentID = C.AgentID
-	INNER JOIN BetTrans_Agent AS BP WITH (NOLOCK)
-			ON BP.TransID = BA.TransID AND BP.AgentID = @AgentID	
-	WHERE	C.ParentId = @AgentID 
-			AND BA.StatusID IN (0,1)	
-			AND BA.Bettype = 10
-			AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-
-			AND BP.StatusID IN (0,1)
-			AND BP.Bettype = 10
-			AND (@Bettypes = '0' OR BP.Bettype IN (Select bettype FROM #BettypeList))
-
-			AND (@Sporttypes = '0' 
-				 OR EXISTS (SELECT	1 
-							FROM	Outright M WITH (NOLOCK) 
-							INNER JOIN League L WITH (NOLOCK) 
-									ON L.leagueid = M.leagueid		
-									AND (L.sporttype IN (Select sporttype FROM #SportsList))				
-							WHERE	M.orid = BA.MatchId
-							)	
-					)	 
-	GROUP BY C.Username, C.AgentID
-
-
-
-
- 
-
------Member Outstanding
-	-- SportsBook 
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
-	INSERT INTO #MemberOutstanding 
-	SELECT  '', 0 as AgentId, 0 as IsAgent,
-			ISNULL(SUM (ABS(BA.actual_stake)),0) as Outstanding,
-			ISNULL(SUM(ABS(BA.actual_stake) * BA.APositiontaking),0) as Positiontaking
-	FROM Bettrans B WITH (NOLOCK)
-	INNER JOIN BetTrans_Agent BA WITH (NOLOCK) 
-		ON BA.TransID = B.TransID AND BA.AgentId = @AgentID 
-	INNER JOIN CustInfo C WITH (NOLOCK)
-		ON B.CustID = C.CustID AND C.AgentId =@AgentID
-	INNER JOIN Match M WITH (NOLOCK) 
-		ON M.MatchId = BA.MatchId 
-	WHERE	 BA.StatusId IN (0,1)
-			AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-			
-			AND B.StatusId IN (0,1)
-			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-			AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList))	
-	GROUP BY C.AgentId
-
-	-- Parlay 
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
-	INSERT INTO #MemberOutstanding 
-	SELECT  '', 0 as AgentId, 0 as IsAgent,
-			ISNULL(SUM (ABS(B.actual_stake)),0) as Outstanding,
-			ISNULL(SUM(ABS(B.actual_stake) * B.APositiontaking),0) as Positiontaking
-	FROM (
-			SELECT  DISTINCT C.AgentId, BA.bettype, BA.actual_stake, BA.APositiontaking
-			FROM Bettrans B WITH (NOLOCK)
-			INNER JOIN BetTrans_Agent BA WITH (NOLOCK) 
-				ON BA.TransID = B.TransID AND BA.AgentId = @AgentID 				
-			INNER JOIN CustInfo C WITH (NOLOCK)
-				ON B.CustID = C.CustID AND C.AgentId =@AgentID
-			WHERE	BA.StatusId IN (0,1)
-					AND BA.Bettype In (9,29)
-					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-
-					AND B.StatusId IN (0,1)
-					AND B.Bettype In (9,29)
-					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-
-					AND (@Sporttypes = '0' 
-							OR EXISTS (	SELECT	1 
-										FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
-										INNER JOIN Match M WITH (NOLOCK) 
-											ON	 M.matchID = BM.MatchId 
-											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
-										WHERE	BM.RefNo = B.RefNo
-										 )	
-						)	
-				) B
-	GROUP BY B.AgentId
-
-	-- Outright 
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype = 10 OR @Bettypes = '0')
-	INSERT INTO #MemberOutstanding 
-	SELECT  '',0 as AgentId, 0 as IsAgent,
-			ISNULL(SUM (ABS(BA.actual_stake)),0) as Outstanding,
-			ISNULL(SUM(ABS(BA.actual_stake) * BA.APositiontaking),0) as Positiontaking
-	FROM Bettrans B WITH (NOLOCK)
-	INNER JOIN BetTrans_Agent BA WITH (NOLOCK) 
-		ON BA.TransID = B.TransID AND BA.AgentId = @AgentID 
-	INNER JOIN CustInfo C WITH (NOLOCK)
-		ON B.CustID = C.CustID AND C.AgentId =@AgentID	
-	WHERE	 BA.StatusId IN (0,1)
-			AND BA.Bettype = 10
-			AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-
-			AND B.StatusId IN (0,1)
-			AND B.Bettype = 10
-			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-			
-			AND (@Sporttypes = '0' 
-				 OR EXISTS (SELECT	1 
-							FROM	Outright M WITH (NOLOCK) 
-							INNER JOIN League L WITH (NOLOCK) 
-									ON L.leagueid = M.leagueid		
-									AND (L.sporttype IN (Select sporttype FROM #SportsList))				
-							WHERE	M.orid = B.MatchId
-							)	
-					)
-
-	GROUP BY C.AgentId
-
-END
 
 
 --################################################# Get Data ####################################################--
 
-SELECT	
-		ISNULL(A.Username, B.Username) as Username , 
-		ISNULL(A.AgentId, B.AgentId) as AgentId, 
-		ISNULL(A.isAgent, B.isAgent) as isAgent, 	
-		ISNULL(A.PositionTaking, B.PositionTaking) as PositionTaking,
-	---	ISNULL(A.BetCount,0) as BetCount,	
-		ISNULL(A.TurnOver,0) as TurnOver,
-		ISNULL(A.ActualTO,0) as ActualTO,
-		ISNULL(A.GrossTotal,0) as GrossTotal,
-		ISNULL(A.AWinLost,0) as AWinLost, 
-		ISNULL(A.AComm,0) as AComm,
-		ISNULL(A.ATotal,0) as ATotal,
-		ISNULL(A.UplineTotal,0) as UplineTotal,
-		ISNULL(B.Outstanding,0) as Outstanding,
-		ISNULL(B.OutstandingShare,0) as OutstandingShare
-FROM 	(
-			SELECT	Username, AgentId, isAgent, PositionTaking,
-					SUM(BetCount) as BetCount,	
-					SUM(TurnOver) as TurnOver,
-					SUM(ActualTO) as ActualTO,
-					SUM(GrossTotal) as GrossTotal,
-					SUM(AWinLost) as  AWinLost, 
-					SUM(AComm) as AComm,
-					SUM(ATotal) as ATotal,				
-					SUM(UplineTotal) as UplineTotal
-			FROM	#WinLossAgent
-			GROUP BY Username, AgentId, isAgent, PositionTaking
-			UNION ALL
-			SELECT	Username, AgentId, isAgent, PositionTaking,
-					SUM(BetCount) as BetCount,	
-					SUM(TurnOver) as TurnOver,
-					SUM(ActualTO) as ActualTO,
-					SUM(GrossTotal) as GrossTotal,
-					SUM(AWinLost) as  AWinLost, 
-					SUM(AComm) as AComm,
-					SUM(ATotal) as ATotal,		
-					SUM(UplineTotal) as UplineTotal
-			FROM	#WinLossMember 
-			GROUP BY Username, AgentId, isAgent, PositionTaking
-		) A
-LEFT JOIN (	 
-			SELECT	Username, A.AgentID, IsAgent,PT.MaxUpperPositionTaking as PositionTaking,
-					SUM (Outstanding) as Outstanding, 
-					SUM (OutstandingShare) as OutstandingShare
-			FROM	#AgentOutstanding A
-			INNER JOIN AgentPositionTaking PT WITH (NOLOCK) 
-				ON PT.AgentID = A.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
-			GROUP BY Username, A.AgentID, IsAgent,PT.MaxUpperPositionTaking 
-			UNION ALL
-			SELECT	Username, AgentID, IsAgent, 0 as PositionTaking,
-					SUM (Outstanding) as Outstanding,
-					SUM (OutstandingShare) as OutstandingShare
-			FROM	#MemberOutstanding 
-			GROUP BY Username, AgentID, IsAgent 
-		) B
-	ON	A.AgentID = B.AgentID
-ORDER BY IsAgent DESC, PositionTaking ASC, Username ASC
+ 
+	SELECT	Username, AgentId, isAgent, PositionTaking,
+			SUM(BetCount) as BetCount,	
+			SUM(TurnOver) as TurnOver,
+			SUM(ActualTO) as ActualTO,
+			SUM(GrossTotal) as GrossTotal,
+			SUM(AWinLost) as  AWinLost, 
+			SUM(AComm) as AComm,
+			SUM(ATotal) as ATotal,				
+			SUM(UplineTotal) as UplineTotal
+	FROM	#WinLossAgent
+	GROUP BY Username, AgentId, isAgent, PositionTaking
+	UNION ALL
+	SELECT	Username, AgentId, isAgent, PositionTaking,
+			SUM(BetCount) as BetCount,	
+			SUM(TurnOver) as TurnOver,
+			SUM(ActualTO) as ActualTO,
+			SUM(GrossTotal) as GrossTotal,
+			SUM(AWinLost) as  AWinLost, 
+			SUM(AComm) as AComm,
+			SUM(ATotal) as ATotal,		
+			SUM(UplineTotal) as UplineTotal
+	FROM	#WinLossMember 
+	GROUP BY Username, AgentId, isAgent, PositionTaking
+	ORDER BY IsAgent DESC, PositionTaking ASC, Username ASC
+ 
 
 
 DROP TABLE #WinLossAgent
 DROP TABLE #WinLossMember
 
-DROP TABLE #AgentOutstanding
-DROP TABLE #MemberOutstanding
-
 DROP TABLE #BettypeList
 DROp TABLE #SportsList
+
 
 
