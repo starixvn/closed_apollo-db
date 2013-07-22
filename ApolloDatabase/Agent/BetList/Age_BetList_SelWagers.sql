@@ -179,8 +179,8 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 
 						AND (C.UGroup = @UGroup OR @UGroup = 'ALL')
 						AND (C.AgentID = @LoggedId OR @IsDirectMem = 0)	
-			GROUP BY	B.transid, B.refno, B.Username, B.bettype, B.custid, B.Odds, B.MOdds, B.Status,	B.Stake, B.Actual_Stake, B.PlayerDiscount,
-						B.TransDate, B.BetTeam, B.BetId,B.IP, B.DoubleCommLosing, C.UGroup
+			--GROUP BY	B.transid, B.refno, B.Username, B.bettype, B.custid, B.Odds, B.MOdds, B.Status,	B.Stake, B.Actual_Stake, B.PlayerDiscount,
+			--			B.TransDate, B.BetTeam, B.BetId,B.IP, B.DoubleCommLosing, C.UGroup, B.TPositionTaking, BA.APositionTaking, BA.ADiscount
 				 
 		END
 
