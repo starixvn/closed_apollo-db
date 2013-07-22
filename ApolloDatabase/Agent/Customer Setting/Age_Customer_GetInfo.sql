@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetInfo]    Script Date: 4/23/2013 12:43:40 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_GetInfo]    Script Date: 7/22/2013 12:59:42 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -36,7 +36,6 @@ BEGIN
 		ci.BetStatus,
 		ci.UplineStatus,
 		ci.UplineBetStatus,
-		ci.Credit,
 		ci.MatchLimit,
 		ci.VirtualMultiplier,
 		ci.Danger,
@@ -47,6 +46,7 @@ BEGIN
 		ci.UGroup,
 		ci.DoubleCommLosing,
 		ci.AgentId,
+		ci.IsUGroupChanged,
 		ai.Username AS AgentUsername,
 		ai.AgentLevel
 	FROM 
