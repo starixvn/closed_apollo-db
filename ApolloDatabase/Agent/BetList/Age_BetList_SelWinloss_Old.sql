@@ -18,6 +18,7 @@ Original:
 Revisions:
     - 20130510@Sophia: Change @splitter of strSplit_Key from '^', to ','
 	- 20130628@Sophia: Add FinalHomeScore, FinalAwayScore
+	- 20130722@Sophia: SuperID = 1
 Param''s Explanation:  
  
 
@@ -80,13 +81,13 @@ CREATE TABLE #Betlist  (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 
 
 	---*****************************  Super View ***************************--
-	IF '+ CONVERT(VARCHAR(10),@LoggedId) +' = 0 
+	IF '+ CONVERT(VARCHAR(10),@LoggedId) +' = 1
 	BEGIN 
 		----By Agent
 		IF '+ CONVERT(VARCHAR(10),@AgentId) +' <> -1 AND '+ CONVERT(VARCHAR(10),@CustId) +' = -1
 		BEGIN 
 			----- 1: Super View by Super
-			IF '+ CONVERT(VARCHAR(10),@AgentId) +' = 0 
+			IF '+ CONVERT(VARCHAR(10),@AgentId) +' = 1
 			BEGIN
 				----Sportsbook
 				INSERT INTO #Betlist
