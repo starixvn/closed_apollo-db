@@ -1493,6 +1493,12 @@
     <NotInBuild Include="CSD\Settlement\Outright\Acc_Set_GetConfirmedActionOutright.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Acc_Set_OutrightSelInfo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Outright\Acc_Set_OutrightSelInfo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">

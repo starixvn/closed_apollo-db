@@ -10,7 +10,7 @@ AS
  * Created by	: Dan
  * Date			: 20130716
  * Task			: Outright results 
- * DB			: SVRPRO/ProdDB
+ * DB			: SVRTXN/TransDB
  * Revisions	:
  *	•
  * Parameters:
@@ -25,26 +25,43 @@ AS
   
 SET NOCOUNT ON  
 
-SELECT o.orid, o.leagueid ,[teamid],
-		o.matchcode, o.kickofftime,  		
-		o.eventdate,  
-		ISNULL(orex.oddsstatus_ex, 'running') AS oddsstatus, 				
-		l.sporttype, 				
-		FailedActionID
-		DisabledAutoSettle
-FROM dbo.outright o WITH(NOLOCK) 
-	LEFT JOIN dbo.outright_ex orex WITH(NOLOCK) ON o.orid= orex.orid_ex
-	JOIN League l WITH(NOLOCK) ON l.leagueid=o.leagueid
-WHERE o.eventdate BETWEEN @FromDate AND @ToDate  
-	AND o.leagueID = CASE WHEN @LeagueID <> 0 THEN @LeagueID ELSE o.leagueID END  
-	AND l.sporttype = @sporttype 				  
-	AND (@isSettled = 1 or (@isSettled= 0 and ISNULL(orex.oddsstatus_ex,'')<>'completed')) 	
+CREATE TABLE #tmpList
+	(
+		orid INT,
+		leagueid INT,
+		[teamid] INT,
+		matchcode VARCHAR(10),
+		kickofftime DATETIME, 
+		eventdate SMALLDATETIME, 
+		oddsstatus  VARCHAR(10),
+		sporttype TINYINT,
+		FailedActionID TINYINT,
+		DisabledAutoSettle BIT
+		)
+
+INSERT INTO #tmpList
+EXEC SVRPro.ProdDB.dbo.[Acc_Set_OutrightSelInfo] 	
+	@FromDate = @FromDate,
+	@ToDate = @ToDate ,
+	@sporttype = @sporttype ,
+	@LeagueID = @LeagueID , -- 0 for ALL Leagues	
+	@isSettled = @isSettled 
+
+SELECT *
+FROM #tmpList 
 ORDER BY  
 	leagueid, 
 	matchcode,
 	CASE WHEN eventdate >= CONVERT(nvarchar(10),CURRENT_TIMESTAMP,120) THEN 1 ELSE 2 END,
 	eventdate,	
-	CASE oddsstatus WHEN 'running' THEN 1 WHEN 'suspend' THEN 2 ELSE 3 END,
-	odds
+	CASE oddsstatus WHEN 'running' THEN 1 WHEN 'suspend' THEN 2 ELSE 3 END	
+
+SELECT * 
+FROM [dbo].[outright_log] WITH(NOLOCK) 
+WHERE [orid] IN (SELECT ORID FROM #tmpList)
+	and ActionId=30
+ORDER BY LogId ASC
+
+
 GO
 GRANT EXECUTE ON [dbo].[Acc_Set_OutrightSel] TO [aplweb]	
