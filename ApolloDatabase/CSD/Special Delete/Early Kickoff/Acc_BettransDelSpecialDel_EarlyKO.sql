@@ -69,7 +69,7 @@ SET NOCOUNT ON
 	----################### Check for concurrent running ###################----
 	DECLARE @isParlay TINYINT 
 	
-	IF EXISTS (SELECT 1 FROM dbo.strSplit(@bettypes,',') WHERE val IN (9,29))	
+	IF EXISTS (SELECT 1 FROM dbo.strSplit(@bettypes,'^') WHERE val IN (9,29))	
 		AND EXISTS (SELECT 1 FROM dbo.bettransm AS b WITH(NOLOCK) WHERE b.matchid=@matchid  AND b.transdate>=@KickOffDate AND b.statusID NOT IN (101,102) AND b.liveindicator=0 AND betfrom <>'P')
 	BEGIN 	
 		IF @bettypes IN ('9','29','9^29','29^9')
@@ -205,7 +205,7 @@ SET NOCOUNT ON
 	INSERT INTO #BetDelete (transid,refno,custid, Username, betfrom, statusID)   
 	SELECT DISTINCT transid,refno,custid, Username, betfrom, statusID
 	FROM bettrans b WITH (nolock)
-		INNER JOIN dbo.strSplit(@bettypes,',') AS fb ON b.bettype=fb.val
+		INNER JOIN dbo.strSplit(@bettypes,'^') AS fb ON b.bettype=fb.val
 	WHERE
 			b.matchid=@matchid	
 			AND b.transdate>=@KickOffDate	
@@ -234,7 +234,7 @@ SET NOCOUNT ON
 			b.matchid=@matchid	
 			AND b.transdate>=@KickOffDate	
 			AND b.liveindicator=0		
-			AND betteam  in (SELECT CONVERT(VARCHAR,val) FROM dbo.strSplit(CASE WHEN @betteam430 = 'All' THEN betteam ELSE @betteam430 END,','))
+			AND betteam  in (SELECT CONVERT(VARCHAR,val) FROM dbo.strSplit(CASE WHEN @betteam430 = 'All' THEN betteam ELSE @betteam430 END,'^'))
 			AND b.bettype in (4,30)
 			AND b.betfrom <>'P'
 			AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
@@ -247,7 +247,7 @@ SET NOCOUNT ON
 			b.matchid=@matchid	
 			AND b.transdate>=@KickOffDate	
 			AND b.liveindicator=0		
-			AND betteam  in (SELECT CONVERT(VARCHAR,val) FROM dbo.strSplit(CASE WHEN @betteam6 = 'All' THEN betteam ELSE @betteam6 END,','))
+			AND betteam  in (SELECT CONVERT(VARCHAR,val) FROM dbo.strSplit(CASE WHEN @betteam6 = 'All' THEN betteam ELSE @betteam6 END,'^'))
 			AND b.bettype = 6
 			AND b.betfrom <>'P'
 			AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
@@ -256,7 +256,7 @@ SET NOCOUNT ON
 	INSERT INTO #BetDelete (transid,refno,custid,Username,betfrom, statusID)   
 	SELECT DISTINCT transid,refno,custid,Username,betfrom, statusID
 	FROM bettrans b WITH (nolock)
-		LEFT JOIN dbo.strSplit(@betteam14,',') AS goal ON goal.val=b.betteam 
+		LEFT JOIN dbo.strSplit(@betteam14,'^') AS goal ON goal.val=b.betteam 
 	WHERE
 			b.matchid=@matchid	
 			AND b.transdate>=@KickOffDate	
@@ -274,21 +274,21 @@ SET NOCOUNT ON
 			b.matchid=@matchid	
 			AND b.transdate>=@KickOffDate	
 			AND b.liveindicator=0		
-			AND betteam  in (SELECT CONVERT(VARCHAR,val) FROM dbo.strSplit(CASE WHEN @betteam16 = 'All' THEN betteam ELSE @betteam16 END,','))
+			AND betteam  in (SELECT CONVERT(VARCHAR,val) FROM dbo.strSplit(CASE WHEN @betteam16 = 'All' THEN betteam ELSE @betteam16 END,'^'))
 			AND b.bettype = 16
 			AND b.betfrom <>'P'
 			AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
 		
 				
 	--GET sub ticket of the matchid for mix parlay
-	IF EXISTS (SELECT 1 FROM dbo.strSplit(@bettypes,',') WHERE val IN (9,29))	
+	IF EXISTS (SELECT 1 FROM dbo.strSplit(@bettypes,'^') WHERE val IN (9,29))	
 		AND EXISTS (SELECT 1 FROM dbo.bettransm AS b WITH(NOLOCK) WHERE b.matchid=@matchid  AND b.transdate>=@KickOffDate AND b.statusID NOT IN (101,102) AND b.liveindicator=0 AND betfrom <>'P')
 	BEGIN	
 		INSERT INTO #BetmDelete (transid,refno,custid,Username, betfrom, statusID)   
 		SELECT DISTINCT b.transid,b.refno,b.custid,bt.Username, b.betfrom, b.statusID
 		FROM bettransm AS b with (NOLOCK)			
 			INNER JOIN bettrans bt WITH(NOLOCK) ON b.refno = bt.refno 
-			INNER JOIN (SELECT CONVERT(SMALLINT,val) AS bettype FROM dbo.strSplit(@bettypes,',') WHERE val IN (9,29)) t ON t.bettype = bt.bettype	
+			INNER JOIN (SELECT CONVERT(SMALLINT,val) AS bettype FROM dbo.strSplit(@bettypes,'^') WHERE val IN (9,29)) t ON t.bettype = bt.bettype	
 		WHERE	b.matchid=@matchid   
 			AND b.transdate>=@KickOffDate		
 			AND b.liveindicator=0			
@@ -430,7 +430,7 @@ SET NOCOUNT ON
 	FROM	dbo.bettrans AS b WITH (nolock)
 		INNER JOIN #BetDelete AS d WITH(NOLOCK) ON d.transid=b.transid AND d.refno=b.refno
 	WHERE		
-		b.bettype in (SELECT CONVERT(INT,val) FROM dbo.strSplit(@bettypes,','))
+		b.bettype in (SELECT CONVERT(INT,val) FROM dbo.strSplit(@bettypes,'^'))
 		AND b.matchid = @matchid
 		AND b.liveindicator = 0
 		AND b.transdate>=@KickOffDate

@@ -37,10 +37,6 @@ CREATE TABLE  #BetListDetail (
 
 CREATE TABLE  #AgentIdList ( AgentId INT)
 
-INSERT INTO #AgentIdList 
-SELECT	AgentId 
-FROM	BetTrans_Agent WITH (NOLOCK)
-WHERE	TransID = @TransId
 
 
 DECLARE @AgentLevel INT, @Username NVARCHAR(50)
@@ -53,6 +49,12 @@ WHERE	AgentID = @LoggedId
 IF @Todate > @MoveBetsDay
 BEGIN 
 	
+	
+	INSERT INTO #AgentIdList 
+	SELECT	AgentId 
+	FROM	BetTrans_Agent WITH (NOLOCK)
+	WHERE	TransID = @TransId
+
 	INSERT INTO #BetListDetail
 	SELECT	DISTINCT
 			BA.TransID,
@@ -113,6 +115,12 @@ END
 
 IF @Fromdate <= @MoveBetsDay
 BEGIN
+
+			INSERT INTO #AgentIdList 
+			SELECT	AgentId 
+			FROM	BetTrans14_Agent WITH (NOLOCK)
+			WHERE	TransID = @TransId
+
 			INSERT INTO #BetListDetail
 			SELECT	DISTINCT
 					BA.TransID,

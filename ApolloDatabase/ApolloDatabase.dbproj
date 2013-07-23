@@ -66,7 +66,6 @@
     <Folder Include="Agent\User management" />
     <Folder Include="Agent\Misc" />
     <Folder Include="Agent\Customer Setting\Test" />
-    <Folder Include="Agent\AccountInfo" />
     <Folder Include="CSD\Settlement" />
     <Folder Include="Agent\BetList" />
     <Folder Include="Agent\Function" />
@@ -112,6 +111,8 @@
     <Folder Include="DBA\Move bet - Balance Up\Balance Up\IBC" />
     <Folder Include="CSD\Settlement\Outright" />
     <Folder Include="CSD\Settlement\Outright\IBC" />
+    <Folder Include="CSD\Special Delete\Early Kickoff" />
+    <Folder Include="Agent\Admin\AccountInfo" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -219,9 +220,6 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Customer Setting\Test\zzz_RandomInteger.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\AccountInfo\Age_Customer_GetAllInfo.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="CSD\Settlement\Admin_Match_Update.sql">
@@ -983,15 +981,6 @@
     <NotInBuild Include="API\Mem_API_BettransInsTransaction.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\AccountInfo\Age_Agent_GetByUsername.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\AccountInfo\Age_Customer_GetByUsername.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\AccountInfo\Age_Agent_GetAllInfo.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="API\Mem_API_GetCustBalance.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1025,19 +1014,7 @@
     <NotInBuild Include="CSD\Write Log\WriteLog_Settlement_Settle.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\AccountInfo\Age_Agent_GetAgentDownline.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\AccountInfo\Age_Agent_GetAgentDownlinePath.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\AccountInfo\Age_Agent_GetMemberDownline.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="CSD\Others\Acc_SelRefNo.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\AccountInfo\Age_Agent_GetAllMainShareHolder.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="CSD\Write Log\WriteLog_RunSpAgent.sql">
@@ -1053,9 +1030,6 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Function\f_Msg_GetContentById.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\--Age_BetList_AgentDetail_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetDiscountToAgent.sql">
@@ -1110,12 +1084,6 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Customer Setting\Unit Test\MainShareHolder.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\AccountInfo\Age_Agent_GetCustomerDownlinePath.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\AccountInfo\Age_Agent_GetMainShareHolderByMember.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Function\f_Bet_GetNameByType.sql">
@@ -1391,9 +1359,6 @@
     <NotInBuild Include="CSD\Settlement\Auto Settlement\Admin_AutoSettlement_ClearFailAction.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\AccountInfo\Age_Agent_SuggestByUsername.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\IBC\ExecRep_APL_01.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1494,6 +1459,51 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="CSD\Settlement\Outright\Acc_Set_OutrightSelInfo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Special Delete\Early Kickoff\Acc_BettransDelSpecialDel_EarlyKO.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Special Delete\Early Kickoff\Acc_BettransSelSpecialDel_EarlyKO.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Admin\AccountInfo\Age_Agent_GetAgentDownline.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Admin\AccountInfo\Age_Agent_GetAgentDownlinePath.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Admin\AccountInfo\Age_Agent_GetAllInfo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Admin\AccountInfo\Age_Agent_GetAllMainShareHolder.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Admin\AccountInfo\Age_Agent_GetByUsername.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Admin\AccountInfo\Age_Agent_GetCustomerDownlinePath.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Admin\AccountInfo\Age_Agent_GetMainShareHolderByMember.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Admin\AccountInfo\Age_Agent_GetMemberDownline.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Admin\AccountInfo\Age_Agent_SuggestByUsername.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Admin\AccountInfo\Age_Customer_GetAllInfo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Admin\AccountInfo\Age_Customer_GetByUsername.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\--Age_BetList_AgentDetail_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\Age_BetList_AgentDetail_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
