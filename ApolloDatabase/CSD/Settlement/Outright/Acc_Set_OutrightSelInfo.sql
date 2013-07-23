@@ -31,7 +31,8 @@ SELECT o.orid, o.leagueid ,[teamid],
 		ISNULL(orex.oddsstatus_ex, 'running') AS oddsstatus, 				
 		l.sporttype, 				
 		FailedActionID,
-		DisabledAutoSettle
+		DisabledAutoSettle,
+		odds
 FROM dbo.outright o WITH(NOLOCK) 
 	LEFT JOIN dbo.outright_ex orex WITH(NOLOCK) ON o.orid= orex.orid_ex
 	JOIN League l WITH(NOLOCK) ON l.leagueid=o.leagueid

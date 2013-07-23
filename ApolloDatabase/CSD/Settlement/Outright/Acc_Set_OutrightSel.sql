@@ -36,7 +36,8 @@ CREATE TABLE #tmpList
 		oddsstatus  VARCHAR(10),
 		sporttype TINYINT,
 		FailedActionID TINYINT,
-		DisabledAutoSettle BIT
+		DisabledAutoSettle BIT,
+		odds SMALLMONEY
 		)
 
 INSERT INTO #tmpList
@@ -54,7 +55,8 @@ ORDER BY
 	matchcode,
 	CASE WHEN eventdate >= CONVERT(nvarchar(10),CURRENT_TIMESTAMP,120) THEN 1 ELSE 2 END,
 	eventdate,	
-	CASE oddsstatus WHEN 'running' THEN 1 WHEN 'suspend' THEN 2 ELSE 3 END	
+	CASE oddsstatus WHEN 'running' THEN 1 WHEN 'suspend' THEN 2 ELSE 3 END,
+	odds
 
 SELECT * 
 FROM [dbo].[outright_log] WITH(NOLOCK) 
