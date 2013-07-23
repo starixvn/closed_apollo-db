@@ -1,6 +1,6 @@
 ﻿USE [MsgDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetPublicMessage]    Script Date: 7/7/2013 9:46:07 AM ******/
+/****** Object:  StoredProcedure [dbo].[Dot_Msg_GetPublicMessage]    Script Date: 7/23/2013 9:28:18 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
