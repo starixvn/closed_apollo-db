@@ -19,6 +19,7 @@ DB:  SVRAGE.RepDB
 Original:  
 
 Revisions:
+	- 20130723@Sophia: Not Filter data by @FromDate, @Todate
   
 */ 
 AS
@@ -28,7 +29,6 @@ SET NOCOUNT ON
 CREATE TABLE  #BetListDetail (
 		TransID BIGINT,
 		AgentID INT,		
-		--Username VARCHAR(50),
 		Status   VARCHAR(10),		
 		APositionTaking SMALLMONEY, 
 		ADiscount	DECIMAL(9,8),
@@ -42,9 +42,7 @@ DECLARE @AgentLevel INT, @Username NVARCHAR(50)
 SELECT	@AgentLevel = AgentLevel +1, @Username = Username
 FROM	AgentInfo  WITH (NOLOCK)
 WHERE	AgentID = @LoggedId
- 
-
-IF @Todate > @MoveBetsDay
+   
 BEGIN 
 
 	INSERT INTO #AgentIdList 
@@ -57,7 +55,6 @@ BEGIN
 	SELECT	DISTINCT
 			BA.TransID,
 			BA.AgentID,
-			--BA.Username,
 			BA.Status,
 			BA.APositionTaking,
 			BA.ADiscount,
@@ -70,12 +67,7 @@ BEGIN
 			ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM #AgentIdList)	 
 	LEFT JOIN BetTrans_Agent D WITH (NOLOCK)
 			ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
-	WHERE	BA.TransId = @TransId 
-			AND BA.TransDate BETWEEN @fromdate AND @todate 
-			AND (BA.bettype < 31 
-				OR BA.bettype BETWEEN 121 AND 999 
-				OR BA.bettype BETWEEN 1301 AND 1334   
-				) ---OR BA.Bettype  BETWEEN 81 AND 120 )
+	WHERE	B.TransId = @TransId 			 
 			AND ISNULL(C.AgentLevel,@AgentLevel) >= @AgentLevel   
 
 
@@ -86,7 +78,6 @@ BEGIN
 			SELECT	DISTINCT
 					B.TransID,
 					@LoggedId as AgentID,
-					--@Username as Username,
 					B.Status,
 					(1 - B.TPositionTaking) AS APositionTaking,
 					NULL AS ADiscount,
@@ -99,19 +90,15 @@ BEGIN
 					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM #AgentIdList)	 
 			LEFT JOIN BetTrans_Agent D WITH (NOLOCK)
 					ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
-			WHERE	BA.TransId = @TransId 
-					AND BA.TransDate BETWEEN @fromdate AND @todate 
-					AND (BA.bettype < 31 
-						OR BA.bettype BETWEEN 121 AND 999 
-						OR BA.bettype BETWEEN 1301 AND 1334   
-						) ----OR BA.Bettype  BETWEEN 81 AND 120 )
+			WHERE	B.TransId = @TransId 					
 					AND ISNULL(C.AgentLevel,@AgentLevel) >= @AgentLevel 
 	END
 	
 		
 END	
 
-IF @Fromdate <= @MoveBetsDay
+------If not have data in Bettrans then check data in bettrans14
+IF NOT EXISTS (SELECT TOP 1 1 FROM #BetListDetail )
 BEGIN
 
 			INSERT INTO #AgentIdList 
@@ -124,7 +111,6 @@ BEGIN
 			SELECT	DISTINCT
 					BA.TransID,
 					BA.AgentID,
-					--BA.Username,
 					BA.Status,
 					BA.APositionTaking,
 					BA.ADiscount,
@@ -137,12 +123,7 @@ BEGIN
 					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM #AgentIdList)	 
 			LEFT JOIN BetTrans14_Agent D WITH (NOLOCK)
 					ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
-			WHERE	BA.TransId = @TransId 
-					AND BA.TransDate BETWEEN @fromdate AND @todate 
-					AND (BA.bettype < 31 
-						OR BA.bettype BETWEEN 121 AND 999 
-						OR BA.bettype BETWEEN 1301 AND 1334  
-						) ---OR BA.bettype  BETWEEN 81 AND 120 ) 
+			WHERE	B.TransId = @TransId 					 
 					AND ISNULL(C.AgentLevel,@AgentLevel) >= @AgentLevel 
 					  	
 	-----Super View add 1 more row of Super
@@ -152,7 +133,6 @@ BEGIN
 			SELECT	DISTINCT 
 					B.TransID,
 					@LoggedId as AgentID,
-				---	@Username as Username,
 					B.Status,
 					(1 - B.TPositionTaking) AS APositionTaking,
 					NULL AS ADiscount,
@@ -165,12 +145,7 @@ BEGIN
 					ON	C.ParentID = BA.AgentID	AND C.AgentId IN (SELECT AgentId FROM #AgentIdList)	 
 			LEFT JOIN BetTrans14_Agent D WITH (NOLOCK)
 					ON  D.AgentID = C.AgentID AND D.TransID = BA.TransID
-			WHERE	BA.TransId = @TransId 
-					AND BA.TransDate BETWEEN @fromdate AND @todate 
-					AND (BA.bettype < 31 
-						OR BA.bettype BETWEEN 121 AND 999 
-						OR BA.bettype BETWEEN 1301 AND 1334   
-						) ---OR BA.Bettype  BETWEEN 81 AND 120 )
+			WHERE	B.TransId = @TransId
 					AND ISNULL(C.AgentLevel,@AgentLevel) >= @AgentLevel 
 	END	
 	

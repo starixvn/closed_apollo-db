@@ -33,21 +33,23 @@ BEGIN
 	SET NOCOUNT ON 
 	
 	CREATE TABLE #SpecialDeleteBets (transid bigint,SubTransid bigint,refno bigint
-	,custid int,odds smallmoney, OddsType int, transdate datetime,bettype smallint, betteam nvarchar(10),hdp1 smallmoney, hdp2 smallmoney,livehomescore smallint, liveawayscore smallint
-	,StakePositiontaking money,currency tinyint,status nvarchar(10), SecAcceptFlag bit, HomeId Int, AwayId int, SportType smallint, LeagueId int)  
+	,custid int, username nvarchar(50), odds smallmoney,modds smallmoney, OddsType int, transdate datetime,bettype smallint, betteam nvarchar(10),hdp1 smallmoney, hdp2 smallmoney,livehomescore smallint, liveawayscore smallint
+	,Actual_stake Money, Stake money,currency tinyint,status nvarchar(10), SecAcceptFlag bit, HomeId Int, AwayId int, SportType smallint, LeagueId int)  
 	
 	CREATE TABLE #SpecialDeleteBetms (transid bigint,SubTransid bigint,refno bigint
-	,custid int,odds smallmoney, OddsType int, transdate datetime,bettype smallint, betteam nvarchar(10),hdp1 smallmoney, hdp2 smallmoney,livehomescore smallint, liveawayscore smallint
-	,StakePositiontaking money,currency tinyint, status nvarchar(10), HomeId Int, AwayId int, SportType smallint, LeagueId int, ParlayType smallint)  
+	,custid int, username nvarchar(50), odds smallmoney,modds smallmoney, OddsType int, transdate datetime,bettype smallint, betteam nvarchar(10),hdp1 smallmoney, hdp2 smallmoney,livehomescore smallint, liveawayscore smallint
+	,Actual_stake Money, Stake money,currency tinyint, status nvarchar(10), HomeId Int, AwayId int, SportType smallint, LeagueId int, ParlayType smallint)  
 
-	IF EXISTS( SELECT convert(int,val) FROM dbo.strSplit(@bettypes,',') Where convert(int,val) in (4,30) )	
+	IF EXISTS( SELECT convert(int,val) FROM dbo.strSplit(@bettypes,'^') Where convert(int,val) in (4,30) )	
 		INSERT INTO #SpecialDeleteBets 
 		SELECT  
 			b.transid,
 			b.transid AS SubTransID,
 			b.refno,
-			b.custid,  
-			b.odds,     
+			b.custid,
+			b.username,  
+			b.odds, 
+			b.modds,    
 			b.OddsType,    
 			b.transdate,  
 			b.bettype,  
@@ -56,7 +58,8 @@ BEGIN
 			b.hdp2,  
 			b.livehomescore,  
 			b.liveawayscore,  			
-			b.stake as StakePositiontaking,  
+			b.Actual_stake,
+			b.stake, 
 			b.currency,   				
 			CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 				 ELSE b.status 
@@ -68,13 +71,13 @@ BEGIN
 			m.LeagueId
 		FROM bettrans b with (NOLOCK)	
 			INNER JOIN Match m WITH (NOLOCK) ON b.MatchId = m.MatchId
-			INNER JOIN dbo.strSplit(@bettypes,',') AS fb ON b.bettype=fb.val
+			INNER JOIN dbo.strSplit(@bettypes,'^') AS fb ON b.bettype=fb.val
 		WHERE	b.matchid=@matchid   
 			AND b.transdate>=@KickOffDate
 			AND b.statusID NOT IN (101,102)
 			AND b.liveindicator=0
 			AND b.bettype in(4,30)
-			AND b.betteam  in (SELECT convert(varchar,val) FROM dbo.strSplit(case when @betteam430 = 'All' then betteam else @betteam430 end,','))  
+			AND b.betteam  in (SELECT convert(varchar,val) FROM dbo.strSplit(case when @betteam430 = 'All' then betteam else @betteam430 end,'^'))  
 	    	AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
     			
 		 
@@ -85,7 +88,9 @@ BEGIN
 		b.transid AS SubTransID,
 		b.refno,
 		b.custid, 
-		b.odds,     
+		b.username,
+		b.odds,   
+		b.modds,      
 		b.OddsType,    
 		b.transdate,  
 		b.bettype,  
@@ -94,7 +99,8 @@ BEGIN
 		b.hdp2,  
 		b.livehomescore,  
 		b.liveawayscore,  
-		b.stake as StakePositiontaking,  
+		b.Actual_stake,
+		b.stake, 
 		b.currency,   	
 		CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 			 ELSE b.status 
@@ -106,7 +112,7 @@ BEGIN
 		m.LeagueId
 	FROM bettrans b with (NOLOCK)	
 		INNER JOIN Match m WITH (NOLOCK) ON b.MatchId = m.MatchId 
-		INNER JOIN dbo.strSplit(@bettypes,',') AS fb ON b.bettype=fb.val
+		INNER JOIN dbo.strSplit(@bettypes,'^') AS fb ON b.bettype=fb.val
 	WHERE	b.matchid=@matchid   
 		AND b.transdate>=@KickOffDate
 		AND b.statusID NOT IN (101,102)
@@ -133,7 +139,9 @@ BEGIN
 		b.transid AS SubTransID,
 		b.refno,
 		b.custid,   
-		b.odds,     
+		b.username,
+		b.odds, 
+		b.modds,        
 		b.OddsType,    
 		b.transdate,  
 		b.bettype,  
@@ -142,7 +150,8 @@ BEGIN
 		hdp2,  
 		b.livehomescore,  
 		b.liveawayscore, 		
-		b.stake as StakePositiontaking,  
+		b.Actual_stake,
+		b.stake,  
 		b.currency,   		
 		CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 			 ELSE b.status 
@@ -161,11 +170,11 @@ BEGIN
 		AND b.betfrom <>'P'		
 		AND(
 			(b.bettype = 6 
-			AND b.betteam  in (SELECT convert(varchar,val) FROM dbo.strSplit(case when @betteam6 = 'All' then betteam else @betteam6 end,','))  
+			AND b.betteam  in (SELECT convert(varchar,val) FROM dbo.strSplit(case when @betteam6 = 'All' then betteam else @betteam6 end,'^'))  
 			)			
 			OR
 			(b.bettype = 16
-			AND b.betteam  in (SELECT convert(varchar,val) FROM dbo.strSplit(case when @betteam16 = 'All' then betteam else @betteam16 end,','))  
+			AND b.betteam  in (SELECT convert(varchar,val) FROM dbo.strSplit(case when @betteam16 = 'All' then betteam else @betteam16 end,'^'))  
 			)
 		)
         AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END		
@@ -175,8 +184,10 @@ BEGIN
 		b.transid,
 		b.transid AS SubTransID,
 		b.refno,
-		b.custid,   
-		b.odds,     
+		b.custid,  
+		b.username, 
+		b.odds,  
+		b.modds,       
 		b.OddsType,    
 		b.transdate,  
 		b.bettype,  
@@ -185,7 +196,8 @@ BEGIN
 		hdp2,  
 		b.livehomescore,  
 		b.liveawayscore, 	
-		b.stake as StakePositiontaking,  
+		b.Actual_stake,
+		b.stake,  
 		b.currency,   
 		CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 			 ELSE b.status 
@@ -197,7 +209,7 @@ BEGIN
 		m.LeagueId  
 	FROM dbo.bettrans b with (NOLOCK)  		
 		INNER JOIN Match m WITH (NOLOCK) ON b.MatchId = m.MatchId 
-		LEFT JOIN dbo.strSplit(@betteam14,',') AS goal ON goal.val=b.betteam--dbo.Acc_SplitIndex(b.betteam,':',2)			
+		LEFT JOIN dbo.strSplit(@betteam14,'^') AS goal ON goal.val=b.betteam--dbo.Acc_SplitIndex(b.betteam,':',2)			
 	WHERE b.matchid=@matchid
 		AND b.transdate>=@KickOffDate		
 		AND b.statusID NOT IN (101,102)
@@ -207,8 +219,8 @@ BEGIN
         AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END		
 	
 	---get sub ticket of a mix parlay	
-	CREATE TABLE #Currency (transid bigint,Refno bigint, CurrencyID tinyint,oddstype tinyint, bettype smallint)
-	IF EXISTS (SELECT 1 FROM dbo.strSplit(@bettypes,',') WHERE val IN (9,29))
+	CREATE TABLE #Currency (transid bigint,Refno bigint, CurrencyID tinyint,oddstype tinyint, bettype smallint, username NVARCHAR(50))
+	IF EXISTS (SELECT 1 FROM dbo.strSplit(@bettypes,'^') WHERE val IN (9,29))
 		AND EXISTS (SELECT 1 FROM dbo.bettransm AS b WITH(NOLOCK) 
 					WHERE b.matchid=@matchid  AND b.transdate>=@KickOffDate 
 						AND b.statusID NOT IN(101,102) 
@@ -217,9 +229,9 @@ BEGIN
 						
 	BEGIN		
 		INSERT INTO #Currency
-		SELECT transid,Refno,Currency,oddstype, b2.bettype
+		SELECT transid,Refno,Currency,oddstype, b2.bettype, b2.username
 		FROM dbo.bettrans AS b2 WITH(NOLOCK)
-			 INNER JOIN dbo.strSplit(@bettypes,',') AS fb ON b2.bettype=fb.val
+			 INNER JOIN dbo.strSplit(@bettypes,'^') AS fb ON b2.bettype=fb.val
 		WHERE b2.matchid IN (9,29)
 			AND b2.bettype IN (9,29)
 			AND (b2.betid IS NULL OR b2.betid = 0)
@@ -235,7 +247,9 @@ BEGIN
 			b.transid AS SubTransID,			
 			b.refno,
 			b.custid,    
+			cy.username,
 			b.odds,     
+			b.modds,    
 			cy.OddsType,    
 			b.transdate,  
 			b.bettype,  
@@ -244,7 +258,8 @@ BEGIN
 			b.hdp2,  
 			b.livehomescore,  
 			b.liveawayscore,    
-			b.stake as StakePositiontaking,  
+			b.Actual_stake,
+			b.stake,
 			cy.currencyID, 		
 			b.status,	
 			m.HomeId, 
