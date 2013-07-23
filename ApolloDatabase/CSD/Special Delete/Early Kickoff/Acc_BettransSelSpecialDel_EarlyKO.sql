@@ -219,7 +219,7 @@ BEGIN
         AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END		
 	
 	---get sub ticket of a mix parlay	
-	CREATE TABLE #Currency (transid bigint,Refno bigint, CurrencyID tinyint,oddstype tinyint, bettype smallint, username NVARCHAR(50))
+	CREATE TABLE #Currency (transid bigint,Refno bigint, CurrencyID tinyint,oddstype tinyint, bettype smallint, username NVARCHAR(50), modds smallmoney, Actual_stake MONEY, stake MONEY)
 	IF EXISTS (SELECT 1 FROM dbo.strSplit(@bettypes,'^') WHERE val IN (9,29))
 		AND EXISTS (SELECT 1 FROM dbo.bettransm AS b WITH(NOLOCK) 
 					WHERE b.matchid=@matchid  AND b.transdate>=@KickOffDate 
@@ -229,7 +229,7 @@ BEGIN
 						
 	BEGIN		
 		INSERT INTO #Currency
-		SELECT transid,Refno,Currency,oddstype, b2.bettype, b2.username
+		SELECT transid,Refno,Currency,oddstype, b2.bettype, b2.username,b2.modds, b2.Actual_stake, b2.stake
 		FROM dbo.bettrans AS b2 WITH(NOLOCK)
 			 INNER JOIN dbo.strSplit(@bettypes,'^') AS fb ON b2.bettype=fb.val
 		WHERE b2.matchid IN (9,29)
@@ -249,7 +249,7 @@ BEGIN
 			b.custid,    
 			cy.username,
 			b.odds,     
-			b.modds,    
+			cy.modds,    
 			cy.OddsType,    
 			b.transdate,  
 			b.bettype,  
@@ -258,8 +258,8 @@ BEGIN
 			b.hdp2,  
 			b.livehomescore,  
 			b.liveawayscore,    
-			b.Actual_stake,
-			b.stake,
+			cy.Actual_stake,
+			cy.stake,
 			cy.currencyID, 		
 			b.status,	
 			m.HomeId, 
