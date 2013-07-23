@@ -23,7 +23,7 @@ Original:
 
 Revisions:
 	- 20110523@Henry: change bettype to new range
-	- 20130603@Sophia: Put the deleting-match code into ExecRep_APL_02
+	- 20130603@Sophia: Put the deleting-match code into [Acc_Apl_ExecRep_03]
 
 	
 Param's Explanation: 
@@ -297,9 +297,9 @@ BEGIN
 		--where matchid not in (select distinct matchid from bettrans where bettype <= 19000)
 		--and kickofftime < @fdate
 
-		-----> Put this code into ExecRep_APL_02
+		-----> Put this code into [Acc_Apl_ExecRep_03]
 
-		EXEC ExecRep_APL_02 @fdate 
+		EXEC Acc_Apl_ExecRep_03 @fdate 
 
 		EXEC DB02.bodb02.dbo.Task_BalanceUp_DB02 @fdate
 

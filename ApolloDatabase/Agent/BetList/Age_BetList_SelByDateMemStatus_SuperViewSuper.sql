@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[Age_BetList_SelByDateMemStatus_SuperViewSuper]
+﻿ALTER PROCEDURE [dbo].[Age_BetList_SelByDateMemStatus_SuperViewSuper]
 	@LoggedId INT,
 	@AgentId INT = -1 ,
 	@CustId INT = -1,
@@ -18,7 +18,8 @@ Task : Betlist for Outstanding report/ Cancel Bets Report/ Account Info-Betlist 
 DB:  SVRAGE.RepDB
 Original:  
 Revisions:
-
+	- 20130722@Sophia: Revise parlay section
+	
 Param's Explanation:  
 	@RptType = 0: Normal
 			 = 1: Called from Report Transaction
@@ -163,14 +164,24 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 					B.DoubleCommLosing,
 					C.UGroup	
 			FROM BetTrans AS B  WITH (NOLOCK)
-			INNER JOIN BettransM BM WITH (NOLOCK) ON BM.RefNo = B.RefNo
-			INNER JOIN Match m WITH (NOLOCK) ON m.MatchID = BM.MatchID
+			--INNER JOIN BettransM BM WITH (NOLOCK) ON BM.RefNo = B.RefNo
+			--INNER JOIN Match m WITH (NOLOCK) ON m.MatchID = BM.MatchID
 			INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId 
 			WHERE  B.StatusId in (SELECT StatusId FROM #StatusId ) 
 					AND B.TransDate Between @FromDate AND @ToDate
 					AND B.BetType IN (9,29)
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
-					AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList)) 	
+					--AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList)) 	
+					AND (@Sporttypes = '0' 
+							OR EXISTS (	SELECT	1 
+										FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
+										INNER JOIN Match M WITH (NOLOCK) 
+											ON	 M.matchID = BM.MatchId 
+											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
+										WHERE	BM.RefNo = B.RefNo
+										)
+							)		
+
 
 			----- Outright
 			INSERT INTO #Betlist
@@ -335,14 +346,23 @@ BEGIN
 					B.DoubleCommLosing,
 					C.UGroup	
 			FROM Bettrans14 AS B  WITH (NOLOCK)
-			INNER JOIN BettransM14 BM WITH (NOLOCK) ON BM.RefNo = B.RefNo
-			INNER JOIN Match14 m WITH (NOLOCK) ON m.MatchID = BM.MatchID
+			--INNER JOIN BettransM14 BM WITH (NOLOCK) ON BM.RefNo = B.RefNo
+			--INNER JOIN Match14 m WITH (NOLOCK) ON m.MatchID = BM.MatchID
 			INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId 
 			WHERE  B.StatusId in (SELECT StatusId FROM #StatusId ) 
 					AND B.TransDate Between @FromDate AND @ToDate
 					AND B.BetType IN (9,29)
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
-					AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList)) 	
+					--AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList)) 	
+					AND (@Sporttypes = '0' 
+							OR EXISTS (	SELECT	1 
+										FROM	BettransM14 BM WITH (NOLOCK, index=IX_RefNo) 
+										INNER JOIN Match14 M WITH (NOLOCK) 
+											ON	 M.matchID = BM.MatchId 
+											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
+										WHERE	BM.RefNo = B.RefNo
+										)
+							)		
 
 			----- Outright14
 			INSERT INTO #Betlist

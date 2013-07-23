@@ -29,6 +29,13 @@ INTO #tmp
 FROM SVRPRO.ProdDB.dbo.outright o WITH(NOLOCK) 
 	LEFT JOIN SVRPRO.ProdDB.dbo.outright_ex orex WITH(NOLOCK) ON o.orid= orex.orid_ex	
 WHERE o.leagueID = @LeagueID
+ORDER BY  
+	leagueid, 
+	matchcode,
+	CASE WHEN eventdate >= CONVERT(nvarchar(10),CURRENT_TIMESTAMP,120) THEN 1 ELSE 2 END,
+	eventdate,	
+	CASE oddsstatus WHEN 'running' THEN 1 WHEN 'suspend' THEN 2 ELSE 3 END,
+	odds
 
 SELECT * 
 FROM #tmp	
