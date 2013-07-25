@@ -127,6 +127,8 @@ BEGIN
 	-- =====
 	--  END
 	-- =====
+
+	PRINT 'DONE DELETE DATA'
 END
 
 --ELSE

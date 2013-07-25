@@ -106,16 +106,16 @@ BEGIN
 
 	---later
 	EXEC dbo.Task_BalanceCheck @fdate, 11
-
+	/*
 	-- doing backup
 	Declare @suffix varchar(10)
 	SET @suffix = 'bbu' + RIGHT(CONVERT(varchar(10), @fdate,120),5)
 
-	EXEC dbo.Task_BackupFULL_TransDB @suffix
+	--EXEC dbo.Task_BackupFULL_TransDB @suffix
 	--EXEC SVRPRO.ProdDB.dbo.Task_BackupFULL_ProdDB @suffix
-	EXEC SVRCUST.CustDB.dbo.Task_BackupFULL_CustDB @suffix
+	--EXEC SVRCUST.CustDB.dbo.Task_BackupFULL_CustDB @suffix
 	-- doing backup : end
-
+	*/
 -- ================== END STEP : 2
 END
 -- ================== Clear BalanceTable and Perform Backup
