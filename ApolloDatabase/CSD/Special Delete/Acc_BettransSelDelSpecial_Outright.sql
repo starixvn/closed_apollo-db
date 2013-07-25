@@ -2,7 +2,7 @@
 	@OutrightID int = 0,
 	@FromRefNo bigint,
 	@ToRefNo bigint,
-	@UserName varchar(50) = ''
+	@UserName nvarchar(50) = ''
 AS
 SET NOCOUNT ON
 
@@ -11,16 +11,16 @@ Created by:  Sophia
 Date: 20130307
 Original: 
 Task: Select bets transaction need to delete
-DB: 
+DB: SVRCSD.RepDB
 
 Revisions:
-	 
+	  - 20130725@Sophia: Change username nvarchar(50)
 	
 Explanation's Param:
 
 */
 
-CREATE TABLE #OutrightDeleteBets (transid bigint,custid int,username varchar(30),odds smallmoney,transdate datetime, Stake money,currency nvarchar(50),status nvarchar(10))
+CREATE TABLE #OutrightDeleteBets (transid bigint,custid int,username nvarchar(50),odds smallmoney,transdate datetime, Stake money,currency nvarchar(50),status nvarchar(10))
 
 INSERT INTO #OutrightDeleteBets
 select

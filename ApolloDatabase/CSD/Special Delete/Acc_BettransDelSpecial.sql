@@ -33,6 +33,8 @@ DB: SVRTXN.TransDB
 Original: 
 
 Revisions:    
+  - 20130725@Sophia: Change username nvarchar(50)
+	
 		    
 Param's Explanation: Special bet delete option
 
@@ -120,7 +122,7 @@ Param's Explanation: Special bet delete option
 	END 
 	-------------------		
 		
-	CREATE TABLE #BetDelete (transid BIGINT, CustId INT, PlayerName varchar(50), betfrom NVARCHAR(1),statusID INT)
+	CREATE TABLE #BetDelete (transid BIGINT, CustId INT, PlayerName nvarchar(50), betfrom NVARCHAR(1),statusID INT)
 	
 	--DECLARE @UUSCust TABLE (custid INT, username VARCHAR(30))
 

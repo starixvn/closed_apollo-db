@@ -12,7 +12,7 @@ AS
 	Task: Recover bet Number Game
 
 	Revisions:   				   
-		 
+		  - 20130725@Sophia: Change username nvarchar(50)
 	Param's Explanation:
 */
 

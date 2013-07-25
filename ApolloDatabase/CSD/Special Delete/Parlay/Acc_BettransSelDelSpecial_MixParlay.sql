@@ -24,6 +24,7 @@ AS
 	Original:   
    
 	Revisions:   	
+	- 20130725@Sophia: Change username nvarchar(50)
 	
 	Param's Explanation:
 			@Type
@@ -42,7 +43,7 @@ BEGIN
 	CREATE TABLE #ParlayDelete (transid bigint  
         ,SubTransID bigint  
         ,refno bigint  
-        ,username varchar(30)  
+        ,username nvarchar(50)  
         ,CustId int  
         ,transdate datetime 
 		,actual_stake money

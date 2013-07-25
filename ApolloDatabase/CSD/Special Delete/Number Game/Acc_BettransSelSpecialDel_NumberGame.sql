@@ -13,6 +13,7 @@ Task: Select bets transaction need to delete (Number Game)
 DB: SVRCSD.RepDB
   
 Revisions:  
+- 20130725@Sophia: Change username nvarchar(50)
 	 
 Explanation's Param:  
   
@@ -24,7 +25,7 @@ BEGIN
 	(
 		transid BIGINT,  
 		CustId INT,  
-		username VARCHAR(30),  
+		username NVARCHAR(50),  
 		odds SMALLMONEY,   
 		OddsType INT,   
 		transdate DATETIME,  

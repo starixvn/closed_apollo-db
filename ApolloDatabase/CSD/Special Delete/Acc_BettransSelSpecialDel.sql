@@ -15,7 +15,7 @@
 	@betteam6 varchar(120) = '',
 	@betteam14 varchar(120) = '',
 	@betteam16 varchar(120) = '',
-	@UserName varchar(50) = '',
+	@UserName nvarchar(50) = '',
     @SAFilter tinyint = 0 	
 AS
 BEGIN
@@ -27,6 +27,7 @@ BEGIN
 	DB: SVRCSD.RepDB
 
 	Revisions:		
+	- 20130725@Sophia: Change Username nvarchar(50)
 		
 	Explanation's Param:
 	    - @SAFilter: 
@@ -42,7 +43,7 @@ BEGIN
 
 */
 	SET NOCOUNT ON
-	CREATE TABLE #SpecialDeleteBets (transid bigint,CustId int,username varchar(30),odds smallmoney, OddsType int, 
+	CREATE TABLE #SpecialDeleteBets (transid bigint,CustId int,username nvarchar(50),odds smallmoney, OddsType int, 
 									 transdate datetime, bettype smallint, betteam nvarchar(10),hdp1 smallmoney, hdp2 smallmoney,
 									 Liveindicator bit, livehomescore smallint, liveawayscore smallint, StakePositiontaking money,currency tinyint,
 									 status nvarchar(10), SecAcceptFlag bit,  HomeId Int, AwayId int, SportType smallint, LeagueId int)

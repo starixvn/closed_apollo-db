@@ -27,7 +27,7 @@ AS
 	DB: SVRCSD.RepDB
 
 	Revisions:		
-		
+		- 20130725@Sophia: Change username nvarchar(50)
 	Explanation's Param:
 	    - @SAFilter: 
 	      + 0: All tickets
@@ -176,8 +176,8 @@ SET NOCOUNT ON
 	END 	
 	----################### End of check for concurrent running ###################----
 	
-	CREATE TABLE #BetDelete (transid BIGINT,refno bigint,custid INT, Username varchar(50), betfrom NVARCHAR(1),statusID INT)
-	CREATE TABLE #BetmDelete (transid BIGINT,refno bigint,custid INT, Username varchar(50), betfrom NVARCHAR(1),statusID INT)
+	CREATE TABLE #BetDelete (transid BIGINT,refno bigint,custid INT, Username nvarchar(50), betfrom NVARCHAR(1),statusID INT)
+	CREATE TABLE #BetmDelete (transid BIGINT,refno bigint,custid INT, Username nvarchar(50), betfrom NVARCHAR(1),statusID INT)
 		
 	--DECLARE @UUSCust TABLE (custid INT, username VARCHAR(30))
 	--DECLARE @RealCurrCust TABLE (custid INT, username VARCHAR(30))

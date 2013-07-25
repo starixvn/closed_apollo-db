@@ -21,7 +21,7 @@ SET NOCOUNT ON
 
 */
 
-DECLARE @BetDelete TABLE (transid bigint, custid int, Username varchar(50))
+DECLARE @BetDelete TABLE (transid bigint, custid int, Username nvarchar(50))
 
 INSERT INTO @BetDelete (transid, custid, Username)	
 
