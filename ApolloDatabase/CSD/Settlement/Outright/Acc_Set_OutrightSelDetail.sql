@@ -24,11 +24,14 @@ SELECT o.orid, o.leagueid , teamid,
 		o.matchcode, o.kickofftime,  		
 		o.eventdate,  
 		ISNULL(orex.oddsstatus_ex, 'running') AS oddsstatus, 				
-		status_ex AS [status]		
+		status_ex AS [status], odds		
 INTO #tmp
 FROM SVRPRO.ProdDB.dbo.outright o WITH(NOLOCK) 
 	LEFT JOIN SVRPRO.ProdDB.dbo.outright_ex orex WITH(NOLOCK) ON o.orid= orex.orid_ex	
 WHERE o.leagueID = @LeagueID
+
+SELECT * 
+FROM #tmp	
 ORDER BY  
 	leagueid, 
 	matchcode,
@@ -36,9 +39,6 @@ ORDER BY
 	eventdate,	
 	CASE oddsstatus WHEN 'running' THEN 1 WHEN 'suspend' THEN 2 ELSE 3 END,
 	odds
-
-SELECT * 
-FROM #tmp	
 
 SELECT * 
 FROM [dbo].[outright_log] WITH(NOLOCK) 
