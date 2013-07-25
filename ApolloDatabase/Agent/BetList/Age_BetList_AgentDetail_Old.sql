@@ -6,9 +6,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 ALTER PROCEDURE [dbo].[Age_BetList_AgentDetail_Old]
 	@TransId BIGINT,
-	@LoggedId INT,
-	@FromDate DATE,
-	@ToDate DATE
+	@LoggedId INT 
 
 
 /*

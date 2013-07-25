@@ -12,7 +12,7 @@ DB: SVRTXN.TransDB
 Task: Recover Single Bet and Outright
 	
 Revisions:   
-	 
+	  - 20130725@Sophia: Change username nvarchar(50)
 Param's Explanation:
 
 */
@@ -32,7 +32,7 @@ BEGIN
         @matchid int,      
         @bettype int,
 		@Status NVARCHAR(10),
-		@Username varchar(50),       
+		@Username nvarchar(50),       
 		@CustId int,		
 		@balance money,
 		@bf_balance MONEY,

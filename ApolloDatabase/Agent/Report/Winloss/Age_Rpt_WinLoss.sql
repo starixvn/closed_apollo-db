@@ -22,6 +22,7 @@ AS
 						  Sort by PositionTaking
 	   - 20130712@Sophia: add OutStanding
 	   - 20130718@Sophia: Remove OutStanding
+	   - 20130725@Sophia: Change username nvarchar(50)
     */
     
 SET NOCOUNT ON
@@ -184,7 +185,7 @@ BEGIN
 	---- Agent Winloss
 	--********************************
 		---Sportsbook
-		CREATE TABLE #Tmp (Username VARCHAR(50),  AgentID INT , PositionTaking smallint,
+		CREATE TABLE #Tmp (Username NVARCHAR(50),  AgentID INT , PositionTaking smallint,
 				BetCount INT, TurnOver MONEY, ActualTO MONEY, AWinlost MONEY,AComm MONEY,
 				ATotal MONEY, ChildAComm MONEY, Winlost MONEY, Actual_Stake MONEY) 
 
@@ -695,7 +696,7 @@ BEGIN
 	---- Agent Winloss
 	--********************************
 		---Sportsbook
-		CREATE TABLE #Tmp14 (Username VARCHAR(50),  AgentID INT , PositionTaking smallint,
+		CREATE TABLE #Tmp14 (Username NVARCHAR(50),  AgentID INT , PositionTaking smallint,
 				BetCount INT, TurnOver MONEY, ActualTO MONEY, AWinlost MONEY,AComm MONEY,
 				ATotal MONEY, ChildAComm MONEY, Winlost MONEY, Actual_Stake MONEY) 
 

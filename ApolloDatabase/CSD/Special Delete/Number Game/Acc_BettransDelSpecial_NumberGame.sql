@@ -20,7 +20,7 @@ DB:  SVRTXN.TransDB
 Original: 
 
 Revisions:
-   
+   - 20130725@Sophia: Change username nvarchar(50)
 						   
 Param's Explanation: 
 
@@ -154,7 +154,7 @@ BEGIN
 	
 	----################ End of check concurrent running #####################----
 	
-	CREATE TABLE #BetDelete (transid BIGINT, CustId INT, PlayerName varchar(50), betfrom NVARCHAR(1),statusID INT)
+	CREATE TABLE #BetDelete (transid BIGINT, CustId INT, PlayerName nvarchar(50), betfrom NVARCHAR(1),statusID INT)
 		
 
 	INSERT INTO #BetDelete (transid, CustId, PlayerName, betfrom, statusID)			

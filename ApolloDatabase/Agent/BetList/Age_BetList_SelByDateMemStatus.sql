@@ -6,7 +6,9 @@
 	@Todate SMALLDATETIME,
 	@StatusIds VARCHAR(1000),
 	@Sporttypes VARCHAR(1000) ='0',
-	@Bettypes VARCHAR(1000) = '0'
+	@Bettypes VARCHAR(1000) = '0',
+	@RptType SMALLINT = 0
+	
 
  AS
 /*
@@ -19,9 +21,13 @@ Revisions:
    - 20130510@Sophia: Change @splitter of strSplit_Key from '^', to ','
    - 20130628@Sophia: Add FinalHomeScore, FinalAwayScore, UGroup for Singbet
    - 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
-
+   - 20130724@Sophioa: Revise Sp, Add @RptType
 
 Param's Explanation:  
+	@RptType: = 0: Called from Account Info-Betlist
+			  = 1: Called from Transaction report
+			  = 2: Called from Outstanding Report
+			  = 3: Called from ticket cancel report
 	
 */  
 SET NOCOUNT ON
@@ -37,7 +43,7 @@ BEGIN
 		EXEC Age_BetList_SelByDateMemStatus_SuperViewSuper 
 			@LoggedId = 1, @AgentId = 1 ,@CustId = -1,
 			@FromDate = @FromDate, @Todate = @Todate, @StatusIds = @StatusIds,
-			@Sporttypes = @Sporttypes, @Bettypes = @Bettypes
+			@Sporttypes = @Sporttypes, @Bettypes = @Bettypes, @RptType = @RptType
 		RETURN				
 	END
 	ELSE
@@ -47,7 +53,7 @@ BEGIN
 		EXEC Age_BetList_SelByDateMemStatus_SuperViewAgent
 			@LoggedId = 1, @AgentId = @AgentId ,@CustId = -1,
 			@FromDate = @FromDate, @Todate = @Todate, @StatusIds = @StatusIds,
-			@Sporttypes = @Sporttypes, @Bettypes = @Bettypes
+			@Sporttypes = @Sporttypes, @Bettypes = @Bettypes, @RptType = @RptType
 		RETURN
 	END
 	ELSE
@@ -58,7 +64,7 @@ BEGIN
 		EXEC Age_BetList_SelByDateMemStatus_SuperViewCust 
 				@LoggedId = 1, @AgentId = -1 ,@CustId = @CustId,
 				@FromDate = @FromDate, @Todate = @Todate, @StatusIds = @StatusIds,
-				@Sporttypes = @Sporttypes, @Bettypes = @Bettypes	
+				@Sporttypes = @Sporttypes, @Bettypes = @Bettypes, @RptType = @RptType	
 		RETURN				
 	END
 END 
@@ -71,7 +77,7 @@ BEGIN
 		EXEC Age_BetList_SelByDateMemStatus_AgentViewAgent
 				@LoggedId = @LoggedId, @AgentId = @AgentId ,@CustId = -1,
 				@FromDate = @FromDate, @Todate = @Todate, @StatusIds = @StatusIds,
-				@Sporttypes = @Sporttypes, @Bettypes = @Bettypes
+				@Sporttypes = @Sporttypes, @Bettypes = @Bettypes, @RptType = @RptType
 		RETURN
 	END
 	ELSE
@@ -81,7 +87,7 @@ BEGIN
 		EXEC Age_BetList_SelByDateMemStatus_AgentViewCust 
 				@LoggedId = @LoggedId, @AgentId = -1 ,@CustId = @CustId,
 				@FromDate = @FromDate, @Todate = @Todate, @StatusIds = @StatusIds,
-				@Sporttypes = @Sporttypes, @Bettypes = @Bettypes
+				@Sporttypes = @Sporttypes, @Bettypes = @Bettypes, @RptType = @RptType
 		RETURN
 
 	END 
