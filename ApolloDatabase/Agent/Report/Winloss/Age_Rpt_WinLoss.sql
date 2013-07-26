@@ -534,16 +534,7 @@ BEGIN
 			AND B.StatusID NOT IN (0,1)
 			AND B.Bettype = 10
 			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-
-			AND ( @Sporttypes = '0' 
-					OR EXISTS (	SELECT	1 
-								FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
-								INNER JOIN Match M WITH (NOLOCK) 
-									ON	 M.matchID = BM.MatchId 
-									AND (M.sporttype IN (Select sporttype FROM #SportsList))							
-								WHERE	BM.RefNo = B.RefNo
-								)
-				)
+			AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))
 
 END
 END
@@ -1046,15 +1037,7 @@ BEGIN
 			AND B.Bettype = 10
 			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
 
-			AND ( @Sporttypes = '0' 
-					OR EXISTS (	SELECT	1 
-								FROM	BettransM14 BM WITH (NOLOCK, index=IX_RefNo) 
-								INNER JOIN Match14 M WITH (NOLOCK) 
-									ON	 M.matchID = BM.MatchId 
-									AND (M.sporttype IN (Select sporttype FROM #SportsList))							
-								WHERE	BM.RefNo = B.RefNo
-								)
-				)
+			AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))
 
 END
 END
