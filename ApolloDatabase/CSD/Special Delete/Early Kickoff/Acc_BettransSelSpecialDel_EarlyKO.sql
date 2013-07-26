@@ -18,7 +18,7 @@ AS
 	Date: 20130718
 	Original:  
 	Task: Select bet tickets early kickoff need to delete
-	DB: SVRCSD.RepDB
+	DB: SVRCSD/RepDB
 
 	Revisions:		
 		
