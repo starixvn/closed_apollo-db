@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_Insert]    Script Date: 7/12/2013 3:04:27 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_Insert]    Script Date: 7/26/2013 2:44:02 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -43,6 +43,9 @@ BEGIN
 	
 	SET NOCOUNT ON
 
+	-- Set default creator is parent agent
+	SET @Creator = @ParentId
+
 	-- Check if agent ID exists
 	IF EXISTS ( SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @AgentId )
 		BEGIN
@@ -81,12 +84,15 @@ BEGIN
 
 	-- For write log
 	DECLARE 
-		@startRun		DATETIME,
-		@endRun			DATETIME,
-		@duration		INT,
-		@logSPData		VARCHAR(5000),
-		@logSPDataOld	VARCHAR(5000),
-		@xml			XML
+		@startRun					DATETIME,
+		@endRun						DATETIME,
+		@duration					INT,
+		@logAgentSPData				NVARCHAR(MAX),
+		@logAgentUserSPData			NVARCHAR(MAX),
+		@logDiscountSpData			NVARCHAR(MAX),
+		@logBetLimitSpData			NVARCHAR(MAX),
+		@logPositionTakingSpData	NVARCHAR(MAX),
+		@xml						XML
 
 	SET @startRun = GETDATE()
 
@@ -253,11 +259,11 @@ BEGIN
 	FROM AgentPositionTaking WITH (NOLOCK)
 	WHERE AgentId = @ParentId		
 
-	-- Write log
+	-- Write log for insert agent
 	SET @xml = (
 		SELECT	
 			@Username			AS '@u',
-			@ParentId			AS '@p',
+			(SELECT Username FROM AgentInfo WHERE AgentId = @ParentId)			AS '@p',
 			@Currency			AS '@c',
 			@Status				AS '@s',
 			@BetStatus			AS '@bs',
@@ -269,30 +275,168 @@ BEGIN
 		 FOR XML PATH('z'), ROOT('r')
 	)
 
-	SET @logSPData = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
+	SET @logAgentSPData = REPLACE(CONVERT(NVARCHAR(MAX), @xml), '" />', '"/"')
+
+	-- Write log for insert agent user
+	SET @xml = (
+		SELECT	
+			@Username	AS '@u',
+			(SELECT Username FROM AgentInfo WHERE AgentId = @AgentId)	AS '@a',
+			''			AS '@pa',
+			1			AS '@im',
+			@Status		AS '@s'
+		 FOR XML PATH('z'), ROOT('r')
+	)
+
+	SET @logAgentUserSPData = REPLACE(CONVERT(NVARCHAR(MAX), @xml), '" />', '"/"')
+
+	-- Write log bet limit for agent
+	SET @xml = (
+		SELECT  
+			blt.SportType		AS '@s'
+			,blt.BetType		AS '@b'
+			,blt.MinBet			AS '@mib'
+			,blt.MaxBet			AS '@mab'
+			,blt.MaxPerMatch	AS '@mam'
+		FROM AgentBetLimit AS blt WITH (NOLOCK)
+		WHERE blt.AgentId = @AgentId 
+		FOR XML PATH('z'), ROOT('r')
+	)
+
+	SET @logBetLimitSpData = REPLACE(CONVERT(NVARCHAR(MAX), @xml), '" />', '"/"')
+
+	-- Write log discount for agent
+	SET @xml = (
+		SELECT  
+			ad.SportType	AS '@s'
+			,ad.BetType		AS '@b'
+			,ad.DiscountA	AS '@ga'
+			,ad.DiscountB	AS '@gb'
+			,ad.DiscountC	AS '@gc'
+			,ad.DiscountD	AS '@gd'
+		FROM AgentDiscount AS ad WITH (NOLOCK)
+		WHERE ad.AgentId = @AgentId
+		FOR XML PATH('z'),ROOT('r')
+	)
+
+	SET @logDiscountSpData = REPLACE(CONVERT(NVARCHAR(MAX), @xml), '" />', '"/"')
+
+	-- Write position taking for agent
+	SET @xml = (
+		SELECT  
+			SportType				AS '@s'
+			,BetType				AS '@b'
+			,IsLive					AS '@i'
+			,MaxUpperPositionTaking	AS '@p'
+			,MaxGivenPositionTaking	AS '@ma'
+			,MinGivenPositionTaking	AS '@mi'
+		FROM AgentPositionTaking WITH (NOLOCK)
+		WHERE AgentId = @AgentId 
+		FOR XML PATH('z'), ROOT('r')
+	)
+
+	SET @logPositionTakingSpData = REPLACE(CONVERT(NVARCHAR(MAX), @xml), '" />', '"/"')
 
 	SET @endRun = GETDATE()
-	SET @duration = DATEDIFF(MILLISECOND, @startRun, @endRun) 
+	SET @duration = DATEDIFF(MILLISECOND, @startRun, @endRun) 	
 
 	IF @@Error = 0
 		BEGIN TRY
 			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
-			@UserId			= @Creator,
-			@SPName			= 'Age_Agent_Insert',
-			@LogDate		= @startRun,
-			@AgentId		= @AgentId,
-			@Duration		= @Duration,
-			@Data			= @logSPData,
-			@OldData		= @logSPDataOld
+			@UserId		= @Creator,
+			@SPName		= 'Age_Agent_Insert',
+			@LogDate	= @startRun,
+			@AgentId	= @AgentId,
+			@Duration	= @Duration,
+			@Data		= @logAgentSPData,
+			@OldData	= NULL
+
+			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
+			@UserId		= @Creator,
+			@SPName		= 'Age_AgentUser_Insert',
+			@LogDate	= @startRun,
+			@AgentId	= @AgentId,
+			@Duration	= @Duration,
+			@Data		= @logAgentUserSPData,
+			@OldData	= NULL
+
+			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
+			@UserId		= @Creator,
+			@AdminId	= NULL,
+			@SPName		= 'Age_Agent_InsertBetLimit',
+			@LogDate	= @startRun,
+			@AgentId	= @AgentId,
+			@Duration	= @Duration,
+			@Data		= @logBetLimitSpData,
+			@OldData	= NULL
+
+			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
+			@UserId		= @Creator,
+			@AdminId	= NULL,
+			@SPName		= 'Age_Agent_InsertDiscount',
+			@LogDate	= @startRun,
+			@AgentId	= @AgentId,
+			@Duration	= @Duration,
+			@Data		= @logDiscountSpData,
+			@OldData	= NULL
+
+			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
+			@UserId		= @Creator,
+			@AdminId	= NULL,
+			@SPName		= 'Age_Agent_InsertPositionTaking',
+			@LogDate	= @startRun,
+			@AgentId	= @AgentId,
+			@Duration	= @Duration,
+			@Data		= @logPositionTakingSpData,
+			@OldData	= NULL
 		END	TRY
 		BEGIN CATCH
 			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
-			@UserId			= @Creator,
-			@SPName			= 'Age_Agent_Insert',
-			@LogDate		= @startRun,
-			@AgentId		= @AgentId,
-			@Duration		= @Duration,
-			@Data			= @logSPData,
-			@OldData		= @logSPDataOld
+			@UserId		= @Creator,
+			@SPName		= 'Age_Agent_Insert',
+			@LogDate	= @startRun,
+			@AgentId	= @AgentId,
+			@Duration	= @Duration,
+			@Data		= @logAgentSPData,
+			@OldData	= NULL
+
+			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
+			@UserId		= @Creator,
+			@SPName		= 'Age_AgentUser_Insert',
+			@LogDate	= @startRun,
+			@AgentId	= @AgentId,
+			@Duration	= @Duration,
+			@Data		= @logAgentUserSPData,
+			@OldData	= NULL
+
+			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
+			@UserId		= @Creator,
+			@AdminId	= NULL,
+			@SPName		= 'Age_Agent_InsertBetLimit',
+			@LogDate	= @startRun,
+			@AgentId	= @AgentId,
+			@Duration	= @Duration,
+			@Data		= @logBetLimitSpData,
+			@OldData	= NULL
+
+			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
+			@UserId		= @Creator,
+			@AdminId	= NULL,
+			@SPName		= 'Age_Agent_InsertDiscount',
+			@LogDate	= @startRun,
+			@AgentId	= @AgentId,
+			@Duration	= @Duration,
+			@Data		= @logDiscountSpData,
+			@OldData	= NULL
+
+			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
+			@UserId		= @Creator,
+			@AdminId	= NULL,
+			@SPName		= 'Age_Agent_InsertPositionTaking',
+			@LogDate	= @startRun,
+			@AgentId	= @AgentId,
+			@Duration	= @Duration,
+			@Data		= @logPositionTakingSpData,
+			@OldData	= NULL
 		END CATCH	
 END

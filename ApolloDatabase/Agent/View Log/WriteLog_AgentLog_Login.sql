@@ -1,6 +1,6 @@
 ﻿USE [LogDB]
 GO
-/****** Object:  StoredProcedure [dbo].[WriteLog_AgentLog_Login]    Script Date: 6/29/2013 11:36:02 AM ******/
+/****** Object:  StoredProcedure [dbo].[WriteLog_AgentLog_Login]    Script Date: 7/26/2013 3:01:26 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -12,7 +12,7 @@ ALTER PROCEDURE [dbo].[WriteLog_AgentLog_Login]
 	@ServerID		INT				= 0,
 	@LoginIP		VARCHAR(40)		='',
 	@ActionID		INT				= 0,
-	@Doing			VARCHAR(300),
+	@Doing			NVARCHAR(300),
 	@DomainName		NVARCHAR(253)	= NULL,
 	@BrowserName	NVARCHAR(255)	= NULL,
 	@Platform		NVARCHAR(255)	= NULL,
@@ -61,7 +61,7 @@ BEGIN
 		@BrowserName,
 		@Platform,
 		@CountryCode,
-		@Duration
+		0
 	)
 
 END

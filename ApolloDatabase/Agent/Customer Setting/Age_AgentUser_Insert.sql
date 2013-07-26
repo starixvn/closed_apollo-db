@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_AgentUser_Insert]    Script Date: 5/6/2013 11:31:41 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_AgentUser_Insert]    Script Date: 7/26/2013 2:45:41 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -35,6 +35,9 @@ BEGIN
 	
 	SET NOCOUNT ON	
 
+	-- Set creator default is agent
+	SET @Creator = @AgentId
+
 	-- Check if agent user ID exists
 	IF EXISTS ( SELECT 1 FROM AgentUser WITH (NOLOCK) WHERE AgentUserId = @AgentUserId )
 		BEGIN
@@ -53,13 +56,22 @@ BEGIN
 			RETURN
 		END	
 
+	-- Check if agent ID exists
+	IF NOT EXISTS ( SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @AgentId )
+		BEGIN
+			SELECT 
+				@ErrCode = 5100, 
+				@ErrMsg = 'Agent ID not exist [AgentId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
+			RETURN
+		END	
+
 	-- For write log
 	DECLARE 
 		@startRun		DATETIME,
 		@endRun			DATETIME,
 		@duration		INT,
-		@logSPData		VARCHAR(5000),
-		@logSPDataOld	VARCHAR(5000),
+		@logSPData		NVARCHAR(MAX),
+		@logSPDataOld	NVARCHAR(MAX),
 		@xml			XML
 
 	SET @startRun = GETDATE()
@@ -98,13 +110,14 @@ BEGIN
 	SET @xml = (
 		SELECT	
 			@Username	AS '@u',
-			@AgentId	AS '@ai',
+			(SELECT Username FROM AgentInfo WHERE AgentId = @AgentId)	AS '@a',
 			@PageAccess	AS '@pa',
+			0			AS '@im',
 			@Status		AS '@s'
 		 FOR XML PATH('z'), ROOT('r')
 	)
 
-	SET @logSPData = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
+	SET @logSPData = REPLACE(CONVERT(NVARCHAR(MAX), @xml), '" />', '"/"')
 
 	SET @endRun	= GETDATE()  
 	SET @duration = DATEDIFF(MILLISECOND, @startRun, @endRun) 
@@ -118,7 +131,7 @@ BEGIN
 			@AgentId		= @AgentId,
 			@Duration		= @Duration,
 			@Data			= @logSPData,
-			@OldData		= @logSPDataOld
+			@OldData		= NULL
 		END	TRY
 		BEGIN CATCH
 			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
@@ -128,6 +141,6 @@ BEGIN
 			@AgentId		= @AgentId,
 			@Duration		= @Duration,
 			@Data			= @logSPData,
-			@OldData		= @logSPDataOld
+			@OldData		= NULL
 		END CATCH 
 END	
