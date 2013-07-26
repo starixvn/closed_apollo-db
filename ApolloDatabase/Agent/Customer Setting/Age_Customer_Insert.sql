@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_Insert]    Script Date: 7/10/2013 9:09:08 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_Insert]    Script Date: 7/26/2013 2:45:17 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -43,6 +43,9 @@ BEGIN
 	
 	SET NOCOUNT ON
 
+	-- set creator default is agent
+	SET @Creator = @AgentId
+
 	-- Check if customer ID exists
 	IF EXISTS ( SELECT 1 FROM CustInfo WITH (NOLOCK) WHERE CustId = @CustId )
 		BEGIN
@@ -72,13 +75,15 @@ BEGIN
 
 	-- For write log
 	DECLARE 
-		@startRun		DATETIME,
-		@endRun			DATETIME,
-		@duration		INT,
-		@logSPData		VARCHAR(5000),
-		@logSPDataOld	VARCHAR(5000),
-		@xml			XML,
-		@agentHId		HIERARCHYID
+		@startRun			DATETIME,
+		@endRun				DATETIME,
+		@duration			INT,
+		@logCustSPData				NVARCHAR(MAX),		
+		@logBetLimitSPData			NVARCHAR(MAX),
+		@logDiscountSPData			NVARCHAR(MAX),
+		@logPositionTakingSPData	NVARCHAR(MAX),
+		@xml				XML,
+		@agentHId			HIERARCHYID
 
 	SELECT @agentHId = AgentHId
 	FROM AgentInfo WITH (NOLOCK)
@@ -107,7 +112,8 @@ BEGIN
 		Status,
 		BetStatus,
 		UplineStatus,
-		UplineBetStatus )
+		UplineBetStatus,
+		IsUGroupChanged)
 	SELECT	
 		@CustId,
 		@AgentId,
@@ -126,7 +132,8 @@ BEGIN
 		@Status,
 		@BetStatus,
 		CASE WHEN Status = 2 OR UplineStatus = 2 THEN 2 ELSE 1 END,			-- UplineStatus
-		CASE WHEN BetStatus = 2 OR UplineBetStatus = 2 THEN 2 ELSE 1 END	-- UplineBetStatus
+		CASE WHEN BetStatus = 2 OR UplineBetStatus = 2 THEN 2 ELSE 1 END,	-- UplineBetStatus
+		0
 	FROM AgentInfo WITH (NOLOCK)
 	WHERE AgentId = @AgentId
 
@@ -196,25 +203,151 @@ BEGIN
 	WHERE AgentId = @AgentId
 
 	-- Insert pt for upline
-	INSERT INTO CustPositionTaking (
-		CustId,
+	--INSERT INTO CustPositionTaking (
+	--	CustId,
+	--	AgentId,
+	--	SportType,
+	--	BetType,
+	--	IsLive,
+	--	PositionTaking )
+	--SELECT
+	--	@CustId,
+	--	b.ParentId,
+	--	a.SportType,
+	--	a.BetType,
+	--	a.IsLive,
+	--	a.MaxGivenPositionTaking
+	--FROM 
+	--	AgentPositionTaking AS a WITH (NOLOCK)
+	--	INNER JOIN AgentInfo AS b WITH (NOLOCK)	ON a.AgentId = b.AgentId
+	--WHERE @agentHId.IsDescendantOf(b.AgentHId) = 1			
+	--	AND b.AgentLevel > 1
+	
+	DECLARE @TableAgent TABLE (
+		AgentId		INT, 
+		AgentLevel	SMALLINT, 
+		Username	NVARCHAR(50) )
+
+	DECLARE @TableUpdatePT TABLE(
+		AgentId			INT,
+		AgentLevel		SMALLINT,
+		SportType		SMALLINT,
+		BetType			SMALLINT,
+		IsLive			BIT,
+		MaxUpper		SMALLINT,
+		MaxUpperUpdate	SMALLINT,
+		MinGiven		SMALLINT)	
+
+	INSERT INTO @TableAgent
+	SELECT 
 		AgentId,
-		SportType,
-		BetType,
-		IsLive,
-		PositionTaking )
-	SELECT
-		@CustId,
-		b.ParentId,
-		a.SportType,
-		a.BetType,
-		a.IsLive,
-		a.MaxGivenPositionTaking
-	FROM 
-		AgentPositionTaking AS a WITH (NOLOCK)
-		INNER JOIN AgentInfo AS b WITH (NOLOCK)	ON a.AgentId = b.AgentId
-	WHERE @agentHId.IsDescendantOf(b.AgentHId) = 1			
-		AND b.AgentLevel > 1	
+		AgentLevel,
+		Username 
+	FROM AgentInfo WITH (NOLOCK) 
+	WHERE @agentHId.IsDescendantOf(AgentHId) = 1				
+	
+	INSERT INTO @TableUpdatePT(
+		AgentId
+		,AgentLevel
+		,SportType
+		,BetType
+		,IsLive
+		,MaxUpper
+		,MaxUpperUpdate
+		,MinGiven)		   
+	SELECT apt.AgentId
+		,ai.AgentLevel
+		,apt.SportType
+		,apt.BetType
+		,apt.IsLive
+		,apt.MaxUpperPositionTaking
+		,capt.MaxUpperPositionTaking
+		,apt.MinGivenPositionTaking
+	FROM AgentPositionTaking AS apt WITH (NOLOCK)			
+		INNER JOIN AgentInfo AS ai WITH (NOLOCK)
+			ON apt.AgentId		= ai.AgentId
+		LEFT JOIN @TableAgent AS ta
+			ON ai.AgentLevel	= ta.AgentLevel - 1
+		LEFT JOIN AgentPositionTaking AS capt WITH(NOLOCK)
+			ON capt.AgentId		= ta.AgentId
+			AND capt.SportType	= apt.SportType
+			AND capt.BetType	= apt.BetType
+			AND capt.IsLive		= apt.IsLive	
+	WHERE apt.AgentId IN (SELECT temp.AgentId FROM @TableAgent AS temp)
+		AND apt.AgentId		<> @AgentId
+		AND ai.AgentLevel	> 0
+	
+	INSERT INTO CustPositionTaking (
+		CustId
+		,AgentId
+		,SportType
+		,BetType
+		,IsLive
+		,PositionTaking)
+	SELECT @CustId
+		 ,tupt.AgentId
+		 ,tupt.SportType
+		 ,tupt.BetType
+		 ,tupt.IsLive
+		 ,tupt.MaxUpperUpdate
+	FROM @TableUpdatePT AS tupt			
+	WHERE tupt.MinGiven = 0	 	
+
+	DELETE @TableUpdatePT WHERE MinGiven = 0
+
+	DECLARE @currentAgentId			INT,
+			@currentAgentLevel 		SMALLINT
+	
+	WHILE EXISTS(
+		SELECT TOP(1) * FROM @TableUpdatePT
+	)
+		BEGIN
+			SELECT TOP(1) @currentAgentId	= AgentId
+					,@currentAgentLevel		= AgentLevel
+			FROM @TableUpdatePT
+			ORDER BY AgentLevel DESC				
+
+			INSERT INTO CustPositionTaking (
+				CustId
+				,AgentId
+				,SportType
+				,BetType
+				,IsLive
+				,PositionTaking)
+			SELECT	@CustId
+				 ,tupt.AgentId
+				 ,tupt.SportType
+				 ,tupt.BetType
+				 ,tupt.IsLive
+				 ,CASE WHEN tupt.MinGiven - temp.SumOfDownlinePT > tupt.MaxUpperUpdate
+					THEN tupt.MinGiven - temp.SumOfDownlinePT
+					ELSE tupt.MaxUpperUpdate
+				END
+			FROM @TableUpdatePT AS tupt					
+				INNER JOIN(
+					SELECT 
+						cpt.SportType,
+						cpt.BetType,
+						cpt.IsLive,
+						SUM(cpt.PositionTaking) AS SumOfDownlinePT
+					FROM dbo.CustPositionTaking AS cpt WITH (NOLOCK)
+						INNER JOIN AgentInfo AS ai WITH (NOLOCK)
+							ON cpt.AgentId = ai.AgentId 
+					WHERE 
+						CustId = @CustId
+						AND ai.AgentLevel > @currentAgentLevel
+					GROUP BY  
+						SportType,
+						BetType,
+						IsLive
+				) AS temp
+					ON temp.SportType	= tupt.SportType
+					AND temp.BetType	= tupt.BetType
+					AND temp.IsLive		= tupt.IsLive
+			WHERE tupt.AgentId	= @currentAgentId				  
+
+			DELETE @TableUpdatePT WHERE AgentId = @currentAgentId
+		END	
 	
 	-- Insert into balance tables 	
 	INSERT INTO SVRTXN.TransDB.dbo.BalanceCredit (CustId, Balance)
@@ -223,10 +356,11 @@ BEGIN
 	INSERT INTO SVRTXN.TransDB.dbo.BalanceDebit (CustId, Balance)
 	VALUES (@CustId, 0)
 
+	-- Write log cust info
 	SET @xml = (
 		SELECT	
 			@Username			AS '@u',
-			@AgentId			AS '@ai',
+			(SELECT Username FROM AgentInfo WHERE AgentId = @AgentId)	AS '@a',
 			@Status				AS '@s',
 			@BetStatus			AS '@bs',
 			@MatchLimit			AS '@ml',
@@ -238,11 +372,58 @@ BEGIN
 		 FOR XML PATH('z'), ROOT('r')
 	)
 
-	SET @logSPData = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
+	SET @logCustSPData = REPLACE(CONVERT(NVARCHAR(MAX), @xml), '" />', '"/"')
+
+	-- write log bet limit
+	SET @xml = (
+		SELECT  
+			SportType		AS '@s'
+			,BetType		AS '@b'
+			,MinBet			AS '@mib'
+			,MaxBet			AS '@mab'
+			,MaxPerMatch	AS '@mam'
+		FROM CustBetLimit WITH (NOLOCK)
+		WHERE CustId = @CustId
+		FOR XML PATH('z'), ROOT('r')
+	)
+
+	SET @logBetLimitSPData = REPLACE(CONVERT(NVARCHAR(MAX), @xml), '" />', '"/"')
+
+	-- write log discount
+	SET @xml = (
+		SELECT  
+			SportType	AS '@s',
+			BetType		AS '@b',			
+			Discount	AS '@d'
+		FROM CustDiscount WITH (NOLOCK)
+		WHERE CustId = @CustId
+		FOR XML PATH('z')--, ROOT('r')
+	)
+	
+	SET @logDiscountSPData = '<r g="'+ @UGroup +'">' + REPLACE(CONVERT(NVARCHAR(MAX), @xml), '" />', '"/"') + '</r>'
+	
+	-- Write log posistion taking
+	SET @xml = (
+		SELECT 
+			SportType		AS '@s',
+			BetType			AS '@b',
+			IsLive			AS '@i',
+			PositionTaking	AS '@p'
+		FROM CustPositionTaking WITH (NOLOCK)
+		WHERE CustId = @CustId
+		ORDER BY SportType
+				--,BetType
+				,IsLive
+		FOR XML PATH('z'), ROOT('r')
+	)
+
+	SET @logPositionTakingSPData = REPLACE(CONVERT(NVARCHAR(MAX), @xml), '" />', '"/"')
+
+	-- end write log 
 
 	SET @endRun = GETDATE()
 	SET @duration = DATEDIFF(MILLISECOND, @startRun, @endRun) 
-		
+
 	IF @@Error = 0
 		BEGIN TRY
 			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
@@ -251,8 +432,38 @@ BEGIN
 			@LogDate		= @startRun,
 			@CustId			= @CustId,
 			@Duration		= @Duration,
-			@Data			= @logSPData,
-			@OldData		= @logSPDataOld
+			@Data			= @logCustSPData,
+			@OldData		= NULL
+
+			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
+			@UserId		= @Creator,
+			@AdminId	= NULL,
+			@SPName		= 'Age_Agent_InsertBetLimit',
+			@LogDate	= @startRun,
+			@CustId		= @CustId,
+			@Duration	= @Duration,
+			@Data		= @logBetLimitSPData,
+			@OldData	= NULL
+
+			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
+			@UserId		= @Creator,
+			@AdminId	= NULL,
+			@SPName		= 'Age_Customer_InsertDiscount',
+			@LogDate	= @startRun,
+			@CustId		= @CustId,
+			@Duration	= @Duration,
+			@Data		= @logDiscountSPData,
+			@OldData	= NULL
+
+			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
+			@UserId		= @Creator,
+			@AdminId	= NULL,
+			@SPName		= 'Age_Customer_InsertPositionTaking',
+			@LogDate	= @startRun,
+			@CustId		= @CustId,
+			@Duration	= @Duration,
+			@Data		= @logPositionTakingSPData,
+			@OldData	= NULL
 		END	TRY
 		BEGIN CATCH
 			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpCust
@@ -261,7 +472,37 @@ BEGIN
 			@LogDate		= @startRun,
 			@CustId			= @CustId,
 			@Duration		= @Duration,
-			@Data			= @logSPData,
-			@OldData		= @logSPDataOld
+			@Data			= @logCustSPData,
+			@OldData		= NULL
+
+			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpCust
+			@UserId		= @Creator,
+			@AdminId	= NULL,
+			@SPName		= 'Age_Agent_InsertBetLimit',
+			@LogDate	= @startRun,
+			@CustId		= @CustId,
+			@Duration	= @Duration,
+			@Data		= @logBetLimitSPData,
+			@OldData	= NULL
+
+			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpCust
+			@UserId		= @Creator,
+			@AdminId	= NULL,
+			@SPName		= 'Age_Customer_InsertDiscount',
+			@LogDate	= @startRun,
+			@CustId		= @CustId,
+			@Duration	= @Duration,
+			@Data		= @logDiscountSPData,
+			@OldData	= NULL
+
+			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpCust
+			@UserId		= @Creator,
+			@AdminId	= NULL,
+			@SPName		= 'Age_Customer_InsertPositionTaking',
+			@LogDate	= @startRun,
+			@CustId		= @CustId,
+			@Duration	= @Duration,
+			@Data		= @logPositionTakingSPData,
+			@OldData	= NULL
 		END CATCH
 END										
