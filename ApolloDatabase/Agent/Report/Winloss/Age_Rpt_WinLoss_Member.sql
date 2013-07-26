@@ -24,6 +24,7 @@ AS
     Revisions:
 		- 20130627@Sophia: Modify for Singbet: filter by Sporttype and Bettype
 		- 20130712@Sophia: add OutStanding
+		- 20130726@Sophia: Add ActualTOAfter (Effective Stake)
 	EX: EXEC Age_Rpt_WinLoss_Member @AgentId =3, @FromDate = '2013-01-01',  @ToDate = '2013-04-10', @BalanceUpDay = '2013-03-01'
 
        
@@ -31,7 +32,8 @@ AS
     
 SET NOCOUNT ON
 
-CREATE TABLE #WinLossMember ( Username NVARCHAR(50), CustID INT, PositionTaking SMALLINT, BetCount BIGINT, TurnOver MONEY, ActualTO MONEY, WinLost MONEY, PlayerComm MONEY, MemTotal MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, UplineTotal MONEY)
+CREATE TABLE #WinLossMember ( Username NVARCHAR(50), CustID INT, PositionTaking SMALLINT, BetCount BIGINT, TurnOver MONEY, ActualTO MONEY, ActualTOAfter MONEY,
+							  WinLost MONEY, PlayerComm MONEY, MemTotal MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, UplineTotal MONEY)
 
 CREATE TABLE #BettypeList (bettype SMALLINT)
 INSERT INTO #BettypeList
@@ -51,7 +53,7 @@ BEGIN
 				COUNT(B.TransID) as BetCount,
 		   		SUM(ABS(B.Stake)) AS TurnOver,
 				SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as ActualTO,
-
+				SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END * BA.APositionTaking)  as ActualTOAfter,
 				SUM(B.WinLost - B.Actual_Stake) AS WinLost,
 				SUM(B.PlayerComm) AS PlayerComm,
 				SUM(B.WinLost - B.Actual_Stake) + SUM(B.PlayerComm) AS MemTotal,
@@ -91,6 +93,7 @@ BEGIN
 				SUM(B.BetCount) as BetCount,
 		   		SUM(ABS(B.Stake)) AS TurnOver,
 				SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as ActualTO,
+				SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END* B.APositionTaking)  as ActualTOAfter,
 
 				SUM(B.WinLost - B.Actual_Stake) AS WinLost,
 				SUM(B.PlayerComm) AS PlayerComm,
@@ -109,7 +112,7 @@ BEGIN
 						COUNT(DISTINCT B.TransID) as BetCount,
 		   				B.Stake, B.MOdds, B.StatusID,
 						B.WinLost , B.Actual_Stake,	B.PlayerComm,	
-						BA.AWinLost, BA.AComm, B.TransID
+						BA.AWinLost, BA.AComm, B.TransID, BA.APositionTaking
 				FROM		Bettrans B WITH (NOLOCK)
 				INNER JOIN	BetTrans_Agent BA WITH (NOLOCK)
 						ON	BA.TransID = B.TransID
@@ -140,7 +143,7 @@ BEGIN
 				GROUP BY	C.Username,C.CustID,PT.PositionTaking, 					
 		   					B.Stake, B.MOdds, B.StatusID,
 							B.WinLost , B.Actual_Stake,	B.PlayerComm,	
-							BA.AWinLost, BA.AComm, B.TransID
+							BA.AWinLost, BA.AComm, B.TransID, BA.APositionTaking
 				) B
 		GROUP BY B.Username,B.CustID,B.PositionTaking
 
@@ -153,6 +156,7 @@ BEGIN
 				COUNT(B.TransID) as BetCount,
 		   		SUM(ABS(B.Stake)) AS TurnOver,
 				SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as ActualTO,
+				SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END * BA.APositionTaking)  as ActualTOAfter,
 
 				SUM(B.WinLost - B.Actual_Stake) AS WinLost,
 				SUM(B.PlayerComm) AS PlayerComm,
@@ -199,6 +203,7 @@ BEGIN
 				COUNT(B.TransID) as BetCount,
 		   		SUM(ABS(B.Stake)) AS TurnOver,
 				SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as ActualTO,
+				SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END *BA.APositionTaking)  as ActualTOAfter,
 
 				SUM(B.WinLost - B.Actual_Stake) AS WinLost,
 				SUM(B.PlayerComm) AS PlayerComm,
@@ -239,6 +244,7 @@ BEGIN
 				SUM(B.BetCount) as BetCount,
 		   		SUM(ABS(B.Stake)) AS TurnOver,
 				SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as ActualTO,
+				SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END * B.APositionTaking)  as ActualTOAfter,
 
 				SUM(B.WinLost - B.Actual_Stake) AS WinLost,
 				SUM(B.PlayerComm) AS PlayerComm,
@@ -257,7 +263,7 @@ BEGIN
 						COUNT(DISTINCT B.TransID) as BetCount,
 		   				B.Stake, B.MOdds, B.StatusID,
 						B.WinLost , B.Actual_Stake,	B.PlayerComm,	
-						BA.AWinLost, BA.AComm, B.TransID
+						BA.AWinLost, BA.AComm, B.TransID, BA.APositionTaking
 				FROM		Bettrans14 B WITH (NOLOCK)
 				INNER JOIN	BetTrans14_Agent BA WITH (NOLOCK)
 						ON	BA.TransID = B.TransID
@@ -288,7 +294,7 @@ BEGIN
 				GROUP BY	C.Username,C.CustID,PT.PositionTaking, 					
 		   					B.Stake, B.MOdds, B.StatusID,
 							B.WinLost , B.Actual_Stake,	B.PlayerComm,	
-							BA.AWinLost, BA.AComm, B.TransID
+							BA.AWinLost, BA.AComm, B.TransID, BA.APositionTaking
 				) B
 		GROUP BY B.Username,B.CustID,B.PositionTaking
 
@@ -301,6 +307,7 @@ BEGIN
 				COUNT(B.TransID) as BetCount,
 		   		SUM(ABS(B.Stake)) AS TurnOver,
 				SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as ActualTO,
+				SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END * BA.APositionTaking)  as ActualTOAfter,
 
 				SUM(B.WinLost - B.Actual_Stake) AS WinLost,
 				SUM(B.PlayerComm) AS PlayerComm,
@@ -445,6 +452,7 @@ SELECT	ISNULL(A.Username, B.Username) as Username,
 		ISNULL(BetCount,0) as BetCount,
 		ISNULL(TurnOver,0) as TurnOver,
 		ISNULL(ActualTO,0) as ActualTO,
+		ISNULL(ActualTOAfter,0) as ActualTOAfter,
 		ISNULL(WinLost,0) as WinLost,
 		ISNULL(PlayerComm,0) as PlayerComm,
 		ISNULL(MemTotal,0) as MemTotal,
@@ -459,7 +467,7 @@ FROM	(
 				SUM(BetCount) as BetCount,	
 				SUM(TurnOver) as TurnOver,
 				SUM(ActualTO) as ActualTO,
-
+				SUM(ActualTOAfter) as ActualTOAfter,
 				SUM(WinLost) as  WinLost, 
 				SUM(PlayerComm) as PlayerComm,
 				SUM(MemTotal) as MemTotal,
