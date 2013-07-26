@@ -1,12 +1,12 @@
 ALTER PROCEDURE  [dbo].[Admin_AutoSettlement_ClearFailActionOutright]			
-	@leagueid int,		
+	@orid int,		
 	@ErrCode int = 0 OUTPUT,
 	@ErrMsg nvarchar(200) = '' OUTPUT
 AS
 /*
 	Created by:Dan
 	Date:20130702
-	Task: clear failed auto settlement action for a match
+	Task: clear failed auto settlement action for an outright
 	DB: SVRPROD/ProdDB	
 	Revisions:		
 
@@ -19,9 +19,7 @@ SET NOCOUNT ON
 	BEGIN TRY
 		UPDATE dbo.outright_ex WITH (ROWLOCK, UPDLOCK)
 		SET	FailedActionID = NULL
-		WHERE orid_ex in (SELECT o.orid
-				FROM dbo.outright o WITH(NOLOCK) 
-				WHERE o.leagueID = @LeagueID)
+		WHERE orid_ex = @orid
 	END TRY
 	BEGIN CATCH
 		Select @ErrMsg = 'Data updating process failed!!'

@@ -24,7 +24,10 @@ SELECT o.orid, o.leagueid , teamid,
 		o.matchcode, o.kickofftime,  		
 		o.eventdate,  
 		ISNULL(orex.oddsstatus_ex, 'running') AS oddsstatus, 				
-		status_ex AS [status], odds		
+		status_ex AS [status], 
+		FailedActionID,
+		DisabledAutoSettle,
+		odds		
 INTO #tmp
 FROM SVRPRO.ProdDB.dbo.outright o WITH(NOLOCK) 
 	LEFT JOIN SVRPRO.ProdDB.dbo.outright_ex orex WITH(NOLOCK) ON o.orid= orex.orid_ex	
