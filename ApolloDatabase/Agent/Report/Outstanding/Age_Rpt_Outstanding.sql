@@ -114,12 +114,10 @@ BEGIN
 			ON B.TransID = BA.TransID						
 	WHERE	C.ParentId = @AgentID 
 			AND BA.StatusID IN (0,1)
-			AND BA.Bettype = 10
-			AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
+			AND BA.Bettype = 10 
 
 			AND B.StatusID IN (0,1)
-			AND B.Bettype = 10
-			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
+			AND B.Bettype = 10 
 
 			--AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))					
 			AND (@Sporttypes = '0' 
@@ -211,11 +209,9 @@ BEGIN
 	WHERE	C.ParentId = @AgentID 
 			AND BA.StatusID IN (0,1)	
 			AND BA.Bettype = 10
-			AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-
+			 
 			AND BP.StatusID IN (0,1)
-			AND BP.Bettype = 10
-			AND (@Bettypes = '0' OR BP.Bettype IN (Select bettype FROM #BettypeList))
+			AND BP.Bettype = 10 
 
 			AND (@Sporttypes = '0' 
 				 OR EXISTS (SELECT	1 
@@ -301,12 +297,10 @@ BEGIN
 		ON B.CustID = C.CustID AND C.AgentId =@AgentID	
 	WHERE	 BA.StatusId IN (0,1)
 			AND BA.Bettype = 10
-			AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-
-			AND B.StatusId IN (0,1)
+			 
+			 AND B.StatusId IN (0,1)
 			AND B.Bettype = 10
-			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-			
+			 	
 			AND (@Sporttypes = '0' 
 				 OR EXISTS (SELECT	1 
 							FROM	Outright M WITH (NOLOCK) 

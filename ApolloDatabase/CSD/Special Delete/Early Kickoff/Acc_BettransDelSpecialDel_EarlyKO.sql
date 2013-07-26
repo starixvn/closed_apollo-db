@@ -24,7 +24,7 @@ AS
 	Date: 20130718
 	Original:  
 	Task: Delete bet tickets early kickoff need to delete
-	DB: SVRCSD.RepDB
+	DB: SVRCSD.TRANSDB
 
 	Revisions:		
 		- 20130725@Sophia: Change username nvarchar(50)

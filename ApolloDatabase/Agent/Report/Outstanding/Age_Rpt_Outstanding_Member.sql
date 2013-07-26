@@ -106,12 +106,10 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 	WHERE	BA.StatusId IN (0,1)
 			AND BA.matchID  > 0
 			AND BA.Bettype = 10 	
-			AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 
 			AND B.StatusId IN (0,1)	
 			AND B.matchID  > 0
 			AND B.Bettype = 10 	
-			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
 			AND (@Sporttypes = '0' 
 				 OR EXISTS (SELECT	1 
 							FROM	Outright M WITH (NOLOCK) 
