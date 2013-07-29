@@ -21,6 +21,7 @@ Original:
 
 Revisions:
    - 20130725@Sophia: Change username nvarchar(50)
+   - 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
 						   
 Param's Explanation: 
 
@@ -381,10 +382,12 @@ BEGIN
 
 		 
 	---- List data to put Message
-	SELECT  B.TransId, A.AgentID as TargetID, A.Username as TargetName, 1 as IsAgent
+	SELECT  B.TransId, A.AgentID as TargetID, I.Username as TargetName, 1 as IsAgent
 	FROM	#BetDelete B
 	INNER JOIN Bettrans_Agent A WITH (NOLOCK)
 			ON A.TransID = B.TransID
+	INNER JOIN AgentInfo I WITh (NOLOCK)
+			ON I.AgentID = A.AgentID
 	UNION ALL
 	SELECT  B.TransId, B.CustId as TargetID, B.PlayerName as TargetName, 0 as IsAgent
 	FROM	#BetDelete B

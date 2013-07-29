@@ -28,6 +28,8 @@ AS
 
 	Revisions:		
 		- 20130725@Sophia: Change username nvarchar(50)
+		- 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
+
 	Explanation's Param:
 	    - @SAFilter: 
 	      + 0: All tickets
@@ -663,20 +665,24 @@ SET NOCOUNT ON
 
 	
 	---- List data to put Message
-	SELECT  B.TransId, A.AgentID as TargetID, A.Username as TargetName, 1 as IsAgent
+	SELECT  B.TransId, A.AgentID as TargetID, I.Username as TargetName, 1 as IsAgent
 	FROM	#BetDelete B
 	INNER JOIN Bettrans_Agent A WITH (NOLOCK)
 			ON A.TransID = B.TransID
+	INNER JOIN AgentInfo I WITH (NOLOCK)
+			ON I.AgentId = A.AgentId
 	UNION ALL
 	SELECT  B.TransId, B.CustId as TargetID, B.Username as TargetName, 0 as IsAgent
 	FROM	#BetDelete B
 	
 	-- Parlay
 	UNION ALL 
-	SELECT  B.TransId, A.AgentID as TargetID, A.Username as TargetName, 1 as IsAgent
+	SELECT  B.TransId, A.AgentID as TargetID, I.Username as TargetName, 1 as IsAgent
 	FROM	#BetmDelete B
 	INNER JOIN Bettrans_Agent A WITH (NOLOCK)
 			ON A.RefNo = B.RefNo
+	INNER JOIN AgentInfo I WITH (NOLOCK)
+			ON I.AgentId = A.AgentId
 	UNION ALL 
 	SELECT  B.TransId, B.CustId as TargetID, B.Username as TargetName, 0 as IsAgent
 	FROM	#BetmDelete B

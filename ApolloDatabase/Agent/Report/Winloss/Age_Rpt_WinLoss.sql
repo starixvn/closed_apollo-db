@@ -23,13 +23,14 @@ AS
 	   - 20130712@Sophia: add OutStanding
 	   - 20130718@Sophia: Remove OutStanding
 	   - 20130726@Sophia: Improve performance
+	   - 201307298@Sophia: Add ActualTOAfter (Effective Stake) 
     */
     
 SET NOCOUNT ON
 
 
-CREATE TABLE #WinLossAgent ( Username NVARCHAR(50), AgentID INT, IsAgent BIT, PositionTaking SMALLINT, BetCount BIGINT, TurnOver MONEY, ActualTO MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, GrossTotal MONEY, UplineTotal MONEY)
-CREATE TABLE #WinLossMember ( Username NVARCHAR(50), AgentID INT, IsAgent BIT,  PositionTaking SMALLINT, BetCount BIGINT, TurnOver MONEY, ActualTO MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, GrossTotal MONEY, UplineTotal MONEY)
+CREATE TABLE #WinLossAgent ( Username NVARCHAR(50), AgentID INT, IsAgent BIT, PositionTaking SMALLINT, BetCount BIGINT, TurnOver MONEY, ActualTO MONEY, ActualTOAfter MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, GrossTotal MONEY, UplineTotal MONEY)
+CREATE TABLE #WinLossMember ( Username NVARCHAR(50), AgentID INT, IsAgent BIT,  PositionTaking SMALLINT, BetCount BIGINT, TurnOver MONEY, ActualTO MONEY, ActualTOAfter MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, GrossTotal MONEY, UplineTotal MONEY)
 
 CREATE TABLE #BettypeList (bettype SMALLINT)
 INSERT INTO #BettypeList
@@ -69,6 +70,7 @@ END
 DELETE	#WinLossAgent 
 WHERE	TurnOver IS NULL 
 		AND ActualTO IS NULL
+		AND ActualTOAfter IS NULL
 		AND AWinLost IS NULL
 		AND AComm IS NULL
 		AND ATotal IS NULL
@@ -79,6 +81,7 @@ WHERE	TurnOver IS NULL
 DELETE	#WinLossMember 
 WHERE	TurnOver IS NULL 
 		AND ActualTO IS NULL
+		AND ActualTOAfter IS NULL
 		AND AWinLost IS NULL
 		AND AComm IS NULL
 		AND ATotal IS NULL
@@ -91,6 +94,7 @@ SELECT	Username, AgentId, isAgent, PositionTaking,
 		SUM(BetCount) as BetCount,	
 		SUM(TurnOver) as TurnOver,
 		SUM(ActualTO) as ActualTO,
+		SUM(ActualTOAfter) as ActualTOAfter,
 		SUM(GrossTotal) as GrossTotal,
 		SUM(AWinLost) as  AWinLost, 
 		SUM(AComm) as AComm,
@@ -103,6 +107,7 @@ SELECT	Username, AgentId, isAgent, PositionTaking,
 		SUM(BetCount) as BetCount,	
 		SUM(TurnOver) as TurnOver,
 		SUM(ActualTO) as ActualTO,
+		SUM(ActualTOAfter) as ActualTOAfter,
 		SUM(GrossTotal) as GrossTotal,
 		SUM(AWinLost) as  AWinLost, 
 		SUM(AComm) as AComm,

@@ -30,7 +30,7 @@ AS
 	Original: 
 	
 	Revisions:
-	
+	 - 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
 
 	Param's Explanation: 
 	
@@ -515,10 +515,12 @@ BEGIN
 
 		 
 	---- List data to put Message
-	SELECT  B.TransId, A.AgentID as TargetID, A.Username as TargetName, 1 as IsAgent
+	SELECT  B.TransId, A.AgentID as TargetID, I.Username as TargetName, 1 as IsAgent
 	FROM	#Ref B
 	INNER JOIN Bettrans_Agent A WITH (NOLOCK)
 			ON A.RefNo = B.RefNo
+	INNER JOIN AgentInfo I WITH (NOLOCK)
+			ON I.AgentId = A.AgentId
 	UNION ALL
 	SELECT  B.TransId, B.CustId as TargetID, C.Username as TargetName, 0 as IsAgent
 	FROM	#Ref B
