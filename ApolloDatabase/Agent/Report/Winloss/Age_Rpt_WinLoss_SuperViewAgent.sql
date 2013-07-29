@@ -1,4 +1,4 @@
-﻿CREATE  PROCEDURE [dbo].[Age_Rpt_WinLoss_SuperViewAgent]
+﻿ALTER  PROCEDURE [dbo].[Age_Rpt_WinLoss_SuperViewAgent]
 	@AgentID 	INT,
 	@FromDate 	DATE,
 	@ToDate 	DATE,	
@@ -36,6 +36,7 @@ BEGIN
 				COUNT(B.TransID) BetCount,			
 		   		SUM(ABS(B.Stake)) AS TurnOver,
 				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS ActualTO,
+				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END * BA.APositionTaking)  AS ActualTOAfter,
 				- SUM(B.Winlost - B.Actual_Stake + B.TWinlost) AS AWinlost,	
 				- SUM (B.TComm) AS AComm,
 				- (SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS ATotal,
@@ -72,6 +73,7 @@ BEGIN
 				SUM(B.BetCount) BetCount,			
 		   		SUM(ABS(B.Stake)) AS TurnOver,
 				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS ActualTO,
+				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END * B.APositionTaking)  AS ActualTOAfter,
 				- SUM(B.Winlost - B.Actual_Stake + B.TWinlost) AS AWinlost,	
 				- SUM (B.TComm) AS AComm,
 				- (SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS ATotal,
@@ -83,7 +85,7 @@ BEGIN
 							COUNT(B.TransID) BetCount,
 							B.Stake, B.TransID,
 							B.MOdds,B.StatusID,	 
-							B.Winlost,B.Actual_Stake ,B.TWinlost, B.TComm	
+							B.Winlost,B.Actual_Stake ,B.TWinlost, B.TComm, BA.APositionTaking	
 				FROM		AgentInfo C WITH (NOLOCK)
 				INNER JOIN	BetTrans_Agent BA WITH (NOLOCK)
 						ON	BA.AgentID = C.AgentID	
@@ -116,7 +118,7 @@ BEGIN
 						)	
 				GROUP BY	C.Username, C.AgentID, PT.MaxUpperPositionTaking, 
 							B.MOdds,B.StatusID,	B.Stake, B.TransID,
-							B.Winlost,B.Actual_Stake ,B.TWinlost, B.TComm,B.Stake
+							B.Winlost,B.Actual_Stake ,B.TWinlost, B.TComm,B.Stake, BA.APositionTaking
 			 ) B
 		GROUP BY	B.Username, B.AgentID, B.MaxUpperPositionTaking  
 
@@ -129,6 +131,7 @@ BEGIN
 				COUNT(B.TransID) BetCount,			
 		   		SUM(ABS(B.Stake)) AS TurnOver,
 				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS ActualTO,
+				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END * BA.APositionTaking)  AS ActualTOAfter,
 				- SUM(B.Winlost - B.Actual_Stake + B.TWinlost) AS AWinlost,	
 				- SUM (B.TComm) AS AComm,
 				- (SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS ATotal,
@@ -177,6 +180,7 @@ BEGIN
 				COUNT(B.TransID) BetCount,			
 		   		SUM(ABS(B.Stake)) AS TurnOver,
 				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS ActualTO,
+				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END *BA.APositionTaking)  AS ActualTOAfter,
 				- SUM(B.Winlost - B.Actual_Stake + B.TWinlost) AS AWinlost,	
 				- SUM (B.TComm) AS AComm,
 				- (SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS ATotal,
@@ -213,6 +217,7 @@ BEGIN
 				SUM(B.BetCount) BetCount,			
 		   		SUM(ABS(B.Stake)) AS TurnOver,
 				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS ActualTO,
+				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END * B.APositionTaking)  AS ActualTOAfter,
 				- SUM(B.Winlost - B.Actual_Stake + B.TWinlost) AS AWinlost,	
 				- SUM (B.TComm) AS AComm,
 				- (SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS ATotal,
@@ -224,7 +229,7 @@ BEGIN
 							COUNT(B.TransID) BetCount,
 							B.Stake, B.TransID,
 							B.MOdds,B.StatusID,	 
-							B.Winlost,B.Actual_Stake ,B.TWinlost, B.TComm	
+							B.Winlost,B.Actual_Stake ,B.TWinlost, B.TComm, BA.APositionTaking	
 				FROM		AgentInfo C WITH (NOLOCK)
 				INNER JOIN	Bettrans14_Agent BA WITH (NOLOCK)
 						ON	BA.AgentID = C.AgentID	
@@ -257,7 +262,7 @@ BEGIN
 						)	
 				GROUP BY	C.Username, C.AgentID, PT.MaxUpperPositionTaking, 
 							B.MOdds,B.StatusID,	B.Stake, B.TransID,
-							B.Winlost,B.Actual_Stake ,B.TWinlost, B.TComm,B.Stake
+							B.Winlost,B.Actual_Stake ,B.TWinlost, B.TComm,B.Stake, BA.APositionTaking
 			 ) B
 		GROUP BY	B.Username, B.AgentID, B.MaxUpperPositionTaking  
 
@@ -270,6 +275,7 @@ BEGIN
 				COUNT(B.TransID) BetCount,			
 		   		SUM(ABS(B.Stake)) AS TurnOver,
 				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS ActualTO,
+				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END * BA.APositionTaking)  AS ActualTOAfter,
 				- SUM(B.Winlost - B.Actual_Stake + B.TWinlost) AS AWinlost,	
 				- SUM (B.TComm) AS AComm,
 				- (SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS ATotal,
