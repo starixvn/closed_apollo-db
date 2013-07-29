@@ -44,7 +44,7 @@ IF (@@Error = 0)
 	END TRY
 	BEGIN CATCH		
 		SELECT @LogData = 'ADD SUCCESS SPName = Dot_Admin_SettleOutright_Event MatchID=' + @matchid + ' KeyID=2 ErrMsg='+ left(error_message(), 70)		
-		EXEC LogDB.dbo.WriteLog_Settlement_Checking 
+		EXEC SVRTXN.LogDB.dbo.WriteLog_Settlement_Checking 
 			@UserID = @creator, 
 			@Matchid = @matchid, 
 			@KeyID = 2,
@@ -117,7 +117,7 @@ BEGIN TRY
 END TRY  
 BEGIN CATCH	
 	SELECT @LogData = ' ErrMsg=' + left(error_message(), 250)	
-	EXEC LogDB.dbo.WriteLog_Settlement_SettleOutright
+	EXEC SVRTXN.LogDB.dbo.WriteLog_Settlement_SettleOutright
 		@UserID = @creator,
 		@OrId = @matchid,
 		@LeagueId = 0,
@@ -143,7 +143,7 @@ BEGIN
 	END TRY
 	BEGIN CATCH		
 		SELECT @LogData = 'DEL SUCCESS SPName = Dot_Admin_SettleOutright_Event MatchID=' + @matchid + ' KeyID=2 ErrMsg='+ left(error_message(), 70)		
-		EXEC LogDB.dbo.WriteLog_Settlement_Checking 
+		EXEC SVRTXN.LogDB.dbo.WriteLog_Settlement_Checking 
 			@UserID = @creator, 
 			@Matchid = @matchid, 
 			@KeyID = 2,
@@ -163,7 +163,7 @@ BEGIN
 	END TRY
 	BEGIN CATCH		
 		SELECT @LogData = 'DEL FAILED SPName = Dot_Admin_SettleOutright_Event MatchID=' + @matchid + ' KeyID=2 ErrMsg='+ left(error_message(), 70)		
-		EXEC LogDB.dbo.WriteLog_Settlement_Checking 
+		EXEC SVRTXN.LogDB.dbo.WriteLog_Settlement_Checking 
 			@UserID = @creator, 
 			@Matchid = @matchid, 
 			@KeyID = 2,

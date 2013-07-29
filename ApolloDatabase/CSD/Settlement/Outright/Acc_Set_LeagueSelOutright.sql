@@ -35,6 +35,7 @@ BEGIN
 		AND l.sporttype = @sporttype
 	ORDER BY leaguename
 END 
+GO
 GRANT EXECUTE ON [dbo].[Acc_Set_LeagueSelOutright] TO [aplweb]	
 
 
