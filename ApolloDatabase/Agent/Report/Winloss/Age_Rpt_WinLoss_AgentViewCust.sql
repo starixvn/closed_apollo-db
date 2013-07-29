@@ -110,7 +110,7 @@ BEGIN
 										WHERE	BM.RefNo = B.RefNo
 										)
 						)
-			GROUP BY B.MOdds,B.StatusID,	BA.AWinLost, BA.AComm,APositionTaking,
+			GROUP BY B.MOdds,B.StatusID,	BA.AWinLost, BA.AComm, BA.APositionTaking,
 					 B.Winlost, B.Actual_Stake,B.PlayerComm, B.Stake , B.TransID
 			) B
 
