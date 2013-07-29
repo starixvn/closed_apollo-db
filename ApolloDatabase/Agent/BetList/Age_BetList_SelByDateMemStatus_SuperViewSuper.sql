@@ -254,7 +254,15 @@ BEGIN
 	--- Called from report Transaction: get more data on Bettrans14 and select top 1500 row
 	IF @RptType = 1 
 	BEGIN 
-	
+		--- Check total of rows on Bettrans table
+		DECLARE @RowCount INT
+
+		SELECT @RowCount = COUNT (1)
+		FROM #Betlist 
+
+		IF @RowCount < 1500
+		BEGIN 		
+
 			----Sportsbook
 			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) ) OR @Bettypes = '0'
 			INSERT INTO #Betlist
@@ -430,7 +438,7 @@ BEGIN
 	SELECT TOP 1500 *, @LoggedAgentLevel as AgentLevel
 	FROM #Betlist 
 	ORDER BY TransID DESC	
-	
+	END 
 END				
 
 

@@ -277,210 +277,218 @@ BEGIN
 	--- Called from report Transaction: get more data on Bettrans14 and select top 1500 row
 	IF @RptType = 1 
 	BEGIN 
-			--sportsbook
-			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) ) OR @Bettypes = '0'
-			INSERT INTO #Betlist
-			SELECT 	B.TransId,
-					B.RefNo,
-					m.MatchId,
-					m.MatchCode ,
-					m.HomeId,
-					m.AwayId,
-					m.SportType,
-					m.LeagueId, 
-					m.IsNeutral,
-					m.BetStatus,
-					B.Username,
-					B.BetType,
-					B.CustId,
-					B.Hdp1, 
-					B.Hdp2, 
-					B.Odds,
-					B.MOdds,
-					CASE WHEN B.Status = 'running' AND IsNull(B.SecAcceptFlag, 0) = 1 AND IsNull(B.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
-								ELSE B.Status 
-								END as Status,
-					B.Stake,
-					B.Actual_Stake,
-					B.TransDate,		
-					B.BetTeam,
-					B.BetId,
-					B.PlayerDiscount,
-					B.WinLost - B.Actual_Stake as WinLost,
-					B.PlayerComm,
-					(1 - B.TPositionTaking) AS APositionTaking,
-					NULL AS ADiscount,
-					- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
-					- (B.TComm) AS AComm,	
-					B.LiveHomeScore,
-					B.LiveAwayScore,
-					B.LiveIndicator, 
-					m.FinalHomeScore,
-					m.FinalAwayScore,
-					B.IP,		
-					B.Oddstype,		
-					B.DoubleCommLosing,
-					C.UGroup
- 				FROM 	
-					Bettrans14 AS B  WITH (NOLOCK) 
-					INNER JOIN Bettrans14_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId  
-					INNER JOIN Match14 m WITH (NOLOCK) ON  B.MatchId = m.MatchId					
-					INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
-				WHERE 
-					BA.AgentId = @AgentId 
-					AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 
-					AND BA.TransDate Between @FromDate AND @ToDate	
-					AND (	BA.bettype < 31 
-							OR BA.bettype between 121 and 999
-							OR BA.bettype between 1301 and 1334 											
-						)
-					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
+		--- Check total of rows on Bettrans table
+		DECLARE @RowCount INT
+
+		SELECT @RowCount = COUNT (1)
+		FROM #Betlist 
+		
+		IF @RowCount < 1500
+		BEGIN 		
+				--sportsbook
+				IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) ) OR @Bettypes = '0'
+				INSERT INTO #Betlist
+				SELECT 	B.TransId,
+						B.RefNo,
+						m.MatchId,
+						m.MatchCode ,
+						m.HomeId,
+						m.AwayId,
+						m.SportType,
+						m.LeagueId, 
+						m.IsNeutral,
+						m.BetStatus,
+						B.Username,
+						B.BetType,
+						B.CustId,
+						B.Hdp1, 
+						B.Hdp2, 
+						B.Odds,
+						B.MOdds,
+						CASE WHEN B.Status = 'running' AND IsNull(B.SecAcceptFlag, 0) = 1 AND IsNull(B.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
+									ELSE B.Status 
+									END as Status,
+						B.Stake,
+						B.Actual_Stake,
+						B.TransDate,		
+						B.BetTeam,
+						B.BetId,
+						B.PlayerDiscount,
+						B.WinLost - B.Actual_Stake as WinLost,
+						B.PlayerComm,
+						(1 - B.TPositionTaking) AS APositionTaking,
+						NULL AS ADiscount,
+						- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
+						- (B.TComm) AS AComm,	
+						B.LiveHomeScore,
+						B.LiveAwayScore,
+						B.LiveIndicator, 
+						m.FinalHomeScore,
+						m.FinalAwayScore,
+						B.IP,		
+						B.Oddstype,		
+						B.DoubleCommLosing,
+						C.UGroup
+ 					FROM 	
+						Bettrans14 AS B  WITH (NOLOCK) 
+						INNER JOIN Bettrans14_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId  
+						INNER JOIN Match14 m WITH (NOLOCK) ON  B.MatchId = m.MatchId					
+						INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
+					WHERE 
+						BA.AgentId = @AgentId 
+						AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 
+						AND BA.TransDate Between @FromDate AND @ToDate	
+						AND (	BA.bettype < 31 
+								OR BA.bettype between 121 and 999
+								OR BA.bettype between 1301 and 1334 											
+							)
+						AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 					
-					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
-					AND B.TransDate Between @FromDate AND @ToDate	
-					AND (	B.bettype < 31 
-							OR B.bettype between 121 and 999
-							OR B.bettype between 1301 and 1334 							 				
-						)
-					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 
+						AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
+						AND B.TransDate Between @FromDate AND @ToDate	
+						AND (	B.bettype < 31 
+								OR B.bettype between 121 and 999
+								OR B.bettype between 1301 and 1334 							 				
+							)
+						AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 
 					 
-					AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList)) 		
+						AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList)) 		
 					
 
-			---Parlay
-			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) ) OR @Bettypes = '0'
-			INSERT INTO #Betlist
-			SELECT  DISTINCT
-					B.TransId,
-					B.RefNo,
-					0 as matchid,
-					'' matchcode,
-					0 as homeID,
-					0 as awayID,
-					0 as sporttype,
-					'' as LeagueId,
-					CONVERT(BIT,0) as IsNeutral,
-					'' as BetStatus,
-					B.Username,				
-					B.BetType,
-					B.CustId,
-					0 as hdp1,
-					0 as hdp2,
-					B.Odds,
-					B.MOdds,
-					B.Status,
-					B.Stake,
-					B.Actual_Stake,
-					B.TransDate,		
-					B.BetTeam,
-					B.BetId,
-					B.PlayerDiscount,
-					B.WinLost - B.Actual_Stake as WinLost,
-					B.PlayerComm,
-					(1 - B.TPositionTaking) AS APositionTaking,
-					NULL AS ADiscount,
-					- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
-					- (B.TComm) AS AComm,	
-					0 AS LiveHomeScore, 
-					0 AS LiveAwayScore,
-					0 AS LiveIndicator,
-					0 AS FinalHomeScore,
-					0 AS FinalAwayScore,
-					B.IP,		
-					0 as OddStype,		
-					B.DoubleCommLosing,
-					C.UGroup	
-			FROM Bettrans14 AS B  WITH (NOLOCK) 
---			INNER JOIN BettransM14 BM WITH (NOLOCK) ON BM.RefNo = B.RefNo
---			INNER JOIN Match14 m WITH (NOLOCK) ON m.MatchID = BM.MatchID		
-			INNER JOIN Bettrans14_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId 
-			INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
-			WHERE	BA.AgentId = @AgentId 			
-				AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 
-				AND BA.TransDate Between @FromDate AND @ToDate
-				AND BA.BetType IN (9,29) 
-				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 
-				
-				AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
-				AND B.TransDate Between @FromDate AND @ToDate
-				AND B.BetType IN (9,29) 
-				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
-				 
-				AND (@Sporttypes = '0' 
-							OR EXISTS (	SELECT	1 
-										FROM	BettransM14 BM WITH (NOLOCK, index=IX_RefNo) 
-										INNER JOIN Match14 M WITH (NOLOCK) 
-											ON	 M.matchID = BM.MatchId 
-											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
-										WHERE	BM.RefNo = B.RefNo
-										)				
-						)			
-
-
-		----- Outright14
-		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype =10 ) OR @Bettypes = '0'
-		INSERT INTO #Betlist
-		SELECT		B.transid,
-					B.refno,
-					0 as matchid,
-					m.matchcode,
-					m.teamID as homeID,
-					0 as awayID,
-					lg.sporttype,
-					m.LeagueID,
-					CONVERT(BIT,0) as IsNeutral,
-					'' as BetStatus,
-					B.username,
-					B.bettype,	
-					B.custid,
-					B.hdp1, 
-					B.hdp2, 
-					B.odds,
-					B.modds,
-					B.status,
-					B.stake,
-					B.actual_stake,
-					B.transdate,		
-					B.betteam,
-					B.betID,
-					B.PlayerDiscount,
-					B.WinLost - B.Actual_Stake as WinLost,
-					B.PlayerComm,
-					(1 - B.TPositionTaking) AS APositionTaking,
-					NULL AS ADiscount,
-					- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
-					- (B.TComm) AS AComm,			
-					B.livehomescore,
-					B.liveawayscore,
-					B.liveindicator,
-					0 AS FinalHomeScore,
-					0 AS FinalAwayScore, 
-					B.IP as IP,		
-					0 as oddstype,		
-					B.DoubleCommLosing,
-					C.UGroup
-			FROM	Bettrans14 B WITH (NOLOCK)
-				INNER JOIN Bettrans14_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
-				INNER JOIN Outright14 as m WITH (NOLOCK) on  B.matchid=m.orid
-				INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
+				---Parlay
+				IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) ) OR @Bettypes = '0'
+				INSERT INTO #Betlist
+				SELECT  DISTINCT
+						B.TransId,
+						B.RefNo,
+						0 as matchid,
+						'' matchcode,
+						0 as homeID,
+						0 as awayID,
+						0 as sporttype,
+						'' as LeagueId,
+						CONVERT(BIT,0) as IsNeutral,
+						'' as BetStatus,
+						B.Username,				
+						B.BetType,
+						B.CustId,
+						0 as hdp1,
+						0 as hdp2,
+						B.Odds,
+						B.MOdds,
+						B.Status,
+						B.Stake,
+						B.Actual_Stake,
+						B.TransDate,		
+						B.BetTeam,
+						B.BetId,
+						B.PlayerDiscount,
+						B.WinLost - B.Actual_Stake as WinLost,
+						B.PlayerComm,
+						(1 - B.TPositionTaking) AS APositionTaking,
+						NULL AS ADiscount,
+						- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
+						- (B.TComm) AS AComm,	
+						0 AS LiveHomeScore, 
+						0 AS LiveAwayScore,
+						0 AS LiveIndicator,
+						0 AS FinalHomeScore,
+						0 AS FinalAwayScore,
+						B.IP,		
+						0 as OddStype,		
+						B.DoubleCommLosing,
+						C.UGroup	
+				FROM Bettrans14 AS B  WITH (NOLOCK) 
+	--			INNER JOIN BettransM14 BM WITH (NOLOCK) ON BM.RefNo = B.RefNo
+	--			INNER JOIN Match14 m WITH (NOLOCK) ON m.MatchID = BM.MatchID		
+				INNER JOIN Bettrans14_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId 
 				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
-			WHERE 	BA.AgentId = @AgentId 		
-				AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 	
-				AND BA.TransDate Between @FromDate AND @ToDate
-				AND BA.bettype = 10
+				WHERE	BA.AgentId = @AgentId 			
+					AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 
+					AND BA.TransDate Between @FromDate AND @ToDate
+					AND BA.BetType IN (9,29) 
+					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 
+				
+					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
+					AND B.TransDate Between @FromDate AND @ToDate
+					AND B.BetType IN (9,29) 
+					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
+				 
+					AND (@Sporttypes = '0' 
+								OR EXISTS (	SELECT	1 
+											FROM	BettransM14 BM WITH (NOLOCK, index=IX_RefNo) 
+											INNER JOIN Match14 M WITH (NOLOCK) 
+												ON	 M.matchID = BM.MatchId 
+												AND (M.sporttype IN (Select sporttype FROM #SportsList))							
+											WHERE	BM.RefNo = B.RefNo
+											)				
+							)			
+
+
+			----- Outright14
+			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype =10 ) OR @Bettypes = '0'
+			INSERT INTO #Betlist
+			SELECT		B.transid,
+						B.refno,
+						0 as matchid,
+						m.matchcode,
+						m.teamID as homeID,
+						0 as awayID,
+						lg.sporttype,
+						m.LeagueID,
+						CONVERT(BIT,0) as IsNeutral,
+						'' as BetStatus,
+						B.username,
+						B.bettype,	
+						B.custid,
+						B.hdp1, 
+						B.hdp2, 
+						B.odds,
+						B.modds,
+						B.status,
+						B.stake,
+						B.actual_stake,
+						B.transdate,		
+						B.betteam,
+						B.betID,
+						B.PlayerDiscount,
+						B.WinLost - B.Actual_Stake as WinLost,
+						B.PlayerComm,
+						(1 - B.TPositionTaking) AS APositionTaking,
+						NULL AS ADiscount,
+						- (B.Winlost - B.Actual_Stake + B.TWinlost) as AWinLost,				
+						- (B.TComm) AS AComm,			
+						B.livehomescore,
+						B.liveawayscore,
+						B.liveindicator,
+						0 AS FinalHomeScore,
+						0 AS FinalAwayScore, 
+						B.IP as IP,		
+						0 as oddstype,		
+						B.DoubleCommLosing,
+						C.UGroup
+				FROM	Bettrans14 B WITH (NOLOCK)
+					INNER JOIN Bettrans14_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
+					INNER JOIN Outright14 as m WITH (NOLOCK) on  B.matchid=m.orid
+					INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
+					INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
+				WHERE 	BA.AgentId = @AgentId 		
+					AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 	
+					AND BA.TransDate Between @FromDate AND @ToDate
+					AND BA.bettype = 10
 								
-				AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
-				AND B.TransDate Between @FromDate AND @ToDate
-				AND B.bettype = 10
+					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
+					AND B.TransDate Between @FromDate AND @ToDate
+					AND B.bettype = 10
 					
-				AND (@Sporttypes = '0' OR lg.sporttype IN (Select sporttype FROM #SportsList))				
+					AND (@Sporttypes = '0' OR lg.sporttype IN (Select sporttype FROM #SportsList))				
 	
+		END
+	
+		SELECT TOP 1500 *, @LoggedAgentLevel as AgentLevel
+		FROM #Betlist 
+		ORDER BY TransID DESC	
 	END
-	
-	SELECT TOP 1500 *, @LoggedAgentLevel as AgentLevel
-	FROM #Betlist 
-	ORDER BY TransID DESC	
-	
 END	
 
 DROP TABLE #Betlist
