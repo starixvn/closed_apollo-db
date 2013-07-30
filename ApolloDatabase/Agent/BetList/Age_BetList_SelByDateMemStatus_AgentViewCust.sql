@@ -504,11 +504,14 @@ BEGIN
 		FROM #Betlist 
 		
 		IF @RowCount < 1500
+		SELECT @RowCount = 1500 - @RowCount 
+
 		BEGIN 				
 			-- Sportsbook	
 			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) ) OR @Bettypes = '0'
 			INSERT INTO #Betlist
-			SELECT 	B.TransId,
+			SELECT 	TOP (@Rowcount) 
+					B.TransId,
 					B.RefNo,
 					m.MatchId,
 					m.MatchCode ,
@@ -579,7 +582,7 @@ BEGIN
 			---- Parlay
 			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) ) OR @Bettypes = '0'
 			INSERT INTO #Betlist
-			SELECT  DISTINCT 
+			SELECT  TOP (@Rowcount) 
 					B.TransId,
 					B.RefNo,
 					0 as matchid,
@@ -650,7 +653,7 @@ BEGIN
 			----- Outright14
 			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype =10 ) OR @Bettypes = '0'
 			INSERT INTO #Betlist
-			SELECT 				
+			SELECT 	TOP (@Rowcount) 			
 					B.transid,
 					B.refno,
 					0 as matchid,

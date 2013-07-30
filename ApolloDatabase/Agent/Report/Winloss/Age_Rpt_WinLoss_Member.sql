@@ -501,4 +501,6 @@ DROP TABLE #MemberOutstanding
 DROP TABLE #BettypeList
 DROp TABLE #SportsList
 
-
+GO
+GRANT EXECUTE ON [dbo].[Age_Rpt_WinLoss_Member] TO [aplweb]
+GO 
