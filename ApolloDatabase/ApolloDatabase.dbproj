@@ -113,6 +113,7 @@
     <Folder Include="CSD\Settlement\Outright\IBC" />
     <Folder Include="CSD\Special Delete\Early Kickoff" />
     <Folder Include="Agent\Admin\AccountInfo" />
+    <Folder Include="Agent\Report\LineSportCredits" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1513,6 +1514,9 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Report\Winloss\Age_Rpt_WinLoss_SuperViewAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Report\LineSportCredits\Age_Rpt_LineSportCredits.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
