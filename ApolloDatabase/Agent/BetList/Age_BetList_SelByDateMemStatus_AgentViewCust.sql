@@ -558,7 +558,6 @@ BEGIN
 					LEFT JOIN Bettrans14_Agent D WITH (NOLOCK) 
 							ON D.TransID = B.TransID 
 							AND D.AgentID IN (SELECT AgentId FROM #DirectChild)
-							AND D.StatusId in (SELECT StatusId FROM #StatusId ) 	
 							AND D.TransDate Between @FromDate AND @ToDate	
 							AND (	D.bettype < 31 
 									OR D.bettype between 121 and 999
@@ -567,8 +566,7 @@ BEGIN
 							AND (@Bettypes = '0' OR D.Bettype IN (Select bettype FROM #BettypeList)) 		 
 					INNER JOIN Match14 m WITH (NOLOCK) ON  B.MatchId = m.MatchId 						
 					INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
-				WHERE	B.CustID = @CustId  
-					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
+				WHERE	B.CustID = @CustId					
 					AND B.TransDate Between @FromDate AND @ToDate	
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
@@ -626,15 +624,13 @@ BEGIN
 					INNER JOIN Bettrans14_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 					LEFT JOIN Bettrans14_Agent D WITH (NOLOCK) 
 							ON D.TransID = B.TransID
-							AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
-							AND D.StatusId in (SELECT StatusId FROM #StatusId ) 
+							AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 							
 							AND D.TransDate Between @FromDate AND @ToDate
 							AND D.BetType IN (9,29) 
 							AND (@Bettypes = '0' OR D.Bettype IN (Select bettype FROM #BettypeList)) 
 					INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 				
-				WHERE   B.CustID = @CustId 				
-					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
+				WHERE   B.CustID = @CustId
 					AND B.TransDate Between @FromDate AND @ToDate
 					AND B.BetType IN (9,29) 
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
@@ -698,18 +694,15 @@ BEGIN
 					INNER JOIN Bettrans14_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 					LEFT JOIN Bettrans14_Agent D WITH (NOLOCK) 
 							ON D.TransID = B.TransID 
-								AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
-								AND D.StatusId in (SELECT StatusId FROM #StatusId ) 	
+								AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 								
 								AND D.TransDate Between @FromDate AND @ToDate
 								AND D.bettype = 10							
 					INNER JOIN Outright14 as m WITH (NOLOCK) on  B.matchid=m.orid
 					INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
 					INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
-				WHERE  B.CustID = @CustId 				
-					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
+				WHERE  B.CustID = @CustId
 					AND B.TransDate Between @FromDate AND @ToDate
-					AND B.bettype = 10
-																
+					AND B.bettype = 10																
 					AND (@Sporttypes = '0' OR lg.sporttype IN (Select sporttype FROM #SportsList)) 	
 		END
 	

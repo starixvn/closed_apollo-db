@@ -503,16 +503,14 @@ BEGIN
 					INNER JOIN Match14 m WITH (NOLOCK) ON  B.MatchId = m.MatchId 		
 					INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId				
 				WHERE 
-					B.CustID = @CustId 
-					AND B.StatusId in (SELECT StatusId FROM #StatusId )   	
+					B.CustID = @CustId   	
 					AND B.TransDate Between @FromDate AND @ToDate	
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
 							OR B.bettype between 1301 and 1334 
 						)
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
-					AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))		
-				
+					AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))					
 
 				
 			-----Parlay
@@ -560,8 +558,7 @@ BEGIN
 					C.UGroup
 				FROM Bettrans14 AS B  WITH (NOLOCK) 
 				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
-				WHERE B.CustID = @CustId  				
-					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
+				WHERE B.CustID = @CustId  					
 					AND B.TransDate Between @FromDate AND @ToDate
 					AND B.BetType IN (9,29)
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
@@ -627,7 +624,6 @@ BEGIN
 					INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId	
 				WHERE 
 					B.CustID = @CustId  				
-					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
 					AND B.TransDate Between @FromDate AND @ToDate
 					AND B.bettype = 10				
 					AND (@Sporttypes = '0' OR lg.sporttype IN (Select sporttype FROM #SportsList)) 	

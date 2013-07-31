@@ -338,16 +338,14 @@ BEGIN
 						INNER JOIN Match14 m WITH (NOLOCK) ON  B.MatchId = m.MatchId					
 						INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 					WHERE 
-						BA.AgentId = @AgentId 
-						AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 
+						BA.AgentId = @AgentId  
 						AND BA.TransDate Between @FromDate AND @ToDate	
 						AND (	BA.bettype < 31 
 								OR BA.bettype between 121 and 999
 								OR BA.bettype between 1301 and 1334 											
 							)
 						AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-					
-						AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
+					 
 						AND B.TransDate Between @FromDate AND @ToDate	
 						AND (	B.bettype < 31 
 								OR B.bettype between 121 and 999
@@ -406,13 +404,11 @@ BEGIN
 	--			INNER JOIN Match14 m WITH (NOLOCK) ON m.MatchID = BM.MatchID		
 				INNER JOIN Bettrans14_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId 
 				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
-				WHERE	BA.AgentId = @AgentId 			
-					AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 
+				WHERE	BA.AgentId = @AgentId 			 
 					AND BA.TransDate Between @FromDate AND @ToDate
 					AND BA.BetType IN (9,29) 
 					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 
 				
-					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
 					AND B.TransDate Between @FromDate AND @ToDate
 					AND B.BetType IN (9,29) 
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
@@ -476,12 +472,10 @@ BEGIN
 					INNER JOIN Outright14 as m WITH (NOLOCK) on  B.matchid=m.orid
 					INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
 					INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
-				WHERE 	BA.AgentId = @AgentId 		
-					AND BA.StatusId in (SELECT StatusId FROM #StatusId ) 	
+				WHERE 	BA.AgentId = @AgentId 			
 					AND BA.TransDate Between @FromDate AND @ToDate
 					AND BA.bettype = 10
-								
-					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
+									
 					AND B.TransDate Between @FromDate AND @ToDate
 					AND B.bettype = 10
 					
