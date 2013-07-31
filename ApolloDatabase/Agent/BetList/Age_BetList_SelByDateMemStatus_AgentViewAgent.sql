@@ -329,11 +329,14 @@ BEGIN
 		FROM #Betlist 
 		
 		IF @RowCount < 1500
+		SELECT @RowCount = 1500 - @RowCount 
+
 		BEGIN 		
 			---Sportsbook
 			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) ) OR @Bettypes = '0'
 			INSERT INTO #Betlist
-			SELECT 	B.TransId,
+			SELECT 	TOP (@Rowcount) 
+					B.TransId,
 					B.RefNo,
 					m.MatchId,
 					m.MatchCode ,
@@ -415,12 +418,13 @@ BEGIN
 						) 			
 					AND (@Bettypes = '0' OR L.Bettype IN (Select bettype FROM #BettypeList))								 
 					AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList)) 		
-			
+				ORDER BY B.TransID DESC
 
 			-----Parlay
 			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) ) OR @Bettypes = '0'
 			INSERT INTO #Betlist
-			SELECT 	DISTINCT B.TransId,
+			SELECT 	TOP (@RowCount)
+					B.TransId,
 					B.RefNo,
 					0 as matchid,
 					'' matchcode,
@@ -498,11 +502,12 @@ BEGIN
 											WHERE	BM.RefNo = B.RefNo
 											)				
 							)	
+				ORDER BY B.TransID DESC
 
 			----- Outright14
 			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype =10 ) OR @Bettypes = '0'
 			INSERT INTO #Betlist
-			SELECT 				
+			SELECT 	TOP (@RowCount)			
 					B.transid,
 					B.refno,
 					0 as matchid,
@@ -569,6 +574,8 @@ BEGIN
 					AND L.bettype = 10
 																 
 					AND (@Sporttypes = '0' OR lg.sporttype IN (Select sporttype FROM #SportsList))
+
+				ORDER BY B.TransID DESC
 			END
 	
 	----Get Betlist

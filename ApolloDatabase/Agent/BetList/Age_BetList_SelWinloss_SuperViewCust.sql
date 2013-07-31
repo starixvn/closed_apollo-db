@@ -1,10 +1,8 @@
-﻿CREATE PROCEDURE [dbo].[Age_BetList_SelWinloss_SuperViewCust]
+﻿ALTER PROCEDURE [dbo].[Age_BetList_SelWinloss_SuperViewCust]
 	@LoggedId INT,
-	@AgentId INT = -1 ,
-	@CustId INT = -1,
+	@CustId INT,
 	@FromDate DATE, 
-	@Todate DATE,
-	@StatusIds VARCHAR(1000),
+	@Todate DATE,	
 	@MoveBetsDay SMALLDATETIME,
 	@Sporttypes VARCHAR(1000) = '0',
 	@Bettypes VARCHAR(1000) = '0'
@@ -17,13 +15,13 @@ DB:  SVRAGE.RepDB
 Original:  
 
 Revisions:
-      
+      - 20130730@Sophia: Revise Code
 
 Param's Explanation:  
 */  
 SET NOCOUNT ON
 
-CREATE TABLE #Betlist (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVARCHAR(50), 
+CREATE TABLE #Betlist ( TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVARCHAR(50), 
 						HomeId INT, AwayId INT, SportType TINYINT, LeagueId INT, IsNeutral BIT, BetStatus NVARCHAR(50),
 						Username NVARCHAR(50), BetType SMALLINT, CustId INT , Hdp1 SMALLMONEY, Hdp2 SMALLMONEY, Odds SMALLMONEY, MOdds SMALLMONEY,
 						Status VARCHAR(10), Stake MONEY, Actual_Stake MONEY, TransDate DATETIME, BetTeam VARCHAR(10), BetId BIGINT, 
@@ -45,10 +43,6 @@ DECLARE @LoggedAgentLevel INT
 SELECT	@LoggedAgentLevel = AgentLevel
 FROM	AgentInfo WITH (NOLOCK)
 WHERE	AgentId = @LoggedId
-
-CREATE TABLE #StatusId ( StatusId TINYINT)
-INSERT INTO #StatusId
-SELECT val FROM dbo.strSplit_Key(@StatusIds,',')
 
 CREATE TABLE #BettypeList (bettype SMALLINT)
 INSERT INTO #BettypeList
@@ -107,7 +101,7 @@ BEGIN
 					INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 					
 				WHERE 
 					B.CustID = @CustId 
-					AND B.StatusId in (SELECT StatusId FROM #StatusId )   	
+					AND B.StatusId NOT IN (0,1)   	
 					AND B.WinLostDate Between @FromDate AND @ToDate	
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
@@ -164,7 +158,7 @@ BEGIN
 				INNER JOIN Match M WITH (NOLOCK) 
 					ON  M.matchID = BM.MatchId  
 				WHERE B.CustID = @CustId  				
-					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
+					AND B.StatusId NOT IN (0,1) 	
 					AND B.WinLostDate Between @FromDate AND @ToDate
 					AND B.BetType IN (9,29) 
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
@@ -217,7 +211,7 @@ BEGIN
 					INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
 				WHERE 
 					B.CustID = @CustId  				
-					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
+					AND B.StatusId NOT IN (0,1) 
 					AND B.WinLostDate Between @FromDate AND @ToDate
 					AND B.bettype = 10
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
@@ -274,7 +268,7 @@ BEGIN
 					INNER JOIN Match14 m WITH (NOLOCK) ON  B.MatchId = m.MatchId 			
 				WHERE 
 					B.CustID = @CustId 
-					AND B.StatusId in (SELECT StatusId FROM #StatusId )   	
+					AND B.StatusId NOT IN (0,1)   	
 					AND B.WinLostDate Between @FromDate AND @ToDate	
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
@@ -330,7 +324,7 @@ BEGIN
 				INNER JOIN BetTransM14 BM WITH (NOLOCK) ON BM.RefNo = B.RefNo
 				INNER JOIN Match14 M WITH (NOLOCK) ON M.matchID = BM.matchID	 
 				WHERE B.CustID = @CustId  				
-					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
+					AND B.StatusId NOT IN (0,1) 	
 					AND B.WinLostDate Between @FromDate AND @ToDate
 					AND B.BetType IN (9,29) 
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))					 
@@ -383,7 +377,7 @@ BEGIN
 					INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
 				WHERE 
 					B.CustID = @CustId  				
-					AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
+					AND B.StatusId NOT IN (0,1) 
 					AND B.WinLostDate Between @FromDate AND @ToDate
 					AND B.bettype = 10
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))					 
@@ -397,7 +391,6 @@ ORDER BY TransID
 
 DROP TABLE #Betlist
 DROP TABLE #DirectChild
-DROP TABLE #StatusId
 DROP TABLE #BettypeList
 DROP TABLE #SportsList
 
