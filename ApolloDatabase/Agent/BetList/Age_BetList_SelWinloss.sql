@@ -21,6 +21,7 @@ Revisions:
 	 - 20130628@Sophia: Add FinalHomeScore, FinalAwayScore
 	 - 20130701@Sophia: Modify for Singbet: filter by Sporttype and Bettype
 	 - 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
+	 - 20130730@Sophia: Revise code
 
 Param's Explanation:  
 				
@@ -29,55 +30,19 @@ SET NOCOUNT ON
 
 	---*****************************  Super View ***************************--
 	IF @LoggedId = 1 
-	BEGIN 
-		----1: Super View Super
-		IF @AgentId = 1 AND @CustID = -1
-		BEGIN 		
-			EXEC Age_BetList_SelWinloss_SuperViewSuper  @LoggedId = 1, @AgentId = 1 ,@CustId = -1, 
-														@FromDate = @FromDate, @Todate = @Todate,@StatusIds = @StatusIds ,
-														@MoveBetsDay = @MoveBetsDay ,@Sporttypes = @Sporttypes ,@Bettypes = @Bettypes				
-			RETURN
-		END			
-		ELSE
-		---- 2: Super view Agent
-		IF @AgentId <> -1 AND @CustID = -1
-		BEGIN			
-			EXEC Age_BetList_SelWinloss_SuperViewAgent  @LoggedId = 1, @AgentId = @AgentId ,@CustId = -1, 
-														@FromDate = @FromDate, @Todate = @Todate ,@StatusIds = @StatusIds ,
-														@MoveBetsDay = @MoveBetsDay ,@Sporttypes = @Sporttypes ,@Bettypes = @Bettypes	
-			RETURN
-		END
-		ELSE
-		---- 3: Super View Member
-		IF @CustID <> -1 AND @AgentId = -1
-		BEGIN 	
-			EXEC Age_BetList_SelWinloss_SuperViewCust @LoggedId = 1, @AgentId = -1 ,@CustId = @CustID, 
-														@FromDate = @FromDate, @Todate = @Todate ,@StatusIds = @StatusIds ,
-														@MoveBetsDay = @MoveBetsDay ,@Sporttypes = @Sporttypes ,@Bettypes = @Bettypes
-			RETURN
-		END
+	BEGIN 	
+		EXEC Age_BetList_SelWinloss_SuperViewCust   @LoggedId = 1, @CustId = @CustID, 
+													@FromDate = @FromDate, @Todate = @Todate,
+													@MoveBetsDay = @MoveBetsDay ,@Sporttypes = @Sporttypes ,@Bettypes = @Bettypes		
 	END 
 	ELSE 
 	--****************** 2: Agent View******************---
 	BEGIN 
-		----4: Agent view Agent
-		IF @AgentId <> -1 AND @CustID = -1
-		BEGIN 			
-			EXEC Age_BetList_SelWinloss_AgentViewAgent  @LoggedId = @LoggedId, @AgentId = @AgentId ,@CustId = -1,
-														@FromDate = @FromDate, @Todate = @Todate ,@StatusIds = @StatusIds ,
-														@MoveBetsDay = @MoveBetsDay ,@Sporttypes = @Sporttypes ,@Bettypes = @Bettypes
-		
-			RETURN
-		END
-		ELSE
-		----- 5: Agent view Member
-		IF @CustID <> -1 AND @AgentId = -1
-		BEGIN 
-			EXEC Age_BetList_SelWinloss_AgentViewCust @LoggedId = @LoggedId, @AgentId = -1 ,@CustId = @CustId,
-														@FromDate = @FromDate, @Todate = @Todate ,@StatusIds = @StatusIds ,
-														@MoveBetsDay = @MoveBetsDay ,@Sporttypes = @Sporttypes ,@Bettypes = @Bettypes
-			RETURN
-		END 
+		EXEC Age_BetList_SelWinloss_AgentViewCust   @LoggedId = @LoggedId, @CustId = @CustId,
+													@FromDate = @FromDate, @Todate = @Todate, 
+													@MoveBetsDay = @MoveBetsDay ,@Sporttypes = @Sporttypes ,@Bettypes = @Bettypes
+			
+		 
 	END
 
 GO
