@@ -22,4 +22,6 @@ BEGIN
 	ORDER BY LogId ASC
 
 END
+
+GO
 GRANT EXECUTE ON [dbo].[Acc_Set_GetConfirmedActionOutright] TO [aplweb]	
