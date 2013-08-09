@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_Insert]    Script Date: 7/26/2013 2:44:02 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_Insert]    Script Date: 8/9/2013 8:51:05 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -44,7 +44,8 @@ BEGIN
 	SET NOCOUNT ON
 
 	-- Set default creator is parent agent
-	SET @Creator = @ParentId
+	IF @Creator IS NULL
+		SET @Creator = @ParentId
 
 	-- Check if agent ID exists
 	IF EXISTS ( SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @AgentId )
@@ -98,11 +99,18 @@ BEGIN
 
 	-- Begin update
 	DECLARE @UplineNode				HIERARCHYID
-	DECLARE	@LastChild				HIERARCHYID
-	DECLARE @ParentStatus			TINYINT
-	DECLARE @ParentBetStatus		TINYINT
-	DECLARE @ParentUplineStatus		TINYINT
-	DECLARE @ParentUplineBetStatus	TINYINT
+			,@LastChild				HIERARCHYID
+			,@ParentStatus			TINYINT
+			,@ParentBetStatus		TINYINT
+			,@ParentUplineStatus	TINYINT
+			,@ParentUplineBetStatus	TINYINT
+			,@MAINSHAREHOLDERPRESET	SMALLINT		= 1200
+			,@MAINSHAREHOLDERMAX	SMALLINT		= 8800			
+			,@SHAREHOLDERMAX		SMALLINT		= 5000
+			,@SHAREHOLDERMIN		SMALLINT		= 5000
+			,@agentLevel			SMALLINT
+			,@MAINSHAREHOLDERLEVEL	SMALLINT		= 1
+			,@SHAREHOLDERLEVEL		SMALLINT		= 2
 
 	-- Get parent information
 	SELECT	
@@ -120,7 +128,7 @@ BEGIN
 	WHERE AgentHId.GetAncestor(1) = @UplineNode
 
 	-- Get upline status if not a main shareholder
-	IF @ParentId > 0 
+	IF @ParentId > 1
 		BEGIN
 			SELECT
 				@UplineStatus = CASE WHEN @ParentStatus = 2 OR @ParentUplineStatus = 2 THEN 2 ELSE 1 END,
@@ -158,6 +166,8 @@ BEGIN
 		@UplineStatus,
 		@UplineBetStatus
 	)	
+
+	SELECT @agentLevel = AgentLevel FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @AgentId
 
 	-- Not support for multiple language
 	IF @@ERROR > 0
@@ -213,9 +223,9 @@ BEGIN
 		@AgentId,
 		SportType,
 		BetType,
-		0,			-- MinBet
-		0,			-- MaxBet
-		0			-- MaxPerMatch
+		MinBet,			-- MinBet
+		MaxBet,			-- MaxBet
+		MaxPerMatch		-- MaxPerMatch
 	FROM AgentBetLimit WITH (NOLOCK)
 	WHERE AgentId = @ParentId
 
@@ -232,10 +242,10 @@ BEGIN
 		@AgentId,
 		SportType,
 		BetType,
-		0,			-- DiscountA
-		0,			-- DiscountB
-		0,			-- DiscountC
-		0			-- DiscountD
+		DiscountA,			-- DiscountA
+		DiscountB,			-- DiscountB
+		DiscountC,			-- DiscountC
+		DiscountD			-- DiscountD
 	FROM AgentDiscount WITH (NOLOCK)
 	WHERE AgentId = @ParentId
 
@@ -253,9 +263,20 @@ BEGIN
 		SportType,
 		BetType,
 		IsLive,
-		MaxGivenPositionTaking,			-- max upper
-		0,			-- max given
-		0			-- min given
+		CASE 
+			WHEN @agentLevel > @SHAREHOLDERLEVEL		THEN MaxGivenPositionTaking
+			WHEN @agentLevel = @SHAREHOLDERLEVEL		THEN 0
+			WHEN @agentLevel = @MAINSHAREHOLDERLEVEL	THEN @MAINSHAREHOLDERPRESET 			
+		END ,		-- max upper
+		CASE 
+			WHEN @agentLevel > @SHAREHOLDERLEVEL		THEN 0
+			WHEN @agentLevel = @SHAREHOLDERLEVEL		THEN MaxGivenPositionTaking
+			WHEN @agentLevel = @MAINSHAREHOLDERLEVEL	THEN @MAINSHAREHOLDERMAX
+		END ,			-- max given
+		CASE 
+			WHEN @agentLevel = @SHAREHOLDERLEVEL THEN @SHAREHOLDERMIN									
+			ELSE 0
+		END 			-- min given
 	FROM AgentPositionTaking WITH (NOLOCK)
 	WHERE AgentId = @ParentId		
 
@@ -263,8 +284,8 @@ BEGIN
 	SET @xml = (
 		SELECT	
 			@Username			AS '@u',
-			(SELECT Username FROM AgentInfo WHERE AgentId = @ParentId)			AS '@p',
-			@Currency			AS '@c',
+			(SELECT Username FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @ParentId)				AS '@p',
+			(SELECT currency FROM SVRAGE.RepDB.dbo.Exchange WITH (NOLOCK) WHERE exchangeid = @Currency)	AS '@c',
 			@Status				AS '@s',
 			@BetStatus			AS '@bs',
 			@UplineStatus		AS '@us',

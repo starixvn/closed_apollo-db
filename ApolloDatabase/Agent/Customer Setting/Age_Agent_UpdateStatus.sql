@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateStatus]    Script Date: 5/6/2013 11:31:31 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateStatus]    Script Date: 8/9/2013 12:26:56 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -35,6 +35,15 @@ BEGIN
 	
 	SET NOCOUNT ON
 
+	-- Check if agent ID is valid (not super)
+	IF @AgentId = 1
+		BEGIN
+			SELECT 
+				@ErrCode = 5106, 
+				@ErrMsg = 'Invalid agent ID [AgentId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
+			RETURN
+		END	
+
 	-- Check if agent ID exists
 	IF NOT EXISTS ( SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @AgentId )
 		BEGIN
@@ -67,8 +76,8 @@ BEGIN
 	SET @xml = (
 		SELECT	
 			@Type		AS '@t',
-			Status		AS '@as',
-			BetStatus	AS '@bs'
+			CASE WHEN @Type = 1 THEN Status ELSE BetStatus END	AS '@s'
+			--BetStatus	AS '@bs'
 		FROM AgentInfo WITH (NOLOCK)
 		WHERE AgentId = @AgentId
 		FOR XML PATH('z'), ROOT('r')
@@ -201,8 +210,7 @@ BEGIN
 	SET @xml = (
 		SELECT	
 			@Type		AS '@t',
-			Status		AS '@as',
-			BetStatus	AS '@bs'
+			@Status		AS '@s'
 		FROM AgentInfo WITH (NOLOCK)
 		WHERE AgentId = @AgentId
 		FOR XML PATH('z'), ROOT('r')
@@ -212,26 +220,30 @@ BEGIN
 
 	SET @endRun = GETDATE()  
 	SET @duration = DATEDIFF(MILLISECOND, @startRun, @endRun) 
-		
+	
+	SELECT @Modifier = ParentId
+	FROM AgentInfo WITH (NOLOCK)
+	WHERE AgentId = @AgentId
+
 	IF @@Error = 0
 		BEGIN TRY
 			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
-			@UserId			= @Modifier,
-			@SPName			= 'Age_Agent_UpdateStatus',
-			@LogDate		= @startRun,
-			@AgentId		= @AgentId,
-			@Duration		= @Duration,
-			@Data			= @logSPData,
-			@OldData		= @logSPDataOld
+				@UserId			= @Modifier,
+				@SPName			= 'Age_Agent_UpdateStatus',
+				@LogDate		= @startRun,
+				@AgentId		= @AgentId,
+				@Duration		= @Duration,
+				@Data			= @logSPData,
+				@OldData		= @logSPDataOld
 		END	TRY
 		BEGIN CATCH
 			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
-			@UserId			= @Modifier,
-			@SPName			= 'Age_Agent_UpdateStatus',
-			@LogDate		= @startRun,
-			@AgentId		= @AgentId,
-			@Duration		= @Duration,
-			@Data			= @logSPData,
-			@OldData		= @logSPDataOld
+				@UserId			= @Modifier,
+				@SPName			= 'Age_Agent_UpdateStatus',
+				@LogDate		= @startRun,
+				@AgentId		= @AgentId,
+				@Duration		= @Duration,
+				@Data			= @logSPData,
+				@OldData		= @logSPDataOld
 		END CATCH 	
 END

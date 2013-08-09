@@ -1,6 +1,6 @@
 ﻿USE [LogDB]
 GO
-/****** Object:  StoredProcedure [dbo].[ReadLog_RunSpAgent]    Script Date: 7/17/2013 4:24:39 PM ******/
+/****** Object:  StoredProcedure [dbo].[ReadLog_RunSpAgent]    Script Date: 8/9/2013 9:06:32 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -14,7 +14,8 @@ ALTER PROCEDURE [dbo].[ReadLog_RunSpAgent]
 	,@To			DATETIME
 	,@PageIndex		INT
 	,@PageSize		INT
-	,@TotalRows		INT				= 0		OUTPUT	
+	,@TotalRows		INT				= 0		OUTPUT
+	,@Language		VARCHAR(5)		= 'en-US'	
 AS
 
 /*  
@@ -73,10 +74,10 @@ BEGIN
 		FROM 
 			dbo.RunSpAgent AS rsa WITH (NOLOCK)
 			INNER JOIN @Temp AS ai ON rsa.AgentId = ai.AgentId
-			INNER JOIN @Temp AS ui ON rsa.UserId = ui.AgentId
+			LEFT JOIN @Temp AS ui ON rsa.UserId = ui.AgentId
 			INNER JOIN dbo.LogAction AS la WITH (NOLOCK) ON rsa.ActionId = la.ActionId
 		WHERE 
-			(@ActionTypeId = 0 OR la.ActionTypeId = @ActionTypeId)
+			(@ActionTypeId = 0 OR la.ActionTypeId  = @ActionTypeId OR (@ActionTypeId = 5 AND la.ActionTypeId =6))
 			AND rsa.LogDate BETWEEN @From AND @To
 			AND ai.Username = @Username
 			AND @isCheck = 1
@@ -90,19 +91,29 @@ BEGIN
 				rsa.LogDate,
 				ui.Username,
 				adi.Username AS AdminUsername,
-				la.ActionTypeId	,
-				la.ActionName,
+				CASE WHEN la.ActionTypeId = 6 THEN 5 ELSE la.ActionTypeId END AS ActionTypeId,
+				CASE @Language	
+					WHEN 'en-US' THEN la.ActionNameEN 
+					WHEN 'zh-CN' THEN la.ActionNameCT	
+					WHEN 'zh-TW' THEN la.ActionNameCS
+					WHEN 'th-TH' THEN la.ActionNameTH
+					WHEN 'ja-JP' THEN la.ActionNameJP
+					WHEN 'ko-KR' THEN la.ActionNameKO
+					WHEN 'es-ES' THEN la.ActionNameES
+					WHEN 'vi-VN' THEN la.ActionNameVI
+					ELSE la.ActionNameEN 
+				END	AS ActionName,
 				rsa.OldData,
 				rsa.Data,
 				ROW_NUMBER() OVER (ORDER BY rsa.LogDate DESC) AS num
 			FROM 
 				dbo.RunSpAgent AS rsa WITH (NOLOCK)
 				INNER JOIN @Temp AS ai ON rsa.AgentId = ai.AgentId	
-				INNER JOIN @Temp AS ui ON rsa.UserId	= ui.AgentId
+				LEFT JOIN @Temp AS ui ON rsa.UserId	= ui.AgentId
 				INNER JOIN dbo.LogAction AS la WITH (NOLOCK) ON rsa.ActionId = la.ActionId
 				LEFT JOIN SVRAGE.RepDB.dbo.AdminInfo AS adi WITH (NOLOCK) ON rsa.AdminId = adi.AdminId
 			WHERE 
-				(@ActionTypeId = 0 OR la.ActionTypeId = @ActionTypeId)
+				(@ActionTypeId = 0 OR la.ActionTypeId  = @ActionTypeId OR (@ActionTypeId = 5 AND la.ActionTypeId =6))
 				AND rsa.LogDate BETWEEN @From AND @To
 				AND ai.Username = @Username
 		) AS Temp

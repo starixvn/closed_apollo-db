@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateStatus]    Script Date: 5/6/2013 12:43:30 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateStatus]    Script Date: 8/9/2013 9:04:22 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -58,8 +58,7 @@ BEGIN
 	SET @xml = (
 		SELECT	
 			@Type		AS '@t',
-			Status		AS '@as',
-			BetStatus	AS '@bs'
+			CASE WHEN @Type = 1 THEN Status ELSE BetStatus END	AS '@s'
 		FROM CustInfo WITH (NOLOCK)
 		WHERE CustId = @CustId
 		FOR XML PATH('z'), ROOT('r')
@@ -103,8 +102,7 @@ BEGIN
 	SET @xml = (
 		SELECT	
 			@Type		AS '@t',
-			Status		AS '@as',
-			BetStatus	AS '@bs'
+			@Status		AS '@s'			
 		FROM CustInfo WITH (NOLOCK)
 		WHERE CustId = @CustId
 		FOR XML PATH('z'), ROOT('r')
@@ -114,7 +112,14 @@ BEGIN
 
 	SET @endRun = GETDATE()
 	SET @duration = DATEDIFF(MILLISECOND, @startRun, @endRun) 
-		
+	
+	IF @Modifier IS NULL
+		BEGIN	
+			SELECT @Modifier = AgentId
+			FROM CustInfo WITH (NOLOCK)
+			WHERE CustId = @CustId
+		END
+
 	IF @@Error = 0
 		BEGIN TRY
 			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
