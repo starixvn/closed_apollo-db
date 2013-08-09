@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateDiscount]    Script Date: 7/17/2013 4:21:36 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateDiscount]    Script Date: 8/9/2013 9:02:52 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -125,18 +125,18 @@ BEGIN
 						@sportType = SportType,
 						@groupCode = 
 							CASE
-								WHEN Discount NOT BETWEEN 0 AND 0.0225 AND @UGroup = 'a' THEN 2001
-								WHEN Discount NOT BETWEEN 0 AND 0.0125 AND @UGroup = 'b' THEN 2002
-								WHEN Discount NOT BETWEEN 0 AND 0.0075 AND @UGroup = 'c' THEN 2003
-								WHEN Discount NOT BETWEEN 0 AND 0 AND @UGroup = 'd' THEN 2004						
+								WHEN Discount NOT BETWEEN 0 AND 0.0225 AND @UGroup = 'd' THEN 2001
+								WHEN Discount NOT BETWEEN 0 AND 0.0125 AND @UGroup = 'c' THEN 2002
+								WHEN Discount NOT BETWEEN 0 AND 0.0075 AND @UGroup = 'b' THEN 2003
+								WHEN Discount NOT BETWEEN 0 AND 0 AND @UGroup = 'a' THEN 2004						
 							END 
 					FROM CustDiscount WITH (NOLOCK)
 					WHERE 
 						(	
-							(Discount NOT BETWEEN 0 AND 0.0225 AND @UGroup = 'a')		-- Group A
-							OR (Discount NOT BETWEEN 0 AND 0.0125 AND @UGroup = 'b')	-- Group B
-							OR (Discount NOT BETWEEN 0 AND 0.0075 AND @UGroup = 'c')	-- Group C
-							OR (Discount NOT BETWEEN 0 AND 0 AND @UGroup = 'd')			-- Group D					
+							(Discount NOT BETWEEN 0 AND 0.0225 AND @UGroup	= 'd')		-- Group A
+							OR (Discount NOT BETWEEN 0 AND 0.0125 AND @UGroup = 'c')	-- Group B
+							OR (Discount NOT BETWEEN 0 AND 0.0075 AND @UGroup = 'b')	-- Group C
+							OR (Discount NOT BETWEEN 0 AND 0 AND @UGroup = 'a')			-- Group D					
 						)	AND CustId = @CustId
 
 			IF @sportType IS NOT NULL 
@@ -151,11 +151,26 @@ BEGIN
 					RETURN
 				END			
 				END
-	
+			
+			IF (@AdminId IS NULL OR @AdminId = 0) 
+				AND EXISTS( SELECT TOP(1) * FROM CustInfo WITH (NOLOCK) WHERE CustId = @CustId AND IsUGroupChanged = 1 )
+				AND @ActorAgentId > 1
+				BEGIN			
+					SELECT 
+						@ErrCode = 1000,
+						@ErrMsg = 
+							CASE @Language
+								WHEN 'en-US' THEN 'You do not have permission to update setting'
+								ELSE [dbo].f_Msg_GetContentById (1000, @Language)
+							END
+					RETURN					
+				END
+
 			IF @OldUGroup <> @UGroup
 				BEGIN
 					UPDATE CustInfo WITH (ROWLOCK, UPDLOCK)
-					SET UGroup = @UGroup
+					SET UGroup			= @UGroup,
+						IsUGroupChanged = 1						
 					WHERE CustId = @CustId
 				END
 		END
@@ -200,19 +215,19 @@ BEGIN
 				@sportType = SportType,
 				@groupCode = 
 					CASE
-						WHEN Discount NOT BETWEEN 0 AND 0.0225 AND @UGroup = 'a' THEN 2001
-						WHEN Discount NOT BETWEEN 0 AND 0.0125 AND @UGroup = 'b' THEN 2002
-						WHEN Discount NOT BETWEEN 0 AND 0.0075 AND @UGroup = 'c' THEN 2003
-						WHEN Discount NOT BETWEEN 0 AND 0 AND @UGroup = 'd' THEN 2004
+						WHEN Discount NOT BETWEEN 0 AND 0.0225 AND @UGroup = 'd' THEN 2001
+						WHEN Discount NOT BETWEEN 0 AND 0.0125 AND @UGroup = 'c' THEN 2002
+						WHEN Discount NOT BETWEEN 0 AND 0.0075 AND @UGroup = 'b' THEN 2003
+						WHEN Discount NOT BETWEEN 0 AND 0 AND @UGroup = 'a' THEN 2004
 						WHEN Discount NOT BETWEEN 0 AND 0 AND SportType = 1 AND BetType = 5 THEN 2005
 						WHEN Discount NOT BETWEEN 0 AND 0 AND SportType = 1 AND BetType = 4 THEN 2006
 					END 
 			FROM @DiscountTable 
 			WHERE 
-				(Discount NOT BETWEEN 0 AND 0.0225 AND @UGroup = 'a')		-- Group A
-				OR (Discount NOT BETWEEN 0 AND 0.0125 AND @UGroup = 'b')	-- Group B
-				OR (Discount NOT BETWEEN 0 AND 0.0075 AND @UGroup = 'c')	-- Group C
-				OR (Discount NOT BETWEEN 0 AND 0 AND @UGroup = 'd')			-- Group D
+				(Discount NOT BETWEEN 0 AND 0.0225 AND @UGroup = 'd')		-- Group A
+				OR (Discount NOT BETWEEN 0 AND 0.0125 AND @UGroup = 'c')	-- Group B
+				OR (Discount NOT BETWEEN 0 AND 0.0075 AND @UGroup = 'b')	-- Group C
+				OR (Discount NOT BETWEEN 0 AND 0 AND @UGroup = 'a')			-- Group D
 				OR (Discount NOT BETWEEN 0 AND 0 AND SportType = 1 AND BetType = 5) -- 1x2
 				OR (Discount NOT BETWEEN 0 AND 0 AND SportType = 1 AND BetType = 4) -- Others
 
