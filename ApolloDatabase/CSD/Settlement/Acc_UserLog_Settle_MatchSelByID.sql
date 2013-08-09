@@ -24,7 +24,7 @@ SELECT
 	l.logid,
 	l.logdate,	
 	o.username,
-	la.ActionNameEN,
+	la.ActionNameEN as ActionName,
     l.finalhomescore,
     l.finalawayscore,  
     l.hthomescore,
