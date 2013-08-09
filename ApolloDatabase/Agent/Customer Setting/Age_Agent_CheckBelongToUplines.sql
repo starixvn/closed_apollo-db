@@ -1,14 +1,14 @@
 USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_CheckBelongToUplines]    Script Date: 8/9/2013 2:08:08 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_CheckBelongToUplines]    Script Date: 8/9/2013 2:54:58 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 ALTER PROCEDURE [dbo].[Age_Agent_CheckBelongToUplines]
-	@Username			NVARCHAR(50),
-	@Allowed			BIT = 0		OUTPUT	
+	@Username	NVARCHAR(50),
+	@Allowed	BIT				= 0		OUTPUT	
 AS
 
 /**
@@ -27,17 +27,24 @@ AS
 BEGIN
 	SET NOCOUNT ON
 	-- Hard code allow user can sso from sungame to agentsite
-	DECLARE @UplineUsernames	NVARCHAR(1000) = 'age-ed--0-206,a3,5000,402'
+	DECLARE @UplineUsernames NVARCHAR(1000) = 'age-ed--0-206,a3,5000,402'
 
-	IF EXISTS (
-		SELECT ai.Username
-			FROM AgentInfo AS ai WITH (NOLOCK)			
-			INNER JOIN AgentInfo AS cai WITH (NOLOCK)	
-				ON ai.AgentHId.IsDescendantOf(cai.AgentHId) = 1
-		WHERE cai.Username IN (SELECT val FROM dbo.[StrSplit](@UplineUsernames,','))							
-			AND ai.Username	= @Username
-	)
-		set @Allowed = 1
+	-- Hard code allow super can sso
+	IF @Username = 'super'
+		BEGIN
+			SET @Allowed = 1
+
+			RETURN
+		END
+
+	IF EXISTS (	SELECT ai.Username
+				FROM 
+					AgentInfo AS ai WITH (NOLOCK)
+					INNER JOIN AgentInfo AS cai WITH (NOLOCK) ON ai.AgentHId.IsDescendantOf(cai.AgentHId) = 1
+				WHERE 
+					ai.Username = @Username
+					AND cai.Username IN (SELECT val FROM dbo.[StrSplit](@UplineUsernames, ',')) )
+		SET @Allowed = 1
 	ELSE
-		set @Allowed = 0
+		SET @Allowed = 0
 END
