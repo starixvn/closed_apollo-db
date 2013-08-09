@@ -7,8 +7,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 ALTER PROCEDURE [dbo].[Age_Agent_CheckBelongToUplines]
-	@Username			NVARCHAR(50),
-	@Allowed			BIT = 0		OUTPUT	
+	@Username	NVARCHAR(50),
+	@Allowed	BIT				= 0		OUTPUT	
 AS
 
 /**
@@ -27,17 +27,16 @@ AS
 BEGIN
 	SET NOCOUNT ON
 	-- Hard code allow user can sso from sungame to agentsite
-	DECLARE @UplineUsernames	NVARCHAR(1000) = 'age-ed--0-206,a3,5000,402'
+	DECLARE @UplineUsernames NVARCHAR(1000) = 'age-ed--0-206,a3,5000,402'
 
-	IF EXISTS (
-		SELECT ai.Username
-			FROM AgentInfo AS ai WITH (NOLOCK)			
-			INNER JOIN AgentInfo AS cai WITH (NOLOCK)	
-				ON ai.AgentHId.IsDescendantOf(cai.AgentHId) = 1
-		WHERE cai.Username IN (SELECT val FROM dbo.[StrSplit](@UplineUsernames,','))							
-			AND ai.Username	= @Username
-	)
-		set @Allowed = 1
+	IF EXISTS (	SELECT ai.Username
+				FROM 
+					AgentInfo AS ai WITH (NOLOCK)
+					INNER JOIN AgentInfo AS cai WITH (NOLOCK) ON ai.AgentHId.IsDescendantOf(cai.AgentHId) = 1
+				WHERE 
+					ai.Username = @Username
+					AND cai.Username IN (SELECT val FROM dbo.[StrSplit](@UplineUsernames, ',')) )
+		SET @Allowed = 1
 	ELSE
-		set @Allowed = 0
+		SET @Allowed = 0
 END
