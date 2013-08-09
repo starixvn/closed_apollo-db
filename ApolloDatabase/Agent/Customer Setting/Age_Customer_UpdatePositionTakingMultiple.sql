@@ -1,6 +1,6 @@
 USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdatePositionTakingMultiple]    Script Date: 8/9/2013 9:29:55 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdatePositionTakingMultiple]    Script Date: 8/9/2013 11:13:14 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -62,22 +62,33 @@ BEGIN
 	
 	SET NOCOUNT ON
 	
-	DECLARE @TempCustId		INT
-			,@TempErrMsg	NVARCHAR(1000)
+	DECLARE @TempCustId			INT
+			,@TempUsername		NVARCHAR(50)
+			,@TempErrMsg		NVARCHAR(1000)
+			,@TempSuccessMsg	NVARCHAR(1000)
 				
-	DECLARE @TableCust TABLE (CustId INT)
+	DECLARE @TableCust TABLE (CustId INT, Username NVARCHAR(50))
 
-	INSERT INTO @TableCust(CustId)
-	SELECT val FROM dbo.StrSplit(@CustIds,',')
+	INSERT INTO @TableCust(CustId, Username)
+	SELECT val, ci.Username 
+	FROM dbo.StrSplit(@CustIds,',')
+		INNER JOIN CustInfo AS ci WITH (NOLOCK) ON CONVERT(INT,val) = ci.CustId	
 
 	WHILE EXISTS ( SELECT TOP(1) * FROM @TableCust)
 		BEGIN
-			SELECT TOP(1) @TempCustId = CustId FROM @TableCust
+			SELECT TOP(1) @TempCustId	= CustId 
+						,@TempUsername	= Username
+			FROM @TableCust
 
 			EXEC Age_Customer_UpdatePositionTaking @ActorAgentId, @AdminId, @AgentId, @TempCustId, @PositionTaking, @Language, @ErrCode OUTPUT, @TempErrMsg OUTPUT	
-
-			SET @ErrMsg = @ErrMsg + ';' + @TempErrMsg
+					
+			IF @TempErrMsg IS NOT NULL
+				SET @ErrMsg = @ErrMsg + @TempUsername + ' : ' + @TempErrMsg + ';'
+			ELSE
+				SET @TempSuccessMsg = @TempUsername + ';'
 
 			DELETE @TableCust WHERE CustId = @TempCustId
 		END
+
+	SET @ErrMsg = @ErrMsg + '#' + @TempSuccessMsg
 END

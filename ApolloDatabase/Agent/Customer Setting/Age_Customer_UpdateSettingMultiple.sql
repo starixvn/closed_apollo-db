@@ -1,6 +1,6 @@
 USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateSettingMultiple]    Script Date: 8/9/2013 9:29:57 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateSettingMultiple]    Script Date: 8/9/2013 11:13:31 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -18,7 +18,9 @@ ALTER PROCEDURE [dbo].[Age_Customer_UpdateSettingMultiple]
 	@PositionTaking		VARCHAR(MAX)	= '',
 	@Language			VARCHAR(5)		= 'en-US',
 	@ErrCode			INT				= 0			OUTPUT,
-	@ErrMsg				NVARCHAR(MAX)	= ''		OUTPUT
+	@ErrMsgBetLimit		NVARCHAR(MAX)	= ''		OUTPUT,
+	@ErrMsgDiscount		NVARCHAR(MAX)	= ''		OUTPUT,
+	@ErrMsgPositionTaking	NVARCHAR(MAX)	= ''		OUTPUT
 AS
 
 /**
@@ -43,22 +45,12 @@ AS
  *			</ROOT>
  */
 
-BEGIN
-	
+BEGIN	  	
 	SET NOCOUNT ON	   
 	
-	EXEC Age_Customer_UpdateBetLimitMultiple @ActorAgentId, @AdminId, @CustIds, @BetLimit, @Language, @ErrCode OUTPUT, @ErrMsg OUTPUT
-	
-	IF @ErrCode > 0
-		RETURN
+	EXEC Age_Customer_UpdateBetLimitMultiple @ActorAgentId, @AdminId, @CustIds, @BetLimit, @Language, @ErrCode OUTPUT, @ErrMsgBetLimit OUTPUT
 
-	EXEC Age_Customer_UpdateDiscountMultiple @ActorAgentId, @AdminId, @CustIds, @UGroup, @Discount, @Language, @ErrCode OUTPUT, @ErrMsg OUTPUT	
+	EXEC Age_Customer_UpdateDiscountMultiple @ActorAgentId, @AdminId, @CustIds, @UGroup, @Discount, @Language, @ErrCode OUTPUT, @ErrMsgDiscount OUTPUT	
 
-	IF @ErrCode > 0
-		RETURN
-
-	EXEC Age_Customer_UpdatePositionTakingMultiple @ActorAgentId, @AdminId, @AgentId, @CustIds, @PositionTaking, @Language, @ErrCode OUTPUT, @ErrMsg OUTPUT	
-
-	IF @ErrCode > 0
-		RETURN
+	EXEC Age_Customer_UpdatePositionTakingMultiple @ActorAgentId, @AdminId, @AgentId, @CustIds, @PositionTaking, @Language, @ErrCode OUTPUT, @ErrMsgPositionTaking OUTPUT	
 END
