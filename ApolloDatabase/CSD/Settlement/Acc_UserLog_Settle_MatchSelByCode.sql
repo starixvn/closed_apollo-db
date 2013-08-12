@@ -71,4 +71,5 @@ END
 
 SELECT t.matchid , t.homeid , t.awayid , t.eventdate , t.leagueid, isneutral, sporttype, showtime, homeid2 
 FROM @TMP_ALL_MatchInfo t
+GO
 GRANT EXECUTE ON [dbo].[Acc_UserLog_Settle_MatchSelByCode] TO [aplweb]

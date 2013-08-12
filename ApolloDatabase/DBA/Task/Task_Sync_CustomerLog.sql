@@ -75,7 +75,7 @@ BEGIN
 		FROM SVRLOG.LogDB.dbo.RunSpAgent with(nolock)
 		WHERE LogDate >= @logdate
 			and LogID > @max_id		
-		SET IDENTITY_INSERT dbo.UserLog_RunSP OFF
+		SET IDENTITY_INSERT dbo.RunSpAgent OFF
 	END	
 	---- /RunSpAgent ---
 
@@ -115,7 +115,7 @@ BEGIN
 		FROM SVRLOG.LogDB.dbo.Settlement with(nolock)
 		WHERE LogDate >= @logdate
 			and LogID > @max_id		
-		SET IDENTITY_INSERT dbo.UserLog_Settle OFF
+		SET IDENTITY_INSERT dbo.Settlement OFF
 	END	
 	---- /Settlement ---
 	
@@ -135,7 +135,28 @@ BEGIN
 		FROM SVRLOG.LogDB.dbo.Settlement_Checking with(nolock)
 		WHERE LogDate >= @logdate
 			and LogID > @max_id		
-		SET IDENTITY_INSERT dbo.UserLog_Settle_Checking OFF
+		SET IDENTITY_INSERT dbo.Settlement_Checking OFF
+	END	
+	---- /Settlement_Checking ---
+
+		---- SettlementOutright ---
+	select @max_id = isnull(max(logid),-1), @logdate = ISNULL(MAX(logdate),@startday)
+	FROM dbo.SettlementOutright with(nolock)
+	WHERE LogDate >= @startday
+	
+	--	IF @max_id <> -1
+	BEGIN	
+		SET IDENTITY_INSERT dbo.SettlementOutright ON
+		INSERT INTO dbo.SettlementOutright (
+			[LogId]  ,[LogDate]  ,[UserId] ,[OrId],[LeagueId],[ActionId] ,[status] ,[deadheat]
+			,[Remark] ,[IP]
+		)
+		SELECT [LogId]  ,[LogDate]  ,[UserId] ,[OrId],[LeagueId],[ActionId] ,[status] ,[deadheat]
+			,[Remark] ,[IP]
+		FROM SVRLOG.LogDB.dbo.SettlementOutright with(nolock)
+		WHERE LogDate >= @logdate
+			and LogID > @max_id		
+		SET IDENTITY_INSERT dbo.SettlementOutright OFF
 	END	
 	---- /Settlement_Checking ---
 

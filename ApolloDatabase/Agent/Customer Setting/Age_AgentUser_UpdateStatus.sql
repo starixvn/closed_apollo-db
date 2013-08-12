@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_AgentUser_UpdateStatus]    Script Date: 5/6/2013 11:31:55 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_AgentUser_UpdateStatus]    Script Date: 8/9/2013 9:00:18 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -85,6 +85,13 @@ BEGIN
 
 	SET @endRun	= GETDATE()
 	SET @duration = DATEDIFF(MILLISECOND, @startRun, @endRun) 
+	
+	IF @Modifier IS NULL
+		BEGIN
+			SELECT @Modifier = AgentId
+			FROM AgentUser WITH (NOLOCK)
+			WHERE AgentUserId = @AgentUserId
+		END
 		
 	IF @@Error = 0
 		BEGIN TRY
@@ -92,7 +99,7 @@ BEGIN
 			@UserId			= @Modifier,
 			@SPName			= 'Age_AgentUser_UpdateStatus',
 			@LogDate		= @startRun,
-			@AgentId		= @AgentUserId,
+			@AgentId		= @Modifier,
 			@Duration		= @Duration,
 			@Data			= @logSPData,
 			@OldData		= @logSPDataOld
@@ -102,7 +109,7 @@ BEGIN
 			@UserId			= @Modifier,
 			@SPName			= 'Age_AgentUser_UpdateStatus',
 			@LogDate		= @startRun,
-			@AgentId		= @AgentUserId,
+			@AgentId		= @Modifier,
 			@Duration		= @Duration,
 			@Data			= @logSPData,
 			@OldData		= @logSPDataOld

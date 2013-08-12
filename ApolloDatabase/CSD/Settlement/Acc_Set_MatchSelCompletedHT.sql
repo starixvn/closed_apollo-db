@@ -105,7 +105,7 @@ FROM
 				)  
 				--OR  confirmHT <> 0
 				) 		
-			AND mr.IsHTCal=0  
+			AND ISNULL(mr.IsHTCal,0)=0  
 
 		UNION 
 		SELECT match.matchid, match.leagueid ,
@@ -137,8 +137,8 @@ FROM
 			AND (@matchcode = '' OR  match.matchcode = @matchcode) 
 			AND (match.matchcode NOT LIKE 'hedge%')  -- exclude hedge matches
 			AND (mr.eventstatus IN ('Closed','running') OR ISNULL(mr.eventstatus, 'running') = 'running')
-			AND (confirmHT <> 0	) 		
-			AND mr.IsHTCal=0  
+			AND (confirmHT <> 0	) 					
+			AND ISNULL(mr.IsHTCal,0)=0  
 		) AS m
 		INNER JOIN  
 		(SELECT   bettrans.matchid,  

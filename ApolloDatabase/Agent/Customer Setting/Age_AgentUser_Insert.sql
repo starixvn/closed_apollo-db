@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_AgentUser_Insert]    Script Date: 7/26/2013 2:45:41 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_AgentUser_Insert]    Script Date: 8/9/2013 8:57:39 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -36,7 +36,8 @@ BEGIN
 	SET NOCOUNT ON	
 
 	-- Set creator default is agent
-	SET @Creator = @AgentId
+	IF @Creator IS NULL
+		SET @Creator = @AgentId
 
 	-- Check if agent user ID exists
 	IF EXISTS ( SELECT 1 FROM AgentUser WITH (NOLOCK) WHERE AgentUserId = @AgentUserId )

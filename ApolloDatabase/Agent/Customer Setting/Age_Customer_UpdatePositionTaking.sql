@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdatePositionTaking]    Script Date: 7/17/2013 4:21:18 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdatePositionTaking]    Script Date: 8/7/2013 4:01:50 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -86,8 +86,8 @@ BEGIN
 				@startRun		DATETIME,
 				@endRun			DATETIME,
 				@duration		INT,
-				@logSPData		VARCHAR(5000),
-				@logSPDataOld	VARCHAR(5000),
+				@logSPData		NVARCHAR(MAX),
+				@logSPDataOld	NVARCHAR(MAX),
 				@xml			XML
 
 			SET @startRun = GETDATE()
@@ -202,7 +202,7 @@ BEGIN
 						FOR XML PATH('z'), ROOT('r')
 					)
 
-					SET @logSPDataOld = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
+					SET @logSPDataOld = REPLACE(CONVERT(NVARCHAR(MAX), @xml), '" />', '"/"')
 
 					-- end write log
 
@@ -829,10 +829,10 @@ BEGIN
 						ORDER BY SportType
 								--,BetType
 								,IsLive
-						FOR XML PATH('z'), ROOT('r')
+						FOR XML PATH('z')
 					)
 
-					SET @logSPData = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
+					SET @logSPData = '<r a="'+(SELECT Username FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @AgentId)+'">'+REPLACE(CONVERT(NVARCHAR(MAX), @xml), '" />', '"/"')+'</r>'
 
 					SET @endRun	= GETDATE()  
 					SET @duration = DATEDIFF(MILLISECOND, @startRun, @endRun) 

@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_Insert]    Script Date: 7/26/2013 2:45:17 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_Insert]    Script Date: 8/9/2013 9:01:45 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -17,7 +17,7 @@ ALTER PROCEDURE [dbo].[Age_Customer_Insert]
 	@DoubleCommLosing	BIT				= 0,	
 	@Danger				TINYINT			= 0,
 	@IPLogin			VARCHAR(40)		= NULL,
-	@UGroup				VARCHAR(3)		= 'a',				-- Group A
+	@UGroup				VARCHAR(3)		= 'd',				-- Group A
 	@Creator			INT				= NULL,
 	@ErrCode			INT				= 0			OUTPUT,
 	@ErrMsg				NVARCHAR(1000)	= ''		OUTPUT
@@ -44,7 +44,8 @@ BEGIN
 	SET NOCOUNT ON
 
 	-- set creator default is agent
-	SET @Creator = @AgentId
+	IF @Creator IS NULL
+		SET @Creator = @AgentId
 
 	-- Check if customer ID exists
 	IF EXISTS ( SELECT 1 FROM CustInfo WITH (NOLOCK) WHERE CustId = @CustId )
@@ -411,13 +412,14 @@ BEGIN
 			PositionTaking	AS '@p'
 		FROM CustPositionTaking WITH (NOLOCK)
 		WHERE CustId = @CustId
+			AND AgentId = @AgentId
 		ORDER BY SportType
 				--,BetType
 				,IsLive
-		FOR XML PATH('z'), ROOT('r')
+		FOR XML PATH('z')
 	)
 
-	SET @logPositionTakingSPData = REPLACE(CONVERT(NVARCHAR(MAX), @xml), '" />', '"/"')
+	SET @logPositionTakingSPData = '<r a="'+(SELECT Username FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @AgentId)+'">'+REPLACE(CONVERT(NVARCHAR(MAX), @xml), '" />', '"/"')+'</r>'
 
 	-- end write log 
 
@@ -438,7 +440,7 @@ BEGIN
 			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
 			@UserId		= @Creator,
 			@AdminId	= NULL,
-			@SPName		= 'Age_Agent_InsertBetLimit',
+			@SPName		= 'Age_Customer_InsertBetLimit',
 			@LogDate	= @startRun,
 			@CustId		= @CustId,
 			@Duration	= @Duration,
@@ -478,7 +480,7 @@ BEGIN
 			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpCust
 			@UserId		= @Creator,
 			@AdminId	= NULL,
-			@SPName		= 'Age_Agent_InsertBetLimit',
+			@SPName		= 'Age_Customer_InsertBetLimit',
 			@LogDate	= @startRun,
 			@CustId		= @CustId,
 			@Duration	= @Duration,
