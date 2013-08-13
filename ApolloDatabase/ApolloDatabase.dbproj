@@ -1522,6 +1522,9 @@
     <NotInBuild Include="Agent\Customer Setting\Age_Customer_UpdateSettingMultiple.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\DBA_CheckDataIntegrity.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">
