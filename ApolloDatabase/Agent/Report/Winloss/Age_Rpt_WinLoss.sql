@@ -29,8 +29,8 @@ AS
 SET NOCOUNT ON
 
 
-CREATE TABLE #WinLossAgent ( Username NVARCHAR(50), AgentID INT, IsAgent BIT, PositionTaking SMALLINT, BetCount BIGINT, TurnOver MONEY, ActualTO MONEY, ActualTOAfter MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, GrossTotal MONEY, UplineTotal MONEY)
-CREATE TABLE #WinLossMember ( Username NVARCHAR(50), AgentID INT, IsAgent BIT,  PositionTaking SMALLINT, BetCount BIGINT, TurnOver MONEY, ActualTO MONEY, ActualTOAfter MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, GrossTotal MONEY, UplineTotal MONEY)
+CREATE TABLE #WinLossAgent ( Username NVARCHAR(50), AgentID INT, IsAgent BIT, Share SMALLINT, BetCount BIGINT, BetAmount MONEY, CommBase MONEY, Winlost MONEY, PlayerComm MONEY, MemberTotal MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, DownlineEffStake MONEY, GrossTotal MONEY, UplineEffStake MONEY, UplineTotal MONEY)
+CREATE TABLE #WinLossMember ( Username NVARCHAR(50), AgentID INT, IsAgent BIT, Share SMALLINT, BetCount BIGINT, BetAmount MONEY, CommBase MONEY,  Winlost MONEY, PlayerComm MONEY, MemberTotal MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, DownlineEffStake MONEY, GrossTotal MONEY, UplineEffStake MONEY, UplineTotal MONEY)
 
 CREATE TABLE #BettypeList (bettype SMALLINT)
 INSERT INTO #BettypeList
@@ -46,13 +46,13 @@ BEGIN
 	--********************************
 	----Super view
 	--********************************
-		EXEC Age_Rpt_WinLoss_SuperViewAgent  @AgentID = @AgentID, @FromDate = @FromDate, @ToDate = @ToDate, 
+		EXEC Age_Rpt_WinLoss_SuperViewAgent @AgentID = @AgentID, @FromDate = @FromDate, @ToDate = @ToDate, 
 										@MoveBetDay =@MoveBetDay, @BalanceUpDay = @BalanceUpDay, @Sporttypes = @Sporttypes, @Bettypes = @Bettypes 
 END
 ELSE 
 BEGIN
 	--********************************
-	---- Agent Winloss
+	-- Agent Winloss
 	--********************************
 
 	EXEC Age_Rpt_WinLoss_AgentViewAgent @AgentID = @AgentID, @FromDate = @FromDate, @ToDate = @ToDate, 
@@ -60,7 +60,7 @@ BEGIN
 	
 
 	--********************************
-	-----Member winloss
+	---Member winloss
 	--********************************	
 	EXEC Age_Rpt_WinLoss_AgentViewCust @AgentID = @AgentID, @FromDate = @FromDate, @ToDate = @ToDate, 
 										 @MoveBetDay =@MoveBetDay, @BalanceUpDay = @BalanceUpDay, @Sporttypes = @Sporttypes, @Bettypes = @Bettypes
@@ -68,54 +68,70 @@ END
 
 ---delete data no need
 DELETE	#WinLossAgent 
-WHERE	TurnOver IS NULL 
-		AND ActualTO IS NULL
-		AND ActualTOAfter IS NULL
-		AND AWinLost IS NULL
-		AND AComm IS NULL
-		AND ATotal IS NULL
-		AND GrossTotal IS NULL
-		AND UplineTotal IS NULL
+WHERE	ISNULL(BetAmount,0) = 0
+		AND ISNULL(CommBase,0) = 0
+		AND ISNULL(Winlost,0) = 0
+		AND ISNULL(PlayerComm,0) = 0
+		AND ISNULL(MemberTotal,0) = 0
+		AND ISNULL(AWinLost ,0) = 0
+		AND ISNULL(AComm ,0) = 0
+		AND ISNULL(ATotal ,0) = 0 
+		AND ISNULL(DownlineEffStake ,0) = 0
+		AND ISNULL(GrossTotal ,0) = 0
+		AND ISNULL(UplineEffStake ,0) = 0
+		AND ISNULL(UplineTotal ,0) = 0
+		
 
 
 DELETE	#WinLossMember 
-WHERE	TurnOver IS NULL 
-		AND ActualTO IS NULL
-		AND ActualTOAfter IS NULL
-		AND AWinLost IS NULL
-		AND AComm IS NULL
-		AND ATotal IS NULL
-		AND GrossTotal IS NULL
-		AND UplineTotal IS NULL
+WHERE	ISNULL(BetAmount ,0) = 0
+		AND ISNULL( CommBase ,0) = 0
+		AND ISNULL( Winlost ,0) = 0
+		AND ISNULL( PlayerComm ,0) = 0
+		AND ISNULL( MemberTotal ,0) = 0
+		AND ISNULL( AWinLost ,0) = 0
+		AND ISNULL( AComm ,0) = 0
+		AND ISNULL( ATotal ,0) = 0		
+		AND ISNULL( UplineEffStake ,0) = 0
+		AND ISNULL( UplineTotal ,0) = 0
+
 
 
 ----- Get Data  
-SELECT	Username, AgentId, isAgent, PositionTaking,
+SELECT	Username, AgentId, isAgent, Share,	
 		SUM(BetCount) as BetCount,	
-		SUM(TurnOver) as TurnOver,
-		SUM(ActualTO) as ActualTO,
-		SUM(ActualTOAfter) as ActualTOAfter,
-		SUM(GrossTotal) as GrossTotal,
+		SUM(BetAmount) as BetAmount,	
+		SUM(CommBase) as CommBase,	
+		SUM(Winlost) as Winlost,	
+		SUM(PlayerComm) as PlayerComm,
+		SUM(MemberTotal) as MemberTotal,	
 		SUM(AWinLost) as  AWinLost, 
 		SUM(AComm) as AComm,
-		SUM(ATotal) as ATotal,				
+		SUM(ATotal) as ATotal,			
+		SUM(DownlineEffStake) as DownlineEffStake,
+		SUM(GrossTotal) as GrossTotal,
+		SUM(UplineEffStake) as UplineEffStake,
 		SUM(UplineTotal) as UplineTotal
 FROM	#WinLossAgent
-GROUP BY Username, AgentId, isAgent, PositionTaking
+GROUP BY Username, AgentId, isAgent, Share
 UNION ALL
-SELECT	Username, AgentId, isAgent, PositionTaking,
+SELECT	Username, AgentId, isAgent, Share,
 		SUM(BetCount) as BetCount,	
-		SUM(TurnOver) as TurnOver,
-		SUM(ActualTO) as ActualTO,
-		SUM(ActualTOAfter) as ActualTOAfter,
-		SUM(GrossTotal) as GrossTotal,
+		SUM(BetAmount) as BetAmount,	
+		SUM(CommBase) as CommBase,	
+		SUM(Winlost) as Winlost,	
+		SUM(PlayerComm) as PlayerComm,
+		SUM(MemberTotal) as MemberTotal,	
 		SUM(AWinLost) as  AWinLost, 
 		SUM(AComm) as AComm,
-		SUM(ATotal) as ATotal,		
+		SUM(ATotal) as ATotal,			
+		SUM(DownlineEffStake) as DownlineEffStake,
+		SUM(GrossTotal) as GrossTotal,
+		SUM(UplineEffStake) as UplineEffStake,
 		SUM(UplineTotal) as UplineTotal
 FROM	#WinLossMember 
-GROUP BY Username, AgentId, isAgent, PositionTaking
-ORDER BY IsAgent DESC, PositionTaking ASC, Username ASC
+GROUP BY Username, AgentId, isAgent, Share
+ORDER BY IsAgent DESC, Share ASC, Username ASC
  
 
 

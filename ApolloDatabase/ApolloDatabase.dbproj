@@ -985,12 +985,6 @@
     <NotInBuild Include="API\Mem_API_GetCustBalance.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\--Age_BetList_AgentDetail_Winloss.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\--Age_BetList_AgentDetail_Winloss_Old.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="Agent\BetList\Age_BetList_SelSystemParlay_Details.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1306,19 +1300,10 @@
     <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_SuperViewSuper.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelWinloss_AgentViewAgent.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="Agent\BetList\Age_BetList_SelWinloss_AgentViewCust.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelWinloss_SuperViewAgent.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="Agent\BetList\Age_BetList_SelWinloss_SuperViewCust.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelWinloss_SuperViewSuper.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Wagers\Age_Wagers_Outright.sql">
@@ -1517,6 +1502,27 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Report\LineSportCredits\Age_Rpt_LineSportCredits.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_Agent_CheckBelongToUplines.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_Customer_QueryUplineAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_Customer_UpdateBetLimitMultiple.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_Customer_UpdateDiscountMultiple.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_Customer_UpdatePositionTakingMultiple.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_Customer_UpdateSettingMultiple.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\DBA_CheckDataIntegrity.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
