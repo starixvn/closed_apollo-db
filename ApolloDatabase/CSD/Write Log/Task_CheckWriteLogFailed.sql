@@ -32,6 +32,11 @@ BEGIN
 	BEGIN
 		SELECT	@ErrMsg= @ErrMsg +'WARNING: Writting Settlement failed!'
 	END
+
+	IF EXISTS(	SELECT TOP 1 1 FROM SettlementOutright WITH (NOLOCK))
+	BEGIN
+		SELECT	@ErrMsg= @ErrMsg +'WARNING: Writting Outright Settlement failed!'
+	END
 	
 	IF @ErrMsg <> '' 
 	BEGIN
