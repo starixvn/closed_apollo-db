@@ -1646,5 +1646,8 @@
     <Build Include="Agent\Message\Dot_Msg_SetPriMsgRead.sql">
       <SubType>Code</SubType>
     </Build>
+    <Build Include="Agent\Customer Setting\Age_Agent_CheckDownlineBelongToAgent.sql">
+      <SubType>Code</SubType>
+    </Build>
   </ItemGroup>
 </Project>
