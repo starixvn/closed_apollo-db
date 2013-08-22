@@ -9,7 +9,7 @@ AS
 	DB: SVRCSD.RepDB
 
 	Revisions: 
-	Original :IBC.Acc_Rpt_DailyWLDirect_MixParlay	
+	Original :IBC.Acc_Rpt_DailyWLDirect_MixParlay
 	
 	Parameter's Explanation: 
 */
@@ -34,9 +34,9 @@ FROM(
 					AND winlostdate = @winlostdate
 							)
 		UNION 
-		SELECT DISTINCT m14.sporttype, bm14.refno
-		FROM	bettransm14 bm14 WITH (NOLOCK)
-				INNER JOIN match14 m14 WITH (NOLOCK) ON bm14.matchid = m14.matchid 
+		SELECT DISTINCT m.sporttype, bm.refno
+		FROM	bettransm bm WITH (NOLOCK)
+				INNER JOIN match m WITH (NOLOCK) ON bm.matchid = m.matchid 
 		WHERE	refno IN (
 			SELECT	refno
 			FROM	bettrans WITH (NOLOCK)
@@ -62,9 +62,9 @@ FROM(
 					AND winlostdate = @winlostdate
 		)
 		UNION 
-		SELECT DISTINCT m14.sporttype, bm14.refno
-		FROM	bettransm14 bm14 WITH (NOLOCK)
-				INNER JOIN match14 m14 WITH (NOLOCK) ON bm14.matchid = m14.matchid 
+		SELECT DISTINCT m.sporttype, bm.refno
+		FROM	bettransm bm WITH (NOLOCK)
+				INNER JOIN match m WITH (NOLOCK) ON bm.matchid = m.matchid 
 		WHERE	refno IN (
 			SELECT	refno
 			FROM	bettrans WITH (NOLOCK)
