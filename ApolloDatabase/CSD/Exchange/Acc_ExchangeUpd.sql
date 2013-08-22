@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[Acc_ExchangeUpd]
+﻿ALTER PROCEDURE [dbo].[Acc_ExchangeUpd]
 	@exchangeid int,
 	@actualrate FLOAT,
 	@minbet FLOAT = 0,
@@ -70,7 +70,7 @@ Select @LogData = 'Update exchange rate:'
 	+  ' ,newMultipliedBy='+ ISNULL(convert(varchar(10),@MultipliedBy),'')	
 	
 
-EXEC DBLOG.LogDB.dbo.WriteLog_ExchangeRate
+EXEC SVRLOG.LogDB.dbo.WriteLog_ExchangeRate
 	@UserID = @UserID, 
 	@ExchangeID = @exchangeid, 
 	@actualrate = @actualrate, 

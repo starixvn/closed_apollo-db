@@ -50,7 +50,7 @@ SELECT @LogData = 'Add exchange rate:'
 	+  ' ,MultipliedBy='+ ISNULL(convert(varchar(10),@MultipliedBy),'')
 	
 
-EXEC DBLOG.LogDB.dbo.WriteLog_ExchangeRate
+EXEC SVRLOG.LogDB.dbo.WriteLog_ExchangeRate
 	@UserID = @UserID, 
 	@ExchangeID = @exchangeid, 
 	@actualrate = @actualrate, 
