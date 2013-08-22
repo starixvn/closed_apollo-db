@@ -114,6 +114,8 @@
     <Folder Include="CSD\Special Delete\Early Kickoff" />
     <Folder Include="Agent\Admin\AccountInfo" />
     <Folder Include="Agent\Report\LineSportCredits" />
+    <Folder Include="App Log" />
+    <Folder Include="Maintenance" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1522,6 +1524,111 @@
     <NotInBuild Include="Agent\Customer Setting\Age_Customer_UpdateSettingMultiple.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\DBA_CheckDataIntegrity.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\ReadLog_AppLog_GetAllCategory.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\ReadLog_AppLog_GetAllMachine.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\ReadLog_AppLog_GetLog.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\ReadLog_AppLog_GetMachineByID.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\ReadLog_AppLog_GetMachineByType.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\RemoveLog_AppLog_Log.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\UpdateLog_AppLog_Machine.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\UpdateLog_AppLog_MonitorLog.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\WriteLog_AppLog.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\WriteLog_AppLog_Category.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\WriteLog_AppLog_CategoryLog.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\WriteLog_AppLog_Machine.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\DBA_GrantPermissions.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetConfig.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetError.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetFucntion.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetListConfig.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetListFuntion.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetListMail.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetListMailByDate.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetListSetting.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetMail.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetMailAttachement.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetMailLinkedResource.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetSetting.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_InsConfig.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_InsError.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_InsFunction.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_InsMailAttachement.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_InsMailLinkedResource.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_InsRecord.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_InsSetting.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_UpdateCountSent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_UpdateMailStatus.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">
@@ -1537,6 +1644,9 @@
       <SubType>Code</SubType>
     </Build>
     <Build Include="Agent\Message\Dot_Msg_SetPriMsgRead.sql">
+      <SubType>Code</SubType>
+    </Build>
+    <Build Include="Agent\Customer Setting\Age_Agent_CheckDownlineBelongToAgent.sql">
       <SubType>Code</SubType>
     </Build>
   </ItemGroup>
