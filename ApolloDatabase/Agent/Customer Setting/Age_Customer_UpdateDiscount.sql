@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateDiscount]    Script Date: 8/22/2013 9:43:56 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateDiscount]    Script Date: 8/22/2013 10:57:13 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -177,6 +177,11 @@ BEGIN
 
 	IF @Discount <> ''
 		BEGIN
+			
+			-- If not change set @Ugroup = @OldUGroup
+			IF @UGroup = ''
+				SET @UGroup = @OldUGroup				
+
 			DECLARE @DiscountTable TABLE (
 				SportType SMALLINT,
 				BetType SMALLINT,
