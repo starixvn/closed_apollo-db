@@ -46,7 +46,10 @@ BEGIN
            ,[Duration]           
            ,[AllowedDate]
 		FROM [dbo].AutoSettlementCommand a WITH (NOLOCK)			
-		WHERE MatchID in (Select matchID From Match WITH (NOLOCK) Where eventdate=@winlostdate)			
+		WHERE MatchID in (Select matchID From Match WITH (NOLOCK) Where eventdate=@winlostdate
+					UNION ALL 
+					Select orid From outright WITH (NOLOCK) Where eventdate=@winlostdate
+		)			
 		
 	IF @@ERROR <> 0
 	BEGIN
@@ -56,7 +59,11 @@ BEGIN
 		
 	DELETE FROM [dbo].AutoSettlementCommand WITH(ROWLOCK)
 	WHERE 
-		MatchID in (Select matchID From Match WITH (NOLOCK) Where eventdate=@winlostdate)			
+		MatchID in (
+				Select matchID From Match WITH (NOLOCK) Where eventdate=@winlostdate
+			UNION ALL 
+				Select orid From outright WITH (NOLOCK) Where eventdate=@winlostdate
+			)			
 
 	IF @@ERROR <> 0
 	BEGIN
