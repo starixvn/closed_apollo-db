@@ -1667,12 +1667,6 @@
     <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Sporttype14.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_SystemParlay.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_SystemParlay14.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="CSD\Exchange\Acc_ExchangeIns.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1700,7 +1694,7 @@
     <NotInBuild Include="Agent\BetList\BK\--Age_BetList_SelWinloss_SuperViewSuper.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_MixParlay_Advance.sql">
+    <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_Parlay_Advance.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_DailyMixParlayWinloss.sql">
@@ -1709,7 +1703,7 @@
     <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_DailyMixParlayWinloss14.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_MixParlay_Advance14.sql">
+    <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_Parlay_Advance14.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
