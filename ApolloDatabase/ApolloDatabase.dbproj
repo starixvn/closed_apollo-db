@@ -120,6 +120,7 @@
     <Folder Include="CSD\Report\02h. Daily Winloss" />
     <Folder Include="CSD\Exchange" />
     <Folder Include="Agent\BetList\BK" />
+    <Folder Include="CSD\Report\Daily Mix Parlay Winloss" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1697,6 +1698,18 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\BetList\BK\--Age_BetList_SelWinloss_SuperViewSuper.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_MixParlay_Advance.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_DailyMixParlayWinloss.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_DailyMixParlayWinloss14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_MixParlay_Advance14.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
