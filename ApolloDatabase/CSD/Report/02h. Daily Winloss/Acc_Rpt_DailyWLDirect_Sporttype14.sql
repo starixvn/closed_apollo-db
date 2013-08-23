@@ -38,7 +38,7 @@ BEGIN
 	FROM (
 			SELECT matchid, leagueid, 'match' as type FROM Match14 WITH (NOLOCK) WHERE eventdate = @winlostdate
 			UNION ALL
-			SELECT orid, leagueid, 'outright' as type FROM outright WITH (NOLOCK) WHERE eventdate = @winlostdate
+			SELECT orid, leagueid, 'outright' as type FROM outright14 WITH (NOLOCK) WHERE eventdate = @winlostdate
 			)m	
 	INNER JOIN league l WITH (NOLOCK) ON m.leagueid = l.leagueid	
 
