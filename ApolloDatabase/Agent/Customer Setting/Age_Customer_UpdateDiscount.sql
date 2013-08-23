@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateDiscount]    Script Date: 8/9/2013 9:02:52 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateDiscount]    Script Date: 8/22/2013 10:57:13 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -157,11 +157,11 @@ BEGIN
 				AND @ActorAgentId > 1
 				BEGIN			
 					SELECT 
-						@ErrCode = 1000,
+						@ErrCode = 2009,
 						@ErrMsg = 
 							CASE @Language
-								WHEN 'en-US' THEN 'You do not have permission to update setting'
-								ELSE [dbo].f_Msg_GetContentById (1000, @Language)
+								WHEN 'en-US' THEN 'You do not have permission to update commission group'
+								ELSE [dbo].f_Msg_GetContentById (2009, @Language)
 							END
 					RETURN					
 				END
@@ -177,6 +177,11 @@ BEGIN
 
 	IF @Discount <> ''
 		BEGIN
+			
+			-- If not change set @Ugroup = @OldUGroup
+			IF @UGroup = ''
+				SET @UGroup = @OldUGroup				
+
 			DECLARE @DiscountTable TABLE (
 				SportType SMALLINT,
 				BetType SMALLINT,
