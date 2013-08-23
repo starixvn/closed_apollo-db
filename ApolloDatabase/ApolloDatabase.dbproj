@@ -114,6 +114,13 @@
     <Folder Include="CSD\Special Delete\Early Kickoff" />
     <Folder Include="Agent\Admin\AccountInfo" />
     <Folder Include="Agent\Report\LineSportCredits" />
+    <Folder Include="App Log" />
+    <Folder Include="Maintenance" />
+    <Folder Include="CSD\Report\02a. Match Win Loss" />
+    <Folder Include="CSD\Report\02h. Daily Winloss" />
+    <Folder Include="CSD\Exchange" />
+    <Folder Include="Agent\BetList\BK" />
+    <Folder Include="CSD\Report\Daily Mix Parlay Winloss" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1102,18 +1109,6 @@
     <NotInBuild Include="Agent\View Log\WriteLog_RunSpAgent.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Report\Acc_Rpt_MatchWinloss2_New.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\Acc_Rpt_MatchWinLoss2_New14.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\Acc_Rpt_WinlossByBettype.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\Acc_Rpt_WinlossByBettype14.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="CSD\Write Log\Task_CheckWriteLogFailed.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1525,6 +1520,198 @@
     <NotInBuild Include="Agent\Customer Setting\DBA_CheckDataIntegrity.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="App Log\ReadLog_AppLog_GetAllCategory.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\ReadLog_AppLog_GetAllMachine.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\ReadLog_AppLog_GetLog.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\ReadLog_AppLog_GetMachineByID.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\ReadLog_AppLog_GetMachineByType.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\RemoveLog_AppLog_Log.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\UpdateLog_AppLog_Machine.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\UpdateLog_AppLog_MonitorLog.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\WriteLog_AppLog.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\WriteLog_AppLog_Category.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\WriteLog_AppLog_CategoryLog.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="App Log\WriteLog_AppLog_Machine.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\DBA_GrantPermissions.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetConfig.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetError.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetFucntion.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetListConfig.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetListFuntion.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetListMail.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetListMailByDate.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetListSetting.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetMail.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetMailAttachement.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetMailLinkedResource.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_GetSetting.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_InsConfig.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_InsError.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_InsFunction.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_InsMailAttachement.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_InsMailLinkedResource.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_InsRecord.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_InsSetting.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_UpdateCountSent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Maintenance\Mail_UpdateMailStatus.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\02a. Match Win Loss\Acc_Rpt_MatchWinloss2_New.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\02a. Match Win Loss\Acc_Rpt_MatchWinLoss2_New14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\02a. Match Win Loss\Acc_Rpt_WinlossByBettype.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\02a. Match Win Loss\Acc_Rpt_WinlossByBettype14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Details.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Details14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_OtherSport.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_OtherSport_Bettype.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_OtherSport_Bettype14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_OtherSport14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Result.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Soccer_Bettype.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Soccer_Bettype14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Sporttype.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Sporttype14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_SystemParlay.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_SystemParlay14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Exchange\Acc_ExchangeIns.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Exchange\Acc_ExchangeSelAccount.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Exchange\Acc_ExchangeSelByID.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Exchange\Acc_ExchangeUpd.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\BK\--Age_BetList_AgentDetail_Winloss.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\BK\--Age_BetList_AgentDetail_Winloss_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\BK\--Age_BetList_SelWinloss_AgentViewAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\BK\--Age_BetList_SelWinloss_SuperViewAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\BK\--Age_BetList_SelWinloss_SuperViewSuper.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_MixParlay_Advance.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_DailyMixParlayWinloss.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_DailyMixParlayWinloss14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_MixParlay_Advance14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">
@@ -1540,6 +1727,9 @@
       <SubType>Code</SubType>
     </Build>
     <Build Include="Agent\Message\Dot_Msg_SetPriMsgRead.sql">
+      <SubType>Code</SubType>
+    </Build>
+    <Build Include="Agent\Customer Setting\Age_Agent_CheckDownlineBelongToAgent.sql">
       <SubType>Code</SubType>
     </Build>
   </ItemGroup>
