@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_GetPositionTakingForUpdate]    Script Date: 8/20/2013 10:07:16 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_GetPositionTakingForUpdate_xtest]    Script Date: 8/20/2013 10:52:05 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -56,47 +56,41 @@ BEGIN
 			WHEN @agentLevel = @MAINSHAREHOLDERLEVEL THEN @MAXMAINSHAREHOLDERPT
 			ELSE papt.MaxGivenPositionTaking
 		END AS ParentMaxGivenPositionTaking,
-		apt.MaxGivenPositionTaking,	
+		apt.MaxGivenPositionTaking,
 		CASE
 			WHEN @agentLevel <= @SHAREHOLDERLEVEL AND ISNULL(maxDownAgent.MaxOfMaxUpperAndGiven, 0) < @MINSHAREMUSTCOVER
 				THEN @MINSHAREMUSTCOVER
-			ELSE ISNULL(maxDownAgent.MaxOfMaxUpperAndGiven, 0)	
-		END	AS MinOfMaxGivenPositionTaking,		
+			ELSE ISNULL(maxDownAgent.MaxOfMaxUpperAndGiven, 0)
+		END	AS MinOfMaxGivenPositionTaking,
 		apt.MinGivenPositionTaking
-		,ISNULL(papt.MinGivenPositionTaking, 0)			AS MinGivenPositionTakingOfParent
+		,ISNULL(papt.MinGivenPositionTaking, 0) AS MinGivenPositionTakingOfParent
 	FROM 
 		AgentPositionTaking AS apt WITH (NOLOCK)
 		LEFT JOIN AgentPositionTaking AS papt WITH (NOLOCK)
 			ON apt.SportType	= papt.SportType
 			AND apt.BetType		= papt.BetType
 			AND apt.IsLive		= papt.IsLive
-			AND papt.AgentId	= @parentId					
+			AND papt.AgentId	= @parentId	
 		LEFT JOIN (
 			SELECT	
-				downAgent.SportType,
-				downAgent.BetType,
-				downAgent.IsLive,
-				MAX(downAgent.SumOfMaxUpperAndGiven) AS MaxOfMaxUpperAndGiven
-			FROM (
-					SELECT 
-						ai.AgentId,
-						apt.MaxUpperPositionTaking + apt.MaxGivenPositionTaking AS SumOfMaxUpperAndGiven,
-						apt.SportType,
-						apt.BetType,
-						apt.IsLive
-					FROM 
-						AgentPositionTaking AS apt WITH (NOLOCK)
-						INNER JOIN AgentInfo AS ai WITH (NOLOCK) ON apt.AgentId = ai.AgentId
-					WHERE ai.AgentHId.IsDescendantOf(@agentHId) = 1 AND ai.AgentId <> @AgentId
-				) AS downAgent
+				capt.SportType,
+				capt.BetType,
+				capt.IsLive,
+				MAX(capt.MaxUpperPositionTaking + capt.MaxGivenPositionTaking) AS MaxOfMaxUpperAndGiven
+			FROM AgentPositionTaking AS capt WITH (NOLOCK)
+			WHERE 
+				capt.AgentId <> @AgentId
+				AND EXISTS (	SELECT 1 
+								FROM AgentInfo WITH (NOLOCK) 
+								WHERE AgentId = capt.AgentId	AND AgentHId.IsDescendantOf(@agentHId) = 1 )
 			GROUP BY 
-				downAgent.SportType,
-				downAgent.BetType,
-				downAgent.IsLive
+				capt.SportType,
+				capt.BetType,
+				capt.IsLive
 		) AS maxDownAgent
 			ON apt.SportType	= maxDownAgent.SportType
 			AND apt.BetType		= maxDownAgent.BetType
 			AND apt.IsLive		= maxDownAgent.IsLive
-	WHERE apt.AgentId	= @AgentId		
+	WHERE apt.AgentId = @AgentId 
 
 END
