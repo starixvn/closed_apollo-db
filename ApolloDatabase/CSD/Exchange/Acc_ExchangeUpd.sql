@@ -58,12 +58,12 @@ WHERE exchangeid=@exchangeid
 
 
 Select @LogData = 'Update exchange rate:'	
-	+  ' ,newBaseRate=' + ISNULL(convert(VARCHAR(30), CONVERT(DECIMAL(28,8),@actualrate)),'')  
-	+  ' ,oldBaseRate=' + ISNULL(convert(VARCHAR(30),  CONVERT(DECIMAL(28,8),@old_actualrate)),'')  
-	+  ' ,newminbet='+ ISNULL(convert(VARCHAR(30), CONVERT(DECIMAL(28,8), @minbet)),'') 
-	+  ' ,oldminbet='+ ISNULL(convert(VARCHAR(30), CONVERT(DECIMAL(28,8), @old_minbet)),'') 
-	+  ' ,newminbetlive='+ ISNULL(convert(VARCHAR(30), CONVERT(DECIMAL(28,8), @minbetlive)),'') 
-	+  ' ,oldminbetlive='+ ISNULL(convert(VARCHAR(30),  CONVERT(DECIMAL(28,8),@old_minbetlive)),'') 	
+	+  ' ,newBaseRate=' + ISNULL(convert(VARCHAR(50), CONVERT(DECIMAL(38,5),@actualrate)),'')  
+	+  ' ,oldBaseRate=' + ISNULL(convert(VARCHAR(50),  CONVERT(DECIMAL(38,5),@old_actualrate)),'')  
+	+  ' ,newminbet='+ ISNULL(convert(VARCHAR(50), CONVERT(DECIMAL(38,5), @minbet)),'') 
+	+  ' ,oldminbet='+ ISNULL(convert(VARCHAR(50), CONVERT(DECIMAL(38,5), @old_minbet)),'') 
+	+  ' ,newminbetlive='+ ISNULL(convert(VARCHAR(50), CONVERT(DECIMAL(38,5), @minbetlive)),'') 
+	+  ' ,oldminbetlive='+ ISNULL(convert(VARCHAR(50),  CONVERT(DECIMAL(38,5),@old_minbetlive)),'') 	
 	+  ' ,oldDescription='+ ISNULL(@old_Description,'')
 	+  ' ,newDescription='+ ISNULL(@Description,'')
 	+  ' ,oldMultipliedBy='+ ISNULL(convert(varchar(10),@old_MultipliedBy),'')

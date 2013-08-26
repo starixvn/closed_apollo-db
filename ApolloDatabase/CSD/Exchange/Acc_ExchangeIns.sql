@@ -43,9 +43,9 @@ SELECT @exchangeid=@@IDENTITY
 DECLARE @LogData NVARCHAR(200)
 SELECT @LogData = 'Add exchange rate:'
 	+  ' CurrencyName='+ ISNULL(@Currency,'') 
-    +  ' ,BaseRate=' + ISNULL(convert(VARCHAR(30), CONVERT(DECIMAl(28,8),@actualrate)),'')  
-	+  ' ,minbet='+ ISNULL(convert(VARCHAR(30), CONVERT(DECIMAl(28,8), @minbet)),'') 
-	+  ' ,minbetlive='+ ISNULL(convert(VARCHAR(30),  CONVERT(DECIMAl(28,8),@minbetlive)),'') 
+    +  ' ,BaseRate=' + ISNULL(convert(VARCHAR(50), CONVERT(DECIMAl(38,5),@actualrate)),'')  
+	+  ' ,minbet='+ ISNULL(convert(VARCHAR(50), CONVERT(DECIMAl(38,5), @minbet)),'') 
+	+  ' ,minbetlive='+ ISNULL(convert(VARCHAR(50),  CONVERT(DECIMAl(38,5),@minbetlive)),'') 
 	+  ' ,Description='+ ISNULL(@Description,'')
 	+  ' ,MultipliedBy='+ ISNULL(convert(varchar(10),@MultipliedBy),'')
 	
