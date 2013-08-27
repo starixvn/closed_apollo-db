@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking]    Script Date: 7/18/2013 1:52:52 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking]    Script Date: 8/26/2013 4:27:55 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -38,6 +38,7 @@ ALTER PROCEDURE [dbo].[Age_Agent_UpdatePositionTaking]
 	@AdminId			INT				= NULL,
 	@AgentId			INT,
 	@PositionTaking		VARCHAR(MAX)	= '',	
+	@IsUpdateMember		BIT				= 0,
 	@Language			VARCHAR(5)		= 'en-US',	
 	@ErrCode			INT				= 0			OUTPUT,
 	@ErrMsg				NVARCHAR(1000)	= ''		OUTPUT
@@ -145,7 +146,7 @@ BEGIN
 				,@SHAREHOLDERLEVEL		SMALLINT	= 2
 				,@MAINAGENTLEVEL		SMALLINT	= 3
 				,@MAXPT					SMALLINT	= 10000
-				,@MAXSHAREHOLDERPT		SMALLINT	= 9000
+				,@MAXSHAREHOLDERPT		SMALLINT	= 10000
 				,@MINSHAREMUSTCOVER		SMALLINT	= 5000
 
 			-- Check current agent is last agent ?
@@ -190,18 +191,18 @@ BEGIN
 				SportType	SMALLINT,
 				BetType		SMALLINT,
 				IsLive		BIT,
-				PT			SMALLINT,
-				MinPT		SMALLINT,
-				SumDownPT	SMALLINT)
+				PT			INT,
+				MinPT		INT,
+				SumDownPT	INT)
 								
 			DECLARE @TableUpdateCustPositionTaking TABLE (
 				AgentId		INT,
 				SportType	SMALLINT,
 				BetType		SMALLINT,
 				IsLive		BIT,
-				PT			SMALLINT,
-				Preset		SMALLINT,
-				Result		SMALLINT,
+				PT			INT,
+				Preset		INT,
+				Result		INT,
 				IsDeleted	BIT)
 		
 			DECLARE @TableTempPositionTaking TABLE (
@@ -210,8 +211,8 @@ BEGIN
 				SportType	SMALLINT,
 				BetType		SMALLINT,
 				IsLive		BIT,
-				PT			SMALLINT,
-				Preset		SMALLINT)
+				PT			INT,
+				Preset		INT)
 
 			DECLARE @TableTempAgent TABLE (AgentId INT)
 
@@ -2684,10 +2685,20 @@ BEGIN
 
 									-- End update Max Given PT		
 								END
-							--(2)-- End edit Max Given PT
-												
+							--(2)-- End edit Max Given PT	
+							
+							IF @IsUpdateMember = 1
+							BEGIN
+								EXEC [dbo].[Age_Agent_UpdatePositionTakingAllMember]
+								@ActorAgentId	= @ActorAgentId,
+								@AgentId		= @ParentAgentId,									
+								@PositionTaking = @PositionTaking,		
+								@Language		= @Language,
+								@ErrCode		= @ErrCode OUTPUT,
+								@ErrMsg			= @ErrMsg OUTPUT
+							END																	
 						END
-					-- End edit Agent with level k ( k > 1)
+					-- End edit Agent with level k ( k > 1)					
 
 					-- write log before update
 				
