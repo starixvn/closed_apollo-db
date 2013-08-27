@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[Acc_Rpt_MixParlay_Advance14]
+﻿CREATE PROCEDURE [dbo].[Acc_Rpt_Parlay_Advance]
 	@FromDate	datetime,
 	@ToDate		datetime,
 	@bettype	int = 9
@@ -27,13 +27,12 @@ AS
 SET NOCOUNT ON 
 
 SELECT  livehomescore as LiveType, liveawayscore as SportType, status, 
-		CONVERT(MONEY,sum((winlost-actual_stake)*actualrate)) WinLost,		
-		CONVERT(MONEY,SUM(stake*actualrate)) turnoverp,
+		CONVERT(MONEY,sum((winlost-actual_stake)*actualrate)) WinLost,	 
 		CONVERT(MONEY,sum((TWinlost)*actualrate)) Share,
 		CONVERT(MONEY,sum(TComm*actualrate)) Commission,	
 		CONVERT(MONEY,sum((winlost-actual_stake+TWinlost+TComm)*actualrate)) LineTotal,
 		CONVERT(MONEY,sum((1-tpositiontaking)*(ABS(stake)*actualrate))) Turnover	
-FROM	bettrans14 WITH (NOLOCK)
+FROM	bettrans WITH (NOLOCK)
 WHERE	bettype = @bettype AND		
 		winlostdate between @FromDate AND @ToDate and
 		statusID NOT IN (0,1,101,102,103) 
@@ -41,4 +40,4 @@ GROUP BY  livehomescore, liveawayscore, status
 ORDER BY  livehomescore, liveawayscore, status
 
 GO
-GRANT EXECUTE ON [dbo].[Acc_Rpt_MixParlay_Advance14] TO [aplweb]
+GRANT EXECUTE ON [dbo].[Acc_Rpt_Parlay_Advance] TO [aplweb]

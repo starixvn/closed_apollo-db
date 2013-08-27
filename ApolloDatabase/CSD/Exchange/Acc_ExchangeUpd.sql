@@ -3,7 +3,7 @@
 	@actualrate FLOAT,
 	@minbet FLOAT = 0,
 	@minbetlive FLOAT = 0,
-	@Description Nvarchar(100) = '',
+	@Description NVARCHAR(100) = '',
 	@MultipliedBy int = 1,	
 	@UserID INT,
 	@ErrCode INT = 0 OUTPUT,
@@ -58,12 +58,12 @@ WHERE exchangeid=@exchangeid
 
 
 Select @LogData = 'Update exchange rate:'	
-	+  ' ,newBaseRate=' + ISNULL(convert(VARCHAR(10), @actualrate),'')  
-	+  ' ,oldBaseRate=' + ISNULL(convert(VARCHAR(10), @old_actualrate),'')  
-	+  ' ,newminbet='+ ISNULL(convert(VARCHAR(10), @minbet),'') 
-	+  ' ,oldminbet='+ ISNULL(convert(VARCHAR(10), @old_minbet),'') 
-	+  ' ,newminbetlive='+ ISNULL(convert(VARCHAR(10), @minbetlive),'') 
-	+  ' ,oldminbetlive='+ ISNULL(convert(VARCHAR(10), @old_minbetlive),'') 	
+	+  ' ,newBaseRate=' + ISNULL(convert(VARCHAR(50), CONVERT(DECIMAL(38,5),@actualrate)),'')  
+	+  ' ,oldBaseRate=' + ISNULL(convert(VARCHAR(50),  CONVERT(DECIMAL(38,5),@old_actualrate)),'')  
+	+  ' ,newminbet='+ ISNULL(convert(VARCHAR(50), CONVERT(DECIMAL(38,5), @minbet)),'') 
+	+  ' ,oldminbet='+ ISNULL(convert(VARCHAR(50), CONVERT(DECIMAL(38,5), @old_minbet)),'') 
+	+  ' ,newminbetlive='+ ISNULL(convert(VARCHAR(50), CONVERT(DECIMAL(38,5), @minbetlive)),'') 
+	+  ' ,oldminbetlive='+ ISNULL(convert(VARCHAR(50),  CONVERT(DECIMAL(38,5),@old_minbetlive)),'') 	
 	+  ' ,oldDescription='+ ISNULL(@old_Description,'')
 	+  ' ,newDescription='+ ISNULL(@Description,'')
 	+  ' ,oldMultipliedBy='+ ISNULL(convert(varchar(10),@old_MultipliedBy),'')
