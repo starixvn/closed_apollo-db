@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_Insert]    Script Date: 8/9/2013 9:01:45 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_Insert]    Script Date: 8/23/2013 11:25:03 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -17,7 +17,7 @@ ALTER PROCEDURE [dbo].[Age_Customer_Insert]
 	@DoubleCommLosing	BIT				= 0,	
 	@Danger				TINYINT			= 0,
 	@IPLogin			VARCHAR(40)		= NULL,
-	@UGroup				VARCHAR(3)		= 'd',				-- Group A
+	@UGroup				VARCHAR(3)		= 'b',				-- Group B
 	@Creator			INT				= NULL,
 	@ErrCode			INT				= 0			OUTPUT,
 	@ErrMsg				NVARCHAR(1000)	= ''		OUTPUT
@@ -33,6 +33,7 @@ AS
  *	• 20130415@Kos		: Add statuses
  *	• 20130415@Edward	: Write log
  *	• 2013070/@Edward	: Insert CustPositionTaking
+ *	• 20130823@Kos		: Change default UGroup to 'b'
  * Parameters:
  *	•
  *	•
@@ -76,17 +77,20 @@ BEGIN
 
 	-- For write log
 	DECLARE 
-		@startRun			DATETIME,
-		@endRun				DATETIME,
-		@duration			INT,
+		@startRun					DATETIME,
+		@endRun						DATETIME,
+		@duration					INT,
 		@logCustSPData				NVARCHAR(MAX),		
 		@logBetLimitSPData			NVARCHAR(MAX),
 		@logDiscountSPData			NVARCHAR(MAX),
 		@logPositionTakingSPData	NVARCHAR(MAX),
-		@xml				XML,
-		@agentHId			HIERARCHYID
+		@xml						XML,
+		@agentHId					HIERARCHYID,
+		@agentUsername				NVARCHAR(50)
 
-	SELECT @agentHId = AgentHId
+	SELECT 
+		@agentHId = AgentHId,
+		@agentUsername = Username
 	FROM AgentInfo WITH (NOLOCK)
 	WHERE AgentId = @AgentId
 
@@ -229,7 +233,7 @@ BEGIN
 		AgentLevel	SMALLINT, 
 		Username	NVARCHAR(50) )
 
-	DECLARE @TableUpdatePT TABLE(
+	DECLARE @TableUpdatePT TABLE (
 		AgentId			INT,
 		AgentLevel		SMALLINT,
 		SportType		SMALLINT,
@@ -247,7 +251,7 @@ BEGIN
 	FROM AgentInfo WITH (NOLOCK) 
 	WHERE @agentHId.IsDescendantOf(AgentHId) = 1				
 	
-	INSERT INTO @TableUpdatePT(
+	INSERT INTO @TableUpdatePT (
 		AgentId
 		,AgentLevel
 		,SportType
@@ -256,7 +260,8 @@ BEGIN
 		,MaxUpper
 		,MaxUpperUpdate
 		,MinGiven)		   
-	SELECT apt.AgentId
+	SELECT 
+		apt.AgentId
 		,ai.AgentLevel
 		,apt.SportType
 		,apt.BetType
@@ -264,11 +269,10 @@ BEGIN
 		,apt.MaxUpperPositionTaking
 		,capt.MaxUpperPositionTaking
 		,apt.MinGivenPositionTaking
-	FROM AgentPositionTaking AS apt WITH (NOLOCK)			
-		INNER JOIN AgentInfo AS ai WITH (NOLOCK)
-			ON apt.AgentId		= ai.AgentId
-		LEFT JOIN @TableAgent AS ta
-			ON ai.AgentLevel	= ta.AgentLevel - 1
+	FROM 
+		AgentPositionTaking AS apt WITH (NOLOCK)			
+		INNER JOIN AgentInfo AS ai WITH (NOLOCK) ON apt.AgentId	= ai.AgentId
+		LEFT JOIN @TableAgent AS ta	ON ai.AgentLevel = ta.AgentLevel - 1
 		LEFT JOIN AgentPositionTaking AS capt WITH(NOLOCK)
 			ON capt.AgentId		= ta.AgentId
 			AND capt.SportType	= apt.SportType
@@ -285,7 +289,8 @@ BEGIN
 		,BetType
 		,IsLive
 		,PositionTaking)
-	SELECT @CustId
+	SELECT 
+		@CustId
 		 ,tupt.AgentId
 		 ,tupt.SportType
 		 ,tupt.BetType
@@ -296,15 +301,14 @@ BEGIN
 
 	DELETE @TableUpdatePT WHERE MinGiven = 0
 
-	DECLARE @currentAgentId			INT,
-			@currentAgentLevel 		SMALLINT
+	DECLARE @currentAgentId		INT,
+			@currentAgentLevel 	SMALLINT
 	
-	WHILE EXISTS(
-		SELECT TOP(1) * FROM @TableUpdatePT
-	)
+	WHILE EXISTS ( SELECT 1 FROM @TableUpdatePT )
 		BEGIN
-			SELECT TOP(1) @currentAgentId	= AgentId
-					,@currentAgentLevel		= AgentLevel
+			SELECT TOP(1) 
+				@currentAgentId	= AgentId
+				,@currentAgentLevel	= AgentLevel
 			FROM @TableUpdatePT
 			ORDER BY AgentLevel DESC				
 
@@ -315,28 +319,29 @@ BEGIN
 				,BetType
 				,IsLive
 				,PositionTaking)
-			SELECT	@CustId
-				 ,tupt.AgentId
-				 ,tupt.SportType
-				 ,tupt.BetType
-				 ,tupt.IsLive
-				 ,CASE WHEN tupt.MinGiven - temp.SumOfDownlinePT > tupt.MaxUpperUpdate
-					THEN tupt.MinGiven - temp.SumOfDownlinePT
+			SELECT	
+				@CustId
+				,tupt.AgentId
+				,tupt.SportType
+				,tupt.BetType
+				,tupt.IsLive
+				,CASE 
+					WHEN tupt.MinGiven - temp.SumOfDownlinePT > tupt.MaxUpperUpdate
+						THEN tupt.MinGiven - temp.SumOfDownlinePT
 					ELSE tupt.MaxUpperUpdate
 				END
-			FROM @TableUpdatePT AS tupt					
+			FROM 
+				@TableUpdatePT AS tupt					
 				INNER JOIN(
 					SELECT 
 						cpt.SportType,
 						cpt.BetType,
 						cpt.IsLive,
 						SUM(cpt.PositionTaking) AS SumOfDownlinePT
-					FROM dbo.CustPositionTaking AS cpt WITH (NOLOCK)
-						INNER JOIN AgentInfo AS ai WITH (NOLOCK)
-							ON cpt.AgentId = ai.AgentId 
-					WHERE 
-						CustId = @CustId
-						AND ai.AgentLevel > @currentAgentLevel
+					FROM 
+						dbo.CustPositionTaking AS cpt WITH (NOLOCK)
+						INNER JOIN AgentInfo AS ai WITH (NOLOCK) ON cpt.AgentId = ai.AgentId 
+					WHERE CustId = @CustId AND ai.AgentLevel > @currentAgentLevel
 					GROUP BY  
 						SportType,
 						BetType,
@@ -345,7 +350,7 @@ BEGIN
 					ON temp.SportType	= tupt.SportType
 					AND temp.BetType	= tupt.BetType
 					AND temp.IsLive		= tupt.IsLive
-			WHERE tupt.AgentId	= @currentAgentId				  
+			WHERE tupt.AgentId = @currentAgentId				  
 
 			DELETE @TableUpdatePT WHERE AgentId = @currentAgentId
 		END	
@@ -361,7 +366,7 @@ BEGIN
 	SET @xml = (
 		SELECT	
 			@Username			AS '@u',
-			(SELECT Username FROM AgentInfo WHERE AgentId = @AgentId)	AS '@a',
+			@agentUsername		AS '@a',
 			@Status				AS '@s',
 			@BetStatus			AS '@bs',
 			@MatchLimit			AS '@ml',
@@ -411,100 +416,100 @@ BEGIN
 			IsLive			AS '@i',
 			PositionTaking	AS '@p'
 		FROM CustPositionTaking WITH (NOLOCK)
-		WHERE CustId = @CustId
-			AND AgentId = @AgentId
-		ORDER BY SportType
-				--,BetType
-				,IsLive
+		WHERE CustId = @CustId AND AgentId = @AgentId
+		ORDER BY 
+			SportType
+			--,BetType
+			,IsLive
 		FOR XML PATH('z')
 	)
 
-	SET @logPositionTakingSPData = '<r a="'+(SELECT Username FROM AgentInfo WITH (NOLOCK) WHERE AgentId = @AgentId)+'">'+REPLACE(CONVERT(NVARCHAR(MAX), @xml), '" />', '"/"')+'</r>'
+	SET @logPositionTakingSPData = '<r a="' + @agentUsername + '">' + REPLACE(CONVERT(NVARCHAR(MAX), @xml), '" />', '"/"') + '</r>'
 
 	-- end write log 
 
 	SET @endRun = GETDATE()
 	SET @duration = DATEDIFF(MILLISECOND, @startRun, @endRun) 
 
-	IF @@Error = 0
+	IF @@ERROR = 0
 		BEGIN TRY
 			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
-			@UserId			= @Creator,
-			@SPName			= 'Age_Customer_Insert',
-			@LogDate		= @startRun,
-			@CustId			= @CustId,
-			@Duration		= @Duration,
-			@Data			= @logCustSPData,
-			@OldData		= NULL
+				@UserId		= @Creator,
+				@SPName		= 'Age_Customer_Insert',
+				@LogDate	= @startRun,
+				@CustId		= @CustId,
+				@Duration	= @Duration,
+				@Data		= @logCustSPData,
+				@OldData	= NULL
 
 			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
-			@UserId		= @Creator,
-			@AdminId	= NULL,
-			@SPName		= 'Age_Customer_InsertBetLimit',
-			@LogDate	= @startRun,
-			@CustId		= @CustId,
-			@Duration	= @Duration,
-			@Data		= @logBetLimitSPData,
-			@OldData	= NULL
+				@UserId		= @Creator,
+				@AdminId	= NULL,
+				@SPName		= 'Age_Customer_InsertBetLimit',
+				@LogDate	= @startRun,
+				@CustId		= @CustId,
+				@Duration	= @Duration,
+				@Data		= @logBetLimitSPData,
+				@OldData	= NULL
 
 			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
-			@UserId		= @Creator,
-			@AdminId	= NULL,
-			@SPName		= 'Age_Customer_InsertDiscount',
-			@LogDate	= @startRun,
-			@CustId		= @CustId,
-			@Duration	= @Duration,
-			@Data		= @logDiscountSPData,
-			@OldData	= NULL
+				@UserId		= @Creator,
+				@AdminId	= NULL,
+				@SPName		= 'Age_Customer_InsertDiscount',
+				@LogDate	= @startRun,
+				@CustId		= @CustId,
+				@Duration	= @Duration,
+				@Data		= @logDiscountSPData,
+				@OldData	= NULL
 
 			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpCust
-			@UserId		= @Creator,
-			@AdminId	= NULL,
-			@SPName		= 'Age_Customer_InsertPositionTaking',
-			@LogDate	= @startRun,
-			@CustId		= @CustId,
-			@Duration	= @Duration,
-			@Data		= @logPositionTakingSPData,
-			@OldData	= NULL
+				@UserId		= @Creator,
+				@AdminId	= NULL,
+				@SPName		= 'Age_Customer_InsertPositionTaking',
+				@LogDate	= @startRun,
+				@CustId		= @CustId,
+				@Duration	= @Duration,
+				@Data		= @logPositionTakingSPData,
+				@OldData	= NULL
 		END	TRY
 		BEGIN CATCH
 			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpCust
-			@UserId			= @Creator,
-			@SPName			= 'Age_Customer_Insert',
-			@LogDate		= @startRun,
-			@CustId			= @CustId,
-			@Duration		= @Duration,
-			@Data			= @logCustSPData,
-			@OldData		= NULL
+				@UserId			= @Creator,
+				@SPName			= 'Age_Customer_Insert',
+				@LogDate		= @startRun,
+				@CustId			= @CustId,
+				@Duration		= @Duration,
+				@Data			= @logCustSPData,
+				@OldData		= NULL
 
 			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpCust
-			@UserId		= @Creator,
-			@AdminId	= NULL,
-			@SPName		= 'Age_Customer_InsertBetLimit',
-			@LogDate	= @startRun,
-			@CustId		= @CustId,
-			@Duration	= @Duration,
-			@Data		= @logBetLimitSPData,
-			@OldData	= NULL
+				@UserId		= @Creator,
+				@AdminId	= NULL,
+				@SPName		= 'Age_Customer_InsertBetLimit',
+				@LogDate	= @startRun,
+				@CustId		= @CustId,
+				@Duration	= @Duration,
+				@Data		= @logBetLimitSPData,
+				@OldData	= NULL
 
 			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpCust
-			@UserId		= @Creator,
-			@AdminId	= NULL,
-			@SPName		= 'Age_Customer_InsertDiscount',
-			@LogDate	= @startRun,
-			@CustId		= @CustId,
-			@Duration	= @Duration,
-			@Data		= @logDiscountSPData,
-			@OldData	= NULL
+				@UserId		= @Creator,
+				@AdminId	= NULL,
+				@SPName		= 'Age_Customer_InsertDiscount',
+				@LogDate	= @startRun,
+				@CustId		= @CustId,
+				@Duration	= @Duration,
+				@Data		= @logDiscountSPData,
+				@OldData	= NULL
 
 			EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpCust
-			@UserId		= @Creator,
-			@AdminId	= NULL,
-			@SPName		= 'Age_Customer_InsertPositionTaking',
-			@LogDate	= @startRun,
-			@CustId		= @CustId,
-			@Duration	= @Duration,
-			@Data		= @logPositionTakingSPData,
-			@OldData	= NULL
+				@UserId		= @Creator,
+				@AdminId	= NULL,
+				@SPName		= 'Age_Customer_InsertPositionTaking',
+				@LogDate	= @startRun,
+				@CustId		= @CustId,
+				@Duration	= @Duration,
+				@Data		= @logPositionTakingSPData,
+				@OldData	= NULL
 		END CATCH
 END										

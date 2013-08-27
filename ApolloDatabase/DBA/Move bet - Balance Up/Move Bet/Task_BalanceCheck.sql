@@ -59,6 +59,6 @@ FROM
 
 INSERT INTO dbo.Task_BalanceRecord (step, winlostdate, SPCode, TotalAmt, TotalSum)
 SELECT @InitStepNo, @winlostdate, 0,
-	(@memberAmount + @agentAmount) totalamt,
-	(@memberSUM + @agentSUM) TotalSUM
+	(isnull(@memberAmount,0) + isnull(@agentAmount,0)) totalamt,
+	(isnull(@memberSUM ,0)+ isnull(@agentSUM,0)) TotalSUM
 
