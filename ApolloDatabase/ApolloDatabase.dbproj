@@ -1706,6 +1706,12 @@
     <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_Parlay_Advance14.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="DBA\Task\Task_Sync_NAPLOG.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="API\Mem_API_GetFundTransBySGSTransId.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">
