@@ -72,6 +72,16 @@ select @bettype =
 		when 3 then 22002 
 	end
 
+
+if EXISTS(SELECT transid 
+	FROM bettrans WITH (NOLOCK)
+	WHERE bettype in (22001,22002) AND betid=@SGS_transid
+)
+BEGIN
+	SELECT @ErrMsg = 'Duplicated SGS trans id.', @ErrCode = 100
+	RETURN
+END
+
 IF @type=3
 	SELECT  @amount = ISNULL(SUM(winlost-actual_stake+playercomm),0),
 		@osbalance = ISNULL(SUM(case when bettype < 19000  and ruben=0 then actual_stake else 0 end),0) 
