@@ -63,7 +63,7 @@ AS
 				o.matchcode,
 				o.TeamId as HomeId,
 				0 as AwayId,
-				0 liveindicator,
+				CONVERT(BIT, 0) as liveindicator,
 				b.BetType, 
 				l.leagueid,
 				CONVERT(MONEY,sum((winlost-actual_stake)*actualrate)) WinLost,
