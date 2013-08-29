@@ -121,6 +121,7 @@
     <Folder Include="CSD\Exchange" />
     <Folder Include="Agent\BetList\BK" />
     <Folder Include="CSD\Report\Daily Mix Parlay Winloss" />
+    <Folder Include="CSD\Admin\MailingList" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1481,9 +1482,6 @@
     <NotInBuild Include="Agent\Admin\AccountInfo\Age_Customer_GetByUsername.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\--Age_BetList_AgentDetail_Old.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="Agent\BetList\Age_BetList_AgentDetail_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1710,6 +1708,18 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="API\Mem_API_GetFundTransBySGSTransId.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_GetByFunction.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_Insert.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_Update.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdatePositionTakingAllMember.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>

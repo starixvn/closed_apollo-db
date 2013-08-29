@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[DBA_CheckDataIntegrity]    Script Date: 8/12/2013 10:28:21 PM ******/
+/****** Object:  StoredProcedure [dbo].[DBA_CheckDataIntegrity]    Script Date: 8/28/2013 4:04:44 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -37,6 +37,25 @@ BEGIN
 		PRINT 'Unknown Parent : Failed'
 	ELSE
 		PRINT 'Unknown Parent : OK'
+
+	PRINT '----------------------------------------------------------------'
+	PRINT 'Agent User'
+
+	--IF EXISTS (	SELECT 1 
+	--			FROM AgentInfo AS ai WITH (NOLOCK)
+	--			WHERE NOT EXISTS ( SELECT 1 FROM AgentUser WITH (NOLOCK) WHERE AgentId = ai.AgentId ) )
+	--	PRINT 'No Agent User : Failed'
+	--ELSE
+	--	PRINT 'No Agent User : OK'
+
+	IF EXISTS (	SELECT 1 
+				FROM AgentUser AS ai WITH (NOLOCK)
+				WHERE 
+					ai.AgentId > 1 
+					AND NOT EXISTS ( SELECT 1 FROM AgentInfo WITH (NOLOCK) WHERE AgentId = ai.AgentId ) )
+		PRINT 'Unknown Agent : Failed'
+	ELSE
+		PRINT 'Unknown Agent : OK'
 	
 	PRINT '----------------------------------------------------------------'
 	PRINT 'Agent Bet Limit'
@@ -55,6 +74,15 @@ BEGIN
 	ELSE
 		PRINT 'Unknown Agent : OK'
 
+	IF EXISTS (	SELECT 1 
+				FROM AgentBetLimit WITH (NOLOCK)
+				WHERE MinBet IS NULL
+					OR MaxBet IS NULL
+					OR MaxPerMatch IS NULL )
+		PRINT 'NULL value : Failed'
+	ELSE
+		PRINT 'NULL value : OK'
+
 	PRINT '----------------------------------------------------------------'
 	PRINT 'Agent Discount'
 
@@ -72,6 +100,16 @@ BEGIN
 	ELSE
 		PRINT 'Unknown Agent : OK'
 
+	IF EXISTS (	SELECT 1 
+				FROM AgentDiscount WITH (NOLOCK)
+				WHERE DiscountA IS NULL
+					OR DiscountB IS NULL
+					OR DiscountC IS NULL
+					OR DiscountD IS NULL )
+		PRINT 'NULL value : Failed'
+	ELSE
+		PRINT 'NULL value : OK'
+
 	PRINT '----------------------------------------------------------------'
 	PRINT 'Agent Position Taking'
 
@@ -88,6 +126,15 @@ BEGIN
 		PRINT 'Unknown Agent : Failed'
 	ELSE
 		PRINT 'Unknown Agent : OK'
+
+	IF EXISTS (	SELECT 1 
+				FROM AgentPositionTaking WITH (NOLOCK)
+				WHERE MaxUpperPositionTaking IS NULL
+					OR MaxGivenPositionTaking IS NULL
+					OR MinGivenPositionTaking IS NULL )
+		PRINT 'NULL value : Failed'
+	ELSE
+		PRINT 'NULL value : OK'
 
 	PRINT '----------------------------------------------------------------'
 	PRINT 'Customer'
@@ -116,6 +163,15 @@ BEGIN
 	ELSE
 		PRINT 'Unknown Customer : OK'
 
+	IF EXISTS (	SELECT 1 
+				FROM CustBetLimit WITH (NOLOCK)
+				WHERE MinBet IS NULL
+					OR MaxBet IS NULL
+					OR MaxPerMatch IS NULL )
+		PRINT 'NULL value : Failed'
+	ELSE
+		PRINT 'NULL value : OK'
+
 	PRINT '----------------------------------------------------------------'
 	PRINT 'Customer Discount'
 
@@ -133,22 +189,36 @@ BEGIN
 	ELSE
 		PRINT 'Unknown Customer : OK'
 
+	IF EXISTS (	SELECT 1 
+				FROM CustDiscount WITH (NOLOCK)
+				WHERE Discount IS NULL )
+		PRINT 'NULL value : Failed'
+	ELSE
+		PRINT 'NULL value : OK'
+
 	PRINT '----------------------------------------------------------------'
 	PRINT 'Customer Position Taking'
 
-	IF EXISTS (	SELECT 1 
-				FROM CustInfo AS ci WITH (NOLOCK)
-				WHERE NOT EXISTS ( SELECT 1 FROM CustPositionTaking WITH (NOLOCK) WHERE CustId = ci.CustId ) )
-		PRINT 'No Setting : Failed'
-	ELSE
-		PRINT 'No Setting : OK'
+	--IF EXISTS (	SELECT 1 
+	--			FROM CustInfo AS ci WITH (NOLOCK)
+	--			WHERE NOT EXISTS ( SELECT 1 FROM CustPositionTaking WITH (NOLOCK) WHERE CustId = ci.CustId ) )
+	--	PRINT 'No Setting : Failed'
+	--ELSE
+	--	PRINT 'No Setting : OK'
 
-	IF EXISTS (	SELECT 1 
-				FROM CustPositionTaking AS cpt WITH (NOLOCK)
-				WHERE NOT EXISTS ( SELECT 1 FROM CustInfo WITH (NOLOCK) WHERE CustId = cpt.CustId ) )
-		PRINT 'Unknown Customer : Failed'
-	ELSE
-		PRINT 'Unknown Customer : OK'
+	--IF EXISTS (	SELECT 1 
+	--			FROM CustPositionTaking AS cpt WITH (NOLOCK)
+	--			WHERE NOT EXISTS ( SELECT 1 FROM CustInfo WITH (NOLOCK) WHERE CustId = cpt.CustId ) )
+	--	PRINT 'Unknown Customer : Failed'
+	--ELSE
+	--	PRINT 'Unknown Customer : OK'
+
+	--IF EXISTS (	SELECT 1 
+	--			FROM CustPositionTaking WITH (NOLOCK)
+	--			WHERE PositionTaking IS NULL )
+	--	PRINT 'NULL value : Failed'
+	--ELSE
+	--	PRINT 'NULL value : OK'
 		
 END	
 
