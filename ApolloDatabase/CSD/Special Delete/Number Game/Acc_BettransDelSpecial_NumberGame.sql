@@ -1,7 +1,7 @@
 ﻿ALTER PROCEDURE [dbo].[Acc_BettransDelSpecial_NumberGame]
     @matchid		INT,
-    @f_transid		BIGINT,
-    @t_transid		BIGINT,
+    @FromTransId		BIGINT,
+    @ToTransId		BIGINT,
     @Dead			VARCHAR(100)	= '', -- bettype for dead-ball
 	@Live			VARCHAR(100)	= '', -- bettype for live-ball	
     @transids		VARCHAR(4000)	= '',-- Normal bets    	
@@ -22,6 +22,7 @@ Original:
 Revisions:
    - 20130725@Sophia: Change username nvarchar(50)
    - 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
+   - 20130829@Sophia: change @f_transID /@t_transid to @FromTransId / @ToTransId
 						   
 Param's Explanation: 
 
@@ -38,7 +39,7 @@ BEGIN
 					WHERE   UserPwd = @UserPwd
 							and AdminId = @UserID)
 	BEGIN
-		SELECT @LogData ='Fail to delete bet for matchid ' + CONVERT(VARCHAR(20), @matchid) + ' from ' + CONVERT(VARCHAR(20), @f_transid) + ' to ' + CONVERT(VARCHAR(20), @t_transid)
+		SELECT @LogData ='Fail to delete bet for matchid ' + CONVERT(VARCHAR(20), @matchid) + ' from ' + CONVERT(VARCHAR(20), @FromTransId) + ' to ' + CONVERT(VARCHAR(20), @ToTransId)
 		EXEC WriteLog_UserLog_T @UserID = @UserID, @Doing = @LogData
 
 		SELECT @ErrMsg = 'Sorry. You can not process delete bet due to either wrong password or insufficient permission!', @ErrCode = 101   
@@ -163,7 +164,7 @@ BEGIN
 			FROM bettrans b WITH (nolock)
 			WHERE
 				b.matchid = @matchid 						
-				AND b.transid BETWEEN @f_transid AND @t_transid			
+				AND b.transid BETWEEN @FromTransId AND @ToTransId			
 				and bettype BETWEEN 81 and 120		
 				AND statusID NOT IN (101, 102)											
 				AND
@@ -313,7 +314,7 @@ BEGIN
 	WHERE	    (a.balance - b.balance) < 0
 
 
-	SELECT @LogData ='delete bet for matchid ' + CONVERT(VARCHAR(20), @matchid) + ' from ' + CONVERT(VARCHAR(20), @f_transid) + ' to ' + CONVERT(VARCHAR(20), @t_transid) + ' IP=' + COALESCE(CAST(@IP AS VARCHAR(15)),SPACE(1))
+	SELECT @LogData ='delete bet for matchid ' + CONVERT(VARCHAR(20), @matchid) + ' from ' + CONVERT(VARCHAR(20), @FromTransId) + ' to ' + CONVERT(VARCHAR(20), @ToTransId) + ' IP=' + COALESCE(CAST(@IP AS VARCHAR(15)),SPACE(1))
 	EXEC WriteLog_UserLog_T @UserID = @UserID, @Doing = @LogData
 
 	--after delete, return all deleted deposit bets with additional information for mailing	
