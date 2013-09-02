@@ -1,7 +1,7 @@
 ﻿ALTER PROCEDURE [dbo].[Acc_BettransDelSpecial]
     @matchid INT,
-    @f_transid BIGINT,
-    @t_transid BIGINT,
+    @FromTransId BIGINT,
+    @ToTransId BIGINT,
     @transids VARCHAR(4000) = '', 
     @bettypes VARCHAR(128) = '',
     @betteam1378 NVARCHAR(10) = '',
@@ -35,7 +35,7 @@ Original:
 Revisions:    
   - 20130725@Sophia: Change username nvarchar(50)
   - 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
-	
+  - 20130829@Sophia: change @f_transID /@t_transid to @FromTransId / @ToTransId
 		    
 Param's Explanation: Special bet delete option
 
@@ -70,7 +70,7 @@ Param's Explanation: Special bet delete option
 					WHERE   UserPwd = @UserPwd
 							and AdminId = @UserID)
 	BEGIN
-		SELECT @LogData ='Fail to delete bet for matchid ' + CONVERT(VARCHAR(20), @matchid) + ' from ' + CONVERT(VARCHAR(20), @f_transid) + ' to ' + CONVERT(VARCHAR(20), @t_transid)
+		SELECT @LogData ='Fail to delete bet for matchid ' + CONVERT(VARCHAR(20), @matchid) + ' from ' + CONVERT(VARCHAR(20), @FromTransId) + ' to ' + CONVERT(VARCHAR(20), @ToTransId)
 		EXEC WriteLog_UserLog_T @UserID = @UserID, @Doing = @LogData
 
 		SELECT @ErrMsg = 'Sorry. You can not process delete bet due to either wrong password or insufficient permission!',
@@ -156,7 +156,7 @@ Param's Explanation: Special bet delete option
 		INNER JOIN dbo.strSplit(@bettypes,'^') AS bt ON bt.val=b.bettype
 	WHERE
 		b.matchid=@matchid 
-		AND b.transid between @f_transid and @t_transid
+		AND b.transid between @FromTransId and @ToTransId
 		AND CASE WHEN @liveindicator = 2 THEN @liveindicator ELSE b.liveindicator END = @liveindicator
 		AND b.livehomescore = CASE WHEN @livehomescore IS NOT NULL AND @liveindicator = 1 THEN @livehomescore ELSE b.livehomescore END
 		AND b.liveawayscore = CASE WHEN @liveawayscore IS NOT NULL AND @liveindicator = 1 THEN @liveawayscore ELSE b.liveawayscore END
@@ -184,7 +184,7 @@ Param's Explanation: Special bet delete option
 		LEFT JOIN dbo.strSplit(@betteam430,'^') AS bt ON b.betteam=CONVERT(varchar(3),bt.val)
 	WHERE
 		b.matchid=@matchid and           
-		b.transid between @f_transid and @t_transid
+		b.transid between @FromTransId and @ToTransId
 		AND CASE WHEN @liveindicator = 2 THEN @liveindicator ELSE b.liveindicator END = @liveindicator
 		AND b.livehomescore = CASE WHEN @livehomescore IS NOT NULL AND @liveindicator = 1 THEN @livehomescore ELSE b.livehomescore END
 		AND b.liveawayscore = CASE WHEN @liveawayscore IS NOT NULL AND @liveindicator = 1 THEN @liveawayscore ELSE b.liveawayscore END
@@ -202,7 +202,7 @@ Param's Explanation: Special bet delete option
 		LEFT JOIN dbo.strSplit(@betteam6,'^') AS bt ON bt.val=b.betteam
 	WHERE
 		b.matchid=@matchid and           
-		b.transid between @f_transid and @t_transid		
+		b.transid between @FromTransId and @ToTransId		
 		AND CASE WHEN @liveindicator = 2 THEN @liveindicator ELSE b.liveindicator END = @liveindicator
 		AND b.livehomescore = CASE WHEN @livehomescore IS NOT NULL AND @liveindicator = 1 THEN @livehomescore ELSE b.livehomescore END
 		AND b.liveawayscore = CASE WHEN @liveawayscore IS NOT NULL AND @liveindicator = 1 THEN @liveawayscore ELSE b.liveawayscore END	
@@ -219,7 +219,7 @@ Param's Explanation: Special bet delete option
 		LEFT JOIN dbo.strSplit(@betteam14,'^') AS bt ON b.betteam=CONVERT(varchar(3),bt.val)
 	WHERE
 		b.matchid=@matchid and           
-		b.transid between @f_transid and @t_transid
+		b.transid between @FromTransId and @ToTransId
 		AND CASE WHEN @liveindicator = 2 THEN @liveindicator ELSE b.liveindicator END = @liveindicator
 		AND b.livehomescore = CASE WHEN @livehomescore IS NOT NULL AND @liveindicator = 1 THEN @livehomescore ELSE b.livehomescore END
 		AND b.liveawayscore = CASE WHEN @liveawayscore IS NOT NULL AND @liveindicator = 1 THEN @liveawayscore ELSE b.liveawayscore END
@@ -236,7 +236,7 @@ Param's Explanation: Special bet delete option
 		LEFT JOIN dbo.strSplit(@betteam16,'^') AS bt ON bt.val=b.betteam
 	WHERE
 		b.matchid=@matchid and           
-		b.transid between @f_transid and @t_transid		
+		b.transid between @FromTransId and @ToTransId		
 		AND CASE WHEN @liveindicator = 2 THEN @liveindicator ELSE b.liveindicator END = @liveindicator	
 		AND b.livehomescore = CASE WHEN @livehomescore IS NOT NULL AND @liveindicator = 1 THEN @livehomescore ELSE b.livehomescore END
 		AND b.liveawayscore = CASE WHEN @liveawayscore IS NOT NULL AND @liveindicator = 1 THEN @liveawayscore ELSE b.liveawayscore END	
@@ -432,7 +432,7 @@ Param's Explanation: Special bet delete option
 
 ------------------***** End of Special Delete *****------------------
 
-	SELECT @LogData ='Delete bet for matchid ' + CONVERT(VARCHAR(20), @matchid) + ' from ' + CONVERT(VARCHAR(20), @f_transid) + ' to ' + CONVERT(VARCHAR(20), @t_transid) + ' IP=' + COALESCE(CAST(@IP AS VARCHAR(15)),SPACE(1))
+	SELECT @LogData ='Delete bet for matchid ' + CONVERT(VARCHAR(20), @matchid) + ' from ' + CONVERT(VARCHAR(20), @FromTransId) + ' to ' + CONVERT(VARCHAR(20), @ToTransId) + ' IP=' + COALESCE(CAST(@IP AS VARCHAR(15)),SPACE(1))
 	EXEC WriteLog_UserLog_T @UserID = @UserID, @Doing = @LogData
 
 ------after delete, return all deleted with additional information for mailing 

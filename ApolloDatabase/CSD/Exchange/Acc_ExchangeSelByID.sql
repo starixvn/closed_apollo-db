@@ -22,5 +22,5 @@ BEGIN
 	WHERE	Exchangeid = @ExchangeID
 END
 
-
+GO
 GRANT  EXECUTE  ON [dbo].[Acc_ExchangeSelByID]  TO [aplweb]
