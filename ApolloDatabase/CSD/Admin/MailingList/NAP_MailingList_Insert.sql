@@ -71,7 +71,7 @@ VALUES(	@FunctionId,
 			BEGIN
 				SELECT 
 					@ErrCode = 1, 
-					@ErrMsg = 'Failed to insert Mauling List [ListId = ' + COALESCE(CAST(@ListId AS VARCHAR(10)), SPACE(1)) + ']'
+					@ErrMsg = 'Failed to insert Mailing List [ListId = ' + COALESCE(CAST(@ListId AS VARCHAR(10)), SPACE(1)) + ']'
 				RETURN
 			END		
 
