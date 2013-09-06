@@ -945,9 +945,6 @@
     <NotInBuild Include="Agent\BetList\Age_BetList_SelWinloss.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelWinloss_Old.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="Agent\Customer Setting\Age_Customer_UpdatePositionTaking.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1480,9 +1477,6 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Admin\AccountInfo\Age_Customer_GetByUsername.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_AgentDetail_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Report\Winloss\Age_Rpt_WinLoss_AgentViewAgent.sql">
