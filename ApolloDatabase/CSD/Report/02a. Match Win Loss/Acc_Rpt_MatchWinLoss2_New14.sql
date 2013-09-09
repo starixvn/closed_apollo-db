@@ -91,7 +91,7 @@ BEGIN
 			sum(b.comm) as comm,
 			sum(b.Linetotal) as LineTotal,
 			sum(b.IBCTurnover) IBCTurnover,
-			'Out Right' as bettype 
+			'Outright' as bettype 
 	FROM	#tmpBettrans b with(nolock)
 	WHERE	bettype = 10 			
 	GROUP BY bettype 	
