@@ -156,16 +156,19 @@ BEGIN
 				ON	B.TransID = BA.TransID		
 		INNER JOIN  AgentPositionTaking PT WITH (NOLOCK) 
 				ON  PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
-		INNER JOIN  Outright m  WITH (NOLOCK) 
-				ON  m.orid = B.MatchID
-		INNER JOIN  League l WITH (NOLOCK)
-				ON	l.leagueID = m.leagueId
 		WHERE		C.ParentId = @AgentID 
 					AND B.Winlostdate BETWEEN @FromDate AND @ToDate
 					AND B.StatusID NOT IN (0,1)
-					AND B.Bettype = 10
-				
-					AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))
+					AND B.Bettype = 10				
+					AND (@Sporttypes = '0' 
+					OR EXISTS (	SELECT	1 
+								FROM Outright m  WITH (NOLOCK) 									
+								INNER JOIN  League l WITH (NOLOCK)
+										ON	l.leagueID = m.leagueId
+										AND (l.sporttype IN (Select sporttype FROM #SportsList))							
+								WHERE	m.orid = B.MatchID
+								)				
+					)
 		GROUP BY	C.Username, C.AgentID, PT.MaxUpperPositionTaking
 
 
@@ -306,16 +309,19 @@ BEGIN
 				ON	B.TransID = BA.TransID		
 		INNER JOIN  AgentPositionTaking PT WITH (NOLOCK) 
 				ON  PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
-		INNER JOIN  Outright14 m  WITH (NOLOCK) 
-				ON  m.orid = B.MatchID
-		INNER JOIN  League l WITH (NOLOCK)
-				ON	l.leagueID = m.leagueId
 		WHERE		C.ParentId = @AgentID 
 					AND B.Winlostdate BETWEEN @FromDate AND @ToDate
 					AND B.StatusID NOT IN (0,1)
-					AND B.Bettype = 10
-				
-					AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))
+					AND B.Bettype = 10				
+					AND (@Sporttypes = '0' 
+					OR EXISTS (	SELECT	1 
+								FROM Outright14 m  WITH (NOLOCK) 									
+								INNER JOIN  League l WITH (NOLOCK)
+										ON	l.leagueID = m.leagueId
+										AND (l.sporttype IN (Select sporttype FROM #SportsList))							
+								WHERE	m.orid = B.MatchID
+								)				
+					)
 		GROUP BY	C.Username, C.AgentID, PT.MaxUpperPositionTaking
 
 
