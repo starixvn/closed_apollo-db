@@ -29,7 +29,7 @@ BEGIN
 			sum((1-tpositiontaking)*stake*actualrate) IBCTurnover
 	FROM	dbo.bettrans14 with(nolock)
 	WHERE	winlostdate = @winlostdate		
-			AND statusID not in (0,1,101,102,103,121) --('VOID','REJECT','REFUND','DONE')
+			AND statusID not in (0,1,101,102,103) --('VOID','REJECT','REFUND')
 			AND bettype <= 19000
 	GROUP BY matchid, bettype, statusID, liveindicator
 	-- END - Fill data of all sports into temporary tables
@@ -89,7 +89,7 @@ BEGIN
 			FROM	bettrans14 with(nolock)
 			WHERE 	bettype IN (9, 29) and
 					winlostdate = @winlostdate and					
-					statusid NOT IN (0,1,101,102,103,121) and
+					statusid NOT IN (0,1,101,102,103) and
 					refno IN (SELECT refno FROM bettransm14 with(nolock) inner join match14 with(nolock) on bettransm14.matchid = match14.matchid WHERE sporttype=1)
 			GROUP BY bettype
 		) m2 on m1.bettype = m2.bettype
