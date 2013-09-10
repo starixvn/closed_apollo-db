@@ -1716,6 +1716,9 @@
     <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdatePositionTakingAllMember.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="API\Mem_API_GetExchange.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">
