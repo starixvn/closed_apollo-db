@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[Acc_Rpt_Parlay_Advance14]
+﻿ALTEr PROCEDURE [dbo].[Acc_Rpt_Parlay_Advance14]
 	@FromDate	datetime,
 	@ToDate		datetime,
 	@bettype	int = 9
@@ -11,6 +11,7 @@ AS
 	DB: SVRCSD.RepDb
 
 	Revisions: 				
+		- 20130911@Sophia: Add currency <> 20
 	 
 	Parameter's Explanation:	
 			+ LiveType (Livehomescore):
@@ -36,7 +37,8 @@ SELECT  livehomescore as LiveType, liveawayscore as SportType, status,
 FROM	bettrans14 WITH (NOLOCK)
 WHERE	bettype = @bettype AND		
 		winlostdate between @FromDate AND @ToDate and
-		statusID NOT IN (0,1,101,102,103) 
+		statusID NOT IN (0,1,101,102,103) AND
+		Currency <> 20
 GROUP BY  livehomescore, liveawayscore, status
 ORDER BY  livehomescore, liveawayscore, status
 
