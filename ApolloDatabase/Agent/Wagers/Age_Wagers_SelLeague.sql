@@ -2,7 +2,8 @@
 	@FromDate DATE,
 	@Todate DATE = @FromDate,
 	@Sporttypes VARCHAR(MAX) = '0',
-	@IsOutright BIT = 0
+	@IsOutright BIT = 0,
+	@isShowAll BIT = 0
 AS
 /*
 Created:  Sophia
@@ -11,7 +12,8 @@ Task: Get Leagueid for Wagers
 DB: SVRAGE.REPDB
  
 Revisions:    
-
+	- 20130913@Sophia: Add @isShowAll	
+	
 Parameters
  
  
@@ -24,7 +26,7 @@ IF @IsOutright = 0
 		INNER JOIN League l WITH (NOLOCK) ON m.leagueid = l.leagueid
 	WHERE	m.eventdate = @FromDate  
 			AND (l.Sporttype IN (SELECT val FROM StrSplit_Key(@Sporttypes, ',')) OR @Sporttypes = '0')
-			AND l.isTest = 0
+			AND (l.isTest = 0  OR @isShowAll = 1)
 
 ELSE
 	SELECT	DISTINCT m.LeagueId
@@ -32,7 +34,7 @@ ELSE
 		INNER JOIN League l WITH (NOLOCK) ON m.leagueid = l.leagueid
 	WHERE	m.eventdate BETWEEN @FromDate AND @ToDate
 			AND (l.Sporttype IN (SELECT val FROM StrSplit_Key(@Sporttypes, ',')) OR @Sporttypes = '0')
-			AND l.isTest = 0
+			AND (l.isTest = 0  OR @isShowAll = 1)
 
 		 
 GO
