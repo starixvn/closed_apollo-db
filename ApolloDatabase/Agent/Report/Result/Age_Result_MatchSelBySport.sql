@@ -1,7 +1,7 @@
 ﻿ALTER PROCEDURE [dbo].[Age_Result_MatchSelBySport]
 	@FromDate DATETIME,
 	@Sporttypes VARCHAR(MAX) = '0',
-	@isShowAll bit = 1 -- 1: Show All; 0: is NOT show Test	
+	@isShowAll bit = 0 -- 1: Show All; 0: is NOT show Test	
 
 AS
 /*

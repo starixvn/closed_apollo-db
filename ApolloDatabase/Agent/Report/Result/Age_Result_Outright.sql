@@ -1,7 +1,7 @@
 ﻿
 ALTER PROCEDURE [dbo].[Age_Result_Outright]
 	@FromDate DATETIME,
-	@isShowAll bit = 1 -- 1: Show All; 0: is NOT show Test	
+	@isShowAll bit = 0 -- 1: Show All; 0: is NOT show Test	
 AS 
 
 /*
@@ -58,5 +58,4 @@ ORDER BY
 	
 GO
 GRANT EXECUTE ON [dbo].[Age_Result_Outright] TO [aplweb]
-GO
---GRANT VIEW DEFINITION ON [dbo].[Age_Result_Outright] TO vnteam
+GO 

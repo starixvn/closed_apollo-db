@@ -2,7 +2,7 @@
 	@EventDate DATETIME,
 	@Language NVARCHAR(2) = 'E',
 	@sporttype tinyint = 0,
-	@isShowAll bit = 1 -- 1: Show All; 0: is NOT show Test	
+	@isShowAll bit = 0 -- 1: Show All; 0: is NOT show Test	
 AS
 /*
 Created: Sophia
@@ -51,5 +51,4 @@ END
 
 GO
 GRANT EXECUTE ON [dbo].[Age_Result_LeagueSelByDate] TO [Aplweb]
-GO
----GRANT VIEW DEFINITION ON [dbo].[Age_Result_LeagueSelByDate] TO [vnteam]
+GO 

@@ -20,8 +20,6 @@ WHERE m.matchid=@MatchID
 
 GO
 GRANT EXECUTE ON [dbo].[Age_Result_MatchSelGoalHistory] TO aplweb
-GO
-
---GRANT VIEW DEFINITION ON [dbo].[Age_Result_MatchSelGoalHistory] TO [vnteam]
-GO
+GO 
+ 
 
