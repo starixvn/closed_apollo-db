@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateStatus]    Script Date: 8/9/2013 12:26:56 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateStatus]    Script Date: 9/5/2013 5:02:15 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -75,8 +75,11 @@ BEGIN
 
 	SET @xml = (
 		SELECT	
-			@Type		AS '@t',
-			CASE WHEN @Type = 1 THEN Status ELSE BetStatus END	AS '@s'
+			@Type AS '@t',
+			CASE 
+				WHEN @Type = 1 THEN Status 
+				ELSE BetStatus 
+			END	AS '@s'
 			--BetStatus	AS '@bs'
 		FROM AgentInfo WITH (NOLOCK)
 		WHERE AgentId = @AgentId
@@ -106,6 +109,13 @@ BEGIN
 	FROM AgentUser WITH (NOLOCK)
 	WHERE AgentUserId = @AgentId
 
+	DECLARE @Agent TABLE (AgentId INT)
+
+	INSERT @Agent
+	SELECT AgentId
+	FROM AgentInfo WITH (NOLOCK)
+	WHERE AgentHId.IsDescendantOf(@AgentHId) = 1
+
 	IF @Type = 1 		-- Account status
 		BEGIN
 			IF @Status <> 3 AND @CurrentStatus <> @Status	-- New status is not Locked
@@ -125,20 +135,45 @@ BEGIN
 
 					-- Update downline status if upline status is Active
 					IF @CurrentUplineStatus = 1
-						BEGIN
-							-- Update agent downline
-							UPDATE AgentInfo WITH (ROWLOCK, UPDLOCK)
-							SET UplineStatus = @Status
-							WHERE 
-								AgentHId.IsDescendantOf(@AgentHId) = 1
-								AND AgentId <> @AgentId
+						BEGIN			  							
+							IF @Status = 2
+								BEGIN
+									-- Update agent downline
+									UPDATE AgentInfo WITH (ROWLOCK, UPDLOCK)
+									SET UplineStatus = @Status
+									WHERE AgentId IN ( SELECT AgentId FROM @Agent )
+										AND AgentId <> @AgentId
 
-							-- Update customer downline
-							UPDATE CustInfo
-							SET UplineStatus = @Status
-							WHERE AgentId IN (	SELECT AgentId
-												FROM AgentInfo WITH (NOLOCK)
-												WHERE AgentHId.IsDescendantOf(@AgentHId) = 1 )
+									-- Update customer downline
+									UPDATE CustInfo WITH (ROWLOCK, UPDLOCK)	
+									SET UplineStatus = @Status
+									WHERE AgentId IN ( SELECT AgentId FROM @Agent )	
+								END
+							ELSE
+								BEGIN
+									-- Update agent downline
+									UPDATE ai 
+									SET ai.UplineStatus = @Status
+									FROM AgentInfo AS ai WITH (ROWLOCK, UPDLOCK)
+									WHERE 
+										ai.AgentId IN ( SELECT AgentId FROM @Agent )	
+										AND ai.AgentId <> @AgentId
+										AND NOT EXISTS (	SELECT 1 FROM AgentInfo AS t WITH (NOLOCK)
+															WHERE ai.AgentHId.IsDescendantOf(t.AgentHId) = 1
+																AND t.Status = 2
+																AND t.AgentId <> ai.AgentId)
+									
+									-- Update customer downline
+									UPDATE ci 
+									SET ci.UplineStatus = CASE WHEN ai.Status = 1 AND ai.UplineStatus = 1 THEN 1 ELSE 2 END
+									FROM 
+										CustInfo AS ci WITH (ROWLOCK, UPDLOCK)											
+										INNER JOIN AgentInfo AS ai WITH (NOLOCK) ON ci.AgentId = ai.AgentId
+									WHERE EXISTS (	SELECT 1 FROM AgentInfo WITH (NOLOCK)
+													WHERE AgentHId.IsDescendantOf(@AgentHId) = 1 
+														AND AgentId = ci.AgentId)	
+										AND ci.UplineStatus <> CASE WHEN ai.Status = 1 AND ai.UplineStatus = 1 THEN 1 ELSE 2 END
+								END
 						END
 
 					-- Update agent user status if new status is Active
@@ -191,26 +226,52 @@ BEGIN
 			-- Update downline bet status if upline bet status is Active
 			IF @CurrentUplineBetStatus = 1
 				BEGIN
-					-- Update agent downline
-					UPDATE AgentInfo WITH (ROWLOCK, UPDLOCK)
-					SET UplineBetStatus = @Status
-					WHERE 
-						AgentHId.IsDescendantOf(@AgentHId) = 1
-						AND AgentId <> @AgentId
+					IF @Status = 2
+						BEGIN
+							-- Update agent downline
+							UPDATE AgentInfo WITH (ROWLOCK, UPDLOCK)
+							SET UplineBetStatus = @Status
+							WHERE 
+								AgentId IN ( SELECT AgentId FROM @Agent )
+								AND AgentId <> @AgentId
 
-					-- Update customer downline
-					UPDATE CustInfo WITH (ROWLOCK, UPDLOCK)
-					SET UplineBetStatus = @Status
-					WHERE AgentId IN (	SELECT AgentId
-										FROM AgentInfo WITH (NOLOCK)
-										WHERE AgentHId.IsDescendantOf(@AgentHId) = 1 )
+							-- Update customer downline						
+							UPDATE CustInfo WITH (ROWLOCK, UPDLOCK)		
+							SET UplineBetStatus = @Status
+							WHERE AgentId IN ( SELECT AgentId FROM @Agent )
+						END	
+					ELSE
+						BEGIN
+							-- Update agent downline
+							UPDATE ai 
+							SET ai.UplineBetStatus = @Status
+							FROM AgentInfo AS ai WITH (ROWLOCK, UPDLOCK)
+							WHERE 
+								ai.AgentId IN ( SELECT AgentId FROM @Agent )
+								AND ai.AgentId <> @AgentId
+								AND NOT EXISTS (	SELECT 1 FROM AgentInfo AS t WITH (NOLOCK)
+													WHERE ai.AgentHId.IsDescendantOf(t.AgentHId) = 1
+														AND t.BetStatus = 2
+														AND t.AgentId <> ai.AgentId)
+									
+							-- Update customer downline
+							UPDATE ci 
+							SET ci.UplineBetStatus = CASE WHEN ai.BetStatus = 1 AND ai.UplineBetStatus = 1 THEN 1 ELSE 2 END
+							FROM 
+								CustInfo AS ci WITH (ROWLOCK, UPDLOCK)											
+								INNER JOIN AgentInfo AS ai WITH (NOLOCK) ON ci.AgentId = ai.AgentId
+							WHERE EXISTS (	SELECT 1 FROM AgentInfo AS t WITH (NOLOCK)
+											WHERE t.AgentHId.IsDescendantOf(@AgentHId) = 1 
+												AND ci.AgentId = t.AgentId )	
+								AND ci.UplineBetStatus <> CASE WHEN ai.BetStatus = 1 AND ai.UplineBetStatus = 1 THEN 1 ELSE 2 END
+						END				
 				END
 		END
 	
 	SET @xml = (
 		SELECT	
-			@Type		AS '@t',
-			@Status		AS '@s'
+			@Type	AS '@t',
+			@Status	AS '@s'
 		FROM AgentInfo WITH (NOLOCK)
 		WHERE AgentId = @AgentId
 		FOR XML PATH('z'), ROOT('r')
@@ -225,7 +286,7 @@ BEGIN
 	FROM AgentInfo WITH (NOLOCK)
 	WHERE AgentId = @AgentId
 
-	IF @@Error = 0
+	IF @@ERROR = 0
 		BEGIN TRY
 			EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
 				@UserId			= @Modifier,

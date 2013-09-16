@@ -30,5 +30,4 @@ ORDER BY m.eventdate DESC
 	
 GO
 GRANT EXECUTE ON [dbo].[Age_Result_SelAvaiDate] TO [aplweb]
-GO
---GRANT VIEW DEFINITION ON [dbo].[Age_Result_SelAvaiDate] TO vnteam
+GO 

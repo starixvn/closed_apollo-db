@@ -7,7 +7,9 @@ AS
 	Task: Daily parlay winloss report ->Parlay Combination Win Loss / 2h report -> Mix Parlay
 	DB: SVRCSD.REPDB
 
-	Revisions: 		
+	Revisions: 	
+	 - 20130911@Sophia: Add currency <> 20
+	 	
 	Original: IBC.Acc_Rpt_DailyParlayWinloss
 		 
 	Parameter's Explanation:
@@ -34,7 +36,8 @@ SELECT
 FROM	bettrans WITH (NOLOCK)
 WHERE	winlostdate between @FromDate AND @ToDate and 
 		bettype = 9 AND
-		statusID NOT IN (0,1,101,102,103) 
+		statusID NOT IN (0,1,101,102,103) AND
+		Currency <> 20
 GROUP BY  case when betcheck in ('m2','m3','m4','m5') then betcheck else 'm6' end, livehomescore, status
 ORDER BY  case when betcheck in ('m2','m3','m4','m5') then betcheck else 'm6' end, livehomescore, status
 

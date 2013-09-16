@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_GetAgentDownlinePath]    Script Date: 5/2/2013 1:23:08 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_GetAgentDownlinePath]    Script Date: 9/9/2013 5:30:21 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -25,25 +25,42 @@ AS
 
 SET NOCOUNT ON
 
-DECLARE 
-	@agentHId	HIERARCHYID,
-	@parentHId	HIERARCHYID
-
-SELECT @agentHId = AgentHId 
-FROM AgentInfo WITH (NOLOCK) 
-WHERE AgentId = @AgentId
+DECLARE @parentHId	HIERARCHYID
 
 SELECT @parentHId = AgentHId 
 FROM AgentInfo WITH (NOLOCK) 
 WHERE AgentId = @ParentId
+
+;WITH Tree(AgentId, AgentLevel, Username, ParentId, AgentHId)
+AS
+(
+	SELECT 
+		AgentId,
+		AgentLevel,
+		Username,
+		ParentId,
+		AgentHId 
+	FROM AgentInfo WITH (NOLOCK)
+	WHERE AgentId = @AgentId
+
+	UNION ALL
+
+	SELECT  
+		ai.AgentId,
+		CAST(ai.AgentLevel AS SMALLINT) AS AgentLevel,
+		ai.Username,
+		ai.ParentId,
+		ai.AgentHId        
+	FROM
+		AgentInfo AS ai WITH (NOLOCK)
+		INNER JOIN Tree AS t ON	t.AgentHId.GetAncestor(1) = ai.AgentHId
+)   
 
 SELECT 
 	AgentId, 
 	Username,
 	AgentLevel,
 	ParentId
-FROM AgentInfo WITH (NOLOCK) 
-WHERE 
-	AgentHId.IsDescendantOf(@parentHId) = 1
-	AND @agentHId.IsDescendantOf(AgentHId) = 1
+FROM Tree		
+WHERE Tree.AgentHId.IsDescendantOf(@parentHId) = 1
 ORDER BY AgentLevel

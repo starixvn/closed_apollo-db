@@ -16,6 +16,7 @@ AS
 
     Revisions:
         - 201307298@Sophia: Add ActualTOAfter (Effective Stake) 
+		- 20130910@Sophia: revise Outright
     */
     
 SET NOCOUNT ON
@@ -149,13 +150,10 @@ BEGIN
 		INNER JOIN AgentInfo P with (nolock) ON  T.AgentID = P.AgentID
 		INNER JOIN AgentInfo C WITH(NOLOCK) ON C.AgentHId.IsDescendantOf(P.AgentHId ) =1  AND C.AgentLevel >= P.AgentLevel  --- Children of k+1 (k+1 -> k+...)
 		INNER JOIN Bettrans_Agent BA WITH (NOLOCK) ON BA.AgentID = C.AgentID AND BA.TransID = T.TransID
-	--	INNER JOIN Match M WITH (NOLOCK) ON M.matchID = BA.MatchId
 		WHERE   BA.Winlostdate BETWEEN @FromDate AND @ToDate
 				AND BA.StatusID NOT IN (0,1) 				 
 				AND BA.Bettype <= 19000
-				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-
-				--AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))			
+				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))	
 		GROUP BY T.Username, T.AgentID, T.Share,
 				T.TransID, T.BetAmount, T.CommBase, 
 				T.Winlost, T.PlayerComm, T.MemberTotal,
@@ -246,17 +244,7 @@ BEGIN
 			WHERE	BA.Winlostdate BETWEEN @FromDate AND @ToDate
 					AND BA.StatusID NOT IN (0,1) 				 
 					AND BA.Bettype IN (9,29)
-					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 	
-
-					--AND (@Sporttypes = '0' 
-					--	OR EXISTS (	SELECT	1 
-					--				FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
-					--				INNER JOIN Match M WITH (NOLOCK) 
-					--					ON	 M.matchID = BM.MatchId 
-					--					AND (m.sporttype IN (Select sporttype FROM #SportsList))							
-					--				WHERE	BM.RefNo = BA.RefNo
-					--				)				
-					--	)					
+					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 							
 			) T
 		GROUP BY	T.Username, T.AgentID, T.Share,
 					T.TransID, T.BetAmount, T.CommBase, 
@@ -306,16 +294,20 @@ BEGIN
 				AND BA.StatusID NOT IN (0,1)	
 				AND BA.Bettype = 10
 				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-		INNER JOIN  Outright m  WITH (NOLOCK) 
-				ON  m.orid = B.MatchID
-		INNER JOIN  League l WITH (NOLOCK)
-				ON	l.leagueID = m.leagueId
 		WHERE	B.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND B.StatusID NOT IN (0,1)	
 				AND B.Bettype =10
-				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-							
-				AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))
+				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))					
+			
+				AND (@Sporttypes = '0' 
+						OR EXISTS (	SELECT	1 
+									FROM Outright m  WITH (NOLOCK) 									
+									INNER JOIN  League l WITH (NOLOCK)
+											ON	l.leagueID = m.leagueId
+											AND (l.sporttype IN (Select sporttype FROM #SportsList))							
+									WHERE	m.orid = B.MatchID
+									)				
+						)
 		GROUP BY C.Username, C.AgentID ,  PT.MaxUpperPositionTaking , B.TransID
 				 
 		 
@@ -334,14 +326,11 @@ BEGIN
 		INNER JOIN AgentInfo P with (nolock) ON  T.AgentID = P.AgentID
 		INNER JOIN AgentInfo C WITH(NOLOCK) ON C.AgentHId.IsDescendantOf(P.AgentHId ) =1  AND C.AgentLevel >= P.AgentLevel  --- Children of k+1 (k+1 -> k+...)
 		INNER JOIN Bettrans_Agent BA WITH (NOLOCK) ON BA.AgentID = C.AgentID AND BA.TransID = T.TransID
-		--INNER JOIN Outright M WITH (NOLOCK) ON M.OrId = BA.MatchId
-		--INNER JOIN League L WITH (NOLOCK) ON L.LeagueId = M.leagueId
 		WHERE	BA.Winlostdate BETWEEN @FromDate AND @ToDate
 				AND BA.StatusID NOT IN (0,1) 				 
 				AND BA.Bettype = 10
-				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-		
-				--AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))
+				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))		
+				
 		GROUP BY T.Username, T.AgentID, T.Share, 
 				T.TransID, T.BetAmount, T.CommBase, 
 				T.Winlost, T.PlayerComm, T.MemberTotal,
@@ -484,13 +473,10 @@ BEGIN
 		INNER JOIN AgentInfo P with (nolock) ON  T.AgentID = P.AgentID
 		INNER JOIN AgentInfo C WITH(NOLOCK) ON C.AgentHId.IsDescendantOf(P.AgentHId ) =1  AND C.AgentLevel >= P.AgentLevel  --- Children of k+1 (k+1 -> k+...)
 		INNER JOIN Bettrans14_Agent BA WITH (NOLOCK) ON BA.AgentID = C.AgentID AND BA.TransID = T.TransID
-	--	INNER JOIN Match14 M WITH (NOLOCK) ON M.matchID = BA.MatchId
 		WHERE   BA.Winlostdate BETWEEN @FromDate AND @ToDate
 				AND BA.StatusID NOT IN (0,1) 				 
 				AND BA.Bettype <= 19000
-				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-
-				--AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))			
+				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))					
 		GROUP BY T.Username, T.AgentID, T.Share,
 				T.TransID, T.BetAmount, T.CommBase, 
 				T.Winlost, T.PlayerComm, T.MemberTotal,
@@ -583,17 +569,8 @@ BEGIN
 			WHERE	BA.Winlostdate BETWEEN @FromDate AND @ToDate
 					AND BA.StatusID NOT IN (0,1) 				 
 					AND BA.Bettype IN (9,29)
-					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 	
-
-					--AND (@Sporttypes = '0' 
-					--	OR EXISTS (	SELECT	1 
-					--				FROM	BettransM14 BM WITH (NOLOCK, index=IX_RefNo) 
-					--				INNER JOIN Match14 M WITH (NOLOCK) 
-					--					ON	 M.matchID = BM.MatchId 
-					--					AND (m.sporttype IN (Select sporttype FROM #SportsList))							
-					--				WHERE	BM.RefNo = BA.RefNo
-					--				)				
-					--	)					
+					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 
+						
 			) T
 		GROUP BY	T.Username, T.AgentID, T.Share,
 				   T.TransID, T.BetAmount, T.CommBase, 
@@ -643,16 +620,21 @@ BEGIN
 				AND BA.StatusID NOT IN (0,1)	
 				AND BA.Bettype = 10
 				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-		INNER JOIN  Outright14 m  WITH (NOLOCK) 
-				ON  m.orid = B.MatchID
-		INNER JOIN  League l WITH (NOLOCK)
-				ON	l.leagueID = m.leagueId
 		WHERE	B.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND B.StatusID NOT IN (0,1)	
 				AND B.Bettype =10
 				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
 							
-				AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))
+				--AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))
+				AND (@Sporttypes = '0' 
+						OR EXISTS (	SELECT	1 
+									FROM Outright14 m  WITH (NOLOCK) 									
+									INNER JOIN  League l WITH (NOLOCK)
+											ON	l.leagueID = m.leagueId
+											AND (l.sporttype IN (Select sporttype FROM #SportsList))							
+									WHERE	m.orid = B.MatchID
+									)				
+						)
 		GROUP BY C.Username, C.AgentID ,  PT.MaxUpperPositionTaking , B.TransID
 				 
 		 
@@ -671,14 +653,11 @@ BEGIN
 		INNER JOIN AgentInfo P with (nolock) ON  T.AgentID = P.AgentID
 		INNER JOIN AgentInfo C WITH(NOLOCK) ON C.AgentHId.IsDescendantOf(P.AgentHId ) =1  AND C.AgentLevel >= P.AgentLevel  --- Children of k+1 (k+1 -> k+...)
 		INNER JOIN Bettrans14_Agent BA WITH (NOLOCK) ON BA.AgentID = C.AgentID AND BA.TransID = T.TransID
-		--INNER JOIN Outright14 M WITH (NOLOCK) ON M.OrId = BA.MatchId
-		--INNER JOIN League L WITH (NOLOCK) ON L.LeagueId = M.leagueId
 		WHERE	BA.Winlostdate BETWEEN @FromDate AND @ToDate
 				AND BA.StatusID NOT IN (0,1) 				 
 				AND BA.Bettype = 10
-				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-		
-				--AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))
+				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))	
+			
 		GROUP BY T.Username, T.AgentID, T.Share, 
 				T.TransID, T.BetAmount, T.CommBase, 
 				T.Winlost, T.PlayerComm, T.MemberTotal,

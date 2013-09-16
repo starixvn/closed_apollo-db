@@ -3,7 +3,7 @@
 	@LeagueID INT,
 	@Language NVARCHAR(2) = 'E',
 	@sporttype smallint = 0,
-	@isShowAll bit = 1 -- 1: Show All; 0: is NOT show Test	
+	@isShowAll bit = 0 -- 1: Show All; 0: is NOT show Test	
 
 AS
 /*
@@ -83,5 +83,4 @@ SELECT
 GO
 
 GRANT EXECUTE ON [dbo].[Age_Result_MatchSelByLeague] TO [aplWeb]
-GO
---GRANT VIEW DEFINITION ON [dbo].[Age_Result_MatchSelByLeague] TO [vnteam]
+GO 

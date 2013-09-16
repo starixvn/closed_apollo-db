@@ -6,6 +6,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 ALTER PROCEDURE [dbo].[Age_Rpt_MatchSelResultEntered]   
+	@isShowAll BIT = 0
 AS  
 /*  
 Created: Sophia 
@@ -15,6 +16,7 @@ DB:  SVRAGE.RepDB
 Original: Age_Rpt_MatchSelResultEntered  
 Revisions:  
 	- 20130626@Sophia: Modify for Singbet
+	- 20130913@Sophia: Add @isShowAll
      
 */  
 SET NOCOUNT ON
@@ -87,7 +89,7 @@ INNER JOIN (
 						GROUP BY  m.LeagueID, m.EventDate 	 
 		  
 					) as m  
-					INNER JOIN League WITH (NOLOCK) on m.LeagueID = League.LeagueID and League.isTest = 0 
+					INNER JOIN League WITH (NOLOCK) on m.LeagueID = League.LeagueID and (League.isTest = 0 OR @isShowAll = 1)
 				GROUP BY CASE WHEN m.Sporttype NOT IN (1, 2, 5, 6, 8,-10) THEN -1 ELSE m.Sporttype END, EventDate
 			) m
 ON r.Sporttype = m.sporttype and m.IsToday = r.IsToday

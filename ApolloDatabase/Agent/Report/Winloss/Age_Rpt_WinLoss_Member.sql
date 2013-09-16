@@ -179,17 +179,22 @@ BEGIN
 				AND BA.bettype =10
 				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 		INNER JOIN	CustInfo C WITH (NOLOCK)
-				ON	B.CustID = C.CustID AND  C.AgentId = @AgentID
-		INNER JOIN  Outright m  WITH (NOLOCK) 
-				ON  m.orid = B.MatchID
-		INNER JOIN  League l WITH (NOLOCK)
-				ON	l.leagueID = m.leagueId
+				ON	B.CustID = C.CustID AND  C.AgentId = @AgentID	
 		INNER JOIN	CustPositionTaking PT WITH (NOLOCK) 
 				ON	PT.CustID = C.CustID AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
 		WHERE	B.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND B.StatusID NOT IN (0,1)	
 				AND B.bettype =10
-				AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))
+				AND (@Sporttypes = '0' 
+						OR EXISTS (	SELECT	1 
+									FROM Outright m  WITH (NOLOCK) 									
+									INNER JOIN  League l WITH (NOLOCK)
+											ON	l.leagueID = m.leagueId
+											AND (l.sporttype IN (Select sporttype FROM #SportsList))							
+									WHERE	m.orid = B.MatchID
+									)				
+						)
+
 		GROUP BY C.Username, C.CustID, PT.PositionTaking
  	    
 	 
@@ -331,16 +336,21 @@ BEGIN
 				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 		INNER JOIN	CustInfo C WITH (NOLOCK)
 				ON	B.CustID = C.CustID AND  C.AgentId = @AgentID
-		INNER JOIN  Outright14 m  WITH (NOLOCK) 
-				ON  m.orid = B.MatchID
-		INNER JOIN  League l WITH (NOLOCK)
-				ON	l.leagueID = m.leagueId
 		INNER JOIN	CustPositionTaking PT WITH (NOLOCK) 
 				ON	PT.CustID = C.CustID AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
 		WHERE	B.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND B.StatusID NOT IN (0,1)	
 				AND B.bettype =10
-				AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))
+				AND (@Sporttypes = '0' 
+						OR EXISTS (	SELECT	1 
+									FROM Outright14 m  WITH (NOLOCK) 									
+									INNER JOIN  League l WITH (NOLOCK)
+											ON	l.leagueID = m.leagueId
+											AND (l.sporttype IN (Select sporttype FROM #SportsList))							
+									WHERE	m.orid = B.MatchID
+									)				
+						)
+
 		GROUP BY C.Username, C.CustID, PT.PositionTaking
  	    
 	 

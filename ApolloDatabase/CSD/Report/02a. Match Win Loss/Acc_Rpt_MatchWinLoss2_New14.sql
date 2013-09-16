@@ -5,10 +5,12 @@ AS
 	Creator: Don
 	Date: 2013-03-18
 	Task: Daily detail winloss report - by match
-	DB: ApolloArchive.RepDB
+	DB: SVRCSD.RepDB
 	
 	Revision:
-			
+	- 20130906@Sophia:  group by at Outright section to avoid one row which no data
+					    Change Ruben = 1 to StatusID not in (0,1) to seek index
+						remove virtualrate 						   			
 	Explanation's Param:
 
 */
@@ -16,22 +18,19 @@ BEGIN
 	SET NOCOUNT ON		
 	
 	-- Fill data of all sports into temporary tables
-	CREATE TABLE #tmpBettrans (matchid int, bettype int, statusID int, liveindicator bit, winlost money, pos money, comm money, VirtualComm money, LineTotal money, VirtualLineTotal money, IBCTurnover money)
+	CREATE TABLE #tmpBettrans (matchid int, bettype int, statusID int, liveindicator bit, winlost money, pos money, comm money, LineTotal money, IBCTurnover money)
 	CREATE INDEX IX_bettype on #tmpBettrans(bettype)
 	
-	INSERT INTO #tmpBettrans (matchid, bettype, statusID, liveindicator, winlost, pos, comm, VirtualComm, LineTotal, VirtualLineTotal, IBCTurnover)
+	INSERT INTO #tmpBettrans (matchid, bettype, statusID, liveindicator, winlost, pos, comm, LineTotal, IBCTurnover)
 	SELECT  matchid, bettype, statusID, liveindicator,
 			sum((winlost-actual_stake)*actualrate) winlost,
 			sum(twinlost*actualrate) pos,
-			sum(tcomm*actualrate) comm,
-			sum(tcomm*virtualrate) VirtualComm,			
+			sum(tcomm*actualrate) comm,		
 			sum((winlost-actual_stake+twinlost+tcomm) *actualrate) LineTotal,
-			sum((winlost-actual_stake+twinlost+tcomm)*virtualrate) VirtualLineTotal,
 			sum((1-tpositiontaking)*stake*actualrate) IBCTurnover
 	FROM	dbo.bettrans14 with(nolock)
 	WHERE	winlostdate = @winlostdate
-			AND ruben = 1  
-			AND statusID not in (101,102,103,121) --('VOID','REJECT','REFUND','DONE')
+			AND statusID not in (0,1,101,102,103 ) --('VOID','REJECT','REFUND' )
 			AND bettype <= 19000
 	GROUP BY matchid, bettype, statusID, liveindicator
 	-- END - Fill data of all sports into temporary tables
@@ -50,9 +49,7 @@ BEGIN
         b.winlost,
         b.pos,
         b.comm,   
-        b.VirtualComm,
         b.LineTotal,
-        b.VirtualLineTotal,
         b.IBCTurnover
 	FROM 
 	    (
@@ -61,16 +58,14 @@ BEGIN
 	            sum(winlost) winlost,
                 sum(pos) pos,
                 sum(comm) comm,
-                sum(VirtualComm) VirtualComm,
                 sum(LineTotal) LineTotal,
-                sum(VirtualLineTotal) VirtualLineTotal,
                 sum(IBCTurnover) IBCTurnover
 	        FROM #tmpBettrans with(nolock)
 	        GROUP BY matchid, bettype, liveindicator
 	    ) b
 		inner join match14 m with(nolock) on m.matchid = b.matchid
 		inner join league l with(nolock) on l.leagueid = m.leagueid
-	WHERE ((bettype < 31 AND bettype <> 10) OR bettype between 121 and 999)
+	WHERE ((bettype < 31 AND bettype <> 10) OR bettype between 121 and 999 OR bettype between 1301 and 1334 )
 	ORDER BY l.leaguenametc, b.bettype, b.liveindicator desc
 	
 	-- Resultset of 3rd products and Parlay, Outright
@@ -79,16 +74,14 @@ BEGIN
 	        sum(b.winlost) as winlost,
 			sum(b.pos) as pos,
 			sum(b.comm) as comm,
-			sum(b.comm) as virtualComm,
 			sum(b.Linetotal) as LineTotal,
-			sum(b.VirtualLineTotal) as VirtualLineTotal,
 			sum(b.IBCTurnover) IBCTurnover,
 			'Parlay-' + case when b.statusID = 111 THEN 'DRAW'
 							 WHEN b.statusID = 113 THEN 'LOSE'
 							 WHEN b.statusID = 112 THEN 'WON' END as bettype
 	FROM	#tmpBettrans b with(nolock)
 	WHERE	bettype = 9 OR bettype = 29 	
-	GROUP BY statusID		
+	GROUP BY StatusId		
 	
 	    -- Outright 
 	UNION ALL
@@ -96,14 +89,12 @@ BEGIN
 	        sum(b.winlost) as winlost,
 			sum(b.pos) as pos,
 			sum(b.comm) as comm,
-			sum(b.comm) as virtualComm,
 			sum(b.Linetotal) as LineTotal,
-			sum(b.VirtualLineTotal) as VirtualLineTotal,
 			sum(b.IBCTurnover) IBCTurnover,
-			'Out Right' as bettype
+			'Outright' as bettype 
 	FROM	#tmpBettrans b with(nolock)
 	WHERE	bettype = 10 			
-	
+	GROUP BY bettype 	
 	/*
 		-- Number Game
 	UNION ALL
@@ -111,9 +102,7 @@ BEGIN
 	        sum(b.winlost) as winlost,
 			sum(b.pos) as pos,
 			sum(b.comm) as comm,
-			sum(b.comm) as virtualComm,
 			sum(b.Linetotal) as LineTotal,
-			sum(b.VirtualLineTotal) as VirtualLineTotal,
 			sum(b.IBCTurnover) IBCTurnover,
 			'Number Game' as bettype
 	FROM	#tmpBettrans b with(nolock)

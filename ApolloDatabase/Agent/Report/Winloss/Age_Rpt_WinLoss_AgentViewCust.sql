@@ -22,6 +22,7 @@ AS
 						  Sort by PositionTaking
 	   - 20130712@Sophia: add OutStanding
 	   - 20130718@Sophia: Remove OutStanding
+	   - 20130910@Sophia: revise Outright
     */
     
 SET NOCOUNT ON
@@ -157,15 +158,19 @@ BEGIN
 			AND BA.Bettype = 10
 			
 	INNER JOIN CustInfo C WITH (NOLOCK)
-		ON	B.CustID = C.CustID AND C.AgentId = @AgentID
-	INNER JOIN  Outright m WITH (NOLOCK) 
-		ON  m.orid = B.MatchID
-	INNER JOIN  League l WITH (NOLOCK)
-		ON	l.leagueID = m.leagueId
+		ON	B.CustID = C.CustID AND C.AgentId = @AgentID	
 	WHERE   B.Winlostdate BETWEEN @FromDate AND @ToDate 
 			AND B.StatusID NOT IN (0,1)
 			AND B.Bettype = 10
-			AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))
+			AND (@Sporttypes = '0' 
+				OR EXISTS (	SELECT	1 
+							FROM Outright m  WITH (NOLOCK) 									
+							INNER JOIN  League l WITH (NOLOCK)
+									ON	l.leagueID = m.leagueId
+									AND (l.sporttype IN (Select sporttype FROM #SportsList))							
+							WHERE	m.orid = B.MatchID
+							)				
+					)
 
 END
  
@@ -301,14 +306,18 @@ BEGIN
 			
 	INNER JOIN CustInfo C WITH (NOLOCK)
 		ON	B.CustID = C.CustID AND C.AgentId = @AgentID
-	INNER JOIN  Outright14 m WITH (NOLOCK) 
-		ON  m.orid = B.MatchID
-	INNER JOIN  League l WITH (NOLOCK)
-		ON	l.leagueID = m.leagueId
 	WHERE   B.Winlostdate BETWEEN @FromDate AND @ToDate 
 			AND B.StatusID NOT IN (0,1)
 			AND B.Bettype = 10
-			AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))
+			AND (@Sporttypes = '0' 
+				OR EXISTS (	SELECT	1 
+							FROM Outright14 m  WITH (NOLOCK) 									
+							INNER JOIN  League l WITH (NOLOCK)
+									ON	l.leagueID = m.leagueId
+									AND (l.sporttype IN (Select sporttype FROM #SportsList))							
+							WHERE	m.orid = B.MatchID
+							)				
+					)
 
 END
  
