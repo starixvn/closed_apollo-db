@@ -19,7 +19,7 @@ DB: SVRTXN.TRANSDB
 Original: 
 
 Revisions: 
-	 
+	 - 20130918@Sophia: Modify converting section when write log
 
 Param's Explanation:
 • @actualrate: new rate to update
@@ -58,12 +58,12 @@ WHERE exchangeid=@exchangeid
 
 
 Select @LogData = 'Update exchange rate:'	
-	+  ' ,newBaseRate=' + ISNULL(convert(VARCHAR(50), CONVERT(DECIMAL(38,5),@actualrate)),'')  
-	+  ' ,oldBaseRate=' + ISNULL(convert(VARCHAR(50),  CONVERT(DECIMAL(38,5),@old_actualrate)),'')  
-	+  ' ,newminbet='+ ISNULL(convert(VARCHAR(50), CONVERT(DECIMAL(38,5), @minbet)),'') 
-	+  ' ,oldminbet='+ ISNULL(convert(VARCHAR(50), CONVERT(DECIMAL(38,5), @old_minbet)),'') 
-	+  ' ,newminbetlive='+ ISNULL(convert(VARCHAR(50), CONVERT(DECIMAL(38,5), @minbetlive)),'') 
-	+  ' ,oldminbetlive='+ ISNULL(convert(VARCHAR(50),  CONVERT(DECIMAL(38,5),@old_minbetlive)),'') 	
+	+  ' ,newBaseRate=' + ISNULL(convert(VARCHAR(50),@actualrate,128),'')  
+	+  ' ,oldBaseRate=' + ISNULL(convert(VARCHAR(50), @old_actualrate, 128),'')  
+	+  ' ,newminbet='+ ISNULL(convert(VARCHAR(50), @minbet,128),'') 
+	+  ' ,oldminbet='+ ISNULL(convert(VARCHAR(50), @old_minbet,128),'') 
+	+  ' ,newminbetlive='+ ISNULL(convert(VARCHAR(50),@minbetlive,128),'') 
+	+  ' ,oldminbetlive='+ ISNULL(convert(VARCHAR(50), @old_minbetlive,128),'') 	
 	+  ' ,oldDescription='+ ISNULL(@old_Description,'')
 	+  ' ,newDescription='+ ISNULL(@Description,'')
 	+  ' ,oldMultipliedBy='+ ISNULL(convert(varchar(10),@old_MultipliedBy),'')

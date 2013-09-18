@@ -11,7 +11,8 @@ AS
 	DB: SVRCSD.RepDb
 
 	Revisions: 				
-	 - 20130911@Sophia: Add currency <> 20
+	  - 20130911@Sophia: Add currency <> 20
+	  - 20130916@Sophia: exclude line test Suntest 53288	
 	Parameter's Explanation:	
 			+ LiveType (Livehomescore):
 				0: Non Live : All bets are Dead Ball 
@@ -36,7 +37,14 @@ FROM	bettrans WITH (NOLOCK)
 WHERE	bettype = @bettype AND		
 		winlostdate between @FromDate AND @ToDate and
 		statusID NOT IN (0,1,101,102,103) and
-		Currency <> 20
+		Currency <> 20 and
+		TransID NOT IN  (			SELECT	TransID 
+									FROM	Bettrans_Agent WITH (NOLOCK)
+									WHERE	winlostdate between @FromDate AND @ToDate 
+											AND statusID not in (0,1,101,102,103) --('VOID','REJECT','REFUND')
+											AND bettype = @bettype 
+											AND AgentID = 53288 -----line test Suntest
+									)  
 GROUP BY  livehomescore, liveawayscore, status
 ORDER BY  livehomescore, liveawayscore, status
 

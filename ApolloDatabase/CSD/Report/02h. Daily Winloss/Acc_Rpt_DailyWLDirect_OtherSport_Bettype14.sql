@@ -10,7 +10,7 @@ SET NOCOUNT ON
 	DB: SVRCSD.RepDB
 
 	Revisions:
-
+		- 20130916@Sophia: add ActualTurnover, exclude line test Suntest 53288	
 */
 
 	Declare @tmpBettype table (Bettype int primary key, DisplayOrder int)
@@ -63,7 +63,8 @@ SET NOCOUNT ON
 			CONVERT(MONEY,sum((TWinlost)*ActualRate)) Share,
 			CONVERT(MONEY,sum(TComm*ActualRate)) Commission,	 
 			CONVERT(MONEY,sum((winlost-actual_stake+TWinlost+TComm)*ActualRate)) LineTotal,
-			CONVERT(MONEY,sum((1-TPositiontaking)* ABS(stake) * ActualRate)) Turnover
+			CONVERT(MONEY,sum((1-TPositiontaking)* ABS(stake) * ActualRate)) Turnover,
+			CONVERT(MONEY,SUM(CASE WHEN ABS(MOdds) <> 0.25 AND StatusID IN (112,113) THEN ABS(Stake) ELSE CASE WHEN ABS(MOdds) =0.25 AND StatusID IN (112,113) THEN  ABS(Stake)*0.5  ELSE 0 END END * (1-TPositionTaking))) AS ActualTurnover
 	FROM	bettrans14 b WITH (NOLOCK)
 			INNER JOIN @Match14 m on b.matchid = m.matchid
 			INNER JOIN @tmpBettype bt ON b.bettype = bt.Bettype
@@ -71,6 +72,13 @@ SET NOCOUNT ON
 			AND (b.bettype < 31 OR b.bettype BETWEEN 121 AND 999 OR b.bettype BETWEEN 1301 and 1334)
 			AND b.statusID NOT IN (0, 1, 102, 101, 103) 
 			AND m.type = CASE WHEN b.bettype = 10 THEN 'outright' ELSE 'match' END  
+			AND b.TransID NOT IN  ( SELECT	TransID 
+									FROM	Bettrans14_Agent WITH (NOLOCK)
+									WHERE	winlostdate = @winlostdate			 
+											AND statusID not in (0,1,101,102,103) --('VOID','REJECT','REFUND')
+											AND (bettype < 31 OR bettype BETWEEN 121 AND 999 OR bettype BETWEEN 1301 and 1334)
+											AND AgentID = 53288 -----line test Suntest
+									) 
 	GROUP BY		
 			b.liveindicator,
 			bt.Bettype,

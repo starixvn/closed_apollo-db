@@ -9,7 +9,7 @@ AS
 	
 	Revision:
 		- 20130906@Sophia: revise Sp to seek index
-		- 20130916@Sophia: add EffectiveStake, exclude line test Suntest 53288			
+		- 20130916@Sophia: add ActualTurnover, exclude line test Suntest 53288			
 	Explanation's Param:
 
 */
@@ -17,7 +17,7 @@ BEGIN
 	SET NOCOUNT ON		
 	
 	-- Fill data of all sports into temporary tables
-	CREATE TABLE #tmpBettrans (matchid int, bettype int, statusID int, liveindicator bit, winlost money, pos money, comm money, LineTotal money, Turnover money, EffStake money)
+	CREATE TABLE #tmpBettrans (matchid int, bettype int, statusID int, liveindicator bit, winlost money, pos money, comm money, LineTotal money, Turnover money, ActualTurnover money)
 	CREATE INDEX IX_bettype on #tmpBettrans(bettype)
 	
 	CREATE TABLE #TestLine (TransID BIGINT)
@@ -31,14 +31,14 @@ BEGIN
 	AND AgentID = 53288 -----line test Suntest
 
 
-	INSERT INTO #tmpBettrans (matchid, bettype, statusID, liveindicator, winlost, pos, comm, LineTotal, Turnover, EffStake)
+	INSERT INTO #tmpBettrans (matchid, bettype, statusID, liveindicator, winlost, pos, comm, LineTotal, Turnover, ActualTurnover)
 	SELECT  matchid, bettype, statusID, liveindicator,
 			sum((winlost-actual_stake)*actualrate) winlost,
 			sum(twinlost*actualrate) pos,
 			sum(tcomm*actualrate) comm,	
 			sum((winlost-actual_stake+twinlost+tcomm) *actualrate) LineTotal,
 			sum((1-tpositiontaking)*stake*actualrate) Turnover,
-			SUM(CASE WHEN ABS(MOdds) <> 0.25 AND StatusID IN (112,113) THEN ABS(Stake) ELSE CASE WHEN ABS(MOdds) =0.25 AND StatusID IN (112,113) THEN  ABS(Stake)*0.5  ELSE 0 END END * (1-TPositionTaking)) AS EffStake
+			SUM(CASE WHEN ABS(MOdds) <> 0.25 AND StatusID IN (112,113) THEN ABS(Stake) ELSE CASE WHEN ABS(MOdds) =0.25 AND StatusID IN (112,113) THEN  ABS(Stake)*0.5  ELSE 0 END END * (1-TPositionTaking)) AS ActualTurnover
 	FROM	dbo.bettrans with(nolock)
 	WHERE	winlostdate = @winlostdate
 			AND statusID not in (0,1,101,102,103) --('VOID','REJECT','REFUND')
@@ -57,7 +57,7 @@ BEGIN
 			sum(case when liveindicator = 0 and sporttype <> 1 then LineTotal else 0 end) as LineTotal_others,
 			
 			sum(Turnover) as Turnover,
-			SUM(EffStake) as EffStake
+			SUM(ActualTurnover) as ActualTurnover
 	FROM 	#tmpBettrans b with(nolock)
 			inner join match m with(nolock) on b.matchid = m.matchid
 	WHERE   ((bettype < 31 and bettype <> 10) OR bettype between 121 and 999 OR bettype between 1301 and 1334 )
@@ -72,7 +72,7 @@ BEGIN
 			sum(case when liveindicator = 1 then LineTotal else 0 end) as LineTotal_others_live,	
 			sum(case when liveindicator = 0 then LineTotal else 0 end) as LineTotal_others,
 			sum(Turnover) as Turnover,
-			SUM(EffStake) as EffStake
+			SUM(ActualTurnover) as ActualTurnover
 	FROM	#tmpBettrans with (nolock)
 	WHERE	bettype BETWEEN 81 AND 120			
 	GROUP BY bettype
@@ -86,13 +86,13 @@ BEGIN
 			0 LineTotal_others_live,
 			LineTotal - LineTotal_soccer as LineTotal_others,			
 			Turnover,
-			EffStake
+			ActualTurnover
 	FROM
 		(
 			SELECT 	bettype,
 					isnull(sum(LineTotal), 0) as LineTotal,
 					isnull(sum(Turnover), 0) as Turnover,
-					ISNULL(SUM(EffStake),0) as EffStake
+					ISNULL(SUM(ActualTurnover),0) as ActualTurnover
 			FROM	#tmpBettrans with (nolock)
 			WHERE 	bettype IN (9, 29)
 			GROUP BY bettype
@@ -118,7 +118,7 @@ BEGIN
 			0 LineTotal_others_live,		
 			sum(case when sporttype <> 1 then LineTotal else 0 end) as LineTotal_others,
 			sum(Turnover) as Turnover,
-			SUM(EffStake) as EffStake
+			SUM(ActualTurnover) as ActualTurnover
 	FROM #tmpBettrans b with(nolock) 
 		inner join outright o with(nolock) on b.matchid = o.orid
 		inner join league l with(nolock) on o.leagueid = l.leagueid	
