@@ -19,8 +19,10 @@
     @UserName NVARCHAR(50),
     @UserPwd NVARCHAR(50),
     @IP VARCHAR(15) = '',
+	@IsDeleteAll BIT = 0,
     @ErrMsg NVARCHAR(200) = '' OUTPUT,
-    @ErrCode INT = 0 OUTPUT	
+    @ErrCode INT = 0 OUTPUT
+
 AS
 /*
 	Created by: Sophia	
@@ -31,14 +33,16 @@ AS
 	
 	Revisions:
 	 - 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
-
+	 - 20130918@Sophia: Add @IsDeleteAll
 	Param's Explanation: 
 	
-	
+		- @IsDeleteAll:
+			 + 0: can only delete the unsettled or refunded tickets
+			 + 1: can delete all type of status 
 */
 BEGIN	
 	SET NOCOUNT ON
-	DECLARE @LogData NVARCHAR(500)
+	DECLARE @LogData NVARCHAR(MAX)
 	SELECT @ErrCode = 0
 
 	
@@ -143,7 +147,8 @@ BEGIN
 	CREATE NONCLUSTERED INDEX nl_Ref_bettype_org_betteam ON #Ref(bettype,org_betteam)
 	
 	
-	--REMOVE REDUNDANT item
+	--REMOVE REDUNDANT item	
+	IF @IsDeleteAll = 0 
 	DELETE #Ref
 	WHERE statusID NOT IN (0,1,103)
 	
@@ -370,7 +375,7 @@ BEGIN
 	END
 
 
-	SELECT @LogData ='delete bet for matchid ' + CONVERT(VARCHAR(20), @matchid) + ' for Mix Parlay Special Delete' + ' IP=' + COALESCE(CAST(@IP AS VARCHAR(15)),SPACE(1))
+	SELECT @LogData ='delete bet for matchid: ' + CONVERT(VARCHAR(20), @matchid) + ', for Mix Parlay Special Delete'+ ', TransID List:' +@transids + ', IP: ' + COALESCE(CAST(@IP AS VARCHAR(15)),SPACE(1))  + ', Can delete all:'+ CASE WHEN @IsDeleteAll = 1 then ' True' ELSE ' False' END
 	EXEC WriteLog_UserLog_T @UserID = @UserID, @Doing = @LogData
 	
 	
