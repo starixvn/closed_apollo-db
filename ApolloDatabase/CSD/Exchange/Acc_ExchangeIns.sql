@@ -19,7 +19,7 @@ DB: SVRTXN.TRANSDB
 Original:
 
 Revisions:
-	 
+	  - 20130918@Sophia: Modify converting section when write log
 Param's Explanation:
 	• @actualrate: Specify exchange-rate of the currency
 	• @minbet: Specify minbet of the currency
@@ -43,9 +43,9 @@ SELECT @exchangeid=@@IDENTITY
 DECLARE @LogData NVARCHAR(200)
 SELECT @LogData = 'Add exchange rate:'
 	+  ' CurrencyName='+ ISNULL(@Currency,'') 
-    +  ' ,BaseRate=' + ISNULL(convert(VARCHAR(50), CONVERT(DECIMAl(38,5),@actualrate)),'')  
-	+  ' ,minbet='+ ISNULL(convert(VARCHAR(50), CONVERT(DECIMAl(38,5), @minbet)),'') 
-	+  ' ,minbetlive='+ ISNULL(convert(VARCHAR(50),  CONVERT(DECIMAl(38,5),@minbetlive)),'') 
+    +  ' ,BaseRate=' + ISNULL(convert(VARCHAR(50), @actualrate,128),'')  
+	+  ' ,minbet='+ ISNULL(convert(VARCHAR(50), @minbet,128),'') 
+	+  ' ,minbetlive='+ ISNULL(convert(VARCHAR(50), @minbetlive,128),'') 
 	+  ' ,Description='+ ISNULL(@Description,'')
 	+  ' ,MultipliedBy='+ ISNULL(convert(varchar(10),@MultipliedBy),'')
 	

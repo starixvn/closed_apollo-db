@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[Acc_Rpt_DailyWLDirect_Details14]
+﻿ALTER PROCEDURE [dbo].[Acc_Rpt_DailyWLDirect_Details14]
 	@winlostdate	datetime,
 	@SportType		int = 1,
 	@liveindicator	bit,
@@ -11,11 +11,24 @@ AS
 		DB: SVRSCD.RepDB
 		
 		Revisions:
-			 
+			  - 20130916@Sophia: add ActualTurnover, exclude line test Suntest 53288
 	*/	
 
 	SET NOCOUNT ON
 	
+
+	CREATE TABLE #TestLine (TransID BIGINT)
+
+	INSERT INTO #TestLine (TransID)
+	SELECT	TransID 
+	FROM	Bettrans14_Agent WITH (NOLOCK)
+	WHERE	winlostdate = @winlostdate			 
+			AND statusID not in (0,1,101,102,103) --('VOID','REJECT','REFUND')
+			AND bettype <= 19000
+			AND AgentID = 53288 -----line test Suntest
+
+
+
 	IF @bettype <> 10
 	BEGIN
 			SELECT
@@ -31,6 +44,7 @@ AS
 					CONVERT(MONEY,sum(Tcomm*actualrate)) Commission,
 					CONVERT(MONEY,sum((winlost-actual_stake+TWinlost+Tcomm)*actualrate)) LineTotal,
 					CONVERT(MONEY,sum((1-tpositiontaking)*ABS(b.stake)*actualrate)) Turnover,
+					CONVERT(MONEY,SUM(CASE WHEN ABS(MOdds) <> 0.25 AND StatusID IN (112,113) THEN ABS(Stake) ELSE CASE WHEN ABS(MOdds) =0.25 AND StatusID IN (112,113) THEN  ABS(Stake)*0.5  ELSE 0 END END * (1-TPositionTaking))) AS ActualTurnover,
 					isnull(m.isNeutral, CONVERT(BIT,0)) as IsNeutral
 			FROM 	bettrans14 b with (nolock)
 					INNER JOIN match14 m with (nolock) ON b.matchid = m.matchid
@@ -40,6 +54,7 @@ AS
 					AND b.liveindicator = @liveindicator						
 					AND b.statusID NOT IN (0, 1, 102, 101, 103) 		
 					AND m.SportType = @SportType			
+					AND b.TransID NOT IN (SELECT TransID FROM #TestLine)
 						
 			GROUP BY
 					b.matchid,
@@ -71,6 +86,7 @@ AS
 				CONVERT(MONEY,sum(TComm*actualrate)) Commission,
 				CONVERT(MONEY,sum((winlost-actual_stake+TWinlost+TComm)*actualrate)) LineTotal,
 				CONVERT(MONEY,sum((1-tpositiontaking)*ABS(b.stake)*actualrate)) Turnover,
+				CONVERT(MONEY,SUM(CASE WHEN ABS(MOdds) <> 0.25 AND StatusID IN (112,113) THEN ABS(Stake) ELSE CASE WHEN ABS(MOdds) =0.25 AND StatusID IN (112,113) THEN  ABS(Stake)*0.5  ELSE 0 END END * (1-TPositionTaking))) AS ActualTurnover,
 				CONVERT(BIT,0) as IsNeutral
 		FROM
 				bettrans14 b with (nolock)
@@ -80,6 +96,7 @@ AS
 				AND b.bettype = 10
 				AND b.statusID NOT IN (0, 1, 102, 101, 103) 							
 				AND l.SportType = @SportType
+				AND b.TransID NOT IN (SELECT TransID FROM #TestLine)
 				
 		GROUP BY
 				b.matchid,

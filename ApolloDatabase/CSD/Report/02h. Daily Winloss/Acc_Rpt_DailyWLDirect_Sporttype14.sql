@@ -24,7 +24,8 @@ BEGIN
 						Share MONEY, 
 						commission MONEY,  
 						Linetotal MONEY,
-						turnover MONEY
+						turnover MONEY,
+						ActualTurnover MONEY
 						)
 					
 	---------------------------------------------------------------------------------------
@@ -49,11 +50,19 @@ BEGIN
 			SUM(TWinLost*actualrate) Share,
 			SUM(TComm*actualrate) commission,
 			SUM((winlost-actual_stake+Twinlost+TComm)*actualrate) LineTotal,
-			SUM((1-TPositionTaking)*ABS(stake)*actualrate) turnover 
+			SUM((1-TPositionTaking)*ABS(stake)*actualrate) turnover, 
+			SUM(CASE WHEN ABS(MOdds) <> 0.25 AND StatusID IN (112,113) THEN ABS(Stake) ELSE CASE WHEN ABS(MOdds) =0.25 AND StatusID IN (112,113) THEN  ABS(Stake)*0.5  ELSE 0 END END * (1-TPositionTaking)) AS ActualTurnover
 	FROM bettrans14 b WITH(NOLOCK)
 	WHERE winlostdate = @winlostdate
 		AND bettype < 19001
 		AND b.statusID NOT IN (0, 1, 102, 101, 103)   ----- Void, reiject, refund
+		AND b.TransID NOT IN  (		SELECT	TransID 
+									FROM	Bettrans14_Agent WITH (NOLOCK)
+									WHERE	winlostdate = @winlostdate			 
+											AND statusID not in (0,1,101,102,103) --('VOID','REJECT','REFUND')
+											AND bettype < 19001
+											AND AgentID = 53288 -----line test Suntest
+									)  
 	GROUP BY matchid, bettype 
 	
 	--------------------------------------------------------------------------------
@@ -64,7 +73,8 @@ BEGIN
 			SUM(Share) AS Share,
 			sum(commission) AS Commission,	
 			SUM(LineTotal) AS LineTotal,
-			SUM(turnover) AS Turnover 
+			SUM(turnover) AS Turnover,
+			SUM(ActualTurnover) AS ActualTurnover
 	FROM	#Tempbettrans14 b WITH(NOLOCK)
 		INNER JOIN @Match14 m on b.matchid = m.matchid
 	WHERE	(b.bettype < 31 
@@ -82,7 +92,8 @@ BEGIN
 			SUM(Share) Share,
 			SUM(commission) Commission,	
 			SUM(LineTotal) AS LineTotal,
-			SUM(turnover) Turnover 
+			SUM(turnover) Turnover,
+			SUM(ActualTurnover) AS ActualTurnover
 	FROM	#Tempbettrans14 b WITH (NOLOCK)
 	WHERE	bettype = 9 
 			AND matchid = 9
@@ -94,7 +105,8 @@ BEGIN
 			SUM(Share) Share,
 			SUM(commission) Commission,	
 			SUM(LineTotal) AS LineTotal,
-			SUM(turnover) Turnover 
+			SUM(turnover) Turnover,
+			SUM(ActualTurnover) AS ActualTurnover
 	FROM	#Tempbettrans14 AS b WITH (NOLOCK)
 	WHERE	bettype = 29 
 			AND matchid = 29
