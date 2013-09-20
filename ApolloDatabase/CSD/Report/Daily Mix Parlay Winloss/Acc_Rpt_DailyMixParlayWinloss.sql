@@ -9,6 +9,7 @@ AS
 
 	Revisions: 	
 	 - 20130911@Sophia: Add currency <> 20
+	 - 20130916@Sophia: exclude line test Suntest 53288	
 	 	
 	Original: IBC.Acc_Rpt_DailyParlayWinloss
 		 
@@ -37,7 +38,14 @@ FROM	bettrans WITH (NOLOCK)
 WHERE	winlostdate between @FromDate AND @ToDate and 
 		bettype = 9 AND
 		statusID NOT IN (0,1,101,102,103) AND
-		Currency <> 20
+		Currency <> 20 AND
+		TransID NOT IN  (		SELECT	TransID 
+									FROM	Bettrans_Agent WITH (NOLOCK)
+									WHERE	winlostdate between @FromDate AND @ToDate 
+											AND statusID not in (0,1,101,102,103) --('VOID','REJECT','REFUND')
+											AND bettype = 9
+											AND AgentID = 53288 -----line test Suntest
+									)  
 GROUP BY  case when betcheck in ('m2','m3','m4','m5') then betcheck else 'm6' end, livehomescore, status
 ORDER BY  case when betcheck in ('m2','m3','m4','m5') then betcheck else 'm6' end, livehomescore, status
 

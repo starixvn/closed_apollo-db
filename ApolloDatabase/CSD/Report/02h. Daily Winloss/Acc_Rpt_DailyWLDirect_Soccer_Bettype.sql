@@ -7,7 +7,7 @@ AS
 	DB: SVRCSD.RepDB
 		
 	Revision:
-		 
+		 - 20130916@Sophia: add ActualTurnover, exclude line test Suntest 53288	
 	Explanation's Param:
 		
 
@@ -58,7 +58,7 @@ SET NOCOUNT ON
 
 	----------------------------------------------------------
 	CREATE TABLE #TempBettrans (Liveindicator BIT, Bettype TINYINT, matchid INT, WinLost MONEY,  
-								Share MONEY, Commission MONEY, LineTotal MONEY, Turnover MONEY )
+								Share MONEY, Commission MONEY, LineTotal MONEY, Turnover MONEY, ActualTurnover MONEY )
 	INSERT INTO #TempBettrans	
 	SELECT	liveindicator,
 			Bettype,			
@@ -67,12 +67,19 @@ SET NOCOUNT ON
 			sum((TWinlost)*ActualRate) Share,
 			sum(TComm*ActualRate) Commission,	
 			sum((winlost-actual_stake+TWinlost+TComm)*ActualRate) LineTotal, 
-			sum((1-TPositionTaking)*ABS(stake)*ActualRate) Turnover
+			sum((1-TPositionTaking)*ABS(stake)*ActualRate) Turnover, 
+			SUM(CASE WHEN ABS(MOdds) <> 0.25 AND StatusID IN (112,113) THEN ABS(Stake) ELSE CASE WHEN ABS(MOdds) =0.25 AND StatusID IN (112,113) THEN  ABS(Stake)*0.5  ELSE 0 END END * (1-TPositionTaking)) AS ActualTurnover
 	FROM	bettrans b WITH (NOLOCK)			
 	WHERE	winlostdate = @winlostdate
-			AND (bettype < 31 OR b.bettype BETWEEN 121 AND 999)	
+			AND (bettype < 31 OR b.bettype BETWEEN 121 AND 999 OR bettype BETWEEN 1301 and 1334)	
 			AND statusID NOT IN (0, 1, 102, 101, 103)   ----- Void, reiject, refund
-			 	
+			AND b.TransID NOT IN  ( SELECT	TransID 
+									FROM	Bettrans_Agent WITH (NOLOCK)
+									WHERE	winlostdate = @winlostdate			 
+											AND statusID not in (0,1,101,102,103) --('VOID','REJECT','REFUND')
+											AND (bettype < 31 OR bettype BETWEEN 121 AND 999 OR bettype BETWEEN 1301 and 1334)
+											AND AgentID = 53288 -----line test Suntest
+									)  	
 	GROUP BY		
 			liveindicator,
 			Bettype,
@@ -88,7 +95,8 @@ SET NOCOUNT ON
 			sum(Share) Share,
 			sum(Commission) commission,	
 			sum(LineTotal) LineTotal,
-			sum(Turnover) turnover 
+			sum(Turnover) turnover,
+			SUM(ActualTurnover) ActualTurnover
 	FROM	#TempBettrans b
 		INNER JOIN @Match m on b.matchid = m.matchid 	
 		INNER JOIN @tmpBettype bt ON b.bettype = bt.Bettype
