@@ -89,6 +89,15 @@ BEGIN
 		WHERE	VName = 'isCalculatingParlay'
 	END
 
+----- check date of match 
+
+	IF EXISTS (SELECT 1 FROM Match WITH (NOLOCK) WHERE Matchid = @matchid and eventdate < CONVERT(DATE, GETDATE()) and @IsDeleteAll = 1)
+	BEGIN
+		SELECT  @ErrCode = 102,
+				@ErrMsg = 'Sorry! You are allowed to void bets which are setted today only.'
+		RETURN
+	END
+
 -----------	
 									
 	CREATE TABLE #Ref (--id int identity(1,1) primary key clustered 
