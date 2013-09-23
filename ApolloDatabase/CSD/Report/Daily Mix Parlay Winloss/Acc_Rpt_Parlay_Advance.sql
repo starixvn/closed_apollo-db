@@ -12,7 +12,7 @@ AS
 
 	Revisions: 				
 	  - 20130911@Sophia: Add currency <> 20
-	  - 20130916@Sophia: exclude line test Suntest 53288	
+	  - 20130916@Sophia: exclude line test Suntest 53288, and add ActualTurnover	
 	Parameter's Explanation:	
 			+ LiveType (Livehomescore):
 				0: Non Live : All bets are Dead Ball 
@@ -32,7 +32,8 @@ SELECT  livehomescore as LiveType, liveawayscore as SportType, status,
 		CONVERT(MONEY,sum((TWinlost)*actualrate)) Share,
 		CONVERT(MONEY,sum(TComm*actualrate)) Commission,	
 		CONVERT(MONEY,sum((winlost-actual_stake+TWinlost+TComm)*actualrate)) LineTotal,
-		CONVERT(MONEY,sum((1-tpositiontaking)*(ABS(stake)*actualrate))) Turnover	
+		CONVERT(MONEY,sum((1-tpositiontaking)*(ABS(stake)*actualrate))) Turnover,
+		CONVERT(MONEY,SUM(CASE WHEN StatusID IN (112,113) AND (ABS(MOdds) <> 0.25 OR Bettype IN (9,29,10)) THEN ABS(Stake) ELSE CASE WHEN StatusID IN (112,113) AND ABS(MOdds) =0.25 AND Bettype NOT IN (9,29,10) THEN  ABS(Stake)*0.5  ELSE 0 END END * (1-TPositionTaking))) AS ActualTurnover	
 FROM	bettrans WITH (NOLOCK)
 WHERE	bettype = @bettype AND		
 		winlostdate between @FromDate AND @ToDate and

@@ -42,6 +42,15 @@ AS
 */
 BEGIN	
 	SET NOCOUNT ON
+
+	
+	----Check permission for Delete all 
+	EXEC SVRNAP.bodb_NAP.dbo.NAP_User_CheckPermission @UserId=@UserID,@FunctionId=24,@ErrCode=@ErrCode OUTPUT,@ErrMsg=@ErrMsg OUTPUT
+	IF @ErrCode <> 0
+		RETURN
+	---end
+
+
 	DECLARE @LogData NVARCHAR(MAX)
 	SELECT @ErrCode = 0
 
@@ -78,6 +87,15 @@ BEGIN
 		UPDATE	systemSettings WITH (ROWLOCK, UPDLOCK)
 		SET		VValue = '1'
 		WHERE	VName = 'isCalculatingParlay'
+	END
+
+----- check date of match 
+
+	IF EXISTS (SELECT 1 FROM Match WITH (NOLOCK) WHERE Matchid = @matchid and eventdate < CONVERT(DATE, GETDATE()) and @IsDeleteAll = 1)
+	BEGIN
+		SELECT  @ErrCode = 102,
+				@ErrMsg = 'Sorry! You are allowed to void bets which are setted today only.'
+		RETURN
 	END
 
 -----------	
@@ -546,8 +564,5 @@ BEGIN
 END
 
 GO
-GRANT EXECUTE ON [dbo].[Acc_BettransDelSpecialDel_MixParlay] TO aplweb
+GRANT EXECUTE ON [dbo].[Acc_BettransDelSpecialDel_MixParlay] TO [aplweb]
 GO
---GRANT VIEW DEFINITION ON [dbo].[Acc_BettransDelSpecialDel_MixParlay] TO [vnteam]
-go
-
