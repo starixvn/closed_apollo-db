@@ -42,6 +42,15 @@ AS
 */
 BEGIN	
 	SET NOCOUNT ON
+
+	
+	----Check permission for Delete all 
+	EXEC SVRNAP.bodb_NAP.dbo.NAP_User_CheckPermission @UserId=@UserID,@FunctionId=24,@ErrCode=@ErrCode OUTPUT,@ErrMsg=@ErrMsg OUTPUT
+	IF @ErrCode <> 0
+		RETURN
+	---end
+
+
 	DECLARE @LogData NVARCHAR(MAX)
 	SELECT @ErrCode = 0
 
@@ -546,8 +555,5 @@ BEGIN
 END
 
 GO
-GRANT EXECUTE ON [dbo].[Acc_BettransDelSpecialDel_MixParlay] TO aplweb
+GRANT EXECUTE ON [dbo].[Acc_BettransDelSpecialDel_MixParlay] TO [aplweb]
 GO
---GRANT VIEW DEFINITION ON [dbo].[Acc_BettransDelSpecialDel_MixParlay] TO [vnteam]
-go
-

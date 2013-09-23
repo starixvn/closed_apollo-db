@@ -58,12 +58,11 @@ Param's Explanation: Special bet delete option
 
 	SET NOCOUNT ON
 
-	---- **************MODIFY LATER*********
-	----Check permission for account site:  
-	--EXEC DBPOLICY.bodb02.dbo.Acc_Con_CheckPermission @custid=@UserID,@funcname='[SpecialDelete]',@ErrCode=@ErrCode OUTPUT,@ErrMsg=@ErrMsg OUTPUT
-	--IF @ErrCode <> 0
-	--	RETURN
-	--end
+	----Check permission for Delete all 
+	EXEC SVRNAP.bodb_NAP.dbo.NAP_User_CheckPermission @UserId=@UserID,@FunctionId=24,@ErrCode=@ErrCode OUTPUT,@ErrMsg=@ErrMsg OUTPUT
+	IF @ErrCode <> 0
+		RETURN
+	---end
 		
 	
 	DECLARE @LogData NVARCHAR(MAX)
@@ -597,5 +596,5 @@ END
 
 	 
 GO
-GRANT EXECUTE ON [dbo].[Acc_BettransDelSpecial] TO [aplweb] AS [dbo]
+GRANT EXECUTE ON [dbo].[Acc_BettransDelSpecial] TO [aplweb] 
 GO 
