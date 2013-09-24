@@ -66,6 +66,17 @@ BEGIN
 		SELECT @ErrMsg = 'Sorry. You can not process delete bet due to either wrong password or insufficient permission!', @ErrCode = 101   
 		RETURN
 	END
+
+	
+	----- check date of match 
+
+	IF EXISTS (SELECT 1 FROM Match WITH (NOLOCK) WHERE Matchid = @matchid and eventdate < CONVERT(DATE, GETDATE()) and @IsDeleteAll = 1)
+	BEGIN
+		SELECT  @ErrCode = 102,
+				@ErrMsg = 'Sorry! You are allowed to void bets which are setted today only.'
+		RETURN
+	END
+
 			
 	IF EXISTS(	SELECT 1 FROM dbo.match m WITH(NOLOCK)
 				WHERE m.matchid=@matchid AND m.eventstatus='completed')
@@ -87,15 +98,6 @@ BEGIN
 		UPDATE	systemSettings WITH (ROWLOCK, UPDLOCK)
 		SET		VValue = '1'
 		WHERE	VName = 'isCalculatingParlay'
-	END
-
------ check date of match 
-
-	IF EXISTS (SELECT 1 FROM Match WITH (NOLOCK) WHERE Matchid = @matchid and eventdate < CONVERT(DATE, GETDATE()) and @IsDeleteAll = 1)
-	BEGIN
-		SELECT  @ErrCode = 102,
-				@ErrMsg = 'Sorry! You are allowed to void bets which are setted today only.'
-		RETURN
 	END
 
 -----------	

@@ -81,6 +81,16 @@ Param's Explanation: Special bet delete option
 			   @ErrCode = 101   
 		RETURN
 	END
+
+
+	---- check date of match 
+	IF EXISTS (SELECT 1 FROM Match WITH (NOLOCK) WHERE Matchid = @matchid and eventdate < CONVERT(DATE, GETDATE()) and @IsDeleteAll = 1)
+	BEGIN
+		SELECT  @ErrCode = 102,
+				@ErrMsg = 'Sorry! You are allowed to void bets which are setted today only.'
+		RETURN
+	END
+
 	
 	---- check and not allow attempt to delete same game while it's still not finish
 	DECLARE @KeyID INT
@@ -125,15 +135,6 @@ Param's Explanation: Special bet delete option
 		SELECT @ErrCode = 100, @ErrMsg = 'This match is being calculated or some tickets of this match are being deleted, please wait a few seconds until the on-going process is completed and try again.'
 		RETURN
 	END 
-
-	----- check date of match 
-	IF EXISTS (SELECT 1 FROM Match WITH (NOLOCK) WHERE Matchid = @matchid and eventdate < CONVERT(DATE, GETDATE()) and @IsDeleteAll = 1)
-	BEGIN
-		SELECT  @ErrCode = 102,
-				@ErrMsg = 'Sorry! You are allowed to void bets which are setted today only.'
-		RETURN
-	END
-
 
 	-------------------		
 		
