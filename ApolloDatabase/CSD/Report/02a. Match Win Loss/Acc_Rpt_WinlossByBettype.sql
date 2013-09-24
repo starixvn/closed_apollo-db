@@ -40,7 +40,7 @@ BEGIN
 			sum((winlost-actual_stake+twinlost+tcomm) *actualrate) LineTotal,
 			sum((1-tpositiontaking)*stake*actualrate) Turnover,
 			SUM(CASE WHEN StatusID IN (112,113) AND (ABS(MOdds) <> 0.25 OR Bettype IN (9,29,10)) THEN ABS(Stake)
-				 ELSE CASE WHEN StatusID IN (112,113) AND ABS(MOdds) =0.25 AND Bettype NOT IN (9,29,10) THEN ABS(Stake)*0.5  ELSE 0 END END * (1-TPositionTaking)) AS ActualTurnover
+				 ELSE CASE WHEN StatusID IN (112,113) AND ABS(MOdds) =0.25 AND Bettype NOT IN (9,29,10) THEN ABS(Stake)*0.5  ELSE 0 END END * (1-TPositionTaking)*actualrate) AS ActualTurnover
 	FROM	dbo.bettrans with(nolock)
 	WHERE	winlostdate = @winlostdate
 			AND statusID not in (0,1,101,102,103) --('VOID','REJECT','REFUND')

@@ -65,7 +65,7 @@ SET NOCOUNT ON
 			CONVERT(MONEY,sum((winlost-actual_stake+TWinlost+TComm)*ActualRate)) LineTotal,
 			CONVERT(MONEY,sum((1-TPositiontaking)* ABS(stake) * ActualRate)) Turnover,
 			CONVERT(MONEY,SUM(CASE WHEN B.StatusID IN (112,113) AND (ABS(B.MOdds) <> 0.25 OR B.Bettype IN (9,29,10)) THEN ABS(B.Stake)
-									ELSE CASE WHEN B.StatusID IN (112,113) AND ABS(B.MOdds) =0.25 AND B.Bettype NOT IN (9,29,10) THEN ABS(B.Stake)*0.5  ELSE 0 END END * (1-B.TPositionTaking))) AS ActualTurnover
+									ELSE CASE WHEN B.StatusID IN (112,113) AND ABS(B.MOdds) =0.25 AND B.Bettype NOT IN (9,29,10) THEN ABS(B.Stake)*0.5  ELSE 0 END END * (1-B.TPositionTaking)*ActualRate)) AS ActualTurnover
 	FROM	bettrans14 b WITH (NOLOCK)
 			INNER JOIN @Match14 m on b.matchid = m.matchid
 			INNER JOIN @tmpBettype bt ON b.bettype = bt.Bettype
