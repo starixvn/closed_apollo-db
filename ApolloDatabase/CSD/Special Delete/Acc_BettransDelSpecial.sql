@@ -38,6 +38,7 @@ Revisions:
   - 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
   - 20130829@Sophia: change @f_transID /@t_transid to @FromTransId / @ToTransId
   - 20130918@Sophia: Add @IsDeleteAll
+
 		    
 Param's Explanation: Special bet delete option
 
@@ -79,15 +80,6 @@ Param's Explanation: Special bet delete option
 
 		SELECT @ErrMsg = 'Sorry. You can not process delete bet due to either wrong password or insufficient permission!',
 			   @ErrCode = 101   
-		RETURN
-	END
-
-
-	---- check date of match 
-	IF EXISTS (SELECT 1 FROM Match WITH (NOLOCK) WHERE Matchid = @matchid and eventdate < CONVERT(DATE, GETDATE()) and @IsDeleteAll = 1)
-	BEGIN
-		SELECT  @ErrCode = 102,
-				@ErrMsg = 'Sorry! You are allowed to void bets which are setted today only.'
 		RETURN
 	END
 

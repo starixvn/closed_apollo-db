@@ -34,6 +34,7 @@ AS
 	Revisions:
 	 - 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
 	 - 20130918@Sophia: Add @IsDeleteAll
+
 	Param's Explanation: 
 	
 		- @IsDeleteAll:
@@ -67,17 +68,7 @@ BEGIN
 		RETURN
 	END
 
-	
-	----- check date of match 
-
-	IF EXISTS (SELECT 1 FROM Match WITH (NOLOCK) WHERE Matchid = @matchid and eventdate < CONVERT(DATE, GETDATE()) and @IsDeleteAll = 1)
-	BEGIN
-		SELECT  @ErrCode = 102,
-				@ErrMsg = 'Sorry! You are allowed to void bets which are setted today only.'
-		RETURN
-	END
-
-			
+				
 	IF EXISTS(	SELECT 1 FROM dbo.match m WITH(NOLOCK)
 				WHERE m.matchid=@matchid AND m.eventstatus='completed')
 	BEGIN
