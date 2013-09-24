@@ -1,6 +1,4 @@
-﻿
-
-ALTER PROCEDURE [dbo].[Acc_BettransSelSpecialDel_EarlyKO]
+﻿ALTER PROCEDURE [dbo].[Acc_BettransSelSpecialDel_EarlyKO_xtest]
 	@MatchID int,  
 	@KickOffDate datetime,
 	@hdp smallmoney = 9999,  
@@ -10,8 +8,7 @@ ALTER PROCEDURE [dbo].[Acc_BettransSelSpecialDel_EarlyKO]
 	@betteam430 varchar(120) = '',
 	@betteam6 varchar(120) = '',
 	@betteam14 varchar(120) = '',
-	@betteam16 varchar(120) = '',
-	@SAFilter tinyint
+	@betteam16 varchar(120) = ''
 AS  
 /*  
   Created by: Sophia
@@ -23,10 +20,10 @@ AS
 	Revisions:		
 		
 	Explanation's Param:
-	    - @SAFilter: 
-	      + 0: All tickets
-          + 1: Normal tickets only
-	      + 2: SA tickets only
+	    --- @SAFilter: 
+	    --  + 0: All tickets
+		--  + 1: Normal tickets only
+	    --  + 2: SA tickets only
      		
 */
 BEGIN
@@ -34,11 +31,11 @@ BEGIN
 	
 	CREATE TABLE #SpecialDeleteBets (transid bigint,SubTransid bigint,refno bigint
 	,custid int, username nvarchar(50), odds smallmoney,modds smallmoney, OddsType int, transdate datetime,bettype smallint, betteam nvarchar(10),hdp1 smallmoney, hdp2 smallmoney,livehomescore smallint, liveawayscore smallint
-	,Actual_stake Money, Stake money,currency tinyint,status nvarchar(10), SecAcceptFlag bit, HomeId Int, AwayId int, SportType smallint, LeagueId int)  
+	,Actualstake Money, Stake money,currency tinyint,status nvarchar(10),  HomeId Int, AwayId int, SportType smallint, LeagueId int)  
 	
 	CREATE TABLE #SpecialDeleteBetms (transid bigint,SubTransid bigint,refno bigint
 	,custid int, username nvarchar(50), odds smallmoney,modds smallmoney, OddsType int, transdate datetime,bettype smallint, betteam nvarchar(10),hdp1 smallmoney, hdp2 smallmoney,livehomescore smallint, liveawayscore smallint
-	,Actual_stake Money, Stake money,currency tinyint, status nvarchar(10), HomeId Int, AwayId int, SportType smallint, LeagueId int, ParlayType smallint)  
+	,Actualstake Money, Stake money,currency tinyint, status nvarchar(10), HomeId Int, AwayId int, SportType smallint, LeagueId int, ParlayType smallint)  
 
 	IF EXISTS( SELECT convert(int,val) FROM dbo.strSplit(@bettypes,'^') Where convert(int,val) in (4,30) )	
 		INSERT INTO #SpecialDeleteBets 
@@ -64,7 +61,7 @@ BEGIN
 			CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 				 ELSE b.status 
 				 END as status,  
-			ISNULL(SecAcceptFlag,0) SecAcceptFlag,
+			--ISNULL(SecAcceptFlag,0) SecAcceptFlag,
 			m.HomeId, 
 			m.AwayId, 
 			m.SportType,
@@ -78,7 +75,7 @@ BEGIN
 			AND b.liveindicator=0
 			AND b.bettype in(4,30)
 			AND b.betteam  in (SELECT convert(varchar,val) FROM dbo.strSplit(case when @betteam430 = 'All' then betteam else @betteam430 end,'^'))  
-	    	AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
+	    	--AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
     			
 		 
 	
@@ -105,7 +102,7 @@ BEGIN
 		CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 			 ELSE b.status 
 			 END as status,		
-		ISNULL(SecAcceptFlag,0) SecAcceptFlag,
+		--ISNULL(SecAcceptFlag,0) SecAcceptFlag,
 		m.HomeId, 
 		m.AwayId, 
 		m.SportType,
@@ -130,7 +127,7 @@ BEGIN
 		ELSE 1 END = 1  
 		AND b.bettype NOT IN(4,6,14,16,30)
 		AND b.betfrom <>'P'
-		AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
+		--AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
 
 	UNION ALL  
 
@@ -156,7 +153,7 @@ BEGIN
 		CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 			 ELSE b.status 
 			 END as status,  	
-        ISNULL(SecAcceptFlag,0) SecAcceptFlag,
+        --ISNULL(SecAcceptFlag,0) SecAcceptFlag,
 		m.HomeId, 
 		m.AwayId, 
 		m.SportType,
@@ -177,7 +174,7 @@ BEGIN
 			AND b.betteam  in (SELECT convert(varchar,val) FROM dbo.strSplit(case when @betteam16 = 'All' then betteam else @betteam16 end,'^'))  
 			)
 		)
-        AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END		
+        --AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END		
 	UNION ALL  
 
 	SELECT  
@@ -202,7 +199,7 @@ BEGIN
 		CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 			 ELSE b.status 
 			 END as status,		
-		ISNULL(SecAcceptFlag,0) SecAcceptFlag,
+		--ISNULL(SecAcceptFlag,0) SecAcceptFlag,
 		m.HomeId, 
 		m.AwayId, 
 		m.SportType,
@@ -216,7 +213,7 @@ BEGIN
 		AND b.liveindicator=0				
 		AND b.betfrom <>'P'		
 		AND (@betteam14='All' OR goal.val IS NOT NULL)
-        AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END		
+        --AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END		
 	
 	---get sub ticket of a mix parlay	
 	CREATE TABLE #Currency (transid bigint,Refno bigint, CurrencyID tinyint,oddstype tinyint, bettype smallint, username NVARCHAR(50), modds smallmoney, Actual_stake MONEY, stake MONEY)
@@ -238,7 +235,7 @@ BEGIN
 			AND liveindicator=0
 			AND transdate>=@KickOffDate	
 			AND statusID NOT IN (101,102)
-			AND CASE when @SAFilter = 2 then 0 else 1 END = 1
+			--AND CASE when @SAFilter = 2 then 0 else 1 END = 1
 	
 	
 		INSERT INTO #SpecialDeleteBetms 	
@@ -275,20 +272,19 @@ BEGIN
 			AND b.statusID NOT IN (101,102)	  
 			AND b.liveindicator=0			
 			AND b.betfrom <>'P'		
-			AND CASE when @SAFilter = 2 then 0 else 1 END = 1
+			---AND CASE when @SAFilter = 2 then 0 else 1 END = 1
 		
 	END 
 
 	--SINGLE TICKET SECTION	
-	SELECT s.*,IsMP=0
-	FROM #SpecialDeleteBets AS s with (NOLOCK)		
-	ORDER BY transid
+	SELECT s.*, 0 as parlaytype, IsMP=0
+	FROM #SpecialDeleteBets AS s with (NOLOCK)	
 		
-
-	---MIX PARLAY SECTION
+	UNION ALL 
+	 
 	SELECT s.*,IsMP=1
 	FROM #SpecialDeleteBetms AS s with (NOLOCK)
-	ORDER BY transid
+	ORDER BY IsMP, transid
 
 
 	DROP TABLE #SpecialDeleteBets
@@ -301,5 +297,5 @@ END
 
 
 GO
-GRANT EXECUTE ON [dbo].[Acc_BettransSelSpecialDel_EarlyKO] TO [aplweb]
+GRANT EXECUTE ON [dbo].[Acc_BettransSelSpecialDel_EarlyKO_Xtest] TO [aplweb]
 GO

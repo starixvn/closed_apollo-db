@@ -15,12 +15,13 @@ DB: SVRCSD.RepDB
 
 Revisions:
 	  - 20130725@Sophia: Change username nvarchar(50)
+	  - 20130924@Sophia: Change Currency Tinyint
 	
 Explanation's Param:
 
 */
 
-CREATE TABLE #OutrightDeleteBets (transid bigint,custid int,username nvarchar(50),odds smallmoney,transdate datetime, Stake money,currency nvarchar(50),status nvarchar(10))
+CREATE TABLE #OutrightDeleteBets (transid bigint,custid int,username nvarchar(50),odds smallmoney,transdate datetime, Stake money,currency tinyint,status nvarchar(10))
 
 INSERT INTO #OutrightDeleteBets
 select
@@ -55,5 +56,4 @@ DROP TABLE #OutrightDeleteBets
 GO
 GRANT EXECUTE ON [dbo].[Acc_BettransSelDelSpecial_Outright] TO [aplweb]
 
-GO
---GRANT VIEW DEFINITION ON [dbo].[Acc_BettransSelDelSpecial_Outright] TO [VNTeam]
+GO 
