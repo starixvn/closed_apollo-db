@@ -10,6 +10,7 @@ AS
 	Revision:
 		- 20130906@Sophia: revise Sp to seek index
 		- 20130916@Sophia: add ActualTurnover, exclude line test Suntest 53288		
+		- 20130923@Sophia: add Comm	
 	Explanation's Param:
 
 */
@@ -39,7 +40,8 @@ BEGIN
 			sum(tcomm*actualrate) comm,	
 			sum((winlost-actual_stake+twinlost+tcomm) *actualrate) LineTotal,
 			sum((1-tpositiontaking)*stake*actualrate) Turnover,
-			SUM(CASE WHEN ABS(MOdds) <> 0.25 AND StatusID IN (112,113) THEN ABS(Stake) ELSE CASE WHEN ABS(MOdds) =0.25 AND StatusID IN (112,113) THEN  ABS(Stake)*0.5  ELSE 0 END END * (1-TPositionTaking)) AS ActualTurnover
+				SUM(CASE WHEN StatusID IN (112,113) AND (ABS(MOdds) <> 0.25 OR Bettype IN (9,29,10)) THEN ABS(Stake)
+				 ELSE CASE WHEN StatusID IN (112,113) AND ABS(MOdds) =0.25 AND Bettype NOT IN (9,29,10) THEN ABS(Stake)*0.5  ELSE 0 END END * (1-TPositionTaking)) AS ActualTurnover
 	FROM	dbo.bettrans14 with(nolock)
 	WHERE	winlostdate = @winlostdate		
 			AND statusID not in (0,1,101,102,103) --('VOID','REJECT','REFUND')
@@ -58,7 +60,8 @@ BEGIN
 			sum(case when liveindicator = 0 and sporttype <> 1 then LineTotal else 0 end) as LineTotal_others,
 			
 			sum(Turnover) as Turnover,
-			SUM(ActualTurnover) as ActualTurnover
+			SUM(ActualTurnover) as ActualTurnover,
+			SUM(Comm) as Comm
 	FROM 	#tmpBettrans b with(nolock)
 			inner join match14 m with(nolock) on b.matchid = m.matchid
 	WHERE   ((bettype < 31 and bettype <> 10) OR bettype between 121 and 999  OR bettype between 1301 and 1334)
@@ -73,7 +76,8 @@ BEGIN
 			sum(case when liveindicator = 1 then LineTotal else 0 end) as LineTotal_others_live,		
 			sum(case when liveindicator = 0 then LineTotal else 0 end) as LineTotal_others,
 			sum(Turnover) as Turnover,
-			SUM(ActualTurnover) as ActualTurnover
+			SUM(ActualTurnover) as ActualTurnover,
+			SUM(Comm) as Comm
 	FROM	#tmpBettrans with (nolock)
 	WHERE	bettype BETWEEN 81 AND 120			
 	GROUP BY bettype
@@ -89,13 +93,15 @@ BEGIN
 			LineTotal - LineTotal_soccer as LineTotal_others,
 			
 			Turnover,
-			ActualTurnover
+			ActualTurnover,
+			Comm
 	FROM
 		(
 			SELECT 	bettype,
 					isnull(sum(LineTotal), 0) as LineTotal,
 					isnull(sum(Turnover), 0) as Turnover,
-					isnull(SUM(ActualTurnover),0) as ActualTurnover
+					isnull(SUM(ActualTurnover),0) as ActualTurnover,
+					ISNULL(SUM(Comm),0) as Comm
 			FROM	#tmpBettrans with (nolock)
 			WHERE 	bettype IN (9, 29) 
 			GROUP BY bettype
@@ -121,7 +127,8 @@ BEGIN
 			0 LineTotal_others_live,	
 			sum(case when sporttype <> 1 then LineTotal else 0 end) as LineTotal_others,
 			sum(Turnover) as Turnover,
-			SUM(ActualTurnover) as ActualTurnover
+			SUM(ActualTurnover) as ActualTurnover,
+			SUM(Comm) as Comm
 	FROM #tmpBettrans b with(nolock) 
 		inner join outright14 o with(nolock) on b.matchid = o.orid
 		inner join league l with(nolock) on o.leagueid = l.leagueid	

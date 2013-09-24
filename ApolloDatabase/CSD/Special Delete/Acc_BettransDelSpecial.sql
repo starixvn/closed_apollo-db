@@ -58,12 +58,11 @@ Param's Explanation: Special bet delete option
 
 	SET NOCOUNT ON
 
-	---- **************MODIFY LATER*********
-	----Check permission for account site:  
-	--EXEC DBPOLICY.bodb02.dbo.Acc_Con_CheckPermission @custid=@UserID,@funcname='[SpecialDelete]',@ErrCode=@ErrCode OUTPUT,@ErrMsg=@ErrMsg OUTPUT
-	--IF @ErrCode <> 0
-	--	RETURN
-	--end
+	----Check permission for Delete all 
+	EXEC SVRNAP.bodb_NAP.dbo.NAP_User_CheckPermission @UserId=@UserID,@FunctionId=24,@ErrCode=@ErrCode OUTPUT,@ErrMsg=@ErrMsg OUTPUT
+	IF @ErrCode <> 0
+		RETURN
+	---end
 		
 	
 	DECLARE @LogData NVARCHAR(MAX)
@@ -126,6 +125,16 @@ Param's Explanation: Special bet delete option
 		SELECT @ErrCode = 100, @ErrMsg = 'This match is being calculated or some tickets of this match are being deleted, please wait a few seconds until the on-going process is completed and try again.'
 		RETURN
 	END 
+
+	----- check date of match 
+	IF EXISTS (SELECT 1 FROM Match WITH (NOLOCK) WHERE Matchid = @matchid and eventdate < CONVERT(DATE, GETDATE()) and @IsDeleteAll = 1)
+	BEGIN
+		SELECT  @ErrCode = 102,
+				@ErrMsg = 'Sorry! You are allowed to void bets which are setted today only.'
+		RETURN
+	END
+
+
 	-------------------		
 		
 	CREATE TABLE #BetDelete (transid BIGINT, CustId INT, PlayerName nvarchar(50), betfrom NVARCHAR(1),statusID INT)
@@ -597,5 +606,5 @@ END
 
 	 
 GO
-GRANT EXECUTE ON [dbo].[Acc_BettransDelSpecial] TO [aplweb] AS [dbo]
+GRANT EXECUTE ON [dbo].[Acc_BettransDelSpecial] TO [aplweb] 
 GO 

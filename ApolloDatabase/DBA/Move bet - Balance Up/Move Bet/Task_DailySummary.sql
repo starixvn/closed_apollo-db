@@ -14,7 +14,7 @@ Task:	- Daily Summary
 		- Update outright on ProdDB via linked server call: Task_DailySummary_DB02_Copy/Delete 
 DB: SVRTXN.TransDB
 Revisions:	
-
+	- 20130923@Sophia: Exclude Parlay and outright in ActualTO
 
  */
 
@@ -486,7 +486,8 @@ EXEC Task_BalanceCheck @winlostdate, 2
 		SELECT  C.Username, C.AgentID,   --- k+1
 				C.ParentID, --- k
 		   		SUM(ABS(B.Stake)) AS TurnOver,
-				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds)= 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS ActualTO,
+				SUM(CASE WHEN B.StatusID IN (112,113) AND (ABS(B.MOdds) <> 0.25 OR B.Bettype IN (9,29,10)) THEN ABS(B.Stake) 
+							ELSE CASE WHEN B.StatusID IN (112,113) AND ABS(B.MOdds) =0.25 AND B.Bettype NOT IN (9,29,10) THEN  ABS(B.Stake)*0.5 ELSE 0 END END)  AS ActualTO,
 				SUM(BP.AWinlost) AS UplineWinlost,	---- k winlost
 				SUM(BP.AComm) AS UplineComm,  ---- k Comm  
 			    SUM(BA.AWinlost)  as AWinlost, ----k+1 Winlost
@@ -520,7 +521,8 @@ EXEC Task_BalanceCheck @winlostdate, 2
 		INSERT INTO #Tmp
 		SELECT  C.Username, C.AgentID, C.ParentID,
 		   		SUM(ABS(B.Stake)) AS TurnOver,
-				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds)= 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS ActualTO,
+				SUM(CASE WHEN B.StatusID IN (112,113) AND (ABS(B.MOdds) <> 0.25 OR B.Bettype IN (9,29,10)) THEN ABS(B.Stake) 
+							ELSE CASE WHEN B.StatusID IN (112,113) AND ABS(B.MOdds) =0.25 AND B.Bettype NOT IN (9,29,10) THEN  ABS(B.Stake)*0.5 ELSE 0 END END)  AS ActualTO,
 				- SUM(B.Winlost - B.Actual_Stake + B.TWinlost) AS UplineWinlost,	 ---super Winlost
 				0 AS UplineComm,			---super comm
 				SUM(BA.AWinlost)  as AWinlost, ----Main SH Winlost
@@ -570,7 +572,8 @@ EXEC Task_BalanceCheck @winlostdate, 2
 				WinLost, PlayerComm, UplineWinLost, UplineComm, BetCount, SportType, BetType)
 		SELECT  @WinlostDate, C.CustID, C.Username, C.AgentID, 						
 		   		SUM(ABS(B.Stake)) AS TurnOver,
-				SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as ActualTO,
+				SUM(CASE WHEN B.StatusID IN (112,113) AND (ABS(B.MOdds) <> 0.25 OR B.Bettype IN (9,29,10)) THEN ABS(B.Stake) 
+							ELSE CASE WHEN B.StatusID IN (112,113) AND ABS(B.MOdds) =0.25 AND B.Bettype NOT IN (9,29,10) THEN  ABS(B.Stake)*0.5 ELSE 0 END END)  as ActualTO,
 				SUM(B.WinLost - B.Actual_Stake) AS WinLost,				
 				SUM(B.PlayerComm) AS PlayerComm,				
 				SUM(BA.AWinLost) AS UplineWinlost,	

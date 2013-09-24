@@ -17,6 +17,8 @@ AS
     Revisions:
         - 201307298@Sophia: Add ActualTOAfter (Effective Stake) 
 		- 20130910@Sophia: revise Outright
+		- 20130924@Sophia: .Use link server to call table AgentPositionTaking
+						   .Change the formula of CommBase Parlay and Outright
     */
     
 SET NOCOUNT ON
@@ -71,7 +73,7 @@ BEGIN
 					FROM	#PAgent B				
 					INNER JOIN AgentInfo C WITH (NOLOCK) --- Child direct (k+1)
 							ON C.ParentID = @AgentID  				
-					INNER JOIN AgentPositionTaking PT WITH (NOLOCK) 
+					INNER JOIN SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
 							ON PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
 					INNER JOIN Bettrans_Agent BA WITH (NOLOCK) 
 							ON  BA.TransID = B.TransID 
@@ -118,7 +120,7 @@ BEGIN
 					FROM	#PAgent B				
 					INNER JOIN AgentInfo C WITH (NOLOCK) --- Child direct (k+1)
 							ON C.ParentID = @AgentID  				
-					INNER JOIN AgentPositionTaking PT WITH (NOLOCK) 
+					INNER JOIN SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
 							ON PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
 					INNER JOIN Bettrans_Agent BA WITH (NOLOCK) 
 							ON  BA.TransID = B.TransID 
@@ -171,7 +173,7 @@ BEGIN
 		SELECT  C.Username, C.AgentID, PT.MaxUpperPositionTaking as Share, B.TransID,				
 				SUM (BP.APositionTaking) as APositionTaking ,						 
 		   		SUM(ABS(B.Stake)) AS BetAmount,
-				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS CommBase,
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,
 				SUM(B.Winlost - B.Actual_Stake) AS Winlost,	
 				SUM(B.PlayerComm) as PlayerComm, 
 				SUM(B.Winlost - B.Actual_Stake + B.PlayerComm) AS MemberTotal,
@@ -194,7 +196,7 @@ BEGIN
 
 				INNER JOIN AgentInfo C WITH (NOLOCK) --- Child direct (k+1)
 						ON C.ParentID = @AgentID  
-				INNER JOIN AgentPositionTaking PT WITH (NOLOCK) 
+				INNER JOIN SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
 						ON PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
 				INNER JOIN Bettrans_Agent BA WITH (NOLOCK) 
 						ON BA.TransID = B.TransID 
@@ -262,7 +264,7 @@ BEGIN
 		SELECT  C.Username, C.AgentID, PT.MaxUpperPositionTaking as Share, B.TransID,
 				SUM(BP.APositionTaking) as APositionTaking , 				 
 		   		SUM(ABS(B.Stake)) AS BetAmount,
-				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS CommBase,
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,
 				
 				SUM(B.Winlost - B.Actual_Stake) AS Winlost,	
 				SUM(B.PlayerComm) AS PlayerComm,
@@ -285,7 +287,7 @@ BEGIN
 				AND (@Bettypes = '0' OR BP.Bettype IN (Select bettype FROM #BettypeList))
 		INNER JOIN AgentInfo C WITH (NOLOCK) --- Child direct (k+1)
 				ON C.ParentID = @AgentID  
-		INNER JOIN AgentPositionTaking PT WITH (NOLOCK) 
+		INNER JOIN SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
 				ON PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
 		INNER JOIN Bettrans_Agent BA WITH (NOLOCK) 
 				ON BA.TransID = B.TransID 
@@ -396,7 +398,7 @@ BEGIN
 					FROM	#PAgent14 B				
 					INNER JOIN AgentInfo C WITH (NOLOCK) --- Child direct (k+1)
 							ON C.ParentID = @AgentID  				
-					INNER JOIN AgentPositionTaking PT WITH (NOLOCK) 
+					INNER JOIN SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
 							ON PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
 					INNER JOIN Bettrans14_Agent BA WITH (NOLOCK) 
 							ON  BA.TransID = B.TransID 
@@ -442,7 +444,7 @@ BEGIN
 					FROM	#PAgent14 B				
 					INNER JOIN AgentInfo C WITH (NOLOCK) --- Child direct (k+1)
 							ON C.ParentID = @AgentID  				
-					INNER JOIN AgentPositionTaking PT WITH (NOLOCK) 
+					INNER JOIN SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
 							ON PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
 					INNER JOIN Bettrans14_Agent BA WITH (NOLOCK) 
 							ON  BA.TransID = B.TransID 
@@ -496,7 +498,7 @@ BEGIN
 		SELECT  C.Username, C.AgentID, PT.MaxUpperPositionTaking as Share, B.TransID,				
 				SUM (BP.APositionTaking) as APositionTaking ,						 
 		   		SUM(ABS(B.Stake)) AS BetAmount,
-				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS CommBase,
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,
 				SUM(B.Winlost - B.Actual_Stake) AS Winlost,	
 				SUM(B.PlayerComm) as PlayerComm, 
 				SUM(B.Winlost - B.Actual_Stake + B.PlayerComm) AS MemberTotal,
@@ -519,7 +521,7 @@ BEGIN
 
 				INNER JOIN AgentInfo C WITH (NOLOCK) --- Child direct (k+1)
 						ON C.ParentID = @AgentID  
-				INNER JOIN AgentPositionTaking PT WITH (NOLOCK) 
+				INNER JOIN SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
 						ON PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
 				INNER JOIN Bettrans14_Agent BA WITH (NOLOCK) 
 						ON BA.TransID = B.TransID 
@@ -588,7 +590,7 @@ BEGIN
 		SELECT  C.Username, C.AgentID, PT.MaxUpperPositionTaking as Share, B.TransID,
 				SUM(BP.APositionTaking) as APositionTaking , 				 
 		   		SUM(ABS(B.Stake)) AS BetAmount,
-				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS CommBase,
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,
 				
 				SUM(B.Winlost - B.Actual_Stake) AS Winlost,	
 				SUM(B.PlayerComm) AS PlayerComm,
@@ -611,7 +613,7 @@ BEGIN
 				AND (@Bettypes = '0' OR BP.Bettype IN (Select bettype FROM #BettypeList))
 		INNER JOIN AgentInfo C WITH (NOLOCK) --- Child direct (k+1)
 				ON C.ParentID = @AgentID  
-		INNER JOIN AgentPositionTaking PT WITH (NOLOCK) 
+		INNER JOIN SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
 				ON PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
 		INNER JOIN Bettrans14_Agent BA WITH (NOLOCK) 
 				ON BA.TransID = B.TransID 
