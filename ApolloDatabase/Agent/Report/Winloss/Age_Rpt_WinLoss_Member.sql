@@ -13,7 +13,7 @@ ALTER PROCEDURE [dbo].[Age_Rpt_WinLoss_Member]
 	@BalanceUpDay DATE,
 	@Sporttypes VARCHAR(MAX) = '0',
 	@Bettypes VARCHAR(MAX) = '0' 		
-WITH RECOMPILE
+
 AS
     /*
     Created: Sophia
