@@ -23,14 +23,15 @@ AS
 	   - 20130712@Sophia: add OutStanding
 	   - 20130718@Sophia: Remove OutStanding
 	   - 20130726@Sophia: Improve performance
-	   - 201307298@Sophia: Add ActualTOAfter (Effective Stake) 
+	   - 20130729@Sophia: Add ActualTOAfter (Effective Stake)
+	   - 20130925@Sophia: Change to way to get Share
     */
     
 SET NOCOUNT ON
 
 
-CREATE TABLE #WinLossAgent ( Username NVARCHAR(50), AgentID INT, IsAgent BIT, Share SMALLINT, BetCount BIGINT, BetAmount MONEY, CommBase MONEY, Winlost MONEY, PlayerComm MONEY, MemberTotal MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, DownlineEffStake MONEY, GrossTotal MONEY, UplineEffStake MONEY, UplineTotal MONEY)
-CREATE TABLE #WinLossMember ( Username NVARCHAR(50), AgentID INT, IsAgent BIT, Share SMALLINT, BetCount BIGINT, BetAmount MONEY, CommBase MONEY,  Winlost MONEY, PlayerComm MONEY, MemberTotal MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, DownlineEffStake MONEY, GrossTotal MONEY, UplineEffStake MONEY, UplineTotal MONEY)
+CREATE TABLE #WinLossAgent ( Username NVARCHAR(50), AgentID INT, IsAgent BIT, BetCount BIGINT, BetAmount MONEY, CommBase MONEY, Winlost MONEY, PlayerComm MONEY, MemberTotal MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, DownlineEffStake MONEY, GrossTotal MONEY, UplineEffStake MONEY, UplineTotal MONEY)
+CREATE TABLE #WinLossMember ( Username NVARCHAR(50), AgentID INT, IsAgent BIT, BetCount BIGINT, BetAmount MONEY, CommBase MONEY,  Winlost MONEY, PlayerComm MONEY, MemberTotal MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, DownlineEffStake MONEY, GrossTotal MONEY, UplineEffStake MONEY, UplineTotal MONEY)
 
 CREATE TABLE #BettypeList (bettype SMALLINT)
 INSERT INTO #BettypeList
@@ -98,7 +99,7 @@ WHERE	ISNULL(BetAmount ,0) = 0
 
 
 ----- Get Data  
-SELECT	Username, AgentId, isAgent, Share,	
+SELECT	A.Username, A.AgentId,  A.isAgent,  PT.MaxUpperPositionTaking  as Share,	
 		SUM(BetCount) as BetCount,	
 		SUM(BetAmount) as BetAmount,	
 		SUM(CommBase) as CommBase,	
@@ -112,10 +113,12 @@ SELECT	Username, AgentId, isAgent, Share,
 		SUM(GrossTotal) as GrossTotal,
 		SUM(UplineEffStake) as UplineEffStake,
 		SUM(UplineTotal) as UplineTotal
-FROM	#WinLossAgent
-GROUP BY Username, AgentId, isAgent, Share
+FROM	#WinLossAgent A
+INNER JOIN SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
+		ON PT.AgentID = A.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
+GROUP BY A.Username, A.AgentId, A.isAgent, PT.MaxUpperPositionTaking 
 UNION ALL
-SELECT	Username, AgentId, isAgent, Share,
+SELECT	Username, AgentId, isAgent, CONVERT(smallint, 0) as Share,
 		SUM(BetCount) as BetCount,	
 		SUM(BetAmount) as BetAmount,	
 		SUM(CommBase) as CommBase,	
@@ -130,7 +133,7 @@ SELECT	Username, AgentId, isAgent, Share,
 		SUM(UplineEffStake) as UplineEffStake,
 		SUM(UplineTotal) as UplineTotal
 FROM	#WinLossMember 
-GROUP BY Username, AgentId, isAgent, Share
+GROUP BY Username, AgentId, isAgent 
 ORDER BY IsAgent DESC, Share ASC, Username ASC
  
 

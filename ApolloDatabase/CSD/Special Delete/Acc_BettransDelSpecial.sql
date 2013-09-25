@@ -37,7 +37,7 @@ Revisions:
   - 20130725@Sophia: Change username nvarchar(50)
   - 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
   - 20130829@Sophia: change @f_transID /@t_transid to @FromTransId / @ToTransId
-  - 20130918@Sophia: Add @IsDeleteAll to delete settled ticket
+  - 20130918@Sophia: Add @IsDeleteAll to delete settled tickets
 
 		    
 Param's Explanation: Special bet delete option

@@ -36,7 +36,7 @@ AS
     
 SET NOCOUNT ON
 
- CREATE TABLE #WinLossMember ( Username NVARCHAR(50), CustId INT, Share SMALLINT, BetCount BIGINT, BetAmount MONEY, CommBase MONEY,  
+ CREATE TABLE #WinLossMember ( Username NVARCHAR(50), CustId INT, BetCount BIGINT, BetAmount MONEY, CommBase MONEY,  
 							   Winlost MONEY, PlayerComm MONEY, MemberTotal MONEY, AWinLost MONEY, AComm MONEY, ATotal MONEY, UplineEffStake MONEY, UplineTotal MONEY)
 
 
@@ -53,8 +53,7 @@ BEGIN
 		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
 		INSERT INTO #WinLossMember
 	    SELECT  C.Username,
-				C.CustID,
-				PT.PositionTaking as Share, 
+				C.CustID, 
 				COUNT(B.TransID) as BetCount,
 		   		SUM(ABS(B.Stake)) AS BetAmount,
 				SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as CommBase,
@@ -80,22 +79,19 @@ BEGIN
 		INNER JOIN	CustInfo C WITH (NOLOCK)
 				ON	B.CustID = C.CustID AND  C.AgentId = @AgentID
 		INNER JOIN  Match m  WITH (NOLOCK) 
-				ON  m.MatchID = B.MatchID
-		INNER JOIN	SVRCUST.CUSTDB.dbo.AgentCustPositionTaking PT WITH (NOLOCK) 
-				ON	PT.AgentCustId = @AgentID AND PT.AgentId = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
+				ON  m.MatchID = B.MatchID		
 		WHERE   B.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND B.StatusID NOT IN (0,1)	
 				AND B.bettype <= 19000
 				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
 				AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
-		GROUP BY C.Username, C.CustID, PT.PositionTaking
+		GROUP BY C.Username, C.CustID
 
 	----Parlay
 	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
 	 INSERT INTO #WinLossMember
 	 SELECT		B.Username,
 				B.CustID,
-				B.PositionTaking as Share, 
 
 				COUNT(B.TransID) as BetCount,
 		   		SUM(ABS(B.Stake)) AS BetAmount,
@@ -114,8 +110,7 @@ BEGIN
 
 		FROM	(
 				SELECT 	DISTINCT C.Username,
-						C.CustID,
-						PT.PositionTaking, 
+						C.CustID, 
 						COUNT(DISTINCT B.TransID) as BetCount,
 		   				B.Stake, B.MOdds, B.StatusID,
 						B.WinLost , B.Actual_Stake,	B.PlayerComm,	
@@ -130,8 +125,6 @@ BEGIN
 						AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))	
 				INNER JOIN	CustInfo C WITH (NOLOCK)
 						ON	B.CustID = C.CustID AND  C.AgentId = @AgentID				
-				INNER JOIN	SVRCUST.CustDB.dbo.AgentCustPositionTaking PT WITH (NOLOCK) 
-						ON	PT.AgentCustId = @AgentID AND PT.AgentId = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
 				WHERE	 B.Winlostdate BETWEEN @FromDate AND @ToDate 
 						AND B.StatusID NOT IN (0,1)	
 						AND B.bettype IN (9,29)
@@ -147,19 +140,18 @@ BEGIN
 										)
 							)	
 
-				GROUP BY	C.Username,C.CustID,PT.PositionTaking, 					
+				GROUP BY	C.Username,C.CustID,			
 		   					B.Stake, B.MOdds, B.StatusID,
 							B.WinLost , B.Actual_Stake,	B.PlayerComm,	
 							BA.AWinLost, BA.AComm, B.TransID, BA.APositionTaking
 				) B
-		GROUP BY B.Username,B.CustID,B.PositionTaking
+		GROUP BY B.Username,B.CustID
 
 ----- Outright
 	 IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype  IN ( 10) OR @Bettypes = '0')
 	 INSERT INTO #WinLossMember
 	 SELECT  C.Username,
-				C.CustID,
-				PT.PositionTaking as Share, 
+				C.CustID,				
 				COUNT(B.TransID) as BetCount,
 		   		SUM(ABS(B.Stake)) AS BetAmount,
 				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  as CommBase,
@@ -184,8 +176,6 @@ BEGIN
 				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 		INNER JOIN	CustInfo C WITH (NOLOCK)
 				ON	B.CustID = C.CustID AND  C.AgentId = @AgentID	
-		INNER JOIN	SVRCUST.CustDB.dbo.AgentCustPositionTaking PT WITH (NOLOCK) 
-				ON	PT.AgentCustId = @AgentID AND PT.AgentId = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
 		WHERE	B.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND B.StatusID NOT IN (0,1)	
 				AND B.bettype =10
@@ -199,8 +189,7 @@ BEGIN
 									)				
 						)
 
-		GROUP BY C.Username, C.CustID, PT.PositionTaking
- 	    
+		GROUP BY C.Username, C.CustID
 	 
 END
 
@@ -211,7 +200,6 @@ BEGIN
 		INSERT INTO #WinLossMember
 	    SELECT  C.Username,
 				C.CustID,
-				PT.PositionTaking as Share, 
 				COUNT(B.TransID) as BetCount,
 		   		SUM(ABS(B.Stake)) AS BetAmount,
 				SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as CommBase,
@@ -237,22 +225,19 @@ BEGIN
 		INNER JOIN	CustInfo C WITH (NOLOCK)
 				ON	B.CustID = C.CustID AND  C.AgentId = @AgentID
 		INNER JOIN  Match14 M WITH (NOLOCK) 
-				ON  m.MatchID = B.MatchID
-		INNER JOIN	SVRCUST.CustDB.dbo.AgentCustPositionTaking PT WITH (NOLOCK) 
-				ON	PT.AgentCustId = @AgentID AND PT.AgentId = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
+				ON  m.MatchID = B.MatchID		
 		WHERE   B.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND B.StatusID NOT IN (0,1)	
 				AND B.bettype <= 19000
 				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
 				AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
-		GROUP BY C.Username, C.CustID, PT.PositionTaking
+		GROUP BY C.Username, C.CustID
 
 	----Parlay
 	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
 	 INSERT INTO #WinLossMember
 	 SELECT		B.Username,
 				B.CustID,
-				B.PositionTaking as Share, 
 				COUNT(B.TransID) as BetCount,
 		   		SUM(ABS(B.Stake)) AS BetAmount,
 				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  as CommBase,
@@ -271,7 +256,6 @@ BEGIN
 		FROM	(
 				SELECT 	DISTINCT C.Username,
 						C.CustID,
-						PT.PositionTaking, 
 						COUNT(DISTINCT B.TransID) as BetCount,
 		   				B.Stake, B.MOdds, B.StatusID,
 						B.WinLost , B.Actual_Stake,	B.PlayerComm,	
@@ -286,8 +270,6 @@ BEGIN
 						AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))	
 				INNER JOIN	CustInfo C WITH (NOLOCK)
 						ON	B.CustID = C.CustID AND  C.AgentId = @AgentID				
-				INNER JOIN	SVRCUST.CustDB.dbo.AgentCustPositionTaking PT WITH (NOLOCK) 
-						ON	PT.AgentCustId = @AgentID AND PT.AgentId = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
 				WHERE	 B.Winlostdate BETWEEN @FromDate AND @ToDate 
 						AND B.StatusID NOT IN (0,1)	
 						AND B.bettype IN (9,29)
@@ -303,19 +285,18 @@ BEGIN
 										)
 							)	
 
-				GROUP BY	C.Username,C.CustID,PT.PositionTaking, 					
+				GROUP BY	C.Username,C.CustID,		
 		   					B.Stake, B.MOdds, B.StatusID,
 							B.WinLost , B.Actual_Stake,	B.PlayerComm,	
 							BA.AWinLost, BA.AComm, B.TransID, BA.APositionTaking
 				) B
-		GROUP BY B.Username,B.CustID,B.PositionTaking
+		GROUP BY B.Username,B.CustID
 
 ----- Outright14
 	 IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype  IN ( 10) OR @Bettypes = '0')
 	 INSERT INTO #WinLossMember
 	 SELECT  C.Username,
 				C.CustID,
-				PT.PositionTaking as Share, 
 				COUNT(B.TransID) as BetCount,
 		   		SUM(ABS(B.Stake)) AS BetAmount,
 				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  as CommBase,
@@ -339,9 +320,7 @@ BEGIN
 				AND BA.bettype =10
 				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 		INNER JOIN	CustInfo C WITH (NOLOCK)
-				ON	B.CustID = C.CustID AND  C.AgentId = @AgentID
-		INNER JOIN	SVRCUST.CustDB.dbo.AgentCustPositionTaking PT WITH (NOLOCK) 
-				ON	PT.AgentCustId = @AgentID AND PT.AgentId = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
+				ON	B.CustID = C.CustID AND  C.AgentId = @AgentID	
 		WHERE	B.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND B.StatusID NOT IN (0,1)	
 				AND B.bettype =10
@@ -355,7 +334,7 @@ BEGIN
 									)				
 						)
 
-		GROUP BY C.Username, C.CustID, PT.PositionTaking
+		GROUP BY C.Username, C.CustID
  	    
 	 
 END
@@ -463,9 +442,23 @@ CREATE TABLE #MemberOutstanding (Username NVARCHAR(50), CustID INT, OutstandingA
 
 --####################################### GET DATA #####################################-- 
 
+DECLARE @Share smallint
+
+
+----verison _CustDB
+--SELECT TOP 1 @Share = PositionTaking
+--FROM SVRCUST.CustDB.dbo.CustPositionTaking PT WITH (NOLOCK) 
+--WHERE  Custid= (select top 1 custid from CustInfo where AgentID = @AgentID) AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
+
+---Verion local
+SELECT TOP 1 @Share = PositionTaking
+FROM SVRCUST.CustDB.dbo.AgentCustPositionTaking PT WITH (NOLOCK) 
+WHERE PT.AgentCustId = @AgentID AND PT.AgentId = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
+
+
 SELECT	ISNULL(A.Username, B.Username) as Username, 
 		ISNULL(A.CustId, B.CustId) as CustId,
-		ISNULL(A.Share, B.Share) as Share,
+		ISNULL(@Share,0) as Share,
 		ISNULL(BetCount,0) as BetCount,
 		ISNULL(BetAmount,0) as BetAmount,
 		ISNULL(CommBase,0) as CommBase,
@@ -484,7 +477,7 @@ SELECT	ISNULL(A.Username, B.Username) as Username,
 		ISNULL(OutstandingAmount,0) as OutstandingAmount,
 		ISNULL(OutstandingShareAmount,0) as OutstandingShareAmount
 FROM	(
-		SELECT	Username, CustId,  Share,
+		SELECT	Username, CustId,  
 				SUM(BetCount) as BetCount,	
 				SUM(BetAmount) as BetAmount,
 				SUM(CommBase) as CommBase,
@@ -499,18 +492,16 @@ FROM	(
 
 				SUM(UplineEffStake) as UplineEffStake,
 				SUM(UplineTotal) as UplineTotal
-		FROM	#WinLossMember 
-		GROUP BY Username, CustId, Share
+		FROM	#WinLossMember
+		GROUP BY Username, CustId
 		) A
 LEFT JOIN 
 		( 	
-		SELECT	M.Username, M.CustID, PT.PositionTaking as Share,
+		SELECT	M.Username, M.CustID,  
 				SUM(OutstandingAmount) OutstandingAmount , 
 				SUM(OutstandingShareAmount) OutstandingShareAmount 
-		FROM	#MemberOutstanding M	
-		INNER JOIN	SVRCUST.CustDB.dbo.AgentCustPositionTaking PT WITH (NOLOCK) 
-				ON	PT.AgentCustId = @AgentID AND PT.AgentId = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0 
-		GROUP BY M.Username, M.CustID, PT.PositionTaking 
+		FROM	#MemberOutstanding M			
+		GROUP BY M.Username, M.CustID 
 		) B
 	ON A.CustID = B.CustID
 
