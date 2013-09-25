@@ -51,7 +51,8 @@ BEGIN
 			SUM(TComm*actualrate) commission,
 			SUM((winlost-actual_stake+Twinlost+TComm)*actualrate) LineTotal,
 			SUM((1-TPositionTaking)*ABS(stake)*actualrate) turnover, 
-			SUM(CASE WHEN ABS(MOdds) <> 0.25 AND StatusID IN (112,113) THEN ABS(Stake) ELSE CASE WHEN ABS(MOdds) =0.25 AND StatusID IN (112,113) THEN  ABS(Stake)*0.5  ELSE 0 END END * (1-TPositionTaking)) AS ActualTurnover
+			CONVERT(MONEY,SUM(CASE WHEN StatusID IN (112,113) AND (ABS(MOdds) <> 0.25 OR Bettype IN (9,29,10)) THEN ABS(Stake)
+									ELSE CASE WHEN StatusID IN (112,113) AND ABS(MOdds) =0.25 AND Bettype NOT IN (9,29,10) THEN ABS(Stake)*0.5  ELSE 0 END END * (1-TPositionTaking)*actualrate)) AS ActualTurnover
 	FROM bettrans14 b WITH(NOLOCK)
 	WHERE winlostdate = @winlostdate
 		AND bettype < 19001

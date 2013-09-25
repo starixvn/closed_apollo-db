@@ -17,6 +17,8 @@ AS
    
 
     Revisions: 
+		- 20130924@Sophia: .Use link server to call table AgentPositionTaking
+						   .Change the formula of CommBase Parlay and Outright
     */
     
 SET NOCOUNT ON
@@ -59,7 +61,7 @@ BEGIN
 					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))							
 		INNER JOIN	Bettrans B WITH (NOLOCK) 
 				ON	B.TransID = BA.TransID		
-		INNER JOIN  AgentPositionTaking PT WITH (NOLOCK) 
+		INNER JOIN  SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
 				ON  PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
 		INNER JOIN  Match m  WITH (NOLOCK) 
 				ON m.MatchID = B.MatchID
@@ -80,7 +82,7 @@ BEGIN
 				PT.MaxUpperPositionTaking as Share,	
 				COUNT(B.TransID) BetCount,		
 		   		SUM(ABS(B.Stake)) AS BetAmount,
-				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS CommBase,				
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,				
 				SUM (B.WinLost - B.Actual_Stake) as Winlost,
 				SUM (B.PlayerComm) as PlayerComm,
 				SUM (B.WinLost - B.Actual_Stake+ B.PlayerComm) as MemberTotal,
@@ -89,7 +91,7 @@ BEGIN
 				- SUM (B.TComm) AS AComm,
 				- (SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS ATotal,
 
-				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END * (1-B.TPositionTaking))  AS DownlineEffStake , 
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END * (1-B.TPositionTaking))  AS DownlineEffStake , 
 				(SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS GrossTotal,
 											
 				0 AS UplineEffStake ,
@@ -103,7 +105,7 @@ BEGIN
 					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))								
 		INNER JOIN	Bettrans B WITH (NOLOCK) 
 				ON	B.TransID = BA.TransID		
-		INNER JOIN  AgentPositionTaking PT WITH (NOLOCK) 
+		INNER JOIN  SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
 				ON  PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
 		WHERE		C.ParentId = @AgentID 
 				AND B.Winlostdate BETWEEN @FromDate AND @ToDate
@@ -130,7 +132,7 @@ BEGIN
 				PT.MaxUpperPositionTaking as Share,	
 				COUNT(B.TransID) BetCount,			
 		   		SUM(ABS(B.Stake)) AS BetAmount,
-				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS CommBase,				
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,
 				SUM (B.WinLost - B.Actual_Stake) as Winlost,
 				SUM (B.PlayerComm) as PlayerComm,
 				SUM (B.WinLost - B.Actual_Stake+ B.PlayerComm) as MemberTotal,
@@ -139,7 +141,7 @@ BEGIN
 				- SUM (B.TComm) AS AComm,
 				- (SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS ATotal,
 
-				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END * (1-B.TPositionTaking))  AS DownlineEffStake , 
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END * (1-B.TPositionTaking))  AS DownlineEffStake , 
 				(SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS GrossTotal,
 											
 				0 AS UplineEffStake ,
@@ -154,7 +156,7 @@ BEGIN
 					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))						
 		INNER JOIN	Bettrans B WITH (NOLOCK) 
 				ON	B.TransID = BA.TransID		
-		INNER JOIN  AgentPositionTaking PT WITH (NOLOCK) 
+		INNER JOIN  SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
 				ON  PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
 		WHERE		C.ParentId = @AgentID 
 					AND B.Winlostdate BETWEEN @FromDate AND @ToDate
@@ -213,7 +215,7 @@ BEGIN
 					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))							
 		INNER JOIN	Bettrans14 B WITH (NOLOCK) 
 				ON	B.TransID = BA.TransID		
-		INNER JOIN  AgentPositionTaking PT WITH (NOLOCK) 
+		INNER JOIN  SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
 				ON  PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
 		INNER JOIN  Match14 m  WITH (NOLOCK) 
 				ON m.MatchID = B.MatchID
@@ -234,7 +236,7 @@ BEGIN
 				PT.MaxUpperPositionTaking as Share,	
 				COUNT(B.TransID) BetCount,		
 		   		SUM(ABS(B.Stake)) AS BetAmount,
-				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS CommBase,				
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,
 				SUM (B.WinLost - B.Actual_Stake) as Winlost,
 				SUM (B.PlayerComm) as PlayerComm,
 				SUM (B.WinLost - B.Actual_Stake+ B.PlayerComm) as MemberTotal,
@@ -243,7 +245,7 @@ BEGIN
 				- SUM (B.TComm) AS AComm,
 				- (SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS ATotal,
 
-				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END * (1-B.TPositionTaking))  AS DownlineEffStake , 
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END * (1-B.TPositionTaking))  AS DownlineEffStake , 
 				(SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS GrossTotal,
 											
 				0 AS UplineEffStake ,
@@ -257,7 +259,7 @@ BEGIN
 					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))								
 		INNER JOIN	Bettrans14 B WITH (NOLOCK) 
 				ON	B.TransID = BA.TransID		
-		INNER JOIN  AgentPositionTaking PT WITH (NOLOCK) 
+		INNER JOIN  SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
 				ON  PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
 		WHERE		C.ParentId = @AgentID 
 				AND B.Winlostdate BETWEEN @FromDate AND @ToDate
@@ -284,7 +286,7 @@ BEGIN
 				PT.MaxUpperPositionTaking as Share,	
 				COUNT(B.TransID) BetCount,			
 		   		SUM(ABS(B.Stake)) AS BetAmount,
-				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS CommBase,				
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,
 				SUM (B.WinLost - B.Actual_Stake) as Winlost,
 				SUM (B.PlayerComm) as PlayerComm,
 				SUM (B.WinLost - B.Actual_Stake+ B.PlayerComm) as MemberTotal,
@@ -293,7 +295,7 @@ BEGIN
 				- SUM (B.TComm) AS AComm,
 				- (SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS ATotal,
 
-				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END * (1-B.TPositionTaking))  AS DownlineEffStake , 
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END * (1-B.TPositionTaking))  AS DownlineEffStake , 
 				(SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS GrossTotal,
 											
 				0 AS UplineEffStake ,
@@ -307,7 +309,7 @@ BEGIN
 					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))						
 		INNER JOIN	Bettrans14 B WITH (NOLOCK) 
 				ON	B.TransID = BA.TransID		
-		INNER JOIN  AgentPositionTaking PT WITH (NOLOCK) 
+		INNER JOIN  SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
 				ON  PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
 		WHERE		C.ParentId = @AgentID 
 					AND B.Winlostdate BETWEEN @FromDate AND @ToDate

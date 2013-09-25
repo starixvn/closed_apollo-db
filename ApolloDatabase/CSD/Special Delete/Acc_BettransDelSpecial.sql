@@ -37,7 +37,8 @@ Revisions:
   - 20130725@Sophia: Change username nvarchar(50)
   - 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
   - 20130829@Sophia: change @f_transID /@t_transid to @FromTransId / @ToTransId
-  - 20130918@Sophia: Add @IsDeleteAll
+  - 20130918@Sophia: Add @IsDeleteAll to delete settled ticket
+
 		    
 Param's Explanation: Special bet delete option
 
@@ -58,12 +59,17 @@ Param's Explanation: Special bet delete option
 
 	SET NOCOUNT ON
 
+	
 	----Check permission for Delete all 
-	EXEC SVRNAP.bodb_NAP.dbo.NAP_User_CheckPermission @UserId=@UserID,@FunctionId=24,@ErrCode=@ErrCode OUTPUT,@ErrMsg=@ErrMsg OUTPUT
+	DECLARE @FunctionId smallint 
+	SELECT	@FunctionId = FunctionId
+	FROM	SVRNAP.bodb_NAP.dbo.Functions
+	WHERE	FunctionKey = 'VoidSportsbookBetAll'
+
+	EXEC SVRNAP.bodb_NAP.dbo.NAP_User_CheckPermission @UserId=@UserID,@FunctionId=@FunctionId,@ErrCode=@ErrCode OUTPUT,@ErrMsg=@ErrMsg OUTPUT
 	IF @ErrCode <> 0
 		RETURN
 	---end
-		
 	
 	DECLARE @LogData NVARCHAR(MAX)
 	DECLARE @Remark VARCHAR(500)
@@ -81,6 +87,7 @@ Param's Explanation: Special bet delete option
 			   @ErrCode = 101   
 		RETURN
 	END
+
 	
 	---- check and not allow attempt to delete same game while it's still not finish
 	DECLARE @KeyID INT
@@ -125,15 +132,6 @@ Param's Explanation: Special bet delete option
 		SELECT @ErrCode = 100, @ErrMsg = 'This match is being calculated or some tickets of this match are being deleted, please wait a few seconds until the on-going process is completed and try again.'
 		RETURN
 	END 
-
-	----- check date of match 
-	IF EXISTS (SELECT 1 FROM Match WITH (NOLOCK) WHERE Matchid = @matchid and eventdate < CONVERT(DATE, GETDATE()) and @IsDeleteAll = 1)
-	BEGIN
-		SELECT  @ErrCode = 102,
-				@ErrMsg = 'Sorry! You are allowed to void bets which are setted today only.'
-		RETURN
-	END
-
 
 	-------------------		
 		
