@@ -19,6 +19,7 @@ AS
 		- 20130910@Sophia: revise Outright
 		- 20130924@Sophia: .Use link server to call table AgentPositionTaking
 						   .Change the formula of CommBase Parlay and Outright
+		- 20130925@Sophia: Change to way to get Share
     */
     
 SET NOCOUNT ON
@@ -29,7 +30,7 @@ BEGIN
 	---- Agent Winloss
 	--********************************	
 		---Sportsbook
-	CREATE TABLE #Tmp (Username NVARCHAR(50),  AgentID INT , Share smallint, TransID BIGINT, APositionTaking smallmoney,  
+	CREATE TABLE #Tmp (Username NVARCHAR(50),  AgentID INT, TransID BIGINT, APositionTaking smallmoney,  
 				BetAmount MONEY, CommBase MONEY, Winlost MONEY, PlayerComm MONEY, MemberTotal MONEY, 
 				AWinlost MONEY,AComm MONEY,	ATotal MONEY, ChildAComm MONEY, Actual_Stake MONEY) 
 
@@ -56,7 +57,7 @@ BEGIN
  						
 
 				INSERT INTO	#Tmp
-				SELECT		C.Username, C.AgentID, PT.MaxUpperPositionTaking as Share, BA.TransID,
+				SELECT		C.Username, C.AgentID, BA.TransID,
 							SUM (B.APositionTaking) as APositionTaking ,									 
 		   					SUM(ABS(B.Stake)) AS BetAmount,
 							SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS CommBase,
@@ -72,9 +73,7 @@ BEGIN
 							SUM(B.Actual_stake) as Actual_stake  	   
 					FROM	#PAgent B				
 					INNER JOIN AgentInfo C WITH (NOLOCK) --- Child direct (k+1)
-							ON C.ParentID = @AgentID  				
-					INNER JOIN SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
-							ON PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
+							ON C.ParentID = @AgentID		
 					INNER JOIN Bettrans_Agent BA WITH (NOLOCK) 
 							ON  BA.TransID = B.TransID 
 							AND C.AgentID = BA.AgentID ---- Child direct (k+1)
@@ -84,7 +83,7 @@ BEGIN
 					INNER JOIN  Match m  WITH (NOLOCK) 
 							ON m.MatchID = B.MatchID
 					WHERE	(@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
-					GROUP BY C.Username, C.AgentID ,  PT.MaxUpperPositionTaking, BA.TransID
+					GROUP BY C.Username, C.AgentID,  BA.TransID
 			END
 			ELSE
 			BEGIN
@@ -103,7 +102,7 @@ BEGIN
 
  
 				INSERT INTO	#Tmp
-				SELECT		C.Username, C.AgentID, PT.MaxUpperPositionTaking as Share, BA.TransID,
+				SELECT		C.Username, C.AgentID, BA.TransID,
 							SUM (B.APositionTaking) as APositionTaking ,								 
 		   					SUM(ABS(B.Stake)) AS BetAmount,
 							SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS CommBase,
@@ -119,9 +118,7 @@ BEGIN
 							SUM(B.Actual_stake) as Actual_stake 
 					FROM	#PAgent B				
 					INNER JOIN AgentInfo C WITH (NOLOCK) --- Child direct (k+1)
-							ON C.ParentID = @AgentID  				
-					INNER JOIN SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
-							ON PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
+							ON C.ParentID = @AgentID
 					INNER JOIN Bettrans_Agent BA WITH (NOLOCK) 
 							ON  BA.TransID = B.TransID 
 							AND C.AgentID = BA.AgentID ---- Child direct (k+1)
@@ -131,14 +128,14 @@ BEGIN
 					INNER JOIN  Match m  WITH (NOLOCK) 
 							ON m.MatchID = B.MatchID
 					WHERE	(@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
-					GROUP BY C.Username, C.AgentID ,  PT.MaxUpperPositionTaking, BA.TransID
+					GROUP BY C.Username, C.AgentID,  BA.TransID
 			END						
  
  
 		------------------------------------
 
 		INSERT INTO #WinLossAgent
-		SELECT	T.Username, T.AgentID, 1 as IsAgent, T.Share,
+		SELECT	T.Username, T.AgentID, 1 as IsAgent, 
 				1 as Betcount, T.BetAmount, T.CommBase, 
 				T.Winlost, T.PlayerComm, T.MemberTotal,
 				T.AWinlost, T.AComm, T.ATotal, 
@@ -156,7 +153,7 @@ BEGIN
 				AND BA.StatusID NOT IN (0,1) 				 
 				AND BA.Bettype <= 19000
 				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))	
-		GROUP BY T.Username, T.AgentID, T.Share,
+		GROUP BY T.Username, T.AgentID, 
 				T.TransID, T.BetAmount, T.CommBase, 
 				T.Winlost, T.PlayerComm, T.MemberTotal,
 				T.AWinlost, T.AComm, T.ATotal,T.ChildAComm , 
@@ -170,7 +167,7 @@ BEGIN
 	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
 	BEGIN 
 		INSERT INTO	#Tmp
-		SELECT  C.Username, C.AgentID, PT.MaxUpperPositionTaking as Share, B.TransID,				
+		SELECT  C.Username, C.AgentID, B.TransID,				
 				SUM (BP.APositionTaking) as APositionTaking ,						 
 		   		SUM(ABS(B.Stake)) AS BetAmount,
 				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,
@@ -196,8 +193,6 @@ BEGIN
 
 				INNER JOIN AgentInfo C WITH (NOLOCK) --- Child direct (k+1)
 						ON C.ParentID = @AgentID  
-				INNER JOIN SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
-						ON PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
 				INNER JOIN Bettrans_Agent BA WITH (NOLOCK) 
 						ON BA.TransID = B.TransID 
 						AND BA.AgentID = C.AgentID ---- Child direct (k+1)
@@ -219,12 +214,12 @@ BEGIN
 										WHERE	BM.RefNo = B.RefNo
 										)				
 						        )
-				GROUP BY C.Username, C.AgentID , PT.MaxUpperPositionTaking, B.TransID
+				GROUP BY C.Username, C.AgentID, B.TransID
  
 		--------------------------------
 	
 		INSERT INTO #WinLossAgent
-		SELECT	T.Username, T.AgentID, 1 as IsAgent, T.Share,
+		SELECT	T.Username, T.AgentID, 1 as IsAgent,
 				1 as Betcount, T.BetAmount, T.CommBase, 
 				T.Winlost, T.PlayerComm, T.MemberTotal,
 				T.AWinlost, T.AComm, T.ATotal, 		
@@ -234,7 +229,7 @@ BEGIN
 				((1-SUM (T.LinePositionTaking)) - T.APositionTaking) * T.CommBase as UplineEffStake,
 				-(SUM(T.LineWinLost)  + T.ChildAComm + T.Winlost + T.ATotal) AS UplineTotal
 		FROM (	
-			SELECT  T.Username, T.AgentID, T.Share, T.APositionTaking, 
+			SELECT  T.Username, T.AgentID,T.APositionTaking, 
 					T.TransID, T.BetAmount, T.CommBase, 
 					T.Winlost, T.PlayerComm, T.MemberTotal,
 					T.AWinlost, T.AComm, T.ATotal, T.ChildAComm, T.Actual_Stake,	
@@ -248,7 +243,7 @@ BEGIN
 					AND BA.Bettype IN (9,29)
 					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 							
 			) T
-		GROUP BY	T.Username, T.AgentID, T.Share,
+		GROUP BY	T.Username, T.AgentID,
 					T.TransID, T.BetAmount, T.CommBase, 
 					T.Winlost, T.PlayerComm, T.MemberTotal,
 					T.AWinlost, T.AComm, T.ATotal, T.ChildAComm , 
@@ -261,7 +256,7 @@ BEGIN
 	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (10) OR @Bettypes = '0')
 	BEGIN
 		INSERT INTO	#Tmp
-		SELECT  C.Username, C.AgentID, PT.MaxUpperPositionTaking as Share, B.TransID,
+		SELECT  C.Username, C.AgentID, B.TransID,
 				SUM(BP.APositionTaking) as APositionTaking , 				 
 		   		SUM(ABS(B.Stake)) AS BetAmount,
 				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,
@@ -286,9 +281,7 @@ BEGIN
 				AND BP.Bettype = 10
 				AND (@Bettypes = '0' OR BP.Bettype IN (Select bettype FROM #BettypeList))
 		INNER JOIN AgentInfo C WITH (NOLOCK) --- Child direct (k+1)
-				ON C.ParentID = @AgentID  
-		INNER JOIN SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
-				ON PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
+				ON C.ParentID = @AgentID 
 		INNER JOIN Bettrans_Agent BA WITH (NOLOCK) 
 				ON BA.TransID = B.TransID 
 				AND C.AgentID = BA.AgentID ---- Child direct (k+1)
@@ -310,11 +303,11 @@ BEGIN
 									WHERE	m.orid = B.MatchID
 									)				
 						)
-		GROUP BY C.Username, C.AgentID ,  PT.MaxUpperPositionTaking , B.TransID
+		GROUP BY C.Username, C.AgentID, B.TransID
 				 
 		 
 		INSERT INTO #WinLossAgent
-		SELECT	T.Username, T.AgentID, 1 as IsAgent, T.Share,				 
+		SELECT	T.Username, T.AgentID, 1 as IsAgent,				 
 				1 as Betcount, T.BetAmount, T.CommBase, 
 				T.Winlost, T.PlayerComm, T.MemberTotal,
 				T.AWinlost, T.AComm, T.ATotal, 
@@ -333,7 +326,7 @@ BEGIN
 				AND BA.Bettype = 10
 				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))		
 				
-		GROUP BY T.Username, T.AgentID, T.Share, 
+		GROUP BY T.Username, T.AgentID, 
 				T.TransID, T.BetAmount, T.CommBase, 
 				T.Winlost, T.PlayerComm, T.MemberTotal,
 				T.AWinlost, T.AComm, T.ATotal,
@@ -354,7 +347,7 @@ BEGIN
 	---- Agent Winloss
 	--********************************	
 		---Sportsbook
-	CREATE TABLE #Tmp14 (Username NVARCHAR(50),  AgentID INT , Share smallint, TransID BIGINT, APositionTaking smallmoney,  
+	CREATE TABLE #Tmp14 (Username NVARCHAR(50),  AgentID INT , TransID BIGINT, APositionTaking smallmoney,  
 				BetAmount MONEY, CommBase MONEY, Winlost MONEY, PlayerComm MONEY, MemberTotal MONEY, 
 				AWinlost MONEY,AComm MONEY,	ATotal MONEY, ChildAComm MONEY, Actual_Stake MONEY) 
 
@@ -381,7 +374,7 @@ BEGIN
 									
 
 				INSERT INTO	#Tmp14
-				SELECT		C.Username, C.AgentID, PT.MaxUpperPositionTaking as Share, BA.TransID,
+				SELECT		C.Username, C.AgentID,BA.TransID,
 							SUM (B.APositionTaking) as APositionTaking ,								 
 		   					SUM(ABS(B.Stake)) AS BetAmount,
 							SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS CommBase,
@@ -398,8 +391,6 @@ BEGIN
 					FROM	#PAgent14 B				
 					INNER JOIN AgentInfo C WITH (NOLOCK) --- Child direct (k+1)
 							ON C.ParentID = @AgentID  				
-					INNER JOIN SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
-							ON PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
 					INNER JOIN Bettrans14_Agent BA WITH (NOLOCK) 
 							ON  BA.TransID = B.TransID 
 							AND C.AgentID = BA.AgentID ---- Child direct (k+1)
@@ -409,7 +400,7 @@ BEGIN
 					INNER JOIN  Match14 m  WITH (NOLOCK) 
 							ON m.MatchID = B.MatchID
 					WHERE	(@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
-					GROUP BY C.Username, C.AgentID ,  PT.MaxUpperPositionTaking, BA.TransID
+					GROUP BY C.Username, C.AgentID, BA.TransID
 			END
 			ELSE
 			BEGIN
@@ -427,7 +418,7 @@ BEGIN
 					AND BP.Bettype IN (Select bettype FROM #BettypeList)	
 
 				INSERT INTO	#Tmp14
-				SELECT		C.Username, C.AgentID, PT.MaxUpperPositionTaking as Share, BA.TransID,
+				SELECT		C.Username, C.AgentID, BA.TransID,
 							SUM (B.APositionTaking) as APositionTaking ,							 
 		   					SUM(ABS(B.Stake)) AS BetAmount,
 							SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS CommBase,
@@ -444,8 +435,6 @@ BEGIN
 					FROM	#PAgent14 B				
 					INNER JOIN AgentInfo C WITH (NOLOCK) --- Child direct (k+1)
 							ON C.ParentID = @AgentID  				
-					INNER JOIN SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
-							ON PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
 					INNER JOIN Bettrans14_Agent BA WITH (NOLOCK) 
 							ON  BA.TransID = B.TransID 
 							AND C.AgentID = BA.AgentID ---- Child direct (k+1)
@@ -455,13 +444,13 @@ BEGIN
 					INNER JOIN  Match14 m  WITH (NOLOCK) 
 							ON m.MatchID = B.MatchID
 					WHERE	(@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
-					GROUP BY C.Username, C.AgentID ,  PT.MaxUpperPositionTaking, BA.TransID
+					GROUP BY C.Username, C.AgentID, BA.TransID
 			END						
 
 		------------------------------------
 		
 		INSERT INTO #WinLossAgent
-		SELECT	T.Username, T.AgentID, 1 as IsAgent, T.Share,
+		SELECT	T.Username, T.AgentID, 1 as IsAgent,
 				1 as Betcount, T.BetAmount, T.CommBase, 
 				T.Winlost, T.PlayerComm, T.MemberTotal,
 				T.AWinlost, T.AComm, T.ATotal, 
@@ -479,7 +468,7 @@ BEGIN
 				AND BA.StatusID NOT IN (0,1) 				 
 				AND BA.Bettype <= 19000
 				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))					
-		GROUP BY T.Username, T.AgentID, T.Share,
+		GROUP BY T.Username, T.AgentID, 
 				T.TransID, T.BetAmount, T.CommBase, 
 				T.Winlost, T.PlayerComm, T.MemberTotal,
 				T.AWinlost, T.AComm, T.ATotal,T.ChildAComm , 
@@ -495,7 +484,7 @@ BEGIN
 	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
 	BEGIN 
 		INSERT INTO	#Tmp14
-		SELECT  C.Username, C.AgentID, PT.MaxUpperPositionTaking as Share, B.TransID,				
+		SELECT  C.Username, C.AgentID, B.TransID,				
 				SUM (BP.APositionTaking) as APositionTaking ,						 
 		   		SUM(ABS(B.Stake)) AS BetAmount,
 				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,
@@ -521,8 +510,6 @@ BEGIN
 
 				INNER JOIN AgentInfo C WITH (NOLOCK) --- Child direct (k+1)
 						ON C.ParentID = @AgentID  
-				INNER JOIN SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
-						ON PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
 				INNER JOIN Bettrans14_Agent BA WITH (NOLOCK) 
 						ON BA.TransID = B.TransID 
 						AND BA.AgentID = C.AgentID ---- Child direct (k+1)
@@ -544,12 +531,12 @@ BEGIN
 										WHERE	BM.RefNo = B.RefNo
 										)				
 						        )
-				GROUP BY C.Username, C.AgentID , PT.MaxUpperPositionTaking, B.TransID
+				GROUP BY C.Username, C.AgentID, B.TransID
  
 		--------------------------------
 	
 		INSERT INTO #WinLossAgent
-		SELECT	T.Username, T.AgentID, 1 as IsAgent, T.Share,
+		SELECT	T.Username, T.AgentID, 1 as IsAgent,
 				1 as Betcount, T.BetAmount, T.CommBase, 
 				T.Winlost, T.PlayerComm, T.MemberTotal,
 				T.AWinlost, T.AComm, T.ATotal, 		
@@ -559,7 +546,7 @@ BEGIN
 				((1-SUM (T.LinePositionTaking)) - T.APositionTaking) * T.CommBase as UplineEffStake,
 				-(SUM(T.LineWinLost)  + T.ChildAComm + T.Winlost + T.ATotal) AS UplineTotal
 		FROM (	
-			SELECT  T.Username, T.AgentID, T.Share, T.APositionTaking, 
+			SELECT  T.Username, T.AgentID, T.APositionTaking, 
 					T.TransID, T.BetAmount, T.CommBase, 
 					T.Winlost, T.PlayerComm, T.MemberTotal,
 					T.AWinlost, T.AComm, T.ATotal, T.ChildAComm, T.Actual_Stake,	
@@ -574,7 +561,7 @@ BEGIN
 					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 
 						
 			) T
-		GROUP BY	T.Username, T.AgentID, T.Share,
+		GROUP BY	T.Username, T.AgentID, 
 				   T.TransID, T.BetAmount, T.CommBase, 
 					T.Winlost, T.PlayerComm, T.MemberTotal,
 					T.AWinlost, T.AComm, T.ATotal, T.ChildAComm , 
@@ -587,7 +574,7 @@ BEGIN
 	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (10) OR @Bettypes = '0')
 	BEGIN
 		INSERT INTO	#Tmp14
-		SELECT  C.Username, C.AgentID, PT.MaxUpperPositionTaking as Share, B.TransID,
+		SELECT  C.Username, C.AgentID, B.TransID,
 				SUM(BP.APositionTaking) as APositionTaking , 				 
 		   		SUM(ABS(B.Stake)) AS BetAmount,
 				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,
@@ -612,9 +599,7 @@ BEGIN
 				AND BP.Bettype = 10
 				AND (@Bettypes = '0' OR BP.Bettype IN (Select bettype FROM #BettypeList))
 		INNER JOIN AgentInfo C WITH (NOLOCK) --- Child direct (k+1)
-				ON C.ParentID = @AgentID  
-		INNER JOIN SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
-				ON PT.AgentID = C.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
+				ON C.ParentID = @AgentID	
 		INNER JOIN Bettrans14_Agent BA WITH (NOLOCK) 
 				ON BA.TransID = B.TransID 
 				AND C.AgentID = BA.AgentID ---- Child direct (k+1)
@@ -637,11 +622,11 @@ BEGIN
 									WHERE	m.orid = B.MatchID
 									)				
 						)
-		GROUP BY C.Username, C.AgentID ,  PT.MaxUpperPositionTaking , B.TransID
+		GROUP BY C.Username, C.AgentID, B.TransID
 				 
 		 
 		INSERT INTO #WinLossAgent
-		SELECT	T.Username, T.AgentID, 1 as IsAgent, T.Share,				 
+		SELECT	T.Username, T.AgentID, 1 as IsAgent, 			 
 				1 as Betcount, T.BetAmount, T.CommBase, 
 				T.Winlost, T.PlayerComm, T.MemberTotal,
 				T.AWinlost, T.AComm, T.ATotal, 
@@ -660,7 +645,7 @@ BEGIN
 				AND BA.Bettype = 10
 				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))	
 			
-		GROUP BY T.Username, T.AgentID, T.Share, 
+		GROUP BY T.Username, T.AgentID, 
 				T.TransID, T.BetAmount, T.CommBase, 
 				T.Winlost, T.PlayerComm, T.MemberTotal,
 				T.AWinlost, T.AComm, T.ATotal,
