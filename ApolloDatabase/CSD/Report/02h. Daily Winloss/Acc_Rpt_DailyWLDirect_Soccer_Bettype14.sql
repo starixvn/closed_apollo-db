@@ -69,7 +69,7 @@ SET NOCOUNT ON
 			sum((winlost-actual_stake+TWinlost+TComm)*ActualRate) LineTotal, 
 			sum((1-TPositionTaking)*ABS(stake)*ActualRate) Turnover,
 			CONVERT(MONEY,SUM(CASE WHEN StatusID IN (112,113) AND (ABS(MOdds) <> 0.25 OR Bettype IN (9,29,10)) THEN ABS(Stake)
-									ELSE CASE WHEN StatusID IN (112,113) AND ABS(MOdds) =0.25 AND Bettype NOT IN (9,29,10) THEN ABS(Stake)*0.5  ELSE 0 END END * (1-TPositionTaking))) AS ActualTurnover
+									ELSE CASE WHEN StatusID IN (112,113) AND ABS(MOdds) =0.25 AND Bettype NOT IN (9,29,10) THEN ABS(Stake)*0.5  ELSE 0 END END * (1-TPositionTaking)*ActualRate)) AS ActualTurnover
 	FROM	bettrans14 b WITH (NOLOCK)			
 	WHERE	winlostdate = @winlostdate
 			AND (bettype < 31 OR b.bettype BETWEEN 121 AND 999 OR bettype BETWEEN 1301 and 1334)	

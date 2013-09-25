@@ -2,7 +2,7 @@
     @transid BIGINT,
     @userid int,   
     @IP varchar(50),
-    @ErrCode int output,
+	@ErrCode int output,
     @ErrMsg nvarchar(200) output
 AS
 /*
@@ -14,6 +14,7 @@ Task: Recover Single Bet and Outright
 Revisions:   
 	  - 20130725@Sophia: Change username nvarchar(50)
 	  - 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
+	  - 20130924@Sophia: get EventStatus to show recommendation popup when recover bet
 Param's Explanation:
 
 */
@@ -37,7 +38,8 @@ BEGIN
 		@CustId int,		
 		@balance money,
 		@bf_balance MONEY,
-		@at_balance MONEY
+		@at_balance MONEY,
+		@EventStatus NVARCHAR(50)
 
     SELECT	@matchid = matchid, 
 			@bettype = bettype ,			
@@ -92,36 +94,41 @@ BEGIN
 	
 	-------------------		
 		
-    --IF @bettype = 10  --@bettype = 10
-    --BEGIN
-    --    SELECT
-    --        MATCH.teamid AS homeid,
-    --        0 AS awayid,
-    --        MATCH.matchcode,
-    --        MATCH.eventdate,
-    --        MATCH.leagueid,
-    --        GETDATE() AS DATETIME,
-    --        CONVERT(BIT,0) AS IsNeutral
-    --    FROM
-    --        Outright AS MATCH WITH (NOLOCK)
-    --    WHERE
-    --        MATCH.orid = @matchID
-    --END  
-    --ELSE
-    --BEGIN
-    --    SELECT
-    --        MATCH.homeid,
-    --        MATCH.awayid,
-    --        MATCH.matchcode,
-    --        MATCH.eventdate,
-    --        MATCH.leagueid,
-    --        GETDATE() AS DATETIME,
-    --        isnull(MATCH.isNeutral, CONVERT(BIT,0)) AS IsNeutral
-    --    FROM
-    --        MATCH WITH (NOLOCK)
-    --    WHERE
-    --        MATCH.matchid = @matchID
-    --END
+    IF @bettype = 10  
+    BEGIN
+        SELECT	@EventStatus = OddsStatus
+				--MATCH.teamid AS homeid,
+				--0 AS awayid,
+				--MATCH.matchcode,
+				--MATCH.eventdate,
+				--MATCH.leagueid,
+				--GETDATE() AS DATETIME,
+				--CONVERT(BIT,0) AS IsNeutral		
+        FROM      Outright WITH (NOLOCK)
+        WHERE     Outright.orid = @matchID
+    END  
+    ELSE
+    BEGIN
+        SELECT	@EventStatus = EventStatus
+				--MATCH.homeid,
+				--MATCH.awayid,
+				--MATCH.matchcode,
+				--MATCH.eventdate,
+				--MATCH.leagueid,
+				--GETDATE() AS DATETIME,
+				--isnull(MATCH.isNeutral, CONVERT(BIT,0)) AS IsNeutral
+        FROM	MATCH WITH (NOLOCK)
+        WHERE   MATCH.matchid = @matchID
+    END
+	IF @EventStatus = 'completed' and @Bettype NOT IN (9,29)
+	BEGIN 
+		SELECT @ErrCode = 0, @ErrMsg = 'Recalculation for the match ' + @MatchID +' is highly recommended as ticket BetId ' + @TransID + ' has been reverted to "Running" status.'
+	END
+	ELSE 
+	IF @EventStatus = 'completed' and @Bettype IN (9,29)
+	BEGIN 
+		SELECT @ErrCode = 0, @ErrMsg = 'Parlay recalculation for the match '+ @MatchId +' has been reverted to "Running" status.'
+	END
 
    --- exec ApolloArchive.DB06.dbo.Acc_BettransSelRecoverSpecialBets @transid = @transid 
 
@@ -272,7 +279,6 @@ BEGIN
 	WHERE B.TransId = @TransId
 	UNION ALL
 	SELECT  @TransId as TransId, @CustId as TargetId, @Username as TargetName, 0 as IsAgent
-	
 
 
 
@@ -323,5 +329,4 @@ END
 
 GO
 GRANT EXECUTE ON [dbo].[Acc_BettransRecoverSpecialBets] TO [aplweb]
-GO
---GRANT VIEW DEFINITION ON [dbo].[Acc_BettransRecoverSpecialBets] TO [vnteam]
+GO 

@@ -39,8 +39,7 @@ BEGIN
 	---Sportsbook
 	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
 	INSERT INTO #WinLossMember  
-	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,
-			0 as Share,	
+	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,				
 			COUNT(B.TransID) BetCount,			
 		   	SUM(ABS(B.Stake)) as BetAmount,
 			SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as CommBase,
@@ -82,8 +81,7 @@ BEGIN
 	-----Parlay	
 	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
 	INSERT INTO #WinLossMember  
-	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,
-			0 as Share,	
+	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,			
 			COUNT(B.TransID) BetCount,	
 		   	SUM(ABS(B.Stake)) as BetAmount,
 			SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  as CommBase,
@@ -132,7 +130,6 @@ BEGIN
 	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (10) OR @Bettypes = '0')
 	INSERT INTO #WinLossMember  
 	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,
-			0 as Share,	
 			COUNT(B.TransID) BetCount,			
 		   	SUM(ABS(B.Stake)) as BetAmount,
 			SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  as CommBase,
@@ -187,7 +184,6 @@ BEGIN
 	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
 	INSERT INTO #WinLossMember  
 	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,
-			0 as Share,	
 			COUNT(B.TransID) BetCount,			
 		   	SUM(ABS(B.Stake)) as BetAmount,
 			SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as CommBase,
@@ -230,7 +226,6 @@ BEGIN
 	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
 	INSERT INTO #WinLossMember  
 	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,
-			0 as Share,	
 			COUNT(B.TransID) BetCount,	
 		   	SUM(ABS(B.Stake)) as BetAmount,
 			SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  as CommBase,
@@ -279,7 +274,6 @@ BEGIN
 	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (10) OR @Bettypes = '0')
 	INSERT INTO #WinLossMember  
 	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,
-			0 as Share,	
 			COUNT(B.TransID) BetCount,			
 		   	SUM(ABS(B.Stake)) as BetAmount,
 			SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  as CommBase,

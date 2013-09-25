@@ -44,7 +44,7 @@ AS
 					CONVERT(MONEY,sum((winlost-actual_stake+TWinlost+Tcomm)*actualrate)) LineTotal,
 					CONVERT(MONEY,sum((1-tpositiontaking)*ABS(b.stake)*actualrate)) Turnover,
 					CONVERT(MONEY,SUM(CASE WHEN StatusID IN (112,113) AND (ABS(MOdds) <> 0.25 OR Bettype IN (9,29,10)) THEN ABS(Stake)
-										 ELSE CASE WHEN StatusID IN (112,113) AND ABS(MOdds) =0.25 AND Bettype NOT IN (9,29,10) THEN ABS(Stake)*0.5  ELSE 0 END END * (1-TPositionTaking))) AS ActualTurnover,
+										 ELSE CASE WHEN StatusID IN (112,113) AND ABS(MOdds) =0.25 AND Bettype NOT IN (9,29,10) THEN ABS(Stake)*0.5  ELSE 0 END END * (1-TPositionTaking)*actualrate)) AS ActualTurnover,
 					isnull(m.isNeutral, CONVERT(BIT,0)) as IsNeutral					
 			FROM 	bettrans b with (nolock)
 					INNER JOIN match m with (nolock) ON b.matchid = m.matchid
