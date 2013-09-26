@@ -66,13 +66,13 @@ BEGIN
 				AND BA.AgentId = @AgentID
 				AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND BA.StatusID NOT IN (0,1)	
-				AND BA.bettype <= 19000
+				AND BA.bettype <= 19000 AND BA.Bettype NOT IN (9,29,10)
 				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 		INNER JOIN	CustInfo C WITH (NOLOCK)
 				ON	B.CustID = C.CustID AND  C.AgentId = @AgentID		
 		WHERE   B.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND B.StatusID NOT IN (0,1)	
-				AND B.bettype <= 19000
+				AND B.bettype <= 19000 AND B.Bettype NOT IN (9,29,10)
 				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
 				AND (@Sporttypes = '0' 
 					 OR EXISTS (SELECT 1 FROM match (nolock) 
@@ -214,13 +214,13 @@ BEGIN
 				AND BA.AgentId = @AgentID
 				AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND BA.StatusID NOT IN (0,1)	
-				AND BA.bettype <= 19000
+				AND BA.bettype <= 19000 AND BA.Bettype NOT IN (9,29,10)
 				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 		INNER JOIN	CustInfo C WITH (NOLOCK)
 				ON	B.CustID = C.CustID AND  C.AgentId = @AgentID	
 		WHERE   B.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND B.StatusID NOT IN (0,1)	
-				AND B.bettype <= 19000
+				AND B.bettype <= 19000 AND B.Bettype NOT IN (9,29,10)
 				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
 				
 				AND (@Sporttypes = '0' 
@@ -356,11 +356,12 @@ CREATE TABLE #MemberOutstanding (Username NVARCHAR(50), CustID INT, OutstandingA
 	WHERE	BA.StatusId IN (0,1)	
 			AND BA.matchID > 0
 			AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-
+			AND BA.Bettype NOT IN (9,29,10)
 			AND B.StatusId IN (0,1)	
 			AND B.matchID > 0
 			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-			
+			AND B.Bettype NOT IN (9,29,10)
+
 			AND (@Sporttypes = '0' 
 					OR EXISTS (SELECT 1 FROM match (NOLOCK) 
 								WHERE matchid=b.matchid AND sporttype IN (SELECT sporttype FROM #SportsList)
@@ -515,4 +516,6 @@ DROP TABLE #MemberOutstanding
 DROP TABLE #BettypeList
 DROp TABLE #SportsList
 
-
+GO
+GRANT EXECUTE ON [dbo].[Age_Rpt_WinLoss_Member] TO [aplweb] 
+GO
