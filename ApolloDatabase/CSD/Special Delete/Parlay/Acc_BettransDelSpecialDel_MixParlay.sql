@@ -19,10 +19,8 @@
     @UserName NVARCHAR(50),
     @UserPwd NVARCHAR(50),
     @IP VARCHAR(15) = '',
-	@IsDeleteAll BIT = 0,
     @ErrMsg NVARCHAR(200) = '' OUTPUT,
-    @ErrCode INT = 0 OUTPUT
-
+    @ErrCode INT = 0 OUTPUT	
 AS
 /*
 	Created by: Sophia	
@@ -33,31 +31,14 @@ AS
 	
 	Revisions:
 	 - 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
-	 - 20130918@Sophia:  Add @IsDeleteAll to delete settled tickets
 
 	Param's Explanation: 
 	
-		- @IsDeleteAll:
-			 + 0: can only delete the unsettled or refunded tickets
-			 + 1: can delete all type of status 
+	
 */
 BEGIN	
 	SET NOCOUNT ON
-
-	
-	----Check permission for Delete all 
-	DECLARE @FunctionId smallint 
-	SELECT	@FunctionId = FunctionId
-	FROM	SVRNAP.bodb_NAP.dbo.Functions
-	WHERE	FunctionKey = 'VoidSportsbookBetAll'
-
-	EXEC SVRNAP.bodb_NAP.dbo.NAP_User_CheckPermission @UserId=@UserID,@FunctionId=@FunctionId,@ErrCode=@ErrCode OUTPUT,@ErrMsg=@ErrMsg OUTPUT
-	IF @ErrCode <> 0
-		RETURN
-	---end
-
-
-	DECLARE @LogData NVARCHAR(MAX)
+	DECLARE @LogData NVARCHAR(500)
 	SELECT @ErrCode = 0
 
 	
@@ -72,8 +53,7 @@ BEGIN
 		SELECT @ErrMsg = 'Sorry. You can not process delete bet due to either wrong password or insufficient permission!', @ErrCode = 101   
 		RETURN
 	END
-
-				
+			
 	IF EXISTS(	SELECT 1 FROM dbo.match m WITH(NOLOCK)
 				WHERE m.matchid=@matchid AND m.eventstatus='completed')
 	BEGIN
@@ -163,8 +143,7 @@ BEGIN
 	CREATE NONCLUSTERED INDEX nl_Ref_bettype_org_betteam ON #Ref(bettype,org_betteam)
 	
 	
-	--REMOVE REDUNDANT item	
-	IF @IsDeleteAll = 0 
+	--REMOVE REDUNDANT item
 	DELETE #Ref
 	WHERE statusID NOT IN (0,1,103)
 	
@@ -329,8 +308,9 @@ BEGIN
 				@VoidTransID= @transid_tmp,
 				@UserID		= @UserID
 	END
-	
-	---********* Calculate balance at bettrans table for Mix Parlay********---
+
+
+	---********* Calculate balance at bettrans table********---
 	CREATE TABLE #BeforeUpd (
 				custid		 INT,
 				balance		 MONEY)
@@ -343,76 +323,9 @@ BEGIN
 	IF EXISTS (	SELECT TOP 1 1
 				FROM bettrans b WITH(NOLOCK) 
 					INNER JOIN #Ref r ON b.refno = r.refno
-				WHERE b.matchid = 9 AND b.bettype = 9
-			   ) 
-	BEGIN
-	 
-		--Get data before update
-		INSERT INTO #BeforeUpd (custid, balance)
-		SELECT	b.custid, SUM (b.winlost - b.actual_stake + b.playercomm) balance
-		FROM	bettrans b WITH (NOLOCK)
-			INNER JOIN #Ref r ON b.refno = r.refno
-		WHERE b.matchid = 9 AND b.bettype = 9
-		GROUP BY b.CustID		
-
-		--- ReCalculate Mix Parlay at Main Server
-		BEGIN TRANSACTION 
-			EXEC dbo.Admin_Calculate_9  
-				@matchids = @MatchID, 
-				@matchdate = @matchdate, 
-				@targetserver = 'TRANSDB' -- calculate at TRANSDB only
-			
-		COMMIT TRANSACTION
-
-		WAITFOR DELAY '000:00:00.280' -- wait for log reader before calculating at replicated servers
-
-			--- ReCalculate Mix Parlay at replicated servers
-			EXEC dbo.Admin_Calculate_9  
-				@matchids = @MatchID, 
-				@matchdate = @matchdate, 
-				@targetserver = ''-- calculate at all replicated servers				
-		 --- End of ReCalculate Mix Parlay at Main Server
-		 
-		 
-
-		--Get data after update
-		INSERT INTO #AfterUpd (custid, balance)
-		SELECT	b.custid, SUM (b.winlost - b.actual_stake + b.playercomm) balance
-		FROM	bettrans b WITH (NOLOCK)
-			INNER JOIN #Ref r ON b.refno = r.refno
-		WHERE b.matchid = 9 AND b.bettype = 9
-		GROUP BY b.CustID
-
-
-		---insert data into pending balance table 
-		INSERT INTO BalancePendingCredit (custid,Balance)
-		SELECT		a.custid, (a.balance - b.balance) as Balance
-		FROM		#BeforeUpd b
-		INNER JOIN	#AfterUpd a 	
-				ON	a.custid = b.custid
-		WHERE	    (a.balance - b.balance) > 0
-
-		INSERT INTO BalancePendingDebit (custid,Balance)
-		SELECT		a.custid, ABS(a.balance - b.balance) as Balance
-		FROM		#BeforeUpd b
-		INNER JOIN	#AfterUpd a 	
-				ON	a.custid = b.custid
-		WHERE	    (a.balance - b.balance) < 0
-			
-		DELETE #BeforeUpd
-		DELETE #AfterUpd 
-	END
-	---********* End of calculate balance at bettrans table for Mix Parlay********---
-
-
-	---********* Calculate balance at bettrans table for System Parlay********---
-	IF EXISTS (	SELECT TOP 1 1
-				FROM bettrans b WITH(NOLOCK) 
-					INNER JOIN #Ref r ON b.refno = r.refno
 				WHERE b.matchid = 29 AND b.bettype = 29
 			   ) 
 	BEGIN
-		---generate sub-ticket for combination
 		EXEC dbo.Admin_Calculate_29_PreCal @matchids = @match_tmp
 								
 		--Get data before update
@@ -423,11 +336,10 @@ BEGIN
 		WHERE b.matchid = 29 AND b.bettype = 29
 		GROUP BY b.CustID		
 
-		--- ReCalculate System Parlay
 		EXEC dbo.Admin_Calculate_29 @matchids = @match_tmp, @matchdate = @matchdate		
 		 
 
-		--Get data after update
+	--Get data after update
 		INSERT INTO #AfterUpd (custid, balance)
 		SELECT	b.custid, SUM (b.winlost - b.actual_stake + b.playercomm) balance
 		FROM	bettrans b WITH (NOLOCK)
@@ -450,15 +362,15 @@ BEGIN
 		INNER JOIN	#AfterUpd a 	
 				ON	a.custid = b.custid
 		WHERE	    (a.balance - b.balance) < 0
-		
-		
+			
 		DELETE #BeforeUpd
-		DELETE #AfterUpd 
+		DELETE #AfterUpd
+	---********* End of calculate balance at bettrans table********---
 
 	END
-	---********* End of calculate balance at bettrans table for System Parlay********---
 
-	SELECT @LogData ='delete bet for matchid: ' + CONVERT(VARCHAR(20), @matchid) + ', for Mix Parlay Special Delete'+ ', TransID List:' +@transids + ', IP: ' + COALESCE(CAST(@IP AS VARCHAR(15)),SPACE(1))  + ', Can delete all:'+ CASE WHEN @IsDeleteAll = 1 then ' True' ELSE ' False' END
+
+	SELECT @LogData ='delete bet for matchid ' + CONVERT(VARCHAR(20), @matchid) + ' for Mix Parlay Special Delete' + ' IP=' + COALESCE(CAST(@IP AS VARCHAR(15)),SPACE(1))
 	EXEC WriteLog_UserLog_T @UserID = @UserID, @Doing = @LogData
 	
 	
@@ -614,10 +526,10 @@ BEGIN
 	FROM	#Ref B
 	INNER JOIN Bettrans C WITH (NOLOCK)
 			ON C.RefNo = B.RefNo
-			
-	
-	DROP TABLE #BeforeUpd
-	DROP TABLE #AfterUpd
+
+
+
+
 	DROP TABLE #Ref	
 	
 	-----
@@ -626,9 +538,10 @@ BEGIN
     WHERE	VName = 'isCalculatingParlay'	
 			
 	SET NOCOUNT OFF
- END 
-   
+END
 
 GO
-GRANT EXECUTE ON [dbo].[Acc_BettransDelSpecialDel_MixParlay] TO [aplweb]
+GRANT EXECUTE ON [dbo].[Acc_BettransDelSpecialDel_MixParlay] TO aplweb
 GO
+--GRANT VIEW DEFINITION ON [dbo].[Acc_BettransDelSpecialDel_MixParlay] TO [vnteam]
+go
