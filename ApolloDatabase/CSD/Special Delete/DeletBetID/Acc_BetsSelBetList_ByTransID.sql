@@ -23,7 +23,7 @@ AS
 
 */
 	SET NOCOUNT ON
-	CREATE TABLE #Betlist (transid bigint,CustId int,username nvarchar(50),odds smallmoney, OddsType int, 
+	CREATE TABLE #Betlist (transid bigint,CustId int,username nvarchar(50),Creator Int, odds smallmoney, OddsType int, 
 							transdate datetime, bettype smallint, betteam nvarchar(10),hdp1 smallmoney, hdp2 smallmoney,
 							Liveindicator bit, livehomescore smallint, liveawayscore smallint, StakePositiontaking money,currency tinyint,
 							status nvarchar(10), SecAcceptFlag bit,  HomeId Int, AwayId int, SportType smallint, LeagueId int)
@@ -35,6 +35,7 @@ AS
 			b.transid,
 			b.CustId,
 			b.username,
+			b.Creator,
 			b.odds,   
 			b.OddsType,  
 			b.transdate,
@@ -77,6 +78,7 @@ AS
 			b.transid,
 			b.CustId,
 			b.username,
+			b.Creator,
 			b.odds,   
 			b.OddsType,  
 			b.transdate,

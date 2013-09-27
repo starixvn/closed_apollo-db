@@ -1,8 +1,5 @@
 ﻿ALTER PROCEDURE [dbo].[Acc_BettransDelBet]
     @transids VARCHAR(4000) = '',
-	@Username nvarchar(50),  
-	@FromDate date, 
-	@ToDate date, 
 	@IsDeleteAll BIT = 0,	
     @UserPwd NVARCHAR(50),
     @UserID INT,
@@ -34,17 +31,21 @@ SET NOCOUNT ON
 	SELECT @ErrCode = 0
 
 ----------Check permission for Delete all 
-	If @IsDeleteAll = 1
-	BEGIN 
-		DECLARE @FunctionId smallint 
-		SELECT	@FunctionId = FunctionId
-		FROM	SVRNAP.bodb_NAP.dbo.Functions
-		WHERE	FunctionKey = 'VoidByBetIdAll'
+	DECLARE @FunctionId smallint, @FunctionKey NVARCHAR(50)
 
-		EXEC SVRNAP.bodb_NAP.dbo.NAP_User_CheckPermission @UserId=@UserID,@FunctionId=@FunctionId,@ErrCode=@ErrCode OUTPUT,@ErrMsg=@ErrMsg OUTPUT
-		IF @ErrCode <> 0
-			RETURN
-	END		
+	IF @IsDeleteAll = 1
+		SET @FunctionKey = 'VoidByBetIdAll'
+	ELSE	
+		SET @FunctionKey = 'VoidByBetId'
+		
+	SELECT	@FunctionId = FunctionId
+	FROM	SVRNAP.bodb_NAP.dbo.Functions WITH (NOLOCK)
+	WHERE	FunctionKey = @FunctionKey
+
+	EXEC SVRNAP.bodb_NAP.dbo.NAP_User_CheckPermission @UserId=@UserID,@FunctionId=@FunctionId,@ErrCode=@ErrCode OUTPUT,@ErrMsg=@ErrMsg OUTPUT
+	IF @ErrCode <> 0
+		RETURN
+ 
 ---------end check permission for Delete all 
 
 	IF NOT EXISTS ( SELECT 1
@@ -311,21 +312,21 @@ SET NOCOUNT ON
 
 	 
 	---- List data to put Message
-	SELECT  B.TransId, A.AgentID as TargetID, I.Username as TargetName, 1 as IsAgent
+	SELECT  B.TransId, B.KeyValue as MatchId, CASE WHEN B.KeyID = 2 THEN 1 ELSE 0 END IsOutright, A.AgentID as TargetID, I.Username as TargetName, 1 as IsAgent
 	FROM	#BetDelete B
 	INNER JOIN Bettrans_Agent A WITH (NOLOCK)
 			ON A.TransID = B.TransID
 	INNER JOIN AgentInfo I WITH (NOLOCK)
 			ON I.AgentId = A.AgentId
 	UNION ALL
-	SELECT  B.TransId, B.CustId as TargetID, B.PlayerName as TargetName, 0 as IsAgent
+	SELECT  B.TransId, B.KeyValue as MatchId, CASE WHEN B.KeyID = 2 THEN 1 ELSE 0 END IsOutright, B.CustId as TargetID,B.PlayerName as TargetName, 0 as IsAgent
 	FROM	#BetDelete B
 
 	 
 	--------------
-	DELETE T WITH (ROWLOCK,UPDLOCK)
-	FROM dbo.TempVariableNumber T
-	INNER JOIN ( SELECT CASE WHEN Bettype = 10 THEN 2 ELSE 1 END AS KeyID, MatchID AS KeyValue FROM #BetDelete) B 
+	DELETE	T WITH (ROWLOCK,UPDLOCK)
+	FROM	TempVariableNumber T
+	INNER JOIN #BetDelete B 
 			ON T.KeyID = B.KeyID AND T.KeyValue = B.KeyValue
 				
 			
@@ -411,4 +412,3 @@ SET NOCOUNT ON
 	 
 GO
 GRANT EXECUTE ON [dbo].[Acc_BettransDelBet] TO [aplweb] 
-GO
