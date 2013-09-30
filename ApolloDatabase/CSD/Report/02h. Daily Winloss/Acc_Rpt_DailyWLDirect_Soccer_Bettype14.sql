@@ -57,7 +57,7 @@ SET NOCOUNT ON
 	WHERE l.sporttype = 1
 
 	----------------------------------------------------------
-	CREATE TABLE #Tempbettrans14 (Liveindicator BIT, Bettype TINYINT, matchid INT, WinLost MONEY,  
+	CREATE TABLE #Tempbettrans14 (Liveindicator BIT, Bettype SMALLINT, matchid INT, WinLost MONEY,  
 								Share MONEY, Commission MONEY, LineTotal MONEY, Turnover MONEY, ActualTurnover MONEY )
 	INSERT INTO #TempBettrans14	
 	SELECT	liveindicator,
@@ -72,13 +72,13 @@ SET NOCOUNT ON
 									ELSE CASE WHEN StatusID IN (112,113) AND ABS(MOdds) =0.25 AND Bettype NOT IN (9,29,10) THEN ABS(Stake)*0.5  ELSE 0 END END * (1-TPositionTaking)*ActualRate)) AS ActualTurnover
 	FROM	bettrans14 b WITH (NOLOCK)			
 	WHERE	winlostdate = @winlostdate
-			AND (bettype < 31 OR b.bettype BETWEEN 121 AND 999 OR bettype BETWEEN 1301 and 1334)	
+			AND (bettype < 31 OR b.bettype BETWEEN 121 AND 999)	
 			AND statusID NOT IN (0, 1, 102, 101, 103)   ----- Void, reiject, refund
 			AND b.TransID NOT IN  ( SELECT	TransID 
 									FROM	Bettrans14_Agent WITH (NOLOCK)
 									WHERE	winlostdate = @winlostdate			 
 											AND statusID not in (0,1,101,102,103) --('VOID','REJECT','REFUND')
-											AND (bettype < 31 OR bettype BETWEEN 121 AND 999 OR bettype BETWEEN 1301 and 1334)
+											AND (bettype < 31 OR bettype BETWEEN 121 AND 999)
 											AND AgentID = 53288 -----line test Suntest
 									)  	 	
 	GROUP BY		
