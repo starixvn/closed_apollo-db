@@ -22,8 +22,7 @@
     @FromTransdate Datetime = NULL,
 	@ToTransdate Datetime = NULL,
     @IP VARCHAR(15) = '',   
-    @SAFilter tinyint = 0,
-	@IsDeleteAll BIT = 0 
+    @SAFilter tinyint = 0 
 AS
 
 /*
@@ -37,8 +36,6 @@ Revisions:
   - 20130725@Sophia: Change username nvarchar(50)
   - 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
   - 20130829@Sophia: change @f_transID /@t_transid to @FromTransId / @ToTransId
-  - 20130918@Sophia: Add @IsDeleteAll to delete settled tickets
-
 		    
 Param's Explanation: Special bet delete option
 
@@ -52,26 +49,19 @@ Param's Explanation: Special bet delete option
 	 + 1: Live
 	 + 2: All
 
-	- @IsDeleteAll:
-	 + 0: can only delete the unsettled or refunded tickets
-	 + 1: can delete all type of status 
 */
 
 	SET NOCOUNT ON
 
+	---- **************MODIFY LATER*********
+	----Check permission for account site:  
+	--EXEC DBPOLICY.bodb02.dbo.Acc_Con_CheckPermission @custid=@UserID,@funcname='[SpecialDelete]',@ErrCode=@ErrCode OUTPUT,@ErrMsg=@ErrMsg OUTPUT
+	--IF @ErrCode <> 0
+	--	RETURN
+	--end
+		
 	
-	----Check permission for Delete all 
-	DECLARE @FunctionId smallint 
-	SELECT	@FunctionId = FunctionId
-	FROM	SVRNAP.bodb_NAP.dbo.Functions
-	WHERE	FunctionKey = 'VoidSportsbookBetAll'
-
-	EXEC SVRNAP.bodb_NAP.dbo.NAP_User_CheckPermission @UserId=@UserID,@FunctionId=@FunctionId,@ErrCode=@ErrCode OUTPUT,@ErrMsg=@ErrMsg OUTPUT
-	IF @ErrCode <> 0
-		RETURN
-	---end
-	
-	DECLARE @LogData NVARCHAR(MAX)
+	DECLARE @LogData NVARCHAR(500)
 	DECLARE @Remark VARCHAR(500)
 	SELECT @ErrCode = 0
 
@@ -87,7 +77,6 @@ Param's Explanation: Special bet delete option
 			   @ErrCode = 101   
 		RETURN
 	END
-
 	
 	---- check and not allow attempt to delete same game while it's still not finish
 	DECLARE @KeyID INT
@@ -132,7 +121,6 @@ Param's Explanation: Special bet delete option
 		SELECT @ErrCode = 100, @ErrMsg = 'This match is being calculated or some tickets of this match are being deleted, please wait a few seconds until the on-going process is completed and try again.'
 		RETURN
 	END 
-
 	-------------------		
 		
 	CREATE TABLE #BetDelete (transid BIGINT, CustId INT, PlayerName nvarchar(50), betfrom NVARCHAR(1),statusID INT)
@@ -141,7 +129,24 @@ Param's Explanation: Special bet delete option
 
 	--DECLARE @RealCurrCust TABLE (custid INT, username VARCHAR(30))
 
-	 
+	DECLARE @Status TABLE (statusID TINYINT)
+
+		/*
+		INSERT INTO @Status
+		SELECT 'Void' UNION ALL
+		SELECT 'Reject' UNION ALL
+		SELECT 'WON' UNION ALL
+		SELECT 'LOSE' UNION ALL
+		SELECT 'DRAW'
+		*/
+		INSERT INTO @Status
+		SELECT 102 UNION ALL
+		SELECT 101 UNION ALL
+		SELECT 112 UNION ALL
+		SELECT 113 UNION ALL
+		SELECT 111
+
+	
 
 ------------------***** Insert all data into #BetDelete *****------------------
 	--bettype <> 4
@@ -243,20 +248,6 @@ Param's Explanation: Special bet delete option
 		AND b.TransID IN (SELECT CONVERT(BIGINT, val) FROM dbo.strSplit(@transids, ','))
 	 
 ------------------***** End of insert all data into #BetDelete *****------------------		
-
-------------------***** Check: can delete settle ticket or not *****------------------		
-
-IF @IsDeleteAll = 0 
-BEGIN 
-	DECLARE @Status TABLE (statusID TINYINT)
-
-	INSERT INTO @Status
-	SELECT 102 UNION ALL    ---'Void'
-	SELECT 101 UNION ALL	---'Reject'
-	SELECT 112 UNION ALL	---'WON'
-	SELECT 113 UNION ALL	---'LOSE' 
-	SELECT 111				---'DRAW'
-
 			
 	IF EXISTS (SELECT 1 FROM #BetDelete WHERE statusID IN (111,112,113))
 	BEGIN
@@ -309,8 +300,6 @@ BEGIN
 	BEGIN
 		DELETE FROM #BetDelete WHERE statusID IN (SELECT * FROM @Status)
 	END
-END
-------------------*****End check: can delete settle ticket or not *****------------------		
 
 
 ------------------***** Insert Custid of each type into its temp table *****------------------		
@@ -443,7 +432,7 @@ END
 
 ------------------***** End of Special Delete *****------------------
 
-	SELECT @LogData ='Delete bet for matchid: ' + CONVERT(VARCHAR(20), @matchid) + ', from: ' + CONVERT(VARCHAR(20), @FromTransId) + ' to: ' + CONVERT(VARCHAR(20), @ToTransId)+ ',TransID List: ' + @transids + ', IP:' + COALESCE(CAST(@IP AS VARCHAR(15)),SPACE(1))  + ', Can delete all:'+ CASE WHEN @IsDeleteAll = 1 then ' True' ELSE ' False' END
+	SELECT @LogData ='Delete bet for matchid ' + CONVERT(VARCHAR(20), @matchid) + ' from ' + CONVERT(VARCHAR(20), @FromTransId) + ' to ' + CONVERT(VARCHAR(20), @ToTransId) + ' IP=' + COALESCE(CAST(@IP AS VARCHAR(15)),SPACE(1))
 	EXEC WriteLog_UserLog_T @UserID = @UserID, @Doing = @LogData
 
 ------after delete, return all deleted with additional information for mailing 
@@ -604,5 +593,6 @@ END
 
 	 
 GO
-GRANT EXECUTE ON [dbo].[Acc_BettransDelSpecial] TO [aplweb] 
-GO 
+GRANT EXECUTE ON [dbo].[Acc_BettransDelSpecial] TO [aplweb] AS [dbo]
+GO
+--GRANT VIEW DEFINITION ON [dbo].[Acc_BettransDelSpecial] TO [vnteam] AS [dbo]

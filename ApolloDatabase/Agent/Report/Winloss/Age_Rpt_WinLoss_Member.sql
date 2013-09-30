@@ -1,11 +1,4 @@
-﻿USE [RepDB]
-GO
-/****** Object:  StoredProcedure [dbo].[Age_Rpt_WinLoss_Member]    Script Date: 7/15/2013 1:08:38 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-ALTER PROCEDURE [dbo].[Age_Rpt_WinLoss_Member]
+﻿ALTER PROCEDURE [dbo].[Age_Rpt_WinLoss_Member]
 	@AgentID 	INT,
 	@FromDate 	DATE,
 	@ToDate 	DATE,
@@ -13,9 +6,8 @@ ALTER PROCEDURE [dbo].[Age_Rpt_WinLoss_Member]
 	@BalanceUpDay DATE,
 	@Sporttypes VARCHAR(MAX) = '0',
 	@Bettypes VARCHAR(MAX) = '0' 		
-
-AS
-    /*
+as
+ /*
     Created: Sophia
 	Date: 20130401
     Task : Members detail of Report Agent Winloss
@@ -29,7 +21,7 @@ AS
 						   .Change the formula of CommBase Parlay and Outright
 
 
-	EX: EXEC Age_Rpt_WinLoss_Member @AgentId =3, @FromDate = '2013-01-01',  @ToDate = '2013-04-10', @BalanceUpDay = '2013-03-01'
+	EX:  EXEC Age_Rpt_WinLoss_Member @AgentId =3, @FromDate = '2013-01-01',  @ToDate = '2013-04-10', @BalanceUpDay = '2013-03-01'
 
        
     */
@@ -74,17 +66,19 @@ BEGIN
 				AND BA.AgentId = @AgentID
 				AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND BA.StatusID NOT IN (0,1)	
-				AND BA.bettype <= 19000
+				AND BA.bettype <= 19000 AND BA.Bettype NOT IN (9,29,10)
 				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 		INNER JOIN	CustInfo C WITH (NOLOCK)
-				ON	B.CustID = C.CustID AND  C.AgentId = @AgentID
-		INNER JOIN  Match m  WITH (NOLOCK) 
-				ON  m.MatchID = B.MatchID		
+				ON	B.CustID = C.CustID AND  C.AgentId = @AgentID		
 		WHERE   B.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND B.StatusID NOT IN (0,1)	
-				AND B.bettype <= 19000
+				AND B.bettype <= 19000 AND B.Bettype NOT IN (9,29,10)
 				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-				AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
+				AND (@Sporttypes = '0' 
+					 OR EXISTS (SELECT 1 FROM match (nolock) 
+								 WHERE matchid=b.matchid AND sporttype IN (Select sporttype FROM #SportsList)
+								)
+					)
 		GROUP BY C.Username, C.CustID
 
 	----Parlay
@@ -220,17 +214,21 @@ BEGIN
 				AND BA.AgentId = @AgentID
 				AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND BA.StatusID NOT IN (0,1)	
-				AND BA.bettype <= 19000
+				AND BA.bettype <= 19000 AND BA.Bettype NOT IN (9,29,10)
 				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 		INNER JOIN	CustInfo C WITH (NOLOCK)
-				ON	B.CustID = C.CustID AND  C.AgentId = @AgentID
-		INNER JOIN  Match14 M WITH (NOLOCK) 
-				ON  m.MatchID = B.MatchID		
+				ON	B.CustID = C.CustID AND  C.AgentId = @AgentID	
 		WHERE   B.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND B.StatusID NOT IN (0,1)	
-				AND B.bettype <= 19000
+				AND B.bettype <= 19000 AND B.Bettype NOT IN (9,29,10)
 				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-				AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
+				
+				AND (@Sporttypes = '0' 
+					OR EXISTS (SELECT 1 FROM match14 (NOLOCK) 
+								WHERE matchid=b.matchid AND sporttype IN (SELECT sporttype FROM #SportsList)
+								)
+					)
+
 		GROUP BY C.Username, C.CustID
 
 	----Parlay
@@ -355,16 +353,20 @@ CREATE TABLE #MemberOutstanding (Username NVARCHAR(50), CustID INT, OutstandingA
 		ON	BA.TransID = B.TransID AND BA.AgentId = @AgentID  
 	INNER JOIN CustInfo C WITH (NOLOCK)
 			ON B.CustID = C.CustID AND BA.AgentId = C.AgentId
-	INNER JOIN Match M WITH (NOLOCK) 
-			ON M.MatchId = B.MatchId
 	WHERE	BA.StatusId IN (0,1)	
 			AND BA.matchID > 0
 			AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-
+			AND BA.Bettype NOT IN (9,29,10)
 			AND B.StatusId IN (0,1)	
 			AND B.matchID > 0
 			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-			AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
+			AND B.Bettype NOT IN (9,29,10)
+
+			AND (@Sporttypes = '0' 
+					OR EXISTS (SELECT 1 FROM match (NOLOCK) 
+								WHERE matchid=b.matchid AND sporttype IN (SELECT sporttype FROM #SportsList)
+								)
+					)
 	GROUP BY C.Username, B.CustID
 	ORDER BY C.Username
 
@@ -445,15 +447,15 @@ CREATE TABLE #MemberOutstanding (Username NVARCHAR(50), CustID INT, OutstandingA
 DECLARE @Share smallint
 
 
-----verison _CustDB
---SELECT TOP 1 @Share = PositionTaking
---FROM SVRCUST.CustDB.dbo.CustPositionTaking PT WITH (NOLOCK) 
---WHERE  Custid= (select top 1 custid from CustInfo where AgentID = @AgentID) AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
-
----Verion local
+--verison _CustDB
 SELECT TOP 1 @Share = PositionTaking
-FROM SVRCUST.CustDB.dbo.AgentCustPositionTaking PT WITH (NOLOCK) 
-WHERE PT.AgentCustId = @AgentID AND PT.AgentId = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
+FROM SVRCUST.CustDB.dbo.CustPositionTaking PT WITH (NOLOCK) 
+WHERE  Custid= (select top 1 custid from CustInfo where AgentID = @AgentID) AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
+
+-----Verion local
+--SELECT TOP 1 @Share = PositionTaking
+--FROM SVRCUST.CustDB.dbo.AgentCustPositionTaking PT WITH (NOLOCK) 
+--WHERE PT.AgentCustId = @AgentID AND PT.AgentId = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
 
 
 SELECT	ISNULL(A.Username, B.Username) as Username, 
@@ -515,5 +517,5 @@ DROP TABLE #BettypeList
 DROp TABLE #SportsList
 
 GO
-GRANT EXECUTE ON [dbo].[Age_Rpt_WinLoss_Member] TO [aplweb]
-GO 
+GRANT EXECUTE ON [dbo].[Age_Rpt_WinLoss_Member] TO [aplweb] 
+GO
