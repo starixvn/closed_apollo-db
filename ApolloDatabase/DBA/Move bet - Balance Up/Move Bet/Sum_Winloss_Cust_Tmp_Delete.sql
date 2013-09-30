@@ -15,7 +15,8 @@ Created: 20130515@Sophia
 Task :	trigger delete on Sum_Winloss_Cust_Tmp
 DB: SVRTXN.TransDB
 Original:   Sum_Winloss_Tmp_Delete
-Revisions:
+Revisions: 
+	 - 20130930@Sophia: Add new and rename some columns
 	 
 
 */
@@ -25,13 +26,35 @@ SET NOCOUNT ON;
 
     -- Insert statements for trigger here
 	INSERT INTO dbo.Sum_Winloss_Cust 
-				(WinLostDate,CustId,Username,AgentId,Turnover,
-				 Actual_Turnover,WinLost,PlayerComm,UplineWinLost,
-				 UplineComm,BetCount,SportType,BetType)
-	SELECT		 WinLostDate,CustId,Username,AgentId,Turnover,
-				 Actual_Turnover,WinLost,PlayerComm,UplineWinLost,
-				 UplineComm,BetCount,SportType,BetType
-	FROM		deleted
+				(	WinLostDate,
+					CustId,
+					Username,
+					AgentId,
+					BetAmount,
+					BetCount,
+					CommBase,
+					WinLost,
+					PlayerComm,
+					UplineWinLost,
+					UplineComm,
+					UplineEffStake,
+					SportType,
+					BetType)
+	SELECT			WinLostDate,
+					CustId,
+					Username,
+					AgentId,
+					BetAmount,
+					BetCount,
+					CommBase,
+					WinLost,
+					PlayerComm,
+					UplineWinLost,
+					UplineComm,
+					UplineEffStake,
+					SportType,
+					BetType
+	FROM			Deleted
 
 END
 

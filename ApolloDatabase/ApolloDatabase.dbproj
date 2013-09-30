@@ -123,6 +123,7 @@
     <Folder Include="CSD\Report\Daily Mix Parlay Winloss" />
     <Folder Include="CSD\Admin\MailingList" />
     <Folder Include="Agent\Report\Result\BK" />
+    <Folder Include="CSD\Special Delete\DeletBetID" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1754,6 +1755,12 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdatePositionTaking_xtest5.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Special Delete\DeletBetID\Acc_BettransDelBet.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Special Delete\DeletBetID\Acc_BetsSelBetList_ByTransID.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>

@@ -26,7 +26,7 @@ AS
 	CREATE TABLE #Betlist (transid bigint,CustId int,username nvarchar(50),Creator Int, odds smallmoney, OddsType int, 
 							transdate datetime, bettype smallint, betteam nvarchar(10),hdp1 smallmoney, hdp2 smallmoney,
 							Liveindicator bit, livehomescore smallint, liveawayscore smallint, StakePositiontaking money,currency tinyint,
-							status nvarchar(10), SecAcceptFlag bit,  HomeId Int, AwayId int, SportType smallint, LeagueId int)
+							status nvarchar(10), SecAcceptFlag bit,  HomeId Int, AwayId int, SportType smallint, LeagueId int, Winlost MONEY)
 	---by @TransID
 	 IF ISNULL(@TransID,0) <> 0
 	 BEGIN 
@@ -55,7 +55,8 @@ AS
 			m.HomeId, 
 			m.AwayId, 
 			m.SportType,
-			m.LeagueId
+			m.LeagueId,
+			b.Winlost
 		FROM bettrans b WITH (NOLOCK)		
 		INNER JOIN match m WITH (NOLOCK)
 				ON M.MatchID = B.MatchID
@@ -98,7 +99,8 @@ AS
 			m.HomeId, 
 			m.AwayId, 
 			m.SportType,
-			m.LeagueId
+			m.LeagueId,
+			b.Winlost
 		FROM bettrans b WITH (NOLOCK)		
 		INNER JOIN match m WITH (NOLOCK)
 				ON M.MatchID = B.MatchID
