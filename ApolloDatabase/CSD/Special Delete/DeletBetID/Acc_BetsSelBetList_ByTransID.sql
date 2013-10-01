@@ -62,6 +62,7 @@ AS
 				ON M.MatchID = B.MatchID
 		WHERE   B.TransID = @TransID
 				AND Bettype NOT IN (9,29)
+				AND B.StatusID NOT IN (101,102) -- Void, Reject
 			    AND (B.StatusId IN (0,1) OR @IsShowAll = 1)
 			   
 	END 
@@ -107,6 +108,7 @@ AS
 		WHERE B.WinLostDate Between @FromDate AND @ToDate
 			  AND Bettype NOT IN (9,29)
 			  AND B.CustID = @CustID
+			  AND B.StatusID NOT IN (101,102) -- Void, Reject
 			  AND (B.StatusId IN (0,1) OR @IsShowAll = 1)
 	END
 
