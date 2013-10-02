@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[Age_Rpt_WinLoss_AgentViewCust]
+﻿ALTER  PROCEDURE [dbo].[Age_Rpt_WinLoss_SuperViewAgent]
 	@AgentID 	INT,
 	@FromDate 	DATE,
 	@ToDate 	DATE,	
@@ -10,313 +10,238 @@
 AS
     /*
     Created	: Sophia
-	Date	: 20130401
-    Task	: Report Agent Winloss
+	Date	: 20130726
+    Task	: Report Agent Winloss (SuperView)
     DB		: SVRAGE.RepDB
     Original SP:[Age_Rpt_WinLoss_Ag]
-    EX: EXEC Age_Rpt_WinLoss @AgentId =99, @FromDate = '2013-01-01',  @ToDate = '2013-05-10', @BalanceUpDay = '2013-03-01'
+   
 
-    Revisions:
-       - 20130625@Sophia: Modify for Singbet
-	   - 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
-						  Sort by PositionTaking
-	   - 20130712@Sophia: add OutStanding
-	   - 20130718@Sophia: Remove OutStanding
-	   - 20130910@Sophia: revise Outright
-	   - 20130924@Sophia: Change the formula of CommBase Parlay and Outright
+    Revisions: 
+		- 20130924@Sophia: .Use link server to call table AgentPositionTaking
+						   .Change the formula of CommBase Parlay and Outright
+		- 20130925@Sophia: Change to way to get Share
+		- 20131002@Sophia: Use Sum_WinLoss_Agent/ Sum_WinLoss_Cust table
     */
     
 SET NOCOUNT ON
 
-
 IF @Todate > @MoveBetDay
 BEGIN  
-	 
+	
+	--********************************
+	----Super view
+	--********************************
+		
+		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
+		----Sportsbook
+		INSERT INTO #WinLossAgent
+		SELECT  C.Username, C.AgentID, 1 as IsAgent,
+				COUNT(B.TransID) BetCount,			
+		   		SUM(ABS(B.Stake)) AS BetAmount,
+				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS CommBase,				
+				SUM (B.WinLost - B.Actual_Stake) as Winlost,
+				SUM (B.PlayerComm) as PlayerComm,
+				SUM (B.WinLost - B.Actual_Stake+ B.PlayerComm) as MemberTotal,
 
---********************************
------Member winloss
---********************************	
-	---Sportsbook
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
-	INSERT INTO #WinLossMember  
-	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,				
-			COUNT(B.TransID) BetCount,			
-		   	SUM(ABS(B.Stake)) as BetAmount,
-			SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as CommBase,
+				- SUM(B.Winlost - B.Actual_Stake + B.TWinlost) AS AWinlost,	
+				- SUM (B.TComm) AS AComm,
+				- (SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS ATotal,
 
-			SUM (B.Winlost - B.Actual_Stake) as Winlost,
-			SUM (B.PlayerComm) as PlayerComm,
-			SUM (B.Winlost - B.Actual_Stake + B.PlayerComm) as MemberTotal,
-
-			SUM(BA.AWinLost) as AWinlost,	
-			SUM(BA.AComm) - SUM (B.PlayerComm) as AComm,
-			SUM(BA.AWinLost) + SUM(BA.AComm) - SUM (B.PlayerComm) AS ATotal,
-
-			0 as DownlineEffStake, 
-			0 as GrossTotal,
-
-			SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END * (1-BA.APositionTaking))  as UplineEffStake,
-			-(SUM (B.Winlost - B.Actual_Stake + B.PlayerComm) + SUM(BA.AWinLost) + SUM(BA.AComm) - SUM (B.PlayerComm)) UplineTotal
-
-	FROM	Bettrans B WITH (NOLOCK)
-	INNER JOIN BetTrans_Agent BA WITH (NOLOCK ) 
-		ON	BA.TransID = B.TransID 
-		AND BA.AgentId = @AgentID 
-		AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
-		AND BA.StatusID NOT IN (0,1)
-		AND BA.Bettype <= 19000
-		AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-	INNER JOIN CustInfo C WITH (NOLOCK)
-		ON	B.CustID = C.CustID AND C.AgentId = @AgentID
-	INNER JOIN  Match m  WITH (NOLOCK) 
-		ON m.MatchID = B.MatchID
-	WHERE	B.Winlostdate BETWEEN @FromDate AND @ToDate 
-			AND B.StatusID NOT IN (0,1)
-			AND B.Bettype <= 19000
-			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-
-			AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
- 
-
-	-----Parlay	
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
-	INSERT INTO #WinLossMember  
-	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,			
-			COUNT(B.TransID) BetCount,	
-		   	SUM(ABS(B.Stake)) as BetAmount,
-			SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  as CommBase,
+				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END * (1-B.TPositionTaking))  AS DownlineEffStake , 
+				(SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS GrossTotal,
+											
+				0 AS UplineEffStake ,
+				0 AS UplineTotal
 			
-			SUM (B.Winlost - B.Actual_Stake) as Winlost,
-			SUM (B.PlayerComm) as PlayerComm,
-			SUM (B.Winlost - B.Actual_Stake + B.PlayerComm) as MemberTotal,
-
-			SUM(BA.AWinLost) as AWinlost,	
-			SUM(BA.AComm) - SUM (B.PlayerComm) as AComm,
-			SUM(BA.AWinLost) + SUM(BA.AComm) - SUM (B.PlayerComm) AS ATotal,
-
-			0 as DownlineEffStake, 
-			0 as GrossTotal,
-
-			SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END * (1-BA.APositionTaking))  as UplineEffStake,			
-			-(SUM (B.Winlost - B.Actual_Stake ) + SUM(BA.AWinLost) + SUM(BA.AComm)) UplineTotal	
-	FROM	Bettrans B WITH (NOLOCK)
-	INNER JOIN BetTrans_Agent BA WITH (NOLOCK ) 
-		ON	BA.TransID = B.TransID 
-			AND BA.AgentId = @AgentID 
-			AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
-			AND BA.StatusID NOT IN (0,1)
-			AND BA.Bettype IN (9,29)
-			AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-
-	INNER JOIN CustInfo C WITH (NOLOCK)
-		ON	B.CustID = C.CustID AND C.AgentId = @AgentID			
-	WHERE	B.Winlostdate BETWEEN @FromDate AND @ToDate 
-			AND B.StatusID NOT IN (0,1)
-			AND B.Bettype IN (9,29)
-			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-
-			AND (@Sporttypes = '0' 
-					OR EXISTS (	SELECT	1 
-								FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
-								INNER JOIN Match M WITH (NOLOCK) 
-									ON	 M.matchID = BM.MatchId 
-									AND (M.sporttype IN (Select sporttype FROM #SportsList))							
-								WHERE	BM.RefNo = B.RefNo
-								)
-					)
+		FROM		AgentInfo C WITH (NOLOCK)
+		INNER JOIN	BetTrans_Agent BA WITH (NOLOCK)
+				ON	BA.AgentID = C.AgentID
+					AND BA.Winlostdate BETWEEN @FromDate AND @ToDate
+					AND BA.StatusID NOT IN (0,1)
+					AND BA.Bettype <=19000 AND BA.bettype NOT IN (9,29,10)
+					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))							
+		INNER JOIN	Bettrans B WITH (NOLOCK) 
+				ON	B.TransID = BA.TransID			
+		WHERE		C.ParentId = @AgentID 
+					AND B.Winlostdate BETWEEN @FromDate AND @ToDate
+					AND B.StatusID NOT IN (0,1)
+					AND B.Bettype <=19000 AND B.bettype NOT IN (9,29,10)
+					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))					
+					
+					AND (@Sporttypes = '0' 
+						 OR EXISTS ( SELECT 1 FROM match (NOLOCK) 
+									 WHERE matchid = b.matchid AND sporttype IN (SELECT sporttype FROM #SportsList)
+									)
+						)	 
+		GROUP BY	C.Username, C.AgentID
 
 
-	-----Outright
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (10) OR @Bettypes = '0')
-	INSERT INTO #WinLossMember  
-	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,
-			COUNT(B.TransID) BetCount,			
-		   	SUM(ABS(B.Stake)) as BetAmount,
-			SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  as CommBase,
-			
-			SUM (B.Winlost - B.Actual_Stake) as Winlost,
-			SUM (B.PlayerComm) as PlayerComm,
-			SUM (B.Winlost - B.Actual_Stake + B.PlayerComm) as MemberTotal,
+		----Parlay
+		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
+		INSERT INTO #WinLossAgent
+		SELECT  C.Username, C.AgentID, 1 as IsAgent,			
+				COUNT(B.TransID) BetCount,		
+		   		SUM(ABS(B.Stake)) AS BetAmount,
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,				
+				SUM (B.WinLost - B.Actual_Stake) as Winlost,
+				SUM (B.PlayerComm) as PlayerComm,
+				SUM (B.WinLost - B.Actual_Stake+ B.PlayerComm) as MemberTotal,
 
-			SUM(BA.AWinLost) as AWinlost,	
-			SUM(BA.AComm) - SUM (B.PlayerComm) as AComm,
-			SUM(BA.AWinLost) + SUM(BA.AComm) - SUM (B.PlayerComm) AS ATotal,
+				- SUM(B.Winlost - B.Actual_Stake + B.TWinlost) AS AWinlost,	
+				- SUM (B.TComm) AS AComm,
+				- (SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS ATotal,
 
-			0 as DownlineEffStake, 
-			0 as GrossTotal,
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END * (1-B.TPositionTaking))  AS DownlineEffStake , 
+				(SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS GrossTotal,
+											
+				0 AS UplineEffStake ,
+				0 AS UplineTotal
+		FROM	AgentInfo C WITH (NOLOCK)
+		INNER JOIN	BetTrans_Agent BA WITH (NOLOCK)
+				ON	BA.AgentID = C.AgentID	
+					AND BA.Winlostdate BETWEEN @FromDate AND @ToDate
+					AND BA.StatusID NOT IN (0,1)
+					AND BA.Bettype IN (9,29)
+					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))								
+		INNER JOIN	Bettrans B WITH (NOLOCK) 
+				ON	B.TransID = BA.TransID
+		WHERE		C.ParentId = @AgentID 
+				AND B.Winlostdate BETWEEN @FromDate AND @ToDate
+				AND B.StatusID NOT IN (0,1)
+				AND B.Bettype IN (9,29)
+				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))						
+				
+				-------- Parlay not to care Sporttype, it means All Sports
+				--AND (@Sporttypes = '0' 
+				--OR EXISTS (	SELECT	1 
+				--			FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
+				--			INNER JOIN Match M WITH (NOLOCK) 
+				--				ON	 M.matchID = BM.MatchId 
+				--				AND (M.sporttype IN (Select sporttype FROM #SportsList))							
+				--			WHERE	BM.RefNo = B.RefNo
+				--			)				
+				--		)	
+		GROUP BY	C.Username, C.AgentID
 
-			SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END * (1-BA.APositionTaking))  as UplineEffStake,
-			-(SUM (B.Winlost - B.Actual_Stake + B.PlayerComm) + SUM(BA.AWinLost) + SUM(BA.AComm) - SUM (B.PlayerComm)) UplineTotal
-	FROM	Bettrans B WITH (NOLOCK)
-	INNER JOIN BetTrans_Agent BA WITH (NOLOCK ) 
-		ON	BA.TransID = B.TransID
-			AND BA.AgentId = @AgentID 
-			AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
-			AND BA.StatusID NOT IN (0,1)
-			AND BA.Bettype = 10
-			
-	INNER JOIN CustInfo C WITH (NOLOCK)
-		ON	B.CustID = C.CustID AND C.AgentId = @AgentID	
-	WHERE   B.Winlostdate BETWEEN @FromDate AND @ToDate 
-			AND B.StatusID NOT IN (0,1)
-			AND B.Bettype = 10
-			AND (@Sporttypes = '0' 
-				OR EXISTS (	SELECT	1 
-							FROM Outright m  WITH (NOLOCK) 									
-							INNER JOIN  League l WITH (NOLOCK)
-									ON	l.leagueID = m.leagueId
-									AND (l.sporttype IN (Select sporttype FROM #SportsList))							
-							WHERE	m.orid = B.MatchID
-							)				
-					)
+	
+	----Outright
+		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (10) OR @Bettypes = '0')
+		INSERT INTO #WinLossAgent
+		SELECT  C.Username, C.AgentID, 1 as IsAgent,				
+				COUNT(B.TransID) BetCount,			
+		   		SUM(ABS(B.Stake)) AS BetAmount,
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,
+				SUM (B.WinLost - B.Actual_Stake) as Winlost,
+				SUM (B.PlayerComm) as PlayerComm,
+				SUM (B.WinLost - B.Actual_Stake+ B.PlayerComm) as MemberTotal,
 
-END
- 
+				- SUM(B.Winlost - B.Actual_Stake + B.TWinlost) AS AWinlost,	
+				- SUM (B.TComm) AS AComm,
+				- (SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS ATotal,
+
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END * (1-B.TPositionTaking))  AS DownlineEffStake , 
+				(SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS GrossTotal,
+											
+				0 AS UplineEffStake ,
+				0 AS UplineTotal
+				
+		FROM		AgentInfo C WITH (NOLOCK)
+		INNER JOIN	BetTrans_Agent BA WITH (NOLOCK)
+				ON	BA.AgentID = C.AgentID			
+					AND BA.Winlostdate BETWEEN @FromDate AND @ToDate
+					AND BA.StatusID NOT IN (0,1)
+					AND BA.Bettype = 10
+					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))						
+		INNER JOIN	Bettrans B WITH (NOLOCK) 
+				ON	B.TransID = BA.TransID
+		WHERE		C.ParentId = @AgentID 
+					AND B.Winlostdate BETWEEN @FromDate AND @ToDate
+					AND B.StatusID NOT IN (0,1)
+					AND B.Bettype = 10				
+					AND (@Sporttypes = '0' 
+						OR EXISTS (	SELECT	1 
+									FROM Outright m  WITH (NOLOCK) 									
+									INNER JOIN  League l WITH (NOLOCK)
+											ON	l.leagueID = m.leagueId
+											AND (l.sporttype IN (Select sporttype FROM #SportsList))							
+									WHERE	m.orid = B.MatchID
+									)				
+						)
+		GROUP BY	C.Username, C.AgentID
+
+
+	END
+	
 
 ------------------------------------------------DATA [14] ----------------------------------------------
 
-IF @FromDate <= @MoveBetDay 
-BEGIN  
---********************************
------Member winloss
---********************************	
-	---Sportsbook
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
-	INSERT INTO #WinLossMember  
-	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,
-			COUNT(B.TransID) BetCount,			
-		   	SUM(ABS(B.Stake)) as BetAmount,
-			SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as CommBase,
+IF @BalanceUpDay <= @FromDate --if this case occurs then there is no data from sum_winloss_old
+ BEGIN    	
+		INSERT INTO #WinLossAgent
+	    SELECT	A.AgentUsername as Username, A.AgentId, 1 as IsAgent,		
+				SUM(BetCount) as BetCount, 
+				SUM(BetAmount) as BetAmount,		  
+				SUM(CommBase) as CommBase,				
+				
+				SUM(Winlost) as WinLost,
+				SUM(PlayerComm) as PlayerComm,
+				SUM(Winlost) + SUM(PlayerComm) AS MemberTotal,	
 
-			SUM (B.Winlost - B.Actual_Stake) as Winlost,
-			SUM (B.PlayerComm) as PlayerComm,
-			SUM (B.Winlost - B.Actual_Stake + B.PlayerComm) as MemberTotal,
+				SUM(UplineWinlost) as AWinLost,
+				SUM(UplineComm - AComm) as AComm,
+				SUM(UplineWinlost) + SUM(UplineComm - AComm) AS ATotal,
+				
+				SUM(DownlineEffStake) as DownlineEffStake,
+				SUM(GrossTotal) as GrossTotal,
 
-			SUM(BA.AWinLost) as AWinlost,	
-			SUM(BA.AComm) - SUM (B.PlayerComm) as AComm,
-			SUM(BA.AWinLost) + SUM(BA.AComm) - SUM (B.PlayerComm) AS ATotal,
+				0 as UplineEffStake,			 
+				0 as UplineTotal
 
-			0 as DownlineEffStake, 
-			0 as GrossTotal,
+	    FROM	Sum_WinLoss_Agent A WITH(NOLOCK)		
+		WHERE	ParentID = @AgentId 
+				AND WinLostDate BETWEEN @FromDate AND @ToDate 
+				AND (@Sporttypes = '0' OR A.sporttype IN (Select sporttype FROM #SportsList))
+				AND (@Bettypes = '0' OR A.Bettype IN (Select bettype FROM #BettypeList))		 
+	    GROUP BY AgentUsername, A.AgentId
 
-			SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END * (1-BA.APositionTaking))  as UplineEffStake,
-			-(SUM (B.Winlost - B.Actual_Stake + B.PlayerComm) + SUM(BA.AWinLost) + SUM(BA.AComm) - SUM (B.PlayerComm)) UplineTotal
+	END
+------------------------------------------------DATA [BK] ----------------------------------------------
+	
+IF @FromDate < @BalanceUpDay --if this case occurs then there is no data from sum_winloss_old
+ BEGIN    	
+		IF @todate >= DATEADD(dd, -1, @BalanceUpDay)
+		SELECT @ToDate = DATEADD(dd, -1, @BalanceUpDay)
 
-	FROM	Bettrans14 B WITH (NOLOCK)
-	INNER JOIN Bettrans14_Agent BA WITH (NOLOCK ) 
-		ON	BA.TransID = B.TransID 
-		AND BA.AgentId = @AgentID 
-		AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
-		AND BA.StatusID NOT IN (0,1)
-		AND BA.Bettype <= 19000
-		AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-	INNER JOIN CustInfo C WITH (NOLOCK)
-		ON	B.CustID = C.CustID AND C.AgentId = @AgentID
-	INNER JOIN  Match14 m  WITH (NOLOCK) 
-		ON m.MatchID = B.MatchID
-	WHERE	B.Winlostdate BETWEEN @FromDate AND @ToDate 
-			AND B.StatusID NOT IN (0,1)
-			AND B.Bettype <= 19000
-			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
+		INSERT INTO #WinLossAgent
+	    SELECT	A.AgentUsername as Username, A.AgentId, 1 as IsAgent,		
+				SUM(BetCount) as BetCount, 
+				SUM(BetAmount) as BetAmount,		  
+				SUM(CommBase) as CommBase,				
+				
+				SUM(Winlost) as WinLost,
+				SUM(PlayerComm) as PlayerComm,
+				SUM(Winlost) + SUM(PlayerComm) AS MemberTotal,	
 
-			AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
- 
+				SUM(UplineWinlost) as AWinLost,
+				SUM(UplineComm - AComm) as AComm,
+				SUM(UplineWinlost) + SUM(UplineComm - AComm) AS ATotal,
 
-	-----Parlay	
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
-	INSERT INTO #WinLossMember  
-	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,
-			COUNT(B.TransID) BetCount,	
-		   	SUM(ABS(B.Stake)) as BetAmount,
-			SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  as CommBase,
-			
-			SUM (B.Winlost - B.Actual_Stake) as Winlost,
-			SUM (B.PlayerComm) as PlayerComm,
-			SUM (B.Winlost - B.Actual_Stake + B.PlayerComm) as MemberTotal,
+				SUM(GrossTotal) AS GrossTotal, 
+				
+				SUM(DownlineEffStake) as DownlineEffStake,
+				SUM(GrossTotal) as GrossTotal,
+				0 as UplineEffStake,
+				0 as UplineTotal
+	    FROM	SummaryDB.dbo.Sum_WinLoss_Agent_Old A WITH(NOLOCK)		
+		WHERE	ParentID = @AgentId 
+				AND WinLostDate BETWEEN @FromDate AND @ToDate 
+				AND (@Sporttypes = '0' OR A.sporttype IN (Select sporttype FROM #SportsList))
+				AND (@Bettypes = '0' OR A.Bettype IN (Select bettype FROM #BettypeList))	
+	    GROUP BY AgentUsername, A.AgentId
 
-			SUM(BA.AWinLost) as AWinlost,	
-			SUM(BA.AComm) - SUM (B.PlayerComm) as AComm,
-			SUM(BA.AWinLost) + SUM(BA.AComm) - SUM (B.PlayerComm) AS ATotal,
+	END 
 
-			0 as DownlineEffStake, 
-			0 as GrossTotal,
-
-			SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END * (1-BA.APositionTaking))  as UplineEffStake,			
-			-(SUM (B.Winlost - B.Actual_Stake ) + SUM(BA.AWinLost) + SUM(BA.AComm)) UplineTotal	
-	FROM	Bettrans14 B WITH (NOLOCK)
-	INNER JOIN Bettrans14_Agent BA WITH (NOLOCK ) 
-		ON	BA.TransID = B.TransID 
-			AND BA.AgentId = @AgentID 
-			AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
-			AND BA.StatusID NOT IN (0,1)
-			AND BA.Bettype IN (9,29)
-			AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-
-	INNER JOIN CustInfo C WITH (NOLOCK)
-		ON	B.CustID = C.CustID AND C.AgentId = @AgentID			
-	WHERE	B.Winlostdate BETWEEN @FromDate AND @ToDate 
-			AND B.StatusID NOT IN (0,1)
-			AND B.Bettype IN (9,29)
-			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-
-			AND (@Sporttypes = '0' 
-					OR EXISTS (	SELECT	1 
-								FROM	BettransM14 BM WITH (NOLOCK, index=IX_RefNo) 
-								INNER JOIN Match14 M WITH (NOLOCK) 
-									ON	 M.matchID = BM.MatchId 
-									AND (M.sporttype IN (Select sporttype FROM #SportsList))							
-								WHERE	BM.RefNo = B.RefNo
-								)
-					)
-
-
-	-----Outright
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (10) OR @Bettypes = '0')
-	INSERT INTO #WinLossMember  
-	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,
-			COUNT(B.TransID) BetCount,			
-		   	SUM(ABS(B.Stake)) as BetAmount,
-			SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  as CommBase,
-			
-			SUM (B.Winlost - B.Actual_Stake) as Winlost,
-			SUM (B.PlayerComm) as PlayerComm,
-			SUM (B.Winlost - B.Actual_Stake + B.PlayerComm) as MemberTotal,
-
-			SUM(BA.AWinLost) as AWinlost,	
-			SUM(BA.AComm) - SUM (B.PlayerComm) as AComm,
-			SUM(BA.AWinLost) + SUM(BA.AComm) - SUM (B.PlayerComm) AS ATotal,
-
-			0 as DownlineEffStake, 
-			0 as GrossTotal,
-
-			SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END * (1-BA.APositionTaking))  as UplineEffStake,
-			-(SUM (B.Winlost - B.Actual_Stake + B.PlayerComm) + SUM(BA.AWinLost) + SUM(BA.AComm) - SUM (B.PlayerComm)) UplineTotal
-	FROM	Bettrans14 B WITH (NOLOCK)
-	INNER JOIN Bettrans14_Agent BA WITH (NOLOCK ) 
-		ON	BA.TransID = B.TransID
-			AND BA.AgentId = @AgentID 
-			AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
-			AND BA.StatusID NOT IN (0,1)
-			AND BA.Bettype = 10
-			
-	INNER JOIN CustInfo C WITH (NOLOCK)
-		ON	B.CustID = C.CustID AND C.AgentId = @AgentID
-	WHERE   B.Winlostdate BETWEEN @FromDate AND @ToDate 
-			AND B.StatusID NOT IN (0,1)
-			AND B.Bettype = 10
-			AND (@Sporttypes = '0' 
-				OR EXISTS (	SELECT	1 
-							FROM Outright14 m  WITH (NOLOCK) 									
-							INNER JOIN  League l WITH (NOLOCK)
-									ON	l.leagueID = m.leagueId
-									AND (l.sporttype IN (Select sporttype FROM #SportsList))							
-							WHERE	m.orid = B.MatchID
-							)				
-					)
-
-END
- 
- 
 GO
-GRANT EXECUTE ON [dbo].[Age_Rpt_WinLoss_AgentViewCust] TO [aplweb]
-GO 
+GRANT EXECUTE ON [dbo].[Age_Rpt_WinLoss_SuperViewAgent] TO [aplweb]
+GO   
+ 

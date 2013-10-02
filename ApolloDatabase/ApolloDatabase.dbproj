@@ -1727,21 +1727,6 @@
     <NotInBuild Include="CSD\Admin\User\NAP_User_CheckPermission.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Report\Winloss\Age_Rpt_WinLoss_AgentViewAgent_custdb.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Report\Winloss\Age_Rpt_WinLoss_custdb.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Report\Winloss\Age_Rpt_WinLoss_AgentViewCust_custdb.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Report\Winloss\Age_Rpt_WinLoss_Member_custdb.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Report\Winloss\Age_Rpt_WinLoss_SuperViewAgent_custdb.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="Agent\BetList\BK\Age_BetList_SelWinloss_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
