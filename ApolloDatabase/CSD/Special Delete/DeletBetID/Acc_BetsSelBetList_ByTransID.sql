@@ -26,7 +26,7 @@ AS
 	CREATE TABLE #Betlist (transid bigint,CustId int,username nvarchar(50),Creator Int, odds smallmoney, OddsType int, 
 							transdate datetime, bettype smallint, betteam nvarchar(10),hdp1 smallmoney, hdp2 smallmoney,
 							Liveindicator bit, livehomescore smallint, liveawayscore smallint, StakePositiontaking money,currency tinyint,
-							status nvarchar(10), SecAcceptFlag bit,  HomeId Int, AwayId int, TeamId INT, SportType smallint, LeagueId int, Winlost MONEY)
+							status nvarchar(10), SecAcceptFlag bit,  HomeId Int, AwayId int, SportType smallint, LeagueId int, Winlost MONEY)
 	---by @TransID
 	 IF ISNULL(@TransID,0) <> 0
 	 BEGIN 
@@ -54,7 +54,6 @@ AS
 			ISNULL(SecAcceptFlag,0) SecAcceptFlag,
 			m.HomeId, 
 			m.AwayId, 
-			0 as TeamId,
 			m.SportType,
 			m.LeagueId,
 			b.Winlost
@@ -89,9 +88,8 @@ AS
 				 ELSE b.status 
 				 END as status,
 			ISNULL(SecAcceptFlag,0) SecAcceptFlag,
-			0 as HomeId, 
-			0 as AwayId, 
-			m.TeamId,
+			m.TeamId as HomeId, 
+			0 as AwayId,		
 			l.SportType,
 			m.LeagueId,
 			b.Winlost
@@ -140,8 +138,7 @@ AS
 				 END as status,
 			ISNULL(SecAcceptFlag,0) SecAcceptFlag,
 			m.HomeId, 
-			m.AwayId, 
-			0 as TeamId,
+			m.AwayId, 			
 			m.SportType,
 			m.LeagueId,
 			b.Winlost
@@ -176,9 +173,8 @@ AS
 				 ELSE b.status 
 				 END as status,
 			ISNULL(SecAcceptFlag,0) SecAcceptFlag,
-			0 as HomeId, 
-			0 as AwayId, 
-			m.TeamId,
+			m.TeamId as HomeId, 
+			0 as AwayId, 			
 			l.SportType,
 			m.LeagueId,
 			b.Winlost
