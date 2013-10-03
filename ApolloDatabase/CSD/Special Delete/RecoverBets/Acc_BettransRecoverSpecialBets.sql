@@ -2,8 +2,8 @@
     @transid BIGINT,
     @userid int,   
     @IP varchar(50),
-	@ErrCode int output,
-    @ErrMsg nvarchar(200) output
+	@ErrCode int = 0 output ,
+    @ErrMsg nvarchar(200) = '' output  
 AS
 /*
 Created: Sophia
@@ -120,6 +120,7 @@ BEGIN
         FROM	MATCH WITH (NOLOCK)
         WHERE   MATCH.matchid = @matchID
     END
+
 	IF @EventStatus = 'completed' and @Bettype NOT IN (9,29)
 	BEGIN 
 		SELECT @ErrCode = 0, @ErrMsg = 'Recalculation for the match ' + @MatchID +' is highly recommended as ticket BetId ' + @TransID + ' has been reverted to "Running" status.'

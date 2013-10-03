@@ -224,9 +224,7 @@ IF @FromDate < @BalanceUpDay --if this case occurs then there is no data from su
 				SUM(UplineWinlost) as AWinLost,
 				SUM(UplineComm - AComm) as AComm,
 				SUM(UplineWinlost) + SUM(UplineComm) AS ATotal,
-
-				SUM(GrossTotal) AS GrossTotal, 
-				
+								
 				SUM(DownlineEffStake) as DownlineEffStake,
 				SUM(GrossTotal) as GrossTotal,
 				0 as UplineEffStake,
