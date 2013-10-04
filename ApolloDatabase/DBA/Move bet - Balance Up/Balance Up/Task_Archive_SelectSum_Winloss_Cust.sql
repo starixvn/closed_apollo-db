@@ -13,6 +13,7 @@ DB: SVRTXN.TRANSDB
 Original: IBC.Task_Archive_SelectSum_Winloss
 
 Revisions:    
+	- 20130930@Sophia: Add new and rename some columns
  
 */
 
@@ -26,8 +27,20 @@ SELECT
 FROM dbo.Task_ArchiveDate
 
 
-SELECT	WinLostDate,CustId,Username,AgentId,Turnover,Actual_Turnover,
-		WinLost,PlayerComm,UplineWinLost,UplineComm,BetCount,SportType,BetType
+SELECT	WinLostDate,
+		CustId,
+		Username,
+		AgentId,
+		BetAmount,
+		BetCount,
+		CommBase,
+		WinLost,
+		PlayerComm,
+		UplineWinLost,
+		UplineComm,
+		UplineEffStake,
+		SportType,
+		BetType
 FROM	dbo.Sum_Winloss_Cust
 WHERE	winlostdate BETWEEN @min_winlostdate AND @max_winlostdate
  
