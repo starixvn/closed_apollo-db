@@ -11,6 +11,7 @@ Task : Report Outstanding Detail Member
 DB:  SVRAGE.RepDB
 Original: [Age_Rpt_Outstanding_Ag]
 Revisions:
+- 20131003@Sophia: Parlay not to care Sporttype 
 
 */
 SET NOCOUNT ON
@@ -38,16 +39,21 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 		ON	BA.TransID = B.TransID AND BA.AgentId = @AgentID  
 	INNER JOIN CustInfo C WITH (NOLOCK)
 			ON B.CustID = C.CustID AND BA.AgentId = C.AgentId
-	INNER JOIN Match M WITH (NOLOCK) 
-			ON M.MatchId = B.MatchId
 	WHERE	BA.StatusId IN (0,1)	
 			AND BA.matchID > 0
+			AND BA.Bettype NOT IN (9,29,10) 
 			AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 
 			AND B.StatusId IN (0,1)	
 			AND B.matchID > 0
+			AND B.Bettype NOT IN (9,29,10) 
 			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-			AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))
+						
+			AND (@Sporttypes = '0' 
+					OR EXISTS (SELECT 1 FROM match (NOLOCK) 
+								WHERE matchid = B.matchid AND sporttype IN (SELECT sporttype FROM #SportsList)
+								)
+					)
 	GROUP BY C.Username, B.CustID
 	ORDER BY C.Username
 
@@ -77,15 +83,15 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 					AND B.Bettype IN (9,29) 
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
 					
-					AND (@Sporttypes = '0' 
-							OR EXISTS (	SELECT	1 
-										FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
-										INNER JOIN Match M WITH (NOLOCK) 
-											ON	 M.matchID = BM.MatchId 
-											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
-										WHERE	BM.RefNo = B.RefNo
-										 )	
-						)	
+					--AND (@Sporttypes = '0' 
+					--		OR EXISTS (	SELECT	1 
+					--					FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
+					--					INNER JOIN Match M WITH (NOLOCK) 
+					--						ON	 M.matchID = BM.MatchId 
+					--						AND (M.sporttype IN (Select sporttype FROM #SportsList))							
+					--					WHERE	BM.RefNo = B.RefNo
+					--					 )	
+					--	)	
 			
 			) B
 	GROUP BY B.Username, B.CustID

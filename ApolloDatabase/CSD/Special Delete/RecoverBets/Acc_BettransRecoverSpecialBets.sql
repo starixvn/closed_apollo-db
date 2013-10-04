@@ -123,12 +123,12 @@ BEGIN
 
 	IF @EventStatus = 'completed' and @Bettype NOT IN (9,29)
 	BEGIN 
-		SELECT @ErrCode = 0, @ErrMsg = 'Recalculation for the match ' + @MatchID +' is highly recommended as ticket BetId ' + @TransID + ' has been reverted to "Running" status.'
+		SELECT @ErrCode = 0, @ErrMsg = 'Recalculation for the match <b>' + CONVERT(VARCHAR(20),@MatchID) +'</b> is highly recommended as ticket BetId <b>' + CONVERT(VARCHAR(20),@TransID) + '</b> has been reverted to "Running" status.'
 	END
 	ELSE 
 	IF @EventStatus = 'completed' and @Bettype IN (9,29)
 	BEGIN 
-		SELECT @ErrCode = 0, @ErrMsg = 'Parlay recalculation for the match '+ @MatchId +' has been reverted to "Running" status.'
+		SELECT @ErrCode = 0, @ErrMsg = 'Parlay recalculation for the match <b>'+ CONVERT(VARCHAR(20),@MatchID)+'</b> has been reverted to "Running" status.'
 	END
 
    --- exec ApolloArchive.DB06.dbo.Acc_BettransSelRecoverSpecialBets @transid = @transid 
