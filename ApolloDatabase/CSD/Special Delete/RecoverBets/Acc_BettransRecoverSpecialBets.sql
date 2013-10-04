@@ -144,13 +144,13 @@ BEGIN
 		SELECT @errcode = 101, @errmsg = 'Status of this ticket is already ' + @status		
 		----
 		DELETE FROM dbo.TempVariableNumber WITH (ROWLOCK,UPDLOCK)
-		WHERE KeyID = 1 AND KeyValue = @matchid	
+		WHERE KeyID = @KeyID AND KeyValue = @matchid	
 		IF (@@Error = 0)
 		BEGIN TRY
 			EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
 				@UserID = @userid, 
 				@Matchid = @matchid, 
-				@KeyID = 1,
+				@KeyID = @KeyID,
 				@ActionID = 0, 
 				@Remark = 'DEL SUCCESS SPName=Acc_BettransRecoverSpecialBets'
 		END TRY
@@ -159,7 +159,7 @@ BEGIN
 			EXEC LogDB.dbo.WriteLog_Settlement_Checking 
 				@UserID = @userid, 
 				@Matchid = @matchid, 
-				@KeyID = 1,
+				@KeyID = @KeyID,
 				@ActionID = 0, 
 				@Remark = @Remark
 		END CATCH	

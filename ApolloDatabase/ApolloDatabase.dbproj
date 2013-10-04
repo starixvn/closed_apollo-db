@@ -123,7 +123,7 @@
     <Folder Include="CSD\Report\Daily Mix Parlay Winloss" />
     <Folder Include="CSD\Admin\MailingList" />
     <Folder Include="Agent\Report\Result\BK" />
-    <Folder Include="CSD\Special Delete\DeletBetID" />
+    <Folder Include="CSD\Special Delete\DeleteBetID" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
