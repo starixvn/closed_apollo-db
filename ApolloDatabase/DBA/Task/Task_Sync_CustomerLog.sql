@@ -159,7 +159,42 @@ BEGIN
 		SET IDENTITY_INSERT dbo.SettlementOutright OFF
 	END	
 	---- /Settlement_Checking ---
-
+	---- AutoSettlementCommand_History ---
+	select @max_id = isnull(max(execID),-1)
+	FROM dbo.AutoSettlementCommand_History with(nolock)	
+	
+	--	IF @max_id <> -1
+	BEGIN	
+		
+		INSERT INTO dbo.AutoSettlementCommand_History (
+			[StatusID]
+		  ,[SPName]
+		  ,[SQLCommand]
+		  ,[ActionId]
+		  ,[CreatedDate]
+		  ,[ExecutedDate]
+		  ,[RetryCount]
+		  ,[MatchID]
+		  ,[Status]
+		  ,[Duration]
+		  ,[AllowedDate]
+		)
+		SELECT [StatusID]
+		  ,[SPName]
+		  ,[SQLCommand]
+		  ,[ActionId]
+		  ,[CreatedDate]
+		  ,[ExecutedDate]
+		  ,[RetryCount]
+		  ,[MatchID]
+		  ,[Status]
+		  ,[Duration]
+		  ,[AllowedDate]
+		FROM SVRLOG.LogDB.dbo.AutoSettlementCommand_History with(nolock)
+		WHERE execID > @max_id				
+	END	
+	---- /AutoSettlementCommand_History ---
 END
 SET NOCOUNT OFF
+
 
