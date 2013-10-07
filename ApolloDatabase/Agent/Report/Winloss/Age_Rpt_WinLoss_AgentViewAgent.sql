@@ -25,7 +25,7 @@ AS
     
 SET NOCOUNT ON
 
-IF @Todate > @MoveBetDay
+IF @Todate > @BalanceUpDay
 BEGIN  
 	--********************************
 	---- Agent Winloss
@@ -341,12 +341,11 @@ BEGIN
 	END
 	DROP TABLE #PAgent 
 	DROP TABLE #Tmp 
-END 
+  
 	 
 ------------------------------------------------DATA [14] ----------------------------------------------
-
-IF @BalanceUpDay <= @FromDate --if this case occurs then there is no data from sum_winloss_old
- BEGIN    	
+  --if this case occurs then there is no data from sum_winloss_old
+  	
 		INSERT INTO #WinLossAgent
 	    SELECT	A.AgentUsername as Username, A.AgentId, 1 as IsAgent,		
 				SUM(BetCount) as BetCount, 

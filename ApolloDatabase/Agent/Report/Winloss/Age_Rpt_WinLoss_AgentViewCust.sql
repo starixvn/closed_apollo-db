@@ -25,7 +25,7 @@ AS
     
 SET NOCOUNT ON
 
-IF @Todate > @MoveBetDay
+IF @Todate > @BalanceUpDay
 BEGIN  
 	
 	--********************************
@@ -167,16 +167,12 @@ BEGIN
 									WHERE	m.orid = B.MatchID
 									)				
 						)
-		GROUP BY	C.Username, C.AgentID
-
-
-	END
+		GROUP BY	C.Username, C.AgentID 
 	
 
 ------------------------------------------------DATA [14] ----------------------------------------------
-
-IF @BalanceUpDay <= @FromDate --if this case occurs then there is no data from sum_winloss_old
- BEGIN    	
+ --if this case occurs then there is no data from sum_winloss_old
+     	
 		INSERT INTO #WinLossAgent
 	    SELECT	A.AgentUsername as Username, A.AgentId, 1 as IsAgent,		
 				SUM(BetCount) as BetCount, 

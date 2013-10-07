@@ -42,7 +42,7 @@ CREATE TABLE #SportsList (Sporttype TINYINT)
 INSERT INTO #SportsList (Sporttype)
 SELECT val FROM strSplit_key (@Sporttypes, ',')
 
-IF @Todate > @MovebetDay
+IF @Todate > @BalanceUpDay
 BEGIN 
 		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
 		INSERT INTO #WinLossMember
@@ -187,14 +187,11 @@ BEGIN
 
 		GROUP BY C.Username, C.CustID
 	 
-END
+
 
 ------------------------------------------------DATA [14] ----------------------------------------------
- 
-IF @BalanceUpDay <= @FromDate --if this case occurs then there is no data from sum_winloss_old
- BEGIN    	
-
-		INSERT INTO #WinLossMember
+   --if this case occurs then there is no data from sum_winloss_old
+ 		INSERT INTO #WinLossMember
 	    SELECT	Username, CustId, 				 
 				SUM(BetCount) as BetCount, 
 				SUM(BetAmount) as BetAmount,		  
