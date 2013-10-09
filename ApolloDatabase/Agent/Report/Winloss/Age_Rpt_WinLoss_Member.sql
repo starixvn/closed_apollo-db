@@ -190,7 +190,8 @@ BEGIN
 
 
 ------------------------------------------------DATA [14] ----------------------------------------------
-   --if this case occurs then there is no data from sum_winloss_old
+	IF @FromDate <= @MoveBetDay 
+	BEGIN
  		INSERT INTO #WinLossMember
 	    SELECT	Username, CustId, 				 
 				SUM(BetCount) as BetCount, 
@@ -212,12 +213,12 @@ BEGIN
 		WHERE	AgentId = @AgentId 
 				AND WinLostDate BETWEEN @BalanceUpDay AND @ToDate 
 	   GROUP BY Username, CustId
-
+	END
 
 	END
 ------------------------------------------------DATA [BK] ----------------------------------------------
 	
-IF @FromDate < @BalanceUpDay --if this case occurs then there is no data from sum_winloss_old
+IF @FromDate < @BalanceUpDay  
  BEGIN    	
 		IF @todate >= DATEADD(dd, -1, @BalanceUpDay)
 		SELECT @ToDate = DATEADD(dd, -1, @BalanceUpDay)
