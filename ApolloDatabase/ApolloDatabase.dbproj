@@ -124,6 +124,7 @@
     <Folder Include="CSD\Admin\MailingList" />
     <Folder Include="Agent\Report\Result\BK" />
     <Folder Include="CSD\Special Delete\DeleteBetID" />
+    <Folder Include="CSD\Special Delete\DeletBetID\" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1764,6 +1765,9 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Customer Setting\Age_Agent_CheckDirectMember.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\Age_BetList_SelWinloss_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>

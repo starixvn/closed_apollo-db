@@ -356,15 +356,15 @@ CREATE TABLE #MemberOutstanding (Username NVARCHAR(50), CustID INT, OutstandingA
 DECLARE @Share smallint
 
 
---verison _CustDB
-SELECT TOP 1 @Share = PositionTaking
-FROM SVRCUST.CustDB.dbo.CustPositionTaking PT WITH (NOLOCK) 
-WHERE  Custid= (select top 1 custid from CustInfo where AgentID = @AgentID) AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
-
------Verion local
+----verison _CustDB
 --SELECT TOP 1 @Share = PositionTaking
---FROM SVRCUST.CustDB.dbo.AgentCustPositionTaking PT WITH (NOLOCK) 
---WHERE PT.AgentCustId = @AgentID AND PT.AgentId = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
+--FROM SVRCUST.CustDB.dbo.CustPositionTaking PT WITH (NOLOCK) 
+--WHERE  Custid= (select top 1 custid from CustInfo where AgentID = @AgentID) AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
+
+---Verion local
+SELECT TOP 1 @Share = PositionTaking
+FROM SVRCUST.CustDB.dbo.AgentCustPositionTaking PT WITH (NOLOCK) 
+WHERE PT.AgentCustId = @AgentID AND PT.AgentId = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
 
 
 SELECT	ISNULL(A.Username, B.Username) as Username, 
