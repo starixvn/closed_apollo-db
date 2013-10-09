@@ -25,7 +25,7 @@ AS
     
 SET NOCOUNT ON
 
-IF @Todate >= @BalanceUpDay
+IF @Todate > @MoveBetDay
 BEGIN  
 	
 	--********************************
@@ -168,12 +168,12 @@ BEGIN
 									)				
 						)
 		GROUP BY	C.Username, C.AgentID
-
+END
 
 	
 ------------------------------------------------DATA [14] ----------------------------------------------
-	 IF @FromDate <= @MoveBetDay 
-	 BEGIN
+IF @FromDate <= @MoveBetDay  
+BEGIN
 	 	
 		INSERT INTO #WinLossAgent
 	    SELECT	A.AgentUsername as Username, A.AgentId, 1 as IsAgent,		
@@ -200,8 +200,8 @@ BEGIN
 				AND (@Sporttypes = '0' OR A.sporttype IN (Select sporttype FROM #SportsList))
 				AND (@Bettypes = '0' OR A.Bettype IN (Select bettype FROM #BettypeList))		 
 	    GROUP BY AgentUsername, A.AgentId
-	END
-END 
+END
+	 
 ------------------------------------------------DATA [BK] ----------------------------------------------
 	
 IF @FromDate < @BalanceUpDay  

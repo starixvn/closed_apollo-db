@@ -25,7 +25,7 @@ AS
     
 SET NOCOUNT ON
 
-IF @Todate > @BalanceUpDay
+IF @Todate > @MoveBetDay
 BEGIN  
 	
 	--********************************
@@ -169,6 +169,7 @@ BEGIN
 						)
 		GROUP BY	C.Username, C.AgentID 
 	
+END
 
 ------------------------------------------------DATA [14] ----------------------------------------------
  
@@ -201,7 +202,7 @@ BEGIN
 				AND (@Bettypes = '0' OR A.Bettype IN (Select bettype FROM #BettypeList))		 
 	    GROUP BY AgentUsername, A.AgentId
 
-	END
+	
 END
 ------------------------------------------------DATA [BK] ----------------------------------------------
 	
