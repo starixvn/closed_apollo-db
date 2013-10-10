@@ -49,11 +49,6 @@ FROM	AgentInfo WITH (NOLOCK)
 WHERE	ParentId = @LoggedId
 
 
-DECLARE @LoggedAgentLevel INT
-SELECT	@LoggedAgentLevel = AgentLevel
-FROM	AgentInfo WITH (NOLOCK)
-WHERE	AgentId = @LoggedId
-
 CREATE TABLE #StatusId ( StatusId TINYINT)
 INSERT INTO #StatusId
 SELECT val FROM dbo.strSplit_Key(@StatusIds,',')
@@ -271,7 +266,7 @@ BEGIN
 				
 
 		--- Get betlist	Outstanding
-		SELECT *, @LoggedAgentLevel as AgentLevel
+		SELECT * 
 		FROM #Betlist 
 		ORDER BY TransID		
 	
@@ -487,7 +482,7 @@ BEGIN
 	IF @RptType In (0,3) 
 	BEGIN 	
 		-- Get Betlist
-		SELECT *, @LoggedAgentLevel as AgentLevel
+		SELECT * 
 		FROM #Betlist 
 		ORDER BY TransID
 		
@@ -707,7 +702,7 @@ BEGIN
 		END
 	
 		--- Get Betlist
-		SELECT TOP 1500 *, @LoggedAgentLevel as AgentLevel
+		SELECT TOP 1500 * 
 		FROM #Betlist 
 		ORDER BY TransID DESC	
 	END

@@ -1770,6 +1770,27 @@
     <NotInBuild Include="Agent\BetList\Age_BetList_SelWinloss_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\Age_BetList_AgentDetail_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_SuperViewCust_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_SuperViewSuper_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_SuperViewAgent_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_AgentViewCust_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_AgentViewAgent_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">
