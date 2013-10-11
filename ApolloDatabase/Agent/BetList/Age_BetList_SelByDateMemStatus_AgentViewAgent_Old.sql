@@ -21,7 +21,7 @@ Revisions:
 
 Param's Explanation:  
 	@RptType: = 0: Called from Account Info-Betlist
-			  = 1: Called from Transaction report
+			  = 1: Called from Transaction report (No need get data before  Balance Up date)
 			  = 2: Called from Outstanding Report (Agent view Agent No need)
 			  = 3: Called from ticket cancel report
 				
@@ -312,15 +312,7 @@ BEGIN
 		ORDER BY TransID		
 		 
 	END 
-	ELSE
-	---  select top 1500 row
-	IF @RptType = 1 
-	BEGIN
-		----Get Betlist
-		SELECT TOP 1500 * 
-		FROM #Betlist 
-		ORDER BY TransID DESC		
-	END 	
+	 
 END		
 
 DROP TABLE #Betlist

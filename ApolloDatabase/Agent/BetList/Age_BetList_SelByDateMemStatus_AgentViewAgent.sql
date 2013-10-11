@@ -559,7 +559,7 @@ BEGIN
 			END
 	
 	----Get Betlist
-	SELECT TOP 1500 *
+	SELECT TOP 200 *
 	FROM #Betlist 
 	ORDER BY TransID DESC		
 	END 	

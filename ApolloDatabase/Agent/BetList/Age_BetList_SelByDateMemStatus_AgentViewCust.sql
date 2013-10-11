@@ -489,7 +489,7 @@ BEGIN
 		RETURN
 	END 
 	ELSE
-	--- Called from report Transaction: get more data on Bettrans14 and select top 1500 row
+	--- Called from report Transaction: get more data on Bettrans14 and select top 200 row
 	IF @RptType = 1 
 	BEGIN	
 		--- Check total of rows on Bettrans table
@@ -498,8 +498,8 @@ BEGIN
 		SELECT @RowCount = COUNT (1)
 		FROM #Betlist 
 		
-		IF @RowCount < 1500
-		SELECT @RowCount = 1500 - @RowCount 
+		IF @RowCount < 200
+		SELECT @RowCount = 200 - @RowCount 
 
 		BEGIN 				
 			-- Sportsbook	
@@ -702,7 +702,7 @@ BEGIN
 		END
 	
 		--- Get Betlist
-		SELECT TOP 1500 * 
+		SELECT TOP 200 * 
 		FROM #Betlist 
 		ORDER BY TransID DESC	
 	END
