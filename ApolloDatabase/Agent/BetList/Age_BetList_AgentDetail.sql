@@ -11,7 +11,7 @@ ALTER PROCEDURE [dbo].[Age_BetList_AgentDetail]
 
 /*
 Created: 20130301@Sophia
-Task : Detail Betlist for Transdate
+Task : Detail Betlist 
 DB:  SVRAGE.RepDB
 Original:  
 
@@ -34,9 +34,9 @@ CREATE TABLE  #BetListDetail (
 
 CREATE TABLE  #AgentIdList ( AgentId INT)
 
-DECLARE @AgentLevel INT, @Username NVARCHAR(50)
+DECLARE @AgentLevel INT 
 
-SELECT	@AgentLevel = AgentLevel +1, @Username = Username
+SELECT	@AgentLevel = AgentLevel +1 
 FROM	AgentInfo  WITH (NOLOCK)
 WHERE	AgentID = @LoggedId
    

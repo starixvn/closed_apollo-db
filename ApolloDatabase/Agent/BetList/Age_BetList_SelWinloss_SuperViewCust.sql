@@ -16,6 +16,8 @@ Original:
 
 Revisions:
       - 20130730@Sophia: Revise Code
+	  - 20131008@Sophia: Not to check Sporttype for parlay, it mean all sports; Remove @LoggedAgentLevel
+	  - 20131014@Sophia: add hthomescore,htawayscore
 
 Param's Explanation:  
 */  
@@ -28,7 +30,7 @@ CREATE TABLE #Betlist ( TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						PlayerDiscount DECIMAL (9,8), Winlost MONEY, PlayerComm MONEY, 
 						APositionTaking SMALLMONEY, ADiscount DECIMAL (9,8), AWinlost MONEY, AComm MONEY,
 						LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
-						FinalHomeScore SMALLINT, FinalAwayScore SMALLINT,
+						hthomescore SMALLINT,htawayscore SMALLINT,FinalHomeScore SMALLINT, FinalAwayScore SMALLINT,
 						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT)
 
 CREATE TABLE #DirectChild ( AgentId INT)
@@ -37,13 +39,7 @@ INSERT INTO #DirectChild
 SELECT	AgentId 
 FROM	AgentInfo WITH (NOLOCK)
 WHERE	ParentId = @LoggedId
-
-
-DECLARE @LoggedAgentLevel INT
-SELECT	@LoggedAgentLevel = AgentLevel
-FROM	AgentInfo WITH (NOLOCK)
-WHERE	AgentId = @LoggedId
-
+ 
 CREATE TABLE #BettypeList (bettype SMALLINT)
 INSERT INTO #BettypeList
 SELECT val FROM dbo.strSplit_Key(@Bettypes,',')
@@ -91,6 +87,8 @@ BEGIN
 					B.LiveHomeScore,
 					B.LiveAwayScore,
 					B.LiveIndicator, 
+					m.hthomescore,
+					m.htawayscore,
 					m.FinalHomeScore,
 					m.FinalAwayScore,
 					B.IP,		
@@ -106,7 +104,8 @@ BEGIN
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
 							OR B.bettype between 1301 and 1334 											
-						) 				
+						) 		
+					AND B.Bettype NOT IN (9,29,10)		
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
 					AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList)) 	
 
@@ -147,22 +146,24 @@ BEGIN
 					0 AS LiveHomeScore, 
 					0 AS LiveAwayScore,
 					0 AS LiveIndicator,
+					0 as hthomescore,
+					0 as htawayscore,
 					0 AS FinalHomeScore,
 					0 AS FinalAwayScore,
 					B.IP,		
 					0 as OddStype,		
 					B.DoubleCommLosing	
 				FROM BetTrans AS B  WITH (NOLOCK)
-				INNER JOIN BettransM AS BM WITH (NOLOCK)
-					ON	BM.RefNo = B.RefNo
-				INNER JOIN Match M WITH (NOLOCK) 
-					ON  M.matchID = BM.MatchId  
+				--INNER JOIN BettransM AS BM WITH (NOLOCK)
+				--	ON	BM.RefNo = B.RefNo
+				--INNER JOIN Match M WITH (NOLOCK) 
+				--	ON  M.matchID = BM.MatchId  
 				WHERE B.CustID = @CustId  				
 					AND B.StatusId NOT IN (0,1) 	
 					AND B.WinLostDate Between @FromDate AND @ToDate
 					AND B.BetType IN (9,29) 
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
-					AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList)) 	
+					----AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList)) 	
 
 
 			----- Outright
@@ -200,6 +201,8 @@ BEGIN
 					B.livehomescore,
 					B.liveawayscore,
 					B.liveindicator, 
+					0 as hthomescore,
+					0 as htawayscore,
 					0 AS FinalHomeScore,
 					0 AS FinalAwayScore,
 					B.IP as IP,		
@@ -258,6 +261,8 @@ BEGIN
 					B.LiveHomeScore,
 					B.LiveAwayScore,
 					B.LiveIndicator, 
+					m.hthomescore,
+					m.htawayscore,
 					m.FinalHomeScore,
 					m.FinalAwayScore,
 					B.IP,		
@@ -273,7 +278,8 @@ BEGIN
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
 							OR B.bettype between 1301 and 1334 											
-						) 	
+						) 
+					AND B.Bettype NOT IN (9,29,10)	
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))					 
 					AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList)) 	
 				
@@ -315,20 +321,22 @@ BEGIN
 					0 AS LiveHomeScore, 
 					0 AS LiveAwayScore,
 					0 AS LiveIndicator ,
+					0 as hthomescore,
+					0 as htawayscore,
 					0 AS FinalHomeScore,
 					0 AS FinalAwayScore,
 					B.IP,		
 					0 as OddStype,		
 					B.DoubleCommLosing	
 				FROM BetTrans14 AS B  WITH (NOLOCK)
-				INNER JOIN BetTransM14 BM WITH (NOLOCK) ON BM.RefNo = B.RefNo
-				INNER JOIN Match14 M WITH (NOLOCK) ON M.matchID = BM.matchID	 
+				--INNER JOIN BetTransM14 BM WITH (NOLOCK) ON BM.RefNo = B.RefNo
+				--INNER JOIN Match14 M WITH (NOLOCK) ON M.matchID = BM.matchID	 
 				WHERE B.CustID = @CustId  				
 					AND B.StatusId NOT IN (0,1) 	
 					AND B.WinLostDate Between @FromDate AND @ToDate
 					AND B.BetType IN (9,29) 
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))					 
-					AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList)) 
+				---	AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList)) 
 
 
 			----- Outright
@@ -366,6 +374,8 @@ BEGIN
 					B.livehomescore,
 					B.liveawayscore,
 					B.liveindicator, 
+					0 as hthomescore,
+					0 as htawayscore,
 					0 AS FinalHomeScore,
 					0 AS FinalAwayScore,
 					B.IP as IP,		
@@ -384,7 +394,7 @@ BEGIN
 					AND (@Sporttypes = '0' OR lg.sporttype IN (Select sporttype FROM #SportsList)) 
 END
 
-SELECT DISTINCT *, @LoggedAgentLevel as AgentLevel
+SELECT DISTINCT *
 FROM #Betlist 
 ORDER BY TransID
 

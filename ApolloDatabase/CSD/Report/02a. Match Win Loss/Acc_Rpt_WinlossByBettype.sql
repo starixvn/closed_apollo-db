@@ -11,6 +11,7 @@ AS
 		- 20130906@Sophia: revise Sp to seek index
 		- 20130916@Sophia: add ActualTurnover, exclude line test Suntest 53288		
 		- 20130923@Sophia: add Comm	
+		- 20131014@Sophia: Fixed Parlay use Left join , and use liveawayscore to define Soccer
 	Explanation's Param:
 
 */
@@ -85,10 +86,10 @@ BEGIN
 	UNION ALL 
 	SELECT 	m1.bettype,	
 			0 LineTotal_soccer_live,			
-			LineTotal_soccer,
+			ISNULL(LineTotal_soccer,0) as LineTotal_soccer,
 			
 			0 LineTotal_others_live,
-			LineTotal - LineTotal_soccer as LineTotal_others,			
+			LineTotal - ISNULL(LineTotal_soccer,0)  as LineTotal_others,			
 			Turnover,
 			ActualTurnover,
 			Comm
@@ -103,7 +104,7 @@ BEGIN
 			WHERE 	bettype IN (9, 29)
 			GROUP BY bettype
 		) m1
-		inner join
+		LEFT JOIN
 		(
 			SELECT 	bettype,	
 					isnull(sum((winlost-actual_stake+twinlost+tcomm)*actualrate), 0) as LineTotal_soccer
@@ -112,7 +113,8 @@ BEGIN
 					winlostdate = @winlostdate and
 					statusid NOT IN (0,1,101,102,103) and
 					TransID NOT IN (SELECT TransID FROM #TestLine) and
-					refno IN (SELECT refno FROM bettransm with(nolock) inner join match with(nolock) on bettransm.matchid = match.matchid WHERE sporttype=1)
+					liveawayscore IN (1,3)
+					---refno IN (SELECT refno FROM bettransm with(nolock) inner join match with(nolock) on bettransm.matchid = match.matchid WHERE sporttype=1)
 			GROUP BY bettype
 		) m2 on m1.bettype = m2.bettype
 		

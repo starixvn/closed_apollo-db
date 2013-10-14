@@ -97,6 +97,19 @@ WHERE	ISNULL(BetAmount ,0) = 0
 		AND ISNULL( UplineTotal ,0) = 0
 
 
+		 
+
+DECLARE @AgentPT table (AgentID INT, MaxUpperPositionTaking SMALLINT)
+	 
+DECLARE @S1 VARCHAR(8000)
+SET @S1 = '	SELECT * FROM OPENQUERY (SVRCUST,'' SELECT PT.AgentId, PT.MaxUpperPositionTaking 
+												FROM CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
+												INNER JOIN CustDB.dbo.AgentInfo A WITH (NOLOCK) 
+														ON	A.AgentID = PT.AgentID
+												WHERE A.ParentId =' + CONVERT(VARCHAR(20),@AgentId) +' AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0 '')'
+
+INSERT INTO @AgentPT
+EXEC (@s1) 
 
 ----- Get Data  
 SELECT	A.Username, A.AgentId,  A.isAgent,  PT.MaxUpperPositionTaking  as Share,	
@@ -114,8 +127,8 @@ SELECT	A.Username, A.AgentId,  A.isAgent,  PT.MaxUpperPositionTaking  as Share,
 		SUM(UplineEffStake) as UplineEffStake,
 		SUM(UplineTotal) as UplineTotal
 FROM	#WinLossAgent A
-INNER JOIN SVRCUST.CustDB.dbo.AgentPositionTaking PT WITH (NOLOCK) 
-		ON PT.AgentID = A.AgentId AND PT.Bettype = 1 AND PT.SportType = 1 AND IsLive = 0
+INNER JOIN @AgentPT PT
+		ON PT.AgentID = A.AgentId 
 GROUP BY A.Username, A.AgentId, A.isAgent, PT.MaxUpperPositionTaking 
 UNION ALL
 SELECT	Username, AgentId, isAgent, CONVERT(smallint, 0) as Share,

@@ -167,16 +167,14 @@ BEGIN
 									WHERE	m.orid = B.MatchID
 									)				
 						)
-		GROUP BY	C.Username, C.AgentID
-
-
-	END
+		GROUP BY	C.Username, C.AgentID 
 	
+END
 
 ------------------------------------------------DATA [14] ----------------------------------------------
-
-IF @BalanceUpDay <= @FromDate --if this case occurs then there is no data from sum_winloss_old
- BEGIN    	
+ 
+	IF @FromDate <= @MoveBetDay 
+	BEGIN
 		INSERT INTO #WinLossAgent
 	    SELECT	A.AgentUsername as Username, A.AgentId, 1 as IsAgent,		
 				SUM(BetCount) as BetCount, 
@@ -204,10 +202,11 @@ IF @BalanceUpDay <= @FromDate --if this case occurs then there is no data from s
 				AND (@Bettypes = '0' OR A.Bettype IN (Select bettype FROM #BettypeList))		 
 	    GROUP BY AgentUsername, A.AgentId
 
-	END
+	
+END
 ------------------------------------------------DATA [BK] ----------------------------------------------
 	
-IF @FromDate < @BalanceUpDay --if this case occurs then there is no data from sum_winloss_old
+IF @FromDate < @BalanceUpDay 
  BEGIN    	
 		IF @todate >= DATEADD(dd, -1, @BalanceUpDay)
 		SELECT @ToDate = DATEADD(dd, -1, @BalanceUpDay)

@@ -7,8 +7,9 @@
 	@StatusIds VARCHAR(1000),
 	@Sporttypes VARCHAR(1000) ='0',
 	@Bettypes VARCHAR(1000) = '0',
-	@RptType SMALLINT = 0
-	
+	@RptType SMALLINT = 0, 
+	@MoveBetsDay SMALLDATETIME = NULL
+	 
 
  AS
 /*
@@ -43,7 +44,7 @@ BEGIN
 		EXEC Age_BetList_SelByDateMemStatus_SuperViewSuper 
 			@LoggedId = 1, @AgentId = 1 ,@CustId = -1,
 			@FromDate = @FromDate, @Todate = @Todate, @StatusIds = @StatusIds,
-			@Sporttypes = @Sporttypes, @Bettypes = @Bettypes, @RptType = @RptType
+			@Sporttypes = @Sporttypes, @Bettypes = @Bettypes, @RptType = @RptType, @MoveBetsDay= @MoveBetsDay
 		RETURN				
 	END
 	ELSE
@@ -53,7 +54,7 @@ BEGIN
 		EXEC Age_BetList_SelByDateMemStatus_SuperViewAgent
 			@LoggedId = 1, @AgentId = @AgentId ,@CustId = -1,
 			@FromDate = @FromDate, @Todate = @Todate, @StatusIds = @StatusIds,
-			@Sporttypes = @Sporttypes, @Bettypes = @Bettypes, @RptType = @RptType
+			@Sporttypes = @Sporttypes, @Bettypes = @Bettypes, @RptType = @RptType, @MoveBetsDay= @MoveBetsDay
 		RETURN
 	END
 	ELSE
@@ -64,7 +65,7 @@ BEGIN
 		EXEC Age_BetList_SelByDateMemStatus_SuperViewCust 
 				@LoggedId = 1, @AgentId = -1 ,@CustId = @CustId,
 				@FromDate = @FromDate, @Todate = @Todate, @StatusIds = @StatusIds,
-				@Sporttypes = @Sporttypes, @Bettypes = @Bettypes, @RptType = @RptType	
+				@Sporttypes = @Sporttypes, @Bettypes = @Bettypes, @RptType = @RptType, @MoveBetsDay= @MoveBetsDay
 		RETURN				
 	END
 END 
@@ -77,7 +78,7 @@ BEGIN
 		EXEC Age_BetList_SelByDateMemStatus_AgentViewAgent
 				@LoggedId = @LoggedId, @AgentId = @AgentId ,@CustId = -1,
 				@FromDate = @FromDate, @Todate = @Todate, @StatusIds = @StatusIds,
-				@Sporttypes = @Sporttypes, @Bettypes = @Bettypes, @RptType = @RptType
+				@Sporttypes = @Sporttypes, @Bettypes = @Bettypes, @RptType = @RptType, @MoveBetsDay= @MoveBetsDay
 		RETURN
 	END
 	ELSE
@@ -87,7 +88,7 @@ BEGIN
 		EXEC Age_BetList_SelByDateMemStatus_AgentViewCust 
 				@LoggedId = @LoggedId, @AgentId = -1 ,@CustId = @CustId,
 				@FromDate = @FromDate, @Todate = @Todate, @StatusIds = @StatusIds,
-				@Sporttypes = @Sporttypes, @Bettypes = @Bettypes, @RptType = @RptType
+				@Sporttypes = @Sporttypes, @Bettypes = @Bettypes, @RptType = @RptType, @MoveBetsDay= @MoveBetsDay
 		RETURN
 
 	END 

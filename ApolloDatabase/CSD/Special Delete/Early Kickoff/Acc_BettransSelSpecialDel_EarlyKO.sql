@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[Acc_BettransSelSpecialDel_EarlyKO_xtest]
+﻿ALTER PROCEDURE [dbo].[Acc_BettransSelSpecialDel_EarlyKO]
 	@MatchID int,  
 	@KickOffDate datetime,
 	@hdp smallmoney = 9999,  
@@ -297,5 +297,5 @@ END
 
 
 GO
-GRANT EXECUTE ON [dbo].[Acc_BettransSelSpecialDel_EarlyKO_Xtest] TO [aplweb]
+GRANT EXECUTE ON [dbo].[Acc_BettransSelSpecialDel_EarlyKO] TO [aplweb]
 GO

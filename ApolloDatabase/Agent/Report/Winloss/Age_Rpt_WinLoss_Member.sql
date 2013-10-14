@@ -42,7 +42,7 @@ CREATE TABLE #SportsList (Sporttype TINYINT)
 INSERT INTO #SportsList (Sporttype)
 SELECT val FROM strSplit_key (@Sporttypes, ',')
 
-IF @Todate > @MovebetDay
+IF @Todate > @MoveBetDay
 BEGIN 
 		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
 		INSERT INTO #WinLossMember
@@ -190,11 +190,9 @@ BEGIN
 END
 
 ------------------------------------------------DATA [14] ----------------------------------------------
- 
-IF @BalanceUpDay <= @FromDate --if this case occurs then there is no data from sum_winloss_old
- BEGIN    	
-
-		INSERT INTO #WinLossMember
+	IF @FromDate <= @MoveBetDay 
+	BEGIN
+ 		INSERT INTO #WinLossMember
 	    SELECT	Username, CustId, 				 
 				SUM(BetCount) as BetCount, 
 				SUM(BetAmount) as BetAmount,		  
@@ -213,14 +211,16 @@ IF @BalanceUpDay <= @FromDate --if this case occurs then there is no data from s
 
 	    FROM	Sum_WinLoss_Cust b WITH(NOLOCK) 
 		WHERE	AgentId = @AgentId 
-				AND WinLostDate BETWEEN @BalanceUpDay AND @ToDate 
+				AND WinLostDate BETWEEN @FromDate AND @ToDate 
+				AND (@Sporttypes = '0' OR sporttype IN (Select sporttype FROM #SportsList))
+				AND (@Bettypes = '0' OR Bettype IN (Select bettype FROM #BettypeList))	
 	   GROUP BY Username, CustId
-
-
 	END
+
+	
 ------------------------------------------------DATA [BK] ----------------------------------------------
 	
-IF @FromDate < @BalanceUpDay --if this case occurs then there is no data from sum_winloss_old
+IF @FromDate < @BalanceUpDay  
  BEGIN    	
 		IF @todate >= DATEADD(dd, -1, @BalanceUpDay)
 		SELECT @ToDate = DATEADD(dd, -1, @BalanceUpDay)
@@ -243,7 +243,9 @@ IF @FromDate < @BalanceUpDay --if this case occurs then there is no data from su
 				SUM(WinLost + PlayerComm) + SUM(UplineWinlost) + SUM(UplineComm - PlayerComm) as UplineTotal
 	    FROM	SummaryDB.dbo.Sum_WinLoss_Cust_Old b WITH(NOLOCK) 
 		WHERE	AgentId = @AgentId 
-				AND WinLostDate BETWEEN @BalanceUpDay AND @ToDate 
+				AND WinLostDate BETWEEN @FromDate AND @ToDate 
+				AND (@Sporttypes = '0' OR sporttype IN (Select sporttype FROM #SportsList))
+				AND (@Bettypes = '0' OR Bettype IN (Select bettype FROM #BettypeList))	
 	    GROUP BY Username, CustId
 
 	END 
@@ -359,15 +361,15 @@ CREATE TABLE #MemberOutstanding (Username NVARCHAR(50), CustID INT, OutstandingA
 DECLARE @Share smallint
 
 
---verison _CustDB
-SELECT TOP 1 @Share = PositionTaking
-FROM SVRCUST.CustDB.dbo.CustPositionTaking PT WITH (NOLOCK) 
-WHERE  Custid= (select top 1 custid from CustInfo where AgentID = @AgentID) AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
-
------Verion local
+----verison _CustDB
 --SELECT TOP 1 @Share = PositionTaking
---FROM SVRCUST.CustDB.dbo.AgentCustPositionTaking PT WITH (NOLOCK) 
---WHERE PT.AgentCustId = @AgentID AND PT.AgentId = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
+--FROM SVRCUST.CustDB.dbo.CustPositionTaking PT WITH (NOLOCK) 
+--WHERE  Custid= (select top 1 custid from CustInfo where AgentID = @AgentID) AND PT.AgentID = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
+
+---Verion local
+SELECT TOP 1 @Share = PositionTaking
+FROM SVRCUST.CustDB.dbo.AgentCustPositionTaking PT WITH (NOLOCK) 
+WHERE PT.AgentCustId = @AgentID AND PT.AgentId = @AgentID AND PT.Bettype = 1 AND PT.SportType = 1 AND PT.IsLive = 0
 
 
 SELECT	ISNULL(A.Username, B.Username) as Username, 
