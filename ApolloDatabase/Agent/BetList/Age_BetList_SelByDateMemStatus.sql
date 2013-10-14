@@ -7,8 +7,9 @@
 	@StatusIds VARCHAR(1000),
 	@Sporttypes VARCHAR(1000) ='0',
 	@Bettypes VARCHAR(1000) = '0',
-	@RptType SMALLINT = 0
-	
+	@RptType SMALLINT = 0, 
+	@MoveBetDate SMALLDATETIME = NULL
+	 
 
  AS
 /*

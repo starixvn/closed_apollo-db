@@ -18,6 +18,7 @@ DB:  SVRAGE.RepDB
 Original:  
 Revisions:
 	- 20130724@Sophia: Add @RptType
+	- 20131014@Sophia: add hthomescore,htawayscore
 
 Param's Explanation:  
 	@RptType: = 0: Called from Account Info-Betlist
@@ -36,7 +37,7 @@ CREATE TABLE #Betlist ( TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						PlayerDiscount DECIMAL (9,8), Winlost MONEY, PlayerComm MONEY, 
 						APositionTaking SMALLMONEY, ADiscount DECIMAL (9,8), AWinlost MONEY, AComm MONEY,
 						LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
-						FinalHomeScore SMALLINT, FinalAwayScore SMALLINT,
+						hthomescore SMALLINT,htawayscore SMALLINT, FinalHomeScore SMALLINT, FinalAwayScore SMALLINT,
 						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT, UGroup VARCHAR(3))
 
 CREATE TABLE #DirectChild ( AgentId INT)
@@ -99,6 +100,8 @@ BEGIN
 				B.LiveHomeScore,
 				B.LiveAwayScore,
 				B.LiveIndicator, 
+				m.hthomescore,
+				m.htawayscore,
 				m.FinalHomeScore,
 				m.FinalAwayScore,
 				B.IP,		
@@ -168,6 +171,8 @@ BEGIN
 				0 AS LiveHomeScore, 
 				0 AS LiveAwayScore,
 				0 AS LiveIndicator,
+				0 as hthomescore,
+				0 as htawayscore,
 				0 AS FinalHomeScore,
 				0 AS FinalAwayScore,
 				B.IP,		
@@ -235,6 +240,8 @@ BEGIN
 				B.livehomescore,
 				B.liveawayscore,
 				B.liveindicator,
+				0 as hthomescore,
+				0 as htawayscore,
 				0 AS FinalHomeScore,
 				0 AS FinalAwayScore, 
 				B.IP as IP,		
@@ -321,6 +328,8 @@ BEGIN
 						B.LiveHomeScore,
 						B.LiveAwayScore,
 						B.LiveIndicator, 
+						m.hthomescore,
+						m.htawayscore,
 						m.FinalHomeScore,
 						m.FinalAwayScore,
 						B.IP,		
@@ -388,6 +397,8 @@ BEGIN
 						0 AS LiveHomeScore, 
 						0 AS LiveAwayScore,
 						0 AS LiveIndicator,
+						0 as hthomescore,
+						0 as htawayscore,
 						0 AS FinalHomeScore,
 						0 AS FinalAwayScore,
 						B.IP,		
@@ -456,6 +467,8 @@ BEGIN
 						B.livehomescore,
 						B.liveawayscore,
 						B.liveindicator,
+						0 as hthomescore,
+						0 as htawayscore,
 						0 AS FinalHomeScore,
 						0 AS FinalAwayScore, 
 						B.IP as IP,		
