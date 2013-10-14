@@ -7,8 +7,7 @@
 	@StatusIds VARCHAR(1000),
 	@Sporttypes VARCHAR(1000) ='0',
 	@Bettypes VARCHAR(1000) = '0',
-	@RptType TINYINT = 0,
-	@MoveBetsDay SMALLDATETIME = NULL
+	@RptType TINYINT = 0
 
 
  AS
@@ -47,7 +46,6 @@ INSERT INTO #DirectChild
 SELECT	AgentId 
 FROM	RepDB.dbo.AgentInfo WITH (NOLOCK)
 WHERE	ParentId = @LoggedId
-
  
 
 CREATE TABLE #StatusId ( StatusId TINYINT)
@@ -242,15 +240,15 @@ BEGIN
 				AND B.bettype = 10					
 				AND (@Sporttypes = '0' OR lg.sporttype IN (Select sporttype FROM #SportsList))
 
-	---Call from Ticket Cancel report and Account Info Betlist: Filter by TransDate and StatusID
-	IF @RptType In (0,3) 
+	---Call from Ticket Cancel report  
+	IF @RptType = 3
 	BEGIN 	
 		-- Get Betlist
 		SELECT * 
 		FROM #Betlist 
 		ORDER BY TransID
 		
-		RETURN
+		 
 	END 
 	 
  

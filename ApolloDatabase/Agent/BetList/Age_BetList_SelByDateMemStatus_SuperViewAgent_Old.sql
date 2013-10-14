@@ -266,15 +266,15 @@ BEGIN
 			AND (@Sporttypes = '0' OR lg.sporttype IN (Select sporttype FROM #SportsList))				
 	
 			 	
-	----Call from Ticket Cancel report and Account Info Betlist: Filter by TransDate and StatusID
-	IF @RptType In (0,3) 
+	----Call from Ticket Cancel Filter by TransDate and StatusID
+	IF @RptType = 3
 	BEGIN 	
 		-- Get Betlist
 		SELECT * 
 		FROM #Betlist 
 		ORDER BY TransID
 		
-		RETURN
+		 
 	END 
 	 
 END	
