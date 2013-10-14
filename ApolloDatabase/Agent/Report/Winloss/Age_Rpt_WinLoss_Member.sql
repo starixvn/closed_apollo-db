@@ -192,6 +192,13 @@ END
 ------------------------------------------------DATA [14] ----------------------------------------------
 	IF @FromDate <= @MoveBetDay 
 	BEGIN
+		DECLARE @tmpdate DATE  
+
+		IF @FromDate < @BalanceUpDay 
+			SET @tmpdate = @BalanceUpDay
+		ELSE 
+			SET @tmpdate = @FromDate
+
  		INSERT INTO #WinLossMember
 	    SELECT	Username, CustId, 				 
 				SUM(BetCount) as BetCount, 
@@ -211,7 +218,7 @@ END
 
 	    FROM	Sum_WinLoss_Cust b WITH(NOLOCK) 
 		WHERE	AgentId = @AgentId 
-				AND WinLostDate BETWEEN @FromDate AND @ToDate 
+				AND WinLostDate BETWEEN @tmpdate AND @ToDate 
 				AND (@Sporttypes = '0' OR sporttype IN (Select sporttype FROM #SportsList))
 				AND (@Bettypes = '0' OR Bettype IN (Select bettype FROM #BettypeList))	
 	   GROUP BY Username, CustId
