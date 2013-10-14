@@ -325,13 +325,15 @@ BEGIN
 					WHERE 
 						BA.AgentId = @AgentId  
 						AND BA.TransDate Between @FromDate AND @ToDate	
+						AND BA.StatusID IN (101,102)
 						AND (	BA.bettype < 31 
 								OR BA.bettype between 121 and 999
 								OR BA.bettype between 1301 and 1334 											
 							)
 						AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 					 
-						AND B.TransDate Between @FromDate AND @ToDate	
+						AND B.TransDate Between @FromDate AND @ToDate
+						AND B.StatusID IN (101,102)	
 						AND (	B.bettype < 31 
 								OR B.bettype between 121 and 999
 								OR B.bettype between 1301 and 1334 							 				
@@ -393,10 +395,12 @@ BEGIN
 				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 				WHERE	BA.AgentId = @AgentId 			 
 					AND BA.TransDate Between @FromDate AND @ToDate
+					AND BA.StatusID IN (101,102)
 					AND BA.BetType IN (9,29) 
 					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 
 				
 					AND B.TransDate Between @FromDate AND @ToDate
+					AND B.StatusID IN (101,102)
 					AND B.BetType IN (9,29) 
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
 				 
@@ -463,9 +467,11 @@ BEGIN
 					INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 				WHERE 	BA.AgentId = @AgentId 			
 					AND BA.TransDate Between @FromDate AND @ToDate
+					AND BA.StatusID IN (101,102)
 					AND BA.bettype = 10
 									
 					AND B.TransDate Between @FromDate AND @ToDate
+					AND B.StatusID IN (101,102)
 					AND B.bettype = 10
 					
 					AND (@Sporttypes = '0' OR lg.sporttype IN (Select sporttype FROM #SportsList))				

@@ -320,7 +320,7 @@ BEGIN
 		 
 	END 
 	
-	--- Called from ticket Canceled: get more data on Bettrans14 and select top 1500 row
+	--- Called from ticket Canceled: get more data on Bettrans14 
 	IF @RptType =3
 	BEGIN
 		IF @FromDate <= @MoveBetsDay 		 
@@ -380,11 +380,13 @@ BEGIN
 							ON D.TransID = B.TransID 
 							AND D.AgentID IN (SELECT AgentId FROM #DirectChild)
 							AND D.TransDate Between @FromDate AND @ToDate	
+							AND D.StatusId in (101,102)  
 							AND (	D.bettype < 31 
 									OR D.bettype between 121 and 999
 									OR D.bettype between 1301 and 1334 							
 								) 			
 							AND (@Bettypes = '0' OR D.Bettype IN (Select bettype FROM #BettypeList))
+							 
 					INNER JOIN Match14 m WITH (NOLOCK) ON  B.MatchId = m.MatchId 	
 					INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId									
 				WHERE BA.AgentId =  @AgentId
@@ -392,21 +394,24 @@ BEGIN
 					AND (	BA.bettype < 31 
 							OR BA.bettype between 121 and 999
 							OR BA.bettype between 1301 and 1334 							
-						) 			
+						) 
+					AND BA.StatusId in (101,102)  			
 					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 
 				
 					AND B.TransDate Between @FromDate AND @ToDate	
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
 							OR B.bettype between 1301 and 1334 							
-						) 			
+						) 
+					AND B.StatusId in (101,102)  			
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
 				
 					AND L.TransDate Between @FromDate AND @ToDate	
 					AND (	L.bettype < 31 
 							OR L.bettype between 121 and 999
 							OR L.bettype between 1301 and 1334 							
-						) 			
+						) 
+					AND L.StatusId in (101,102)  			
 					AND (@Bettypes = '0' OR L.Bettype IN (Select bettype FROM #BettypeList))								 
 					AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList)) 		
 				ORDER BY B.TransID DESC
@@ -463,6 +468,7 @@ BEGIN
 							ON D.TransID = B.TransID 
 								AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
 								AND D.TransDate Between @FromDate AND @ToDate	
+								AND D.StatusId in (101,102)  
 								AND (	D.bettype < 31 
 										OR D.bettype between 121 and 999
 										OR D.bettype between 1301 and 1334 							
@@ -472,14 +478,17 @@ BEGIN
 				WHERE BA.AgentId =  @AgentId				  	
 					AND BA.TransDate Between @FromDate AND @ToDate
 					AND BA.BetType IN (9,29) 
+					AND BA.StatusId in (101,102)  
 					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 										
 					AND B.TransDate Between @FromDate AND @ToDate
 					AND B.BetType IN (9,29) 
+					AND B.StatusId in (101,102)  
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
 				 	
 					AND L.TransDate Between @FromDate AND @ToDate
 					AND L.BetType IN (9,29) 
+					AND L.StatusId in (101,102)  
 					AND (@Bettypes = '0' OR L.Bettype IN (Select bettype FROM #BettypeList))						
 												 
 					--AND (@Sporttypes = '0' 
@@ -546,6 +555,7 @@ BEGIN
 							ON D.TransID = B.TransID 
 								AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
 								AND D.TransDate Between @FromDate AND @ToDate	
+								AND D.StatusId in (101,102) 
 								AND D.bettype = 10			
 					INNER JOIN Outright14 as m WITH (NOLOCK) on  B.matchid=m.orid
 					INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid
@@ -553,10 +563,13 @@ BEGIN
 				WHERE 
 					BA.AgentId = @AgentId 					  
 					AND BA.TransDate Between @FromDate AND @ToDate
+					AND BA.StatusId in (101,102)  
 					AND BA.bettype = 10										
 					AND B.TransDate Between @FromDate AND @ToDate
+					AND B.StatusId in (101,102)  
 					AND B.bettype = 10								 
 					AND L.TransDate Between @FromDate AND @ToDate
+					AND L.StatusId in (101,102)  
 					AND L.bettype = 10																 
 					AND (@Sporttypes = '0' OR lg.sporttype IN (Select sporttype FROM #SportsList))
 

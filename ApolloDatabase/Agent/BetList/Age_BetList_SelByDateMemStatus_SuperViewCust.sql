@@ -510,6 +510,7 @@ BEGIN
 							OR B.bettype between 121 and 999
 							OR B.bettype between 1301 and 1334 
 						)
+					AND B.StatusID IN (101,102)
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
 					AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))					
 
@@ -562,6 +563,7 @@ BEGIN
 				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 				WHERE B.CustID = @CustId  					
 					AND B.TransDate Between @FromDate AND @ToDate
+					AND B.StatusID IN (101,102)
 					AND B.BetType IN (9,29)
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
 				  
@@ -620,6 +622,7 @@ BEGIN
 				WHERE 
 					B.CustID = @CustId  				
 					AND B.TransDate Between @FromDate AND @ToDate
+					AND B.StatusID IN (101,102)
 					AND B.bettype = 10				
 					AND (@Sporttypes = '0' OR lg.sporttype IN (Select sporttype FROM #SportsList)) 	
 		END				

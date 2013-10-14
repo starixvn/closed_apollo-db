@@ -175,17 +175,8 @@ BEGIN
 		WHERE  B.StatusId in (SELECT StatusId FROM #StatusId ) 
 				AND B.TransDate Between @FromDate AND @ToDate
 				AND B.BetType IN (9,29)
-				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
-			
-				--AND (@Sporttypes = '0' 
-				--		OR EXISTS (	SELECT	1 
-				--					FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
-				--					INNER JOIN Match M WITH (NOLOCK) 
-				--						ON	 M.matchID = BM.MatchId 
-				--						AND (M.sporttype IN (Select sporttype FROM #SportsList))							
-				--					WHERE	BM.RefNo = B.RefNo
-				--					)
-				--		)		
+				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 	
+			 
 
 
 		----- Outright
@@ -259,8 +250,7 @@ BEGIN
 	BEGIN 
 		IF @FromDate <= @MoveBetsDay 
 		BEGIN 
-				----Sportsbook
-																																																												IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) ) OR @Bettypes = '0'
+			----Sportsbook																																																												IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) ) OR @Bettypes = '0'
 			INSERT INTO #Betlist
 			SELECT 	
 					B.TransId,
@@ -309,7 +299,7 @@ BEGIN
  			FROM 	Bettrans14 AS B  WITH (NOLOCK) 
 				INNER JOIN Match14 m WITH (NOLOCK) ON  B.MatchId = m.MatchId
 				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId										
-			WHERE 	B.StatusId in (SELECT StatusId FROM #StatusId ) 
+			WHERE 	B.StatusId in (101,102) 
 					AND B.TransDate Between @FromDate AND @ToDate	
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
@@ -320,8 +310,7 @@ BEGIN
 					
 
 
-				----- Parlay
-																																																					IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) ) OR @Bettypes = '0'
+			----- Parlay																																																					IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) ) OR @Bettypes = '0'
 			INSERT INTO #Betlist
 			SELECT 
 					B.TransId,
@@ -367,15 +356,14 @@ BEGIN
 					C.UGroup	
 			FROM Bettrans14 AS B  WITH (NOLOCK)			
 			INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId 
-			WHERE  B.StatusId in (SELECT StatusId FROM #StatusId ) 
+			WHERE  B.StatusId in (101,102)  
 					AND B.TransDate Between @FromDate AND @ToDate
 					AND B.BetType IN (9,29)
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
 					
 					
 
-				----- Outright 
-																																																								IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype =10 ) OR @Bettypes = '0'
+			----- Outright 																																																								IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype =10 ) OR @Bettypes = '0'
 			INSERT INTO #Betlist
 			SELECT 		
 					B.transid,
@@ -423,7 +411,7 @@ BEGIN
 			INNER JOIN Outright14 as m WITH (NOLOCK) on  B.matchid=m.orid
 			INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid
 			INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId	
-			WHERE 	B.StatusId in (SELECT StatusId FROM #StatusId ) 
+			WHERE 	B.StatusId in (101,102) 
 					AND B.TransDate Between @FromDate AND @ToDate
 					AND B.bettype = 10
 				

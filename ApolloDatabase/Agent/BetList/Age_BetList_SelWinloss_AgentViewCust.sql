@@ -106,8 +106,7 @@ BEGIN
 							AND D.WinLostDate Between @FromDate AND @ToDate	
 							AND (	D.bettype < 31 
 									OR D.bettype between 121 and 999
-									OR D.bettype between 1301 and 1334 
-									OR D.bettype BETWEEN 81 AND 120 				
+									OR D.bettype between 1301 and 1334 			
 								)
 							AND (@Bettypes = '0' OR D.Bettype IN (Select bettype FROM #BettypeList))
 					INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 							
@@ -116,8 +115,7 @@ BEGIN
 					AND B.WinLostDate Between @FromDate AND @ToDate	
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
-							OR B.bettype between 1301 and 1334 
-							OR B.bettype BETWEEN 81 AND 120 				
+							OR B.bettype between 1301 and 1334 			
 						)
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
 
@@ -125,8 +123,7 @@ BEGIN
 					AND L.WinLostDate Between @FromDate AND @ToDate	
 					AND (	L.bettype < 31 
 							OR L.bettype between 121 and 999
-							OR L.bettype between 1301 and 1334 
-							OR L.bettype BETWEEN 81 AND 120 				
+							OR L.bettype between 1301 and 1334 			
 						)
 					AND (@Bettypes = '0' OR L.Bettype IN (Select bettype FROM #BettypeList)) 
 			 
@@ -323,8 +320,7 @@ BEGIN
 								AND D.WinLostDate Between @FromDate AND @ToDate	
 								AND (	D.bettype < 31 
 										OR D.bettype between 121 and 999
-										OR D.bettype between 1301 and 1334 
-										OR D.bettype BETWEEN 81 AND 120 				
+										OR D.bettype between 1301 and 1334 				
 									) 
 								AND (@Bettypes = '0' OR D.Bettype IN (Select bettype FROM #BettypeList))
 					INNER JOIN Match14 m WITH (NOLOCK) ON  B.MatchId = m.MatchId 		
@@ -333,8 +329,7 @@ BEGIN
 					AND B.WinLostDate Between @FromDate AND @ToDate	
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
-							OR B.bettype between 1301 and 1334 
-							OR B.bettype BETWEEN 81 AND 120 				
+							OR B.bettype between 1301 and 1334 			
 						) 
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
 					
@@ -342,8 +337,7 @@ BEGIN
 					AND L.WinLostDate Between @FromDate AND @ToDate	
 					AND (	L.bettype < 31 
 							OR L.bettype between 121 and 999
-							OR L.bettype between 1301 and 1334 
-							OR L.bettype BETWEEN 81 AND 120 				
+							OR L.bettype between 1301 and 1334 			
 						) 
 					AND (@Bettypes = '0' OR L.Bettype IN (Select bettype FROM #BettypeList))		
 								
