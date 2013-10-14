@@ -17,6 +17,7 @@ Original: Age_Rpt_MatchSelResultEntered
 Revisions:  
 	- 20130626@Sophia: Modify for Singbet
 	- 20130913@Sophia: Add @isShowAll
+	-20131002@Sophia: Exclude status closed
      
 */  
 SET NOCOUNT ON
@@ -74,7 +75,7 @@ INNER JOIN (
 						SELECT	LeagueID, EventDate, Sporttype,  MAX(EventStatus) AS EventStatus  
 						FROM		Match WITH (NOLOCK)  
 						WHERE		Match.EventDate between @FromDate and @ToDate  
-								and Match.eventstatus NOT IN ( 'internal')
+								and Match.eventstatus NOT IN ( 'internal', 'closed')
 								and Match.sporttype <= 99
 						GROUP BY 	leagueid, EventDate,Sporttype, matchid 
 	  
@@ -85,9 +86,8 @@ INNER JOIN (
 						INNER JOIN League with (NOLOCK)  
 							ON  m.LeagueId = League.LeagueId and League.Sporttype  < =99
 						WHERE		m.EventDate between @FromDate and @ToDate  
-								---and m.OddsStatus <> 'closed'  
-						GROUP BY  m.LeagueID, m.EventDate 	 
-		  
+								    and m.OddsStatus <> 'closed'  
+						GROUP BY  m.LeagueID, m.EventDate 	 		  
 					) as m  
 					INNER JOIN League WITH (NOLOCK) on m.LeagueID = League.LeagueID and (League.isTest = 0 OR @isShowAll = 1)
 				GROUP BY CASE WHEN m.Sporttype NOT IN (1, 2, 5, 6, 8,-10) THEN -1 ELSE m.Sporttype END, EventDate

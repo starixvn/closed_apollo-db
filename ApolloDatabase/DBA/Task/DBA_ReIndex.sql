@@ -27,6 +27,8 @@ INNER JOIN sys.dm_db_index_physical_stats(@database_id, NULL, NULL, NULL, 'LIMIT
 WHERE
 	fi.avg_fragmentation_in_percent > 10
 	AND tbl.name NOT LIKE 'BalanceRecord%'
+	AND tbl.name NOT LIKE 'CustPositionTaking' 
+	AND tbl.name NOT LIKE 'AgentPositionTaking'	
 ORDER BY tbl.name, i.type_desc
 
 declare @rn int, @cmd nvarchar(1000)

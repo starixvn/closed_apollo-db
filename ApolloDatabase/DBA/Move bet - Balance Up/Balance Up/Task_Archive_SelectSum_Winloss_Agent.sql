@@ -14,6 +14,7 @@ DB: SVRTXN.TRANSDB
 Original: IBC.Task_Archive_SelectSum_Winloss
 
 Revisions:    
+	- 20130930@Sophia: Add new and rename some columns
  
 */
 SET NOCOUNT ON
@@ -26,9 +27,24 @@ SELECT
 FROM dbo.Task_ArchiveDate
 
  
-SELECT	WinLostDate,AgentId,AgentUsername,ParentID,
-		Turnover,Actual_Turnover,AWinLost,AComm,
-		GrossTotal,UplineWinlost,UplineComm,BetCount,SportType,BetType
+SELECT	WinLostDate,
+		AgentId,
+		AgentUsername,
+		ParentID,
+		BetAmount,
+		BetCount,
+		CommBase,
+		Winlost,
+		PlayerComm,
+		AWinLost,
+		AComm,
+		GrossTotal,
+		UplineWinlost,
+		UplineComm,
+		DownlineEffStake,
+		UplineEffStake,
+		SportType,
+		BetType
 FROM dbo.Sum_Winloss_Agent
 WHERE winlostdate
 BETWEEN @min_winlostdate AND @max_winlostdate

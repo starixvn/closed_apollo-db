@@ -123,6 +123,8 @@
     <Folder Include="CSD\Report\Daily Mix Parlay Winloss" />
     <Folder Include="CSD\Admin\MailingList" />
     <Folder Include="Agent\Report\Result\BK" />
+    <Folder Include="CSD\Special Delete\DeleteBetID" />
+    <Folder Include="CSD\Special Delete\DeletBetID\" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1726,21 +1728,6 @@
     <NotInBuild Include="CSD\Admin\User\NAP_User_CheckPermission.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Report\Winloss\Age_Rpt_WinLoss_AgentViewAgent_custdb.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Report\Winloss\Age_Rpt_WinLoss_custdb.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Report\Winloss\Age_Rpt_WinLoss_AgentViewCust_custdb.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Report\Winloss\Age_Rpt_WinLoss_Member_custdb.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Report\Winloss\Age_Rpt_WinLoss_SuperViewAgent_custdb.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="Agent\BetList\BK\Age_BetList_SelWinloss_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1754,6 +1741,54 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdatePositionTaking_xtest5.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\Task_SummaryReport_GenData.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Special Delete\DeletBetID\Acc_BettransDelBet.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Special Delete\DeletBetID\Acc_BetsSelBetList_ByTransID.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_Customer_GetPositionTakingForUpdateDirectMember.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdateDirectMemberPositionTaking_xtest.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdatePositionTaking_xtest6.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_Customer_Insert_xtest.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_Agent_CheckDirectMember.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\Age_BetList_SelWinloss_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\Age_BetList_AgentDetail_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_SuperViewCust_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_SuperViewSuper_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_SuperViewAgent_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_AgentViewCust_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_AgentViewAgent_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>

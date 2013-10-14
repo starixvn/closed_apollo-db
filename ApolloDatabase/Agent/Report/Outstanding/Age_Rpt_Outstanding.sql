@@ -14,6 +14,7 @@ Original: [Age_Rpt_Outstanding_Ag]
 Revisions:
 - 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
 - 20130710@Sophia: Improve Performance 
+- 20131003@Sophia: Parlay not to care Sporttype 
 
 */
 SET NOCOUNT ON
@@ -44,14 +45,13 @@ BEGIN
 			ON BA.AgentID = C.AgentID		
 	INNER JOIN Bettrans B WITH (NOLOCK)
 			ON B.TransID = BA.TransID
-	INNER JOIN Match M WITH (NOLOCK) 
-			ON M.MatchId = B.MatchId			
 	WHERE	C.ParentId = 1 
 			AND B.StatusID IN (0,1) 			
 			AND (	B.bettype < 31 
 					OR B.bettype between 121 and 999
 					OR B.bettype between 1301 and 1334 					 				
-					) 
+					)
+			AND B.Bettype NOT IN (9,29,10) 
 			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
 		
 			AND BA.StatusID IN (0,1) 
@@ -59,9 +59,13 @@ BEGIN
 					OR BA.bettype between 121 and 999
 					OR BA.bettype between 1301 and 1334 					 				
 					)
-			AND (@Bettypes = '0' OR BA.Bettype in (Select bettype FROM #BettypeList))
-
-			AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList))						
+			AND BA.Bettype NOT IN (9,29,10)
+			AND (@Bettypes = '0' OR BA.Bettype in (Select bettype FROM #BettypeList))			
+			AND (@Sporttypes = '0' 
+					OR EXISTS (SELECT 1 FROM match (NOLOCK) 
+								WHERE matchid=b.matchid AND sporttype IN (SELECT sporttype FROM #SportsList)
+								)
+					)				
 	GROUP BY  C.Username, C.AgentID
 
 	--Parlay
@@ -85,17 +89,7 @@ BEGIN
 
 					AND B.StatusID IN (0,1)
 					AND B.Bettype IN (9,29) 
-					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-
-					AND (@Sporttypes = '0' 
-							OR EXISTS (	SELECT	1 
-										FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
-										INNER JOIN Match M WITH (NOLOCK) 
-											ON	 M.matchID = BM.MatchId 
-											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
-										WHERE	BM.RefNo = B.RefNo
-										 )	
-						)	
+					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))				
 			)B	
 				 
 	GROUP BY  B.Username, B.AgentID
@@ -118,8 +112,7 @@ BEGIN
 
 			AND B.StatusID IN (0,1)
 			AND B.Bettype = 10 
-
-			--AND (@Sporttypes = '0' OR l.sporttype IN (Select sporttype FROM #SportsList))					
+			 			
 			AND (@Sporttypes = '0' 
 				 OR EXISTS (SELECT	1 
 							FROM	Outright M WITH (NOLOCK) 
@@ -146,17 +139,22 @@ BEGIN
 			ON BA.AgentID = C.AgentID
 	INNER JOIN BetTrans_Agent AS BP WITH (NOLOCK) --- parent
 			ON BP.TransID = BA.TransID AND BP.AgentID = @AgentID
-	INNER JOIN Match M WITH (NOLOCK) 
-			ON M.MatchId = BA.MatchId
+
 	WHERE	C.ParentId = @AgentID 
-			AND BA.StatusID IN (0,1)	
+			AND BA.StatusID IN (0,1) 	
 			AND BA.Bettype<=19000
+			AND BA.Bettype NOT IN (9,29,10)
 			AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 	
 			AND BP.StatusID IN (0,1)
-			AND BP.Bettype<=19000	
+			AND BP.Bettype<=19000 
+			AND BP.Bettype NOT IN (9,29,10)	
 			AND (@Bettypes = '0' OR BP.Bettype IN (Select bettype FROM #BettypeList))
-			AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList))		
+			AND (@Sporttypes = '0' 
+					OR EXISTS (SELECT 1 FROM match (NOLOCK) 
+								WHERE matchid = BA.matchid AND sporttype IN (SELECT sporttype FROM #SportsList)
+								)
+					)			
 	GROUP BY C.Username, C.AgentID
 
 
@@ -183,15 +181,7 @@ BEGIN
 				AND BP.Bettype IN (9,29)	
 				AND (@Bettypes = '0' OR BP.Bettype IN (Select bettype FROM #BettypeList))
 
-				AND (@Sporttypes = '0' 
-							OR EXISTS (	SELECT	1 
-										FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
-										INNER JOIN Match M WITH (NOLOCK) 
-											ON	 M.matchID = BM.MatchId 
-											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
-										WHERE	BM.RefNo = BA.RefNo
-										 )	
-						)	
+				
 		) B	
 		GROUP BY B.Username, B.AgentID 
 
@@ -241,14 +231,19 @@ BEGIN
 		ON BA.TransID = B.TransID AND BA.AgentId = @AgentID 
 	INNER JOIN CustInfo C WITH (NOLOCK)
 		ON B.CustID = C.CustID AND C.AgentId =@AgentID
-	INNER JOIN Match M WITH (NOLOCK) 
-		ON M.MatchId = BA.MatchId 
+	 
 	WHERE	 BA.StatusId IN (0,1)
+			AND BA.Bettype NOT IN (9,29,10) 
 			AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 			
 			AND B.StatusId IN (0,1)
+			AND B.Bettype NOT IN (9,29,10) 
 			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-			AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList))	
+			AND (@Sporttypes = '0' 
+					OR EXISTS (SELECT 1 FROM match (NOLOCK) 
+								WHERE matchid = BA.matchid AND sporttype IN (SELECT sporttype FROM #SportsList)
+								)
+					)	
 	GROUP BY C.AgentId
 
 	-- Parlay 

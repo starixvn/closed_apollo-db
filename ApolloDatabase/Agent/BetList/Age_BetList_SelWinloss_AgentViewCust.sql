@@ -16,6 +16,7 @@ Original:
 
 Revisions:
       - 20130730@Sophia: Revise Code
+	  - 20131008@Sophia: Not to check Sporttype for parlay, it mean all sports; Remove @LoggedAgentLevel
 
 Param's Explanation:  
 				
@@ -39,11 +40,6 @@ SELECT	AgentId
 FROM	AgentInfo WITH (NOLOCK)
 WHERE	ParentId = @LoggedId
 
-
-DECLARE @LoggedAgentLevel INT
-SELECT	@LoggedAgentLevel = AgentLevel
-FROM	AgentInfo WITH (NOLOCK)
-WHERE	AgentId = @LoggedId
 
 CREATE TABLE #BettypeList (bettype SMALLINT)
 INSERT INTO #BettypeList
@@ -175,8 +171,8 @@ BEGIN
 					0 as OddStype,		
 					B.DoubleCommLosing	
 				FROM BetTrans AS B  WITH (NOLOCK)
-					INNER JOIN BettransM BM With (NOLOCK) ON BM.Refno = B.Refno
-					INNER JOIN Match M WITH (NOLOCK) ON M.MatchId = BM.MatchId
+					--INNER JOIN BettransM BM With (NOLOCK) ON BM.Refno = B.Refno
+					--INNER JOIN Match M WITH (NOLOCK) ON M.MatchId = BM.MatchId
 					INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 					LEFT JOIN Bettrans_Agent D WITH (NOLOCK) 
 							ON	D.TransID = B.TransID 
@@ -195,7 +191,7 @@ BEGIN
 					AND L.WinLostDate Between @FromDate AND @ToDate
 					AND L.BetType IN (9,29) 
 					AND (@Bettypes = '0' OR L.Bettype IN (Select bettype FROM #BettypeList)) 					
-					AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList))  
+					--AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList))  
 
 
 			----- Outright
@@ -387,8 +383,8 @@ BEGIN
 					0 as OddStype,		
 					B.DoubleCommLosing	
 				FROM BetTrans14 AS B  WITH (NOLOCK)
-					INNER JOIN BetTransM14 BM WITH (NOLOCK) ON BM.RefNo = B.RefNo
-					INNER JOIN Match14 M WITH (NOLOCK) ON M.matchID = BM.matchID  						
+					--INNER JOIN BetTransM14 BM WITH (NOLOCK) ON BM.RefNo = B.RefNo
+					--INNER JOIN Match14 M WITH (NOLOCK) ON M.matchID = BM.matchID  						
 					INNER JOIN BetTrans14_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 					LEFT JOIN BetTrans14_Agent D WITH (NOLOCK) 
 							ON D.TransID = B.TransID 
@@ -408,7 +404,7 @@ BEGIN
 					AND L.BetType IN (9,29) 
 					AND (@Bettypes = '0' OR L.Bettype IN (Select bettype FROM #BettypeList))				
 														
-					AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList))
+					--AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList))
 
 			----- Outright
 			INSERT INTO #Betlist
@@ -479,7 +475,7 @@ BEGIN
 END
 
 	
-SELECT DISTINCT *, @LoggedAgentLevel as AgentLevel
+SELECT DISTINCT *
 FROM #Betlist 
 ORDER BY TransID
 

@@ -45,12 +45,7 @@ INSERT INTO #DirectChild
 SELECT	AgentId 
 FROM	AgentInfo WITH (NOLOCK)
 WHERE	ParentId = @LoggedId
-
-
-DECLARE @LoggedAgentLevel INT
-SELECT	@LoggedAgentLevel = AgentLevel
-FROM	AgentInfo WITH (NOLOCK)
-WHERE	AgentId = @LoggedId
+ 
 
 CREATE TABLE #StatusId ( StatusId TINYINT)
 INSERT INTO #StatusId
@@ -193,15 +188,15 @@ BEGIN
 			AND B.BetType IN (9,29) 
 			AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
 			 
-			AND (@Sporttypes = '0' 
-						OR EXISTS (	SELECT	1 
-									FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
-									INNER JOIN Match M WITH (NOLOCK) 
-										ON	 M.matchID = BM.MatchId 
-										AND (M.sporttype IN (Select sporttype FROM #SportsList))							
-									WHERE	BM.RefNo = B.RefNo
-									)				
-					)				
+			--AND (@Sporttypes = '0' 
+			--			OR EXISTS (	SELECT	1 
+			--						FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
+			--						INNER JOIN Match M WITH (NOLOCK) 
+			--							ON	 M.matchID = BM.MatchId 
+			--							AND (M.sporttype IN (Select sporttype FROM #SportsList))							
+			--						WHERE	BM.RefNo = B.RefNo
+			--						)				
+			--		)				
 
 
 	----- Outright
@@ -267,14 +262,14 @@ BEGIN
 	IF @RptType In (0,3) 
 	BEGIN 	
 		-- Get Betlist
-		SELECT *, @LoggedAgentLevel as AgentLevel
+		SELECT * 
 		FROM #Betlist 
 		ORDER BY TransID
 		
 		RETURN
 	END 
 	ELSE
-	--- Called from report Transaction: get more data on Bettrans14 and select top 1500 row
+	--- Called from report Transaction: get more data on Bettrans14 and select top 200 row
 	IF @RptType = 1 
 	BEGIN 
 		--- Check total of rows on Bettrans table
@@ -283,8 +278,8 @@ BEGIN
 		SELECT @RowCount = COUNT (1)
 		FROM #Betlist 
 		
-		IF @RowCount < 1500
-		SELECT @RowCount = 1500 - @RowCount
+		IF @RowCount < 200
+		SELECT @RowCount = 200 - @RowCount
 
 		BEGIN 		
 				--sportsbook
@@ -413,15 +408,15 @@ BEGIN
 					AND B.BetType IN (9,29) 
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
 				 
-					AND (@Sporttypes = '0' 
-								OR EXISTS (	SELECT	1 
-											FROM	BettransM14 BM WITH (NOLOCK, index=IX_RefNo) 
-											INNER JOIN Match14 M WITH (NOLOCK) 
-												ON	 M.matchID = BM.MatchId 
-												AND (M.sporttype IN (Select sporttype FROM #SportsList))							
-											WHERE	BM.RefNo = B.RefNo
-											)				
-							)			
+					--AND (@Sporttypes = '0' 
+					--			OR EXISTS (	SELECT	1 
+					--						FROM	BettransM14 BM WITH (NOLOCK, index=IX_RefNo) 
+					--						INNER JOIN Match14 M WITH (NOLOCK) 
+					--							ON	 M.matchID = BM.MatchId 
+					--							AND (M.sporttype IN (Select sporttype FROM #SportsList))							
+					--						WHERE	BM.RefNo = B.RefNo
+					--						)				
+					--		)			
 
 
 			----- Outright14
@@ -483,7 +478,7 @@ BEGIN
 	
 		END
 	
-		SELECT TOP 1500 *, @LoggedAgentLevel as AgentLevel
+		SELECT TOP 200 * 
 		FROM #Betlist 
 		ORDER BY TransID DESC	
 	END

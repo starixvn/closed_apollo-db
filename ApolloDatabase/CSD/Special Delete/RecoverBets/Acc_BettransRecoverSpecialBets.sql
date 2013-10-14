@@ -2,8 +2,8 @@
     @transid BIGINT,
     @userid int,   
     @IP varchar(50),
-	@ErrCode int output,
-    @ErrMsg nvarchar(200) output
+	@ErrCode int = 0 output ,
+    @ErrMsg nvarchar(200) = '' output  
 AS
 /*
 Created: Sophia
@@ -120,14 +120,15 @@ BEGIN
         FROM	MATCH WITH (NOLOCK)
         WHERE   MATCH.matchid = @matchID
     END
+
 	IF @EventStatus = 'completed' and @Bettype NOT IN (9,29)
 	BEGIN 
-		SELECT @ErrCode = 0, @ErrMsg = 'Recalculation for the match ' + @MatchID +' is highly recommended as ticket BetId ' + @TransID + ' has been reverted to "Running" status.'
+		SELECT @ErrCode = 0, @ErrMsg = 'Recalculation for the match <b>' + CONVERT(VARCHAR(20),@MatchID) +'</b> is highly recommended as ticket BetId <b>' + CONVERT(VARCHAR(20),@TransID) + '</b> has been reverted to "Running" status.'
 	END
 	ELSE 
 	IF @EventStatus = 'completed' and @Bettype IN (9,29)
 	BEGIN 
-		SELECT @ErrCode = 0, @ErrMsg = 'Parlay recalculation for the match '+ @MatchId +' has been reverted to "Running" status.'
+		SELECT @ErrCode = 0, @ErrMsg = 'Parlay recalculation for the match <b>'+ CONVERT(VARCHAR(20),@MatchID)+'</b> has been reverted to "Running" status.'
 	END
 
    --- exec ApolloArchive.DB06.dbo.Acc_BettransSelRecoverSpecialBets @transid = @transid 
@@ -143,13 +144,13 @@ BEGIN
 		SELECT @errcode = 101, @errmsg = 'Status of this ticket is already ' + @status		
 		----
 		DELETE FROM dbo.TempVariableNumber WITH (ROWLOCK,UPDLOCK)
-		WHERE KeyID = 1 AND KeyValue = @matchid	
+		WHERE KeyID = @KeyID AND KeyValue = @matchid	
 		IF (@@Error = 0)
 		BEGIN TRY
 			EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
 				@UserID = @userid, 
 				@Matchid = @matchid, 
-				@KeyID = 1,
+				@KeyID = @KeyID,
 				@ActionID = 0, 
 				@Remark = 'DEL SUCCESS SPName=Acc_BettransRecoverSpecialBets'
 		END TRY
@@ -158,7 +159,7 @@ BEGIN
 			EXEC LogDB.dbo.WriteLog_Settlement_Checking 
 				@UserID = @userid, 
 				@Matchid = @matchid, 
-				@KeyID = 1,
+				@KeyID = @KeyID,
 				@ActionID = 0, 
 				@Remark = @Remark
 		END CATCH	

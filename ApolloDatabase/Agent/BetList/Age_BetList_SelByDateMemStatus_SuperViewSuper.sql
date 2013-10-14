@@ -47,12 +47,7 @@ INSERT INTO #DirectChild
 SELECT	AgentId 
 FROM	AgentInfo WITH (NOLOCK)
 WHERE	ParentId = @LoggedId
-
-
-DECLARE @LoggedAgentLevel INT
-SELECT	@LoggedAgentLevel = AgentLevel
-FROM	AgentInfo WITH (NOLOCK)
-WHERE	AgentId = @LoggedId
+ 
 
 CREATE TABLE #StatusId ( StatusId TINYINT)
 INSERT INTO #StatusId
@@ -177,15 +172,15 @@ BEGIN
 				AND B.BetType IN (9,29)
 				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
 			
-				AND (@Sporttypes = '0' 
-						OR EXISTS (	SELECT	1 
-									FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
-									INNER JOIN Match M WITH (NOLOCK) 
-										ON	 M.matchID = BM.MatchId 
-										AND (M.sporttype IN (Select sporttype FROM #SportsList))							
-									WHERE	BM.RefNo = B.RefNo
-									)
-						)		
+				--AND (@Sporttypes = '0' 
+				--		OR EXISTS (	SELECT	1 
+				--					FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
+				--					INNER JOIN Match M WITH (NOLOCK) 
+				--						ON	 M.matchID = BM.MatchId 
+				--						AND (M.sporttype IN (Select sporttype FROM #SportsList))							
+				--					WHERE	BM.RefNo = B.RefNo
+				--					)
+				--		)		
 
 
 		----- Outright
@@ -244,14 +239,14 @@ BEGIN
 	IF @RptType In (0,3) 
 	BEGIN 	
 		-- Get Betlist
-		SELECT *, @LoggedAgentLevel as AgentLevel
+		SELECT * 
 		FROM #Betlist 
 		ORDER BY TransID
 		
 		RETURN
 	END 
 	ELSE
-	--- Called from report Transaction: get more data on Bettrans14 and select top 1500 row
+	--- Called from report Transaction: get more data on Bettrans14 and select top 200 row
 	IF @RptType = 1 
 	BEGIN 
 		--- Check total of rows on Bettrans table
@@ -260,8 +255,8 @@ BEGIN
 		SELECT @RowCount = COUNT (1)
 		FROM #Betlist 
 
-		IF @RowCount < 1500
-		SELECT @RowCount = 1500 - @RowCount 
+		IF @RowCount < 200
+		SELECT @RowCount = 200 - @RowCount 
 
 		BEGIN 		
 
@@ -313,7 +308,8 @@ BEGIN
  			FROM 	Bettrans14 AS B  WITH (NOLOCK) 
 				INNER JOIN Match14 m WITH (NOLOCK) ON  B.MatchId = m.MatchId
 				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId										
-			WHERE 	B.TransDate Between @FromDate AND @ToDate	
+			WHERE 	B.StatusId in (SELECT StatusId FROM #StatusId ) 
+					AND B.TransDate Between @FromDate AND @ToDate	
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
 							OR B.bettype between 1301 and 1334 										
@@ -368,19 +364,20 @@ BEGIN
 					C.UGroup	
 			FROM Bettrans14 AS B  WITH (NOLOCK)			
 			INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId 
-			WHERE  B.TransDate Between @FromDate AND @ToDate
+			WHERE  B.StatusId in (SELECT StatusId FROM #StatusId ) 
+					AND B.TransDate Between @FromDate AND @ToDate
 					AND B.BetType IN (9,29)
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
 					
-					AND (@Sporttypes = '0' 
-							OR EXISTS (	SELECT	1 
-										FROM	BettransM14 BM WITH (NOLOCK, index=IX_RefNo) 
-										INNER JOIN Match14 M WITH (NOLOCK) 
-											ON	 M.matchID = BM.MatchId 
-											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
-										WHERE	BM.RefNo = B.RefNo
-										)
-							)		
+					--AND (@Sporttypes = '0' 
+					--		OR EXISTS (	SELECT	1 
+					--					FROM	BettransM14 BM WITH (NOLOCK, index=IX_RefNo) 
+					--					INNER JOIN Match14 M WITH (NOLOCK) 
+					--						ON	 M.matchID = BM.MatchId 
+					--						AND (M.sporttype IN (Select sporttype FROM #SportsList))							
+					--					WHERE	BM.RefNo = B.RefNo
+					--					)
+					--		)		
 
 			----- Outright14
 			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype =10 ) OR @Bettypes = '0'
@@ -429,13 +426,14 @@ BEGIN
 			INNER JOIN Outright14 as m WITH (NOLOCK) on  B.matchid=m.orid
 			INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid
 			INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId	
-			WHERE 	B.TransDate Between @FromDate AND @ToDate
+			WHERE 	B.StatusId in (SELECT StatusId FROM #StatusId ) 
+					AND B.TransDate Between @FromDate AND @ToDate
 					AND B.bettype = 10
 				
 					AND (@Sporttypes = '0' OR lg.sporttype IN (Select sporttype FROM #SportsList))
 	END
 	
-	SELECT TOP 1500 *, @LoggedAgentLevel as AgentLevel
+	SELECT TOP 200 *
 	FROM #Betlist 
 	ORDER BY TransID DESC	
 	END 
