@@ -21,9 +21,10 @@ Revisions:
    
 
 Param's Explanation:  
-	@RptType: = 0: Called from Account Info-Betlist
-			  = 1: Called from Transaction report
-			  = 2: Called from Outstanding Report
+	@RptType:
+			----  = 0: Called from Account Info-Betlist
+			----  = 1: Called from Transaction report
+			----  = 2: Called from Outstanding Report
 			  = 3: Called from ticket cancel report
 	
 */  

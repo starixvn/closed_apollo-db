@@ -276,7 +276,7 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 							AND (	D.bettype < 31 
 									OR D.bettype between 121 and 999
 									OR D.bettype between 1301 and 1334 
-									OR D.bettype BETWEEN 81 AND 120 				
+								 			
 								)
 							AND D.Bettype NOT IN (9,29,10)
 							AND (@Bettypes = '0' OR D.Bettype IN (Select bettype FROM #BettypeList))
@@ -286,8 +286,7 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 					AND B.WinLostDate Between @FromDate AND @ToDate	
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
-							OR B.bettype between 1301 and 1334 
-							OR B.bettype BETWEEN 81 AND 120 				
+							OR B.bettype between 1301 and 1334  			
 						)
 					AND B.Bettype NOT IN (9,29,10)
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
@@ -296,8 +295,7 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 					AND L.WinLostDate Between @FromDate AND @ToDate	
 					AND (	L.bettype < 31 
 							OR L.bettype between 121 and 999
-							OR L.bettype between 1301 and 1334 
-							OR L.bettype BETWEEN 81 AND 120 				
+							OR L.bettype between 1301 and 1334  			
 						)
 					AND L.Bettype NOT IN (9,29,10)
 					AND (@Bettypes = '0' OR L.Bettype IN (Select bettype FROM #BettypeList)) 
