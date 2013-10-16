@@ -12,6 +12,7 @@ Revisions:
 	- 20130628@Sophia: Add FinalHomeScore, FinalAwayScore
 	- 20130708@Sophia: Get Matchid
 	- 20131014@Sophia: add hthomescore,htawayscore
+	- 20131016@Sophia: distinct data
 
 */
 SET NOCOUNT ON
@@ -242,7 +243,7 @@ BEGIN
 		) AS b		
 			inner join SVRARC.ArchiveDB.dbo.match_bk as m with (nolock) on b.matchid=m.matchid	
 END
-SELECT * FROM @tmpParlay
+SELECT DISTINCT * FROM @tmpParlay
 ORDER BY transID DESC 
 
 
