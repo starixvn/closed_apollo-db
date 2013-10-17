@@ -591,8 +591,8 @@ BEGIN
 		SELECT @RowCount = COUNT (1)
 		FROM #Betlist 
 		
-		IF @RowCount < 1500
-		SELECT @RowCount = 1500 - @RowCount 
+		IF @RowCount < 200
+		SELECT @RowCount = 200 - @RowCount 
 
 		BEGIN 		
 			---Sportsbook

@@ -87,12 +87,11 @@ BEGIN
 	    -- Parlay
 	UNION ALL 
 	SELECT 	m1.bettype,
-			ISNULL(LineTotal_soccer,0) as LineTotal_soccer_live,
-			LineTotal_soccer,
+			0 LineTotal_soccer_live,			
+			ISNULL(LineTotal_soccer,0) as LineTotal_soccer,
 			
 			0 LineTotal_others_live,
-			LineTotal - ISNULL(LineTotal_soccer,0) as LineTotal_others,
-			
+			LineTotal - ISNULL(LineTotal_soccer,0)  as LineTotal_others,			
 			Turnover,
 			ActualTurnover,
 			Comm
