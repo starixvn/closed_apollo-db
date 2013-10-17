@@ -21,9 +21,10 @@ Revisions:
    
 
 Param's Explanation:  
-	@RptType: = 0: Called from Account Info-Betlist
-			  = 1: Called from Transaction report
-			  = 2: Called from Outstanding Report
+	@RptType:
+			----  = 0: Called from Account Info-Betlist
+			----  = 1: Called from Transaction report
+			----  = 2: Called from Outstanding Report
 			  = 3: Called from ticket cancel report
 	
 */  
@@ -81,7 +82,7 @@ BEGIN
 	----- 5: Agent view By Member
 	IF @CustID <> -1 AND @AgentId = -1
 	BEGIN 
-		EXEC Age_BetList_SelByDateMemStatus_AgentViewCust 
+		EXEC Age_BetList_SelByDateMemStatus_AgentViewCust_Old 
 				@LoggedId = @LoggedId, @AgentId = -1 ,@CustId = @CustId,
 				@FromDate = @FromDate, @Todate = @Todate, @StatusIds = @StatusIds,
 				@Sporttypes = @Sporttypes, @Bettypes = @Bettypes, @RptType = @RptType

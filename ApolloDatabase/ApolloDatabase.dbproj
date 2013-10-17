@@ -125,6 +125,13 @@
     <Folder Include="Agent\Report\Result\BK" />
     <Folder Include="CSD\Special Delete\DeleteBetID" />
     <Folder Include="CSD\Special Delete\DeletBetID\" />
+    <Folder Include="Agent\BetList\TotalBets" />
+    <Folder Include="Agent\BetList\TicketCancel" />
+    <Folder Include="Agent\BetList\OutStanding" />
+    <Folder Include="Agent\BetList\AccInfo" />
+    <Folder Include="Agent\BetList\Transaction" />
+    <Folder Include="Agent\BetList\Winloss" />
+    <Folder Include="OWA" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1789,6 +1796,33 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_AgentViewAgent_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\TotalBets\Age_BetList_TotalBets_SelRunningByBettype.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\BetList\TotalBets\Age_BetList_TotalBets_SelRunningByBettypeMatch.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="OWA\OAS_SelCurrency.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="OWA\OAS_Report_SunSportWinLoss.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="OWA\GEN_rpt_SummaryWinloss.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="OWA\GEN_rptBetting.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="OWA\Task_PrepareStaging.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="OWA\Lrf_f_GetExchangeDaily.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="OWA\Task_PostStaging.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>

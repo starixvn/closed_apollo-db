@@ -18,7 +18,7 @@ Task : Betlist for Outstanding report/ Cancel Bets Report/ Account Info-Betlist 
 DB:  SVRARC.ArchiveDB
 Original:  
 Revisions: 
-
+- 20131014@Sophia: add hthomescore,htawayscore
 
 Param's Explanation:  
 	@RptType: = 0: Called from Account Info-Betlist
@@ -37,7 +37,7 @@ CREATE TABLE #Betlist ( TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						PlayerDiscount DECIMAL (9,8), Winlost MONEY, PlayerComm MONEY, 
 						APositionTaking SMALLMONEY, ADiscount DECIMAL (9,8), AWinlost MONEY, AComm MONEY,
 						LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
-						FinalHomeScore SMALLINT, FinalAwayScore SMALLINT,
+						hthomescore SMALLINT,htawayscore SMALLINT,FinalHomeScore SMALLINT, FinalAwayScore SMALLINT,
 						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT, UGroup VARCHAR(3))
 
 CREATE TABLE #DirectChild ( AgentId INT)
@@ -60,9 +60,7 @@ CREATE TABLE #SportsList (Sporttype TINYINT)
 INSERT INTO #SportsList (Sporttype)
 SELECT val FROM strSplit_key (@Sporttypes, ',')
 
-----Call from Outstanding report: Not filter by Transdate and hardcode StatusID IN (0,1)
-IF @RptType = 2 
-BEGIN
+BEGIN 	
 		--Sportsbook
 		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) ) OR @Bettypes = '0'	
 		INSERT INTO #Betlist
@@ -101,6 +99,8 @@ BEGIN
 				B.LiveHomeScore,
 				B.LiveAwayScore,
 				B.LiveIndicator,
+				m.hthomescore,
+				m.htawayscore,
 				m.FinalHomeScore,
 				m.FinalAwayScore, 
 				B.IP,		
@@ -113,7 +113,8 @@ BEGIN
 				LEFT JOIN BetTrans_Agent_BK D WITH (NOLOCK) 
 						ON D.TransID = B.TransID 
 						AND D.AgentID IN (SELECT AgentId FROM #DirectChild)
-						AND D.StatusId in (0,1)	
+						AND D.StatusId in (SELECT StatusId FROM #StatusId ) 	
+						AND D.TransDate Between @FromDate AND @ToDate	
 						AND (	D.bettype < 31 
 								OR D.bettype between 121 and 999
 								OR D.bettype between 1301 and 1334 				
@@ -122,7 +123,8 @@ BEGIN
 				INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId 						
 				INNER JOIN RepDB.dbo.CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 			WHERE	B.CustID = @CustId  
-				AND B.StatusId in (0,1)
+				AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
+				AND B.TransDate Between @FromDate AND @ToDate	
 				AND (	B.bettype < 31 
 						OR B.bettype between 121 and 999
 						OR B.bettype between 1301 and 1334 				
@@ -169,6 +171,8 @@ BEGIN
 				0 AS LiveHomeScore, 
 				0 AS LiveAwayScore,
 				0 AS LiveIndicator,
+				0 as hthomescore,
+				0 as htawayscore,
 				0 as FinalHomeScore,
 				0 as FinalAwayScore,
 				B.IP,		
@@ -180,13 +184,15 @@ BEGIN
 				LEFT JOIN BetTrans_Agent_BK D WITH (NOLOCK) 
 						ON D.TransID = B.TransID
 						AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
-						AND D.StatusId in (0,1)
+						AND D.StatusId in (SELECT StatusId FROM #StatusId ) 
+						AND D.TransDate Between @FromDate AND @ToDate
 						AND D.BetType IN (9,29) 
 						AND (@Bettypes = '0' OR D.Bettype IN (Select bettype FROM #BettypeList)) 
 				INNER JOIN RepDB.dbo.CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 				
 			WHERE   B.CustID = @CustId 				
-				AND B.StatusId in (0,1)
+				AND B.StatusId in (SELECT StatusId FROM #StatusId ) 
+				AND B.TransDate Between @FromDate AND @ToDate
 				AND B.BetType IN (9,29) 
 				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 			
 													
@@ -238,6 +244,8 @@ BEGIN
 				B.livehomescore,
 				B.liveawayscore,
 				B.liveindicator,
+				0 as hthomescore,
+				0 as htawayscore,
 				0 AS FinalHomeScore,
 				0 AS FinalAwayScore, 
 				B.IP as IP,		
@@ -250,37 +258,30 @@ BEGIN
 				LEFT JOIN BetTrans_Agent_BK D WITH (NOLOCK) 
 						ON D.TransID = B.TransID 
 							AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
-							AND D.StatusId in (0,1)
+							AND D.StatusId in (SELECT StatusId FROM #StatusId ) 	
+							AND D.TransDate Between @FromDate AND @ToDate
 							AND D.bettype = 10
 							 
 				INNER JOIN Outright_BK as m WITH (NOLOCK) on  B.matchid=m.orid
 				INNER JOIN RepDB.dbo.league lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
 				INNER JOIN RepDB.dbo.CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 			WHERE  B.CustID = @CustId 				
-				AND B.StatusId in (0,1) 				
+				AND B.StatusId in (SELECT StatusId FROM #StatusId ) 	
+				AND B.TransDate Between @FromDate AND @ToDate
 				AND B.bettype = 10
 															
 				AND (@Sporttypes = '0' OR lg.sporttype IN (Select sporttype FROM #SportsList))
-				
-
-		--- Get betlist	Outstanding
-		SELECT * 
-		FROM #Betlist 
-		ORDER BY TransID		
-	
-END 
-ELSE 
-BEGIN 	
-	 				 	
-	----Call from Ticket Cancel report and Account Info Betlist: Filter by TransDate and StatusID
-	IF @RptType In (0,3) 
+				 	
+					 	
+	----Call from Ticket Cancel   Filter by TransDate and StatusID
+	IF @RptType = 3
 	BEGIN 	
 		-- Get Betlist
 		SELECT *
 		FROM #Betlist 
 		ORDER BY TransID
 		
-		RETURN
+		 
 	END 
 	 
 END

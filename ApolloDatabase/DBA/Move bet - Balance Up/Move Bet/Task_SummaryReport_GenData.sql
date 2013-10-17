@@ -1,7 +1,8 @@
 --Task_SummaryReport_GenData '2013/06/01'
 ALTER PROCEDURE Task_SummaryReport_GenData
    @WinlostDate date
-AS
+WITH RECOMPILE
+AS 
 /*
 Created by: Dan
 Date: 20131003
@@ -49,7 +50,7 @@ CREATE TABLE #Tmp(
 			ON C.ParentID =  BP.AgentID		
 	INNER JOIN Bettrans14_Agent BA WITH (NOLOCK, INDEX (IX_bettrans14_Agent)) 
 			ON C.AgentID = BA.AgentID AND BA.TransID = B.TransID ---- Child direct (k+1) 
-	JOIN match14 (nolock) m on m.matchid=b.matchid
+	JOIN match (nolock) m on m.matchid=b.matchid
 	WHERE	BA.bettype <=19000
 			AND BA.StatusID NOT IN (0,1)	
 			AND BA.Winlostdate = @WinlostDate	
@@ -104,7 +105,7 @@ CREATE TABLE #Tmp(
 				ON BP.AgentID = T.AgentID and BA.TransId=BP.TransId
 		JOIN Bettrans14_Agent BP1 WITH (NOLOCK, index (IX_bettrans14_Agent)) --Parent agent of agent k
 				ON BP1.AgentID = T.ParentId and BA.TransId=BP1.TransId
-		JOIN match14 (nolock) m on m.matchid=ba.matchid AND m.sporttype=T.sporttype 
+		JOIN match (nolock) m on m.matchid=ba.matchid AND m.sporttype=T.sporttype 
 
 		WHERE	BA.StatusID NOT IN (0,1) 					
 				AND BA.Winlostdate = @WinlostDate	
@@ -270,7 +271,7 @@ CREATE TABLE #Tmp(
 			ON C.ParentID =  BP.AgentID		
 	INNER JOIN Bettrans14_Agent BA WITH (NOLOCK, INDEX (IX_bettrans14_Agent)) 
 			ON C.AgentID = BA.AgentID AND BA.TransID = B.TransID ---- Child direct (k+1) 
-	INNER JOIN Outright14 (nolock) o on o.orid=b.matchid
+	INNER JOIN Outright (nolock) o on o.orid=b.matchid
 	INNER JOIN  League l WITH (NOLOCK)	ON	l.leagueID = o.leagueId		
 	WHERE	BA.bettype = 10
 			AND BA.StatusID NOT IN (0,1)	
@@ -325,7 +326,7 @@ CREATE TABLE #Tmp(
 				ON BP.AgentID = T.AgentID and BA.TransId=BP.TransId
 		JOIN Bettrans14_Agent BP1 WITH (NOLOCK, index (IX_bettrans14_Agent)) --Parent agent of agent k
 				ON BP1.AgentID = T.ParentId and BA.TransId=BP1.TransId
-		INNER JOIN Outright14 (nolock) o on o.orid=b.matchid
+		INNER JOIN Outright (nolock) o on o.orid=b.matchid
 		INNER JOIN  League l WITH (NOLOCK)	ON	l.leagueID = o.leagueId		and l.sporttype=T.sporttype
 
 		WHERE	BA.StatusID NOT IN (0,1) 					
@@ -389,7 +390,7 @@ CREATE TABLE #Tmp(
 				ON	BA.AgentID = C.AgentID		
 		INNER JOIN	Bettrans14 B WITH (NOLOCK) 	
 				ON	B.TransID = BA.TransID			
-		JOIN match14 (nolock) m on m.matchid=b.matchid
+		JOIN match (nolock) m on m.matchid=b.matchid
 		WHERE		C.ParentId = 1 --super id
 					AND B.StatusID NOT IN (0,1)
 					AND B.Winlostdate = @WinlostDate	
@@ -457,7 +458,7 @@ CREATE TABLE #Tmp(
 				ON	BA.AgentID = C.AgentID		
 		INNER JOIN	Bettrans14 B WITH (NOLOCK) 	
 				ON	B.TransID = BA.TransID			
-		INNER JOIN Outright14 (nolock) o on o.orid=b.matchid
+		INNER JOIN Outright (nolock) o on o.orid=b.matchid
 		INNER JOIN  League l WITH (NOLOCK)	ON	l.leagueID = o.leagueId		
 		WHERE		C.ParentId = 1 --super id
 					AND B.StatusID NOT IN (0,1)
@@ -491,7 +492,7 @@ CREATE TABLE #Tmp(
 				ON	BA.TransID = B.TransID
 		INNER JOIN	CustInfo C WITH (NOLOCK)
 				ON	B.CustID = C.CustID AND  C.AgentId = BA.AgentId		
-		JOIN match14 (nolock) m on m.matchid=b.matchid
+		JOIN match (nolock) m on m.matchid=b.matchid
 		WHERE		BA.WinlostDate = @WinlostDate
 				AND BA.bettype <= 19000	
 				AND BA.StatusID NOT IN (0,1)
@@ -549,7 +550,7 @@ CREATE TABLE #Tmp(
 				ON	BA.TransID = B.TransID
 		INNER JOIN	CustInfo C WITH (NOLOCK)
 				ON	B.CustID = C.CustID AND  C.AgentId = BA.AgentId		
-		INNER JOIN Outright14 (nolock) o on o.orid=b.matchid
+		INNER JOIN Outright (nolock) o on o.orid=b.matchid
 		INNER JOIN  League l WITH (NOLOCK)	ON	l.leagueID = o.leagueId		
 		WHERE		BA.WinlostDate = @WinlostDate				
 				AND BA.bettype =10

@@ -1,0 +1,54 @@
+﻿ALTER PROCEDURE [dbo].[GEN_rpt_SummaryWinloss]
+    @date datetime, 
+    @date2 datetime = null
+AS
+/*
+Created: 20131015@Sophia
+Task: Generate data into rpt_SummaryWinloss
+DB: ReportDB
+
+Revisions:
+
+Param's Explanation:
+
+*/
+IF @date2 IS NULL SET @date2 = @date
+SET @date2 = DATEADD(day,1,@date2)
+
+SELECT  b.rptDate,	  
+		b.CurrencyID,
+		Status,			
+		SUM(Betcount) Betcount,
+		SUM(Turnover) Turnover,
+		SUM(WinLoss) winloss,
+		- SUM(Winloss + TWinLoss + TCommission) WinLossCompany
+INTO	#TMP
+FROM	dbo.rpt_Betting b (NOLOCK) 	 	       
+WHERE	rptDate>=@date AND rptDate<@date2
+		AND Status IN (111,112,113,114,115)
+GROUP BY b.rptDate,	  
+		 b.CurrencyID,
+		 Status
+
+DELETE FROM dbo.rpt_SummaryWinloss
+WHERE rptDate>=@date AND rptDate<@date2
+
+
+INSERT INTO dbo.rpt_SummaryWinloss
+        ([rptDate]
+      ,[CurrencyID]
+      ,[Status]
+      ,[BetCount]
+      ,[TurnOver]
+      ,[WinLoss]
+	  , WinLossCompany      
+     )
+SELECT  [rptDate]
+      ,[CurrencyID]
+      ,[Status]
+      ,[BetCount]
+      ,[TurnOver]
+      ,[WinLoss]
+	  , WinLossCompany      
+FROM    #TMP 
+

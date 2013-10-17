@@ -11,6 +11,8 @@ Original:
 Revisions:
 	- 20130628@Sophia: Add FinalHomeScore, FinalAwayScore
 	- 20130708@Sophia: Get Matchid
+	- 20131014@Sophia: add hthomescore,htawayscore
+	- 20131016@Sophia: distinct data
 
 */
 SET NOCOUNT ON
@@ -30,6 +32,8 @@ DECLARE	@tmpParlay	TABLE(
 	livehomescore	SMALLINT,
 	liveawayscore	SMALLINT,
 	liveindicator	BIT,
+	HtHomeScore	SMALLINT,
+	HtAwayScore	SMALLINT,
 	FinalHomeScore	SMALLINT,
 	FinalAwayScore	SMALLINT,
 	betstatus	NVARCHAR(50),
@@ -65,6 +69,8 @@ BEGIN
 		livehomescore,
 		liveawayscore,
 		liveindicator,
+		HtHomeScore,
+		HtAwayScore,
 		FinalHomeScore,
 		FinalAwayScore,
 		betstatus,
@@ -86,6 +92,8 @@ BEGIN
 		b.livehomescore,
 		b.liveawayscore,
 		b.liveindicator,
+		m.HtHomeScore,
+		m.HtAwayScore,
 		m.FinalHomeScore,
 		m.FinalAwayScore,
 		m.betstatus,
@@ -125,6 +133,8 @@ BEGIN
 		livehomescore,
 		liveawayscore,
 		liveindicator,
+		HtHomeScore,
+		HtAwayScore,
 		FinalHomeScore,
 		FinalAwayScore,
 		betstatus,
@@ -146,6 +156,8 @@ BEGIN
 		b.livehomescore,
 		b.liveawayscore,
 		b.liveindicator,
+		m.HtHomeScore,
+		m.HtAwayScore,
 		m.FinalHomeScore,
 		m.FinalAwayScore,
 		m.betstatus,
@@ -185,6 +197,8 @@ BEGIN
 		livehomescore,
 		liveawayscore,
 		liveindicator,
+		HtHomeScore,
+		HtAwayScore,
 		FinalHomeScore,
 		FinalAwayScore,
 		betstatus,
@@ -206,6 +220,8 @@ BEGIN
 		b.livehomescore,
 		b.liveawayscore,
 		b.liveindicator,
+		m.HtHomeScore,
+		m.HtAwayScore,
 		m.FinalHomeScore,
 		m.FinalAwayScore,
 		m.betstatus,
@@ -227,7 +243,7 @@ BEGIN
 		) AS b		
 			inner join SVRARC.ArchiveDB.dbo.match_bk as m with (nolock) on b.matchid=m.matchid	
 END
-SELECT * FROM @tmpParlay
+SELECT DISTINCT * FROM @tmpParlay
 ORDER BY transID DESC 
 
 
