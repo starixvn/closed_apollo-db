@@ -252,7 +252,7 @@ BEGIN
 			0 as Winlost,
 			0 as PlayerComm,
 			0 as actual_stake,
-			20000, 0, 'BALANCE', 141, 'OPENING BALANCE', 260000000000, 148, 1,
+			20000, 0, 'BALANCE', 141, 'OPENING BALANCE', 260000000000, 8, 1,
 			0, '', '', 0, 0
 		
 		SELECT @TransID = SCOPE_IDENTITY()
