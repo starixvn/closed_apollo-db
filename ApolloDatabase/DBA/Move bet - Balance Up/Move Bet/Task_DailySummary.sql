@@ -15,6 +15,7 @@ Task:	- Daily Summary
 DB: SVRTXN.TransDB
 Revisions:	
 	- 20130923@Sophia: Exclude Parlay and outright in ActualTO
+	- 20131004@Dan: update summary winlost report section
 
  */
 
