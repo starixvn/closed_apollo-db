@@ -214,7 +214,7 @@ END
 				SUM(UplineWinlost) + SUM(UplineComm - PlayerComm) AS ATotal,
 
 				SUM(UplineEffStake) as UplineEffStake, 				 
-				SUM(WinLost + PlayerComm) + SUM(UplineWinlost) + SUM(UplineComm - PlayerComm) as UplineTotal
+				- SUM(WinLost + PlayerComm) + SUM(UplineWinlost) + SUM(UplineComm - PlayerComm) as UplineTotal
 
 	    FROM	Sum_WinLoss_Cust b WITH(NOLOCK) 
 		WHERE	AgentId = @AgentId 
@@ -247,7 +247,7 @@ IF @FromDate < @BalanceUpDay
 				SUM(UplineWinlost) + SUM(UplineComm - PlayerComm) AS ATotal,
 
 				SUM(UplineEffStake) as UplineEffStake, 				 
-				SUM(WinLost + PlayerComm) + SUM(UplineWinlost) + SUM(UplineComm - PlayerComm) as UplineTotal
+				- SUM(WinLost + PlayerComm) + SUM(UplineWinlost) + SUM(UplineComm - PlayerComm) as UplineTotal
 	    FROM	SummaryDB.dbo.Sum_WinLoss_Cust_Old b WITH(NOLOCK) 
 		WHERE	AgentId = @AgentId 
 				AND WinLostDate BETWEEN @FromDate AND @ToDate 
