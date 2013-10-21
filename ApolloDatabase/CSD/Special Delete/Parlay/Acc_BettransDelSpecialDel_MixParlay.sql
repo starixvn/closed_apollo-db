@@ -30,8 +30,8 @@ AS
 	Original: 
 	
 	Revisions:
-	 - 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
-
+	  - 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
+	  - 20131017@Sophia: Get data to mail
 	Param's Explanation: 
 	
 	
@@ -374,143 +374,68 @@ BEGIN
 	EXEC WriteLog_UserLog_T @UserID = @UserID, @Doing = @LogData
 	
 	
-
 	
-	----after delete, return all deleted tickets with additional information for mailing
-	--IF EXISTS (SELECT 1 FROM #Ref WITH(NOLOCK))
-	--BEGIN		
-	--	IF EXISTS(SELECT 1 FROM dbo.strSplit(@bettypes,'^') WHERE CONVERT(INT, val) = 10)  --@bettype = 10
-	--	BEGIN
-	--		SELECT
-	--			MATCH.teamid AS homeid,
-	--			0 AS awayid,
-	--			MATCH.matchcode,
-	--			MATCH.eventdate,
-	--			MATCH.leagueid,
-	--			GETDATE() AS DATETIME,
-	--			CONVERT(BIT,0) AS IsNeutral
-	--		FROM
-	--			Outright AS MATCH WITH (NOLOCK)
-	--		WHERE 
-	--			MATCH.orid = @matchID
-	--	END   
-	--	ELSE
-	--	BEGIN
-	--		SELECT
-	--			MATCH.homeid,
-	--			MATCH.awayid,
-	--			MATCH.matchcode,
-	--			MATCH.eventdate,
-	--			MATCH.leagueid,
-	--			GETDATE() AS DATETIME,
-	--			isnull(MATCH.isNeutral, CONVERT(BIT,0)) AS IsNeutral
-	--		FROM
-	--			MATCH WITH (NOLOCK)
-	--		WHERE 
-	--			MATCH.matchid = @matchID
-	--	END
-		
-	--	SELECT
-	--		b.transid,
-	--		r.transid AS SubTransID,
-	--		r.refno,
-	--		b.username,
-	--		b.custid,
-	--		b.transdate,			
-	--		cr.username as creator,	
-	--		b.stake as StakePositiontaking,
-	--		b.winlost-b.actual_stake AS winlost,
-	--		b.odds,   
-	--		b.OddsType, 	
-	--		b.bettype,
-	--		b.status,
-	--		b.spositiontaking,
-	--		b.mpositiontaking,
-	--		b.apositiontaking,				
-	--		b.currency,			
-	--		b.mrecommend,			
-	--		--case when betfrom IN ('D', 'M', 'E') then 1 else 0 end as IsDeposit
-	--		r.bettype AS choice_bettype
-	--		,m.homeid
-	--		,m.awayid
-	--		,r.hdp1 AS choice_hdp1
-	--		,r.hdp2 AS choice_hdp2
-	--		,r.odds AS choice_odds
-	--		,r.betteam
-	--		,r.livehomescore
-	--		,r.liveawayscore
-	--		,r.liveindicator
-	--		,m.leagueid
-	--		,m.sporttype
-	--		,m.isNeutral
-	--		,m.matchID
-	--		,m.matchCode
-	--		,ag.site
-	--FROM dbo.bettrans AS b with (NOLOCK)
-	--	INNER JOIN #Ref AS r WITH(NOLOCK) ON b.refno=r.refno AND b.matchid IN (9,29) AND b.bettype IN (9,29)
-	--	INNER JOIN dbo.match AS m WITH(NOLOCK) ON m.matchid=@MatchID
-	--	--INNER JOIN dbo.customer AS ag with (NOLOCK) ON b.recommend = ag.custid
-	--	INNER JOIN dbo.customer AS cr with (NOLOCK) ON cr.custid = b.creator
-	--	INNER JOIN dbo.customer ag WITH (NOLOCK) ON ag.custid=b.recommend	
-	--WHERE	(b.betid = 0 OR b.betid IS NULL)			
-	--ORDER BY b.transid
+	-----BEGIN : Send mail After Deleted
+	IF EXISTS (SELECT 1 FROM #Ref WITH(NOLOCK))
+	BEGIN	 
+		 ---Get Match Info
+		SELECT
+			MATCH.homeid,
+			MATCH.awayid,
+			MATCH.matchcode,
+			MATCH.eventdate,
+			MATCH.leagueid,
+			GETDATE() AS DATETIME,
+			isnull(MATCH.isNeutral, CONVERT(BIT,0)) AS IsNeutral
+		FROM
+			MATCH WITH (NOLOCK)
+		WHERE 
+			MATCH.matchid = @matchID
+	 
+		---Get Ticket Info
+		SELECT
+			b.transid,
+			r.transid AS SubTransID,
+			r.refno,
+			b.username,
+			b.custid,
+			b.transdate,			
+			cr.username as creator,	
+			b.stake as StakePositiontaking,
+			b.winlost-b.actual_stake AS winlost,
+			b.odds,   
+			b.OddsType, 	
+			b.bettype,
+			b.status,
+			b.spositiontaking,
+			b.mpositiontaking,
+			b.apositiontaking,				
+			b.currency,			
+			b.mrecommend,			 
+			r.bettype AS choice_bettype
+			,m.homeid
+			,m.awayid
+			,r.hdp1 AS choice_hdp1
+			,r.hdp2 AS choice_hdp2
+			,r.odds AS choice_odds
+			,r.betteam
+			,r.livehomescore
+			,r.liveawayscore
+			,r.liveindicator
+			,m.leagueid
+			,m.sporttype
+			,m.isNeutral
+			,m.matchID
+			,m.matchCode
+	FROM dbo.bettrans AS b with (NOLOCK)
+		INNER JOIN #Ref AS r WITH(NOLOCK) ON b.refno=r.refno AND b.matchid IN (9,29) AND b.bettype IN (9,29)
+		INNER JOIN dbo.match AS m WITH(NOLOCK) ON m.matchid=@MatchID 
+	WHERE	(b.betid = 0 OR b.betid IS NULL)			
+	ORDER BY b.transid
 	
-	--END	
-	
-	
-
-	
--------BEGIN : Send mail when delete real currencies and creator username like 'dba%' or 'pgm%' or 'vndbateam',  'VnQaTeam' / OR Currency is UUS
---		SELECT
---			b.transid,
---			r.transid AS SubTransID,
---			r.refno,
---			b.username,
---			b.custid,
---			b.transdate,			
---			cr.username as creator,	
---			b.stake as StakePositiontaking,
---			b.winlost-b.actual_stake AS winlost,
---			b.odds,   
---			b.OddsType, 
---			b.bettype,			
---			b.status,
---			b.spositiontaking,
---			b.mpositiontaking,
---			b.apositiontaking,				
---			b.currency,			
---			b.mrecommend,			
---			--case when betfrom IN ('D', 'M', 'E') then 1 else 0 end as IsDeposit
---			r.bettype AS choice_bettype
---			,m.homeid
---			,m.awayid
---			,r.hdp1 AS choice_hdp1
---			,r.hdp2 AS choice_hdp2
---			,r.odds AS choice_odds
---			,r.betteam
---			,r.livehomescore
---			,r.liveawayscore
---			,r.liveindicator
---			,m.leagueid
---			,m.sporttype
---			,m.isNeutral
---			,m.matchID
---			,m.matchCode
---			,ag.site 
---			,1 as isInternalMail 
---	FROM dbo.bettrans AS b with (NOLOCK)
---		INNER JOIN #Ref AS r WITH(NOLOCK) ON b.refno=r.refno AND b.matchid IN (9,29) AND b.bettype IN (9,29)
---		INNER JOIN dbo.match AS m WITH(NOLOCK) ON m.matchid=@MatchID
---		INNER JOIN dbo.customer AS cr with (NOLOCK) ON cr.custid = b.creator
---		INNER JOIN dbo.customer ag WITH (NOLOCK) ON ag.custid=b.recommend	
---	WHERE	(b.betid = 0 OR b.betid IS NULL)
---			AND 
---				( b.custid IN (SELECT custid FROM @RealCurrCust)	
---				  OR b.custid IN (SELECT custid FROM @UUSCust)
---				 )	
---	ORDER BY b.transid
-	
--------END : Send mail when delete real currencies and creator username like 'dba%' or 'pgm%' or 'vndbateam',  'VnQaTeam'/ OR Currency is UUS
+	END	
+	 
+	-------END : Send mail After Deleted
 	
 
 		 
@@ -542,6 +467,4 @@ END
 
 GO
 GRANT EXECUTE ON [dbo].[Acc_BettransDelSpecialDel_MixParlay] TO aplweb
-GO
---GRANT VIEW DEFINITION ON [dbo].[Acc_BettransDelSpecialDel_MixParlay] TO [vnteam]
-go
+GO 

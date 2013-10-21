@@ -181,8 +181,7 @@ SET NOCOUNT ON
 	CREATE TABLE #BetDelete (transid BIGINT,refno bigint,custid INT, Username nvarchar(50), betfrom NVARCHAR(1),statusID INT)
 	CREATE TABLE #BetmDelete (transid BIGINT,refno bigint,custid INT, Username nvarchar(50), betfrom NVARCHAR(1),statusID INT)
 		
-	--DECLARE @UUSCust TABLE (custid INT, username VARCHAR(30))
-	--DECLARE @RealCurrCust TABLE (custid INT, username VARCHAR(30))
+ 
 	DECLARE @Status TABLE (statusID TINYINT)	
 	 
 	/*
@@ -369,45 +368,7 @@ SET NOCOUNT ON
 		DELETE FROM #BetmDelete WHERE statusID IN (SELECT * FROM @Status)
 	END
 
-
-
-------------------***** Insert Custid of each type into its temp table *****------------------		
-	--------INSERT UUS  CUSTOMER
-	------Insert into @UUSCust(custid,username)
-	------SELECT INF.custid, INF.username 
-	------FROM custinfo INF (nolock) 
-	------	INNER JOIN #BetDelete BD ON INF.Custid = BD.Custid 
-	------	WHERE INF.srecommend IN(
-	------			SELECT custid FROM customer (nolock) Where CURRENCY = 20 AND roleid = 4
-	------		) AND INF.roleid = 1
-	------UNION ALL
-	------SELECT INF.custid, INF.username 
-	------FROM custinfo INF (nolock) 
-	------	INNER JOIN #BetmDelete BMD ON INF.Custid = BMD.Custid 
-	------	WHERE INF.srecommend IN(
-	------			SELECT custid FROM customer (nolock) Where CURRENCY = 20 AND roleid = 4
-	------		) AND INF.roleid = 1
-
-
-	--------INSERT CUSTOMER HAVE REAL CURRENCIES AND CREATE USERNAME LIKE 'dba%' or 'pgm%' or 'vndbateam',  'VnQaTeam'		
-	------INSERT INTO @RealCurrCust (CustID, username)
-	------SELECT		INF.custid, INF.username 
-	------FROM		custinfo INF WITH (NOLOCK) 
-	------INNER JOIN	#BetDelete BD ON INF.Custid = BD.Custid 
-	------WHERE		INF.srecommend IN( SELECT custid FROM customer WITH(NOLOCK) Where CURRENCY <> 20 AND roleid = 4)	
-	------			AND INF.roleid = 1 
-	------			AND ( @Username LIKE 'dba%' OR @Username LIKE 'pgm%' OR @Username ='vndbateam' OR @Username = 'vnQaTeam')		
-	------UNION ALL
-	------SELECT		INF.custid, INF.username 
-	------FROM		custinfo INF WITH (NOLOCK) 
-	------INNER JOIN	#BetmDelete BMD ON INF.Custid = BMD.Custid 
-	------WHERE		INF.srecommend IN( SELECT custid FROM customer WITH(NOLOCK) Where CURRENCY <> 20 AND roleid = 4)	
-	------			AND INF.roleid = 1 
-	------			AND ( @Username LIKE 'dba%' OR @Username LIKE 'pgm%' OR @Username ='vndbateam' OR @Username = 'vnQaTeam')		
-	
- 
-------------------***** End of insert Custid of each type into its temp table  *****------------------		
-
+	 
 ------------------***** Remove data no need to special delete out of #BetDelete *****------------------	
 	
 	IF @transids <> ''
@@ -648,16 +609,7 @@ SET NOCOUNT ON
 		---********* End of calculate balance for system parlay********---
 
 		END
-
-
-		--INSERT INTO #Currency
-		--SELECT b2.transid,b2.Refno,b2.Currency,b2.oddstype, b2.bettype
-		--FROM dbo.bettrans AS b2 WITH(NOLOCK)
-		--	INNER JOIN #BetmDelete AS d WITH(NOLOCK) ON b2.refno=d.refno
-		--WHERE matchid IN (9,29) AND bettype IN (9,29) --mix parlay
-		--	AND liveindicator=0
-		--	AND transdate>=@KickOffDate
-		--	AND (b2.betid = 0 OR b2.betid IS NULL) 				
+		 			
 	END
 	
 	SELECT @LogData ='delete bet for matchid ' + CONVERT(VARCHAR(20), @matchid) + ' because of early kick off at '+CONVERT(varchar(23),@KickOffDate,121) + ' IP=' + COALESCE(CAST(@IP AS VARCHAR(15)),SPACE(1))
@@ -690,96 +642,72 @@ SET NOCOUNT ON
 
 
 ---------BEGIN : Send mail Internal when delete real currencies and creator username like 'dba%' or 'pgm%' or 'vndbateam',  'VnQaTeam'	/OR UUS Currency
-----IF exists(
-----		SELECT 1 
-----		FROM #BetDelete AS d WITH(NOLOCK) 
-----			INNER JOIN dbo.bettrans b ON D.transid = b.transid
-----		WHERE  d.custid IN (SELECT custid FROM @UUSCust)
-----			or d.custid IN (SELECT custid FROM @RealCurrCust)
-----		UNION ALL
-----		SELECT 1 
-----		FROM #BetmDelete AS d WITH(NOLOCK) 
-----			INNER JOIN dbo.bettransm AS b WITH(NOLOCK) ON D.transid = b.transid
-----		WHERE  d.custid IN (SELECT custid FROM @UUSCust)
-----			or d.custid IN (SELECT custid FROM @RealCurrCust)
-----	)
-----	BEGIN
-----			SELECT
-----				c.username,
-----				c.username2,
-----				b.odds,  
-----				b.OddsType, 
-----				b.transdate,
-----				b.bettype,
-----				b.transid,
-----				b.transid AS SubTransID,
-----				b.refno,
-----				b.betteam,
-----				b.hdp1,
-----				b.hdp2,
-----				b.betfrom,
-----				b.livehomescore,
-----				b.liveawayscore,
-----				cr.username creator,
-----				b.stake AS StakePositiontaking,           
-----				b.currency,
-----				ag.site,
-----				--b.status,
-----				0 AS IsMP,
-----				1 as isInternalMail,
-----				0 as ParlayType
-----			FROM
-----				dbo.bettrans b WITH (NOLOCK)
-----				INNER JOIN dbo.customer cr WITH (NOLOCK) ON cr.custid = b.creator
-----				INNER JOIN dbo.customer AS c WITH (NOLOCK) ON c.custid=b.custid				
-----				INNER JOIN dbo.customer ag WITH (NOLOCK) ON ag.custid=c.recommend
-----				INNER JOIN #BetDelete AS d WITH(NOLOCK) ON d.transid=b.transid --AND d.refno=b.refno
-----			WHERE matchid=@matchid
-----				AND b.transdate>=@KickOffDate				
-----				AND b.liveindicator=0		
-----				AND ( c.custid IN (SELECT custid FROM @UUSCust)
-----					  or c.custid IN (SELECT custid FROM @RealCurrCust)
-----					)	
-----			UNION ALL
-----			SELECT
-----				customer.username,
-----				customer.username2,
-----				b.odds,  
-----				cy.OddsType, 
-----				b.transdate,
-----				b.bettype,
-----				cy.transid,
-----				b.transid AS SubTransID,
-----				b.refno,
-----				b.betteam,
-----				b.hdp1,
-----				b.hdp2,
-----				b.betfrom,
-----				b.livehomescore,
-----				b.liveawayscore,
-----				cr.username creator,
-----				b.stake AS StakePositiontaking,           
-----				cy.CurrencyID AS currency,
-----				ag.site,
-----				--b.status,
-----				1 AS IsMP,
-----				1 as isInternalMail,
-----				cy.ParlayType as ParlayType
-----			FROM
-----				dbo.bettransm b WITH (NOLOCK)
-----				INNER JOIN dbo.customer  WITH (NOLOCK) ON customer.custid=b.custid
-----				INNER JOIN dbo.customer cr WITH (NOLOCK) ON cr.custid = b.creator
-----				INNER JOIN dbo.customer ag WITH (NOLOCK) ON customer.recommend = ag.custid				
-----				INNER JOIN #BetmDelete AS d WITH(NOLOCK) ON d.transid=b.transid --AND d.refno=b.refno
-----				INNER JOIN #Currency AS cy WITH(NOLOCK) ON cy.refno=b.refno
-----			WHERE matchid=@matchid
-----				AND b.transdate>=@KickOffDate				
-----				AND b.liveindicator=0		
-----				AND (customer.custid IN (SELECT custid FROM @UUSCust)
-----					 or customer.custid IN (SELECT custid FROM @RealCurrCust)
-----					)	
-----			ORDER BY IsMP, b.transid	
-----	END
+-- Get Match/outright info
+	IF EXISTS(SELECT CONVERT(INT,val) FROM dbo.strSplit(@bettypes,'^') WHERE CONVERT(INT, val) = 10)  --@bettype = 10
+		BEGIN
+			SELECT
+				MATCH.teamid AS homeid,
+				0 AS awayid,
+				MATCH.matchcode,
+				MATCH.eventdate,
+				MATCH.leagueid,
+				GETDATE() AS DATETIME,
+				CONVERT(BIT,0) AS IsNeutral
+			FROM
+				Outright AS MATCH WITH (NOLOCK)
+			WHERE 
+				MATCH.orid = @matchID
+		END   
+	ELSE
+		BEGIN
+			SELECT
+				MATCH.homeid,
+				MATCH.awayid,
+				MATCH.matchcode,
+				MATCH.eventdate,
+				MATCH.leagueid,
+				GETDATE() AS DATETIME,
+				isnull(MATCH.isNeutral, CONVERT(BIT,0)) AS IsNeutral
+			FROM
+				MATCH WITH (NOLOCK)
+			WHERE 
+				MATCH.matchid = @matchID
+		END
+	
+	-- Get deleted tickets Info
+	 
+		SELECT
+			b.transid,
+			b.CustId,
+			b.username,
+			b.odds,   
+			b.OddsType,  
+			b.transdate,
+			b.bettype,
+			betteam,
+			hdp1,
+			hdp2,
+			b.Liveindicator,
+			b.livehomescore,
+			b.liveawayscore,
+			stake as StakePositiontaking,
+			b.currency, 
+				CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
+				 ELSE b.status 
+				 END as status,
+			ISNULL(SecAcceptFlag,0) SecAcceptFlag,
+			m.HomeId, 
+			m.AwayId, 
+			m.SportType,
+			m.LeagueId
+		FROM bettrans b WITH (NOLOCK)
+			INNER JOIN Match m WITH (NOLOCK) 
+				ON b.MatchId = m.MatchId
+		WHERE b.transid IN(SELECT transid FROM #BetDelete)
+				AND m.matchID = @matchID
+		ORDER BY transid
+
+
 --------END : Send mail Internal when delete real currencies and creator username like 'dba%' or 'pgm%' or 'vndbateam',  'VnQaTeam'/ OR UUS Currency
 			
 						

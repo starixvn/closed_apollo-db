@@ -36,6 +36,7 @@ Revisions:
   - 20130725@Sophia: Change username nvarchar(50)
   - 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
   - 20130829@Sophia: change @f_transID /@t_transid to @FromTransId / @ToTransId
+  - 20131017@Sophia: Get data to mail
 		    
 Param's Explanation: Special bet delete option
 
@@ -300,32 +301,7 @@ Param's Explanation: Special bet delete option
 	BEGIN
 		DELETE FROM #BetDelete WHERE statusID IN (SELECT * FROM @Status)
 	END
-
-
-------------------***** Insert Custid of each type into its temp table *****------------------		
 	
-	 
-	------INSERT UUS  CUSTOMER
-	--Insert into @UUSCust(custid,username)
-	--SELECT INF.custid, INF.username 
-	--FROM custinfo INF (nolock) 
-	--	INNER JOIN #BetDelete BD ON INF.Custid = BD.Custid 
-	--	WHERE INF.srecommend IN(
-	--			SELECT custid FROM customer (nolock) Where CURRENCY = 20 AND roleid = 4
-	--		) AND INF.roleid = 1
-	
-	------INSERT CUSTOMER HAVE REAL CURRENCIES AND CREATE USERNAME LIKE 'dba%' or 'pgm%' or 'vndbateam',  'VnQaTeam'		
-	--INSERT INTO @RealCurrCust (CustID, username)
-	--SELECT		INF.custid, INF.username 
-	--FROM		custinfo INF WITH (NOLOCK) 
-	--INNER JOIN	#BetDelete BD ON INF.Custid = BD.Custid 
-	--WHERE		INF.srecommend IN( SELECT custid FROM customer WITH(NOLOCK) Where CURRENCY <> 20 AND roleid = 4)	
-	--			AND INF.roleid = 1 
-	--			AND ( @Username LIKE 'dba%' OR @Username LIKE 'pgm%' OR @Username ='vndbateam' OR @Username = 'vnQaTeam')			
-			
-
-------------------***** End of insert Custid of each type into its temp table  *****------------------		
-
 
 
 ------------------***** Begin Special Delete *****------------------
@@ -436,97 +412,89 @@ Param's Explanation: Special bet delete option
 	EXEC WriteLog_UserLog_T @UserID = @UserID, @Doing = @LogData
 
 ------after delete, return all deleted with additional information for mailing 
-	--IF EXISTS(SELECT CONVERT(INT,val) FROM dbo.strSplit(@bettypes,'^') WHERE CONVERT(INT, val) = 10)  --@bettype = 10
-	--	BEGIN
-	--		SELECT
-	--			MATCH.teamid AS homeid,
-	--			0 AS awayid,
-	--			MATCH.matchcode,
-	--			MATCH.eventdate,
-	--			MATCH.leagueid,
-	--			GETDATE() AS DATETIME,
-	--			CONVERT(BIT,0) AS IsNeutral
-	--		FROM
-	--			Outright AS MATCH WITH (NOLOCK)
-	--		WHERE 
-	--			MATCH.orid = @matchID
-	--	END   
-	--ELSE
-	--	BEGIN
-	--		SELECT
-	--			MATCH.homeid,
-	--			MATCH.awayid,
-	--			MATCH.matchcode,
-	--			MATCH.eventdate,
-	--			MATCH.leagueid,
-	--			GETDATE() AS DATETIME,
-	--			isnull(MATCH.isNeutral, CONVERT(BIT,0)) AS IsNeutral
-	--		FROM
-	--			MATCH WITH (NOLOCK)
-	--		WHERE 
-	--			MATCH.matchid = @matchID
-	--	END
 	
+	IF EXISTS(SELECT CONVERT(INT,val) FROM dbo.strSplit(@bettypes,'^') WHERE CONVERT(INT, val) = 10)  --@bettype = 10
+		BEGIN
+			-- Get Outright info
+			SELECT
+				MATCH.teamid AS homeid,
+				0 AS awayid,
+				MATCH.matchcode,
+				MATCH.eventdate,
+				MATCH.leagueid,
+				GETDATE() AS DATETIME,
+				CONVERT(BIT,0) AS IsNeutral
+			FROM
+				Outright AS MATCH WITH (NOLOCK)
+			WHERE 
+				MATCH.orid = @matchID
 
-	--	SELECT
-	--		b.username,
-	--		b.odds,  
-	--		b.OddsType, 
-	--		b.transdate,
-	--		b.bettype,
-	--		b.transid AS refno,
-	--		betteam,
-	--		hdp1,
-	--		hdp2,
-	--		betfrom,
-	--		livehomescore,
-	--		liveawayscore,
-	--		stake AS StakePositiontaking,           
-	--		b.currency
-	--	FROM
-	--		bettrans b WITH (NOLOCK)
-	--	WHERE b.transid IN(SELECT transid FROM #BetDelete)
-	--	ORDER BY transid
-		
-		
-	-----Begin : Send mail when delete real currencies and creator username like 'dba%' or 'pgm%' or 'vndbateam',  'VnQaTeam'/ OR Currency is UUS
-	--IF exists(
-	--	SELECT 1 FROM #BetDelete 
-	--	INNER join bettrans b ON #BetDelete.transid = b.transid
-	--	WHERE	#BetDelete.custid IN (SELECT custid FROM @RealCurrCust)
-	--			OR #BetDelete.custid IN (SELECT custid FROM @UUSCust)
-	--    	)
-	--BEGIN
-	--	    SELECT
-	--			customer.username,
-	--			customer.username2,
-	--			b.odds,  
-	--			b.OddsType, 
-	--			b.transdate,
-	--			b.bettype,
-	--			b.transid AS refno,
-	--			betteam,
-	--			hdp1,
-	--			hdp2,
-	--			betfrom,
-	--			livehomescore,
-	--			liveawayscore,
-	--			cr.username creator,
-	--			stake AS StakePositiontaking,           
-	--			b.currency,
-	--			ag.site
-	--		FROM
-	--			bettrans b WITH (NOLOCK)
-	--			INNER JOIN customer  WITH (NOLOCK) ON customer.custid=b.custid
-	--			INNER JOIN customer cr WITH (NOLOCK) ON cr.custid = b.creator
-	--			INNER JOIN customer ag WITH (NOLOCK) ON customer.recommend = ag.custid
-	--		WHERE	b.transid IN(SELECT transid FROM #BetDelete)
-	--				and (customer.custid IN (SELECT custid FROM @RealCurrCust)
-	--				or customer.custid IN (SELECT custid FROM @UUSCust)
-	--				)	     					   
-	--		ORDER BY transid    	   
-	--END
-	-----End : Send mail when delete real currencies and creator username like 'dba%' or 'pgm%' or 'vndbateam',  'VnQaTeam'/ OR Currency is UUS
+			-- Get deleted tickets Info	 
+			SELECT
+				b.transid,
+				b.CustId, 
+				b.username,
+				b.odds,
+				b.transdate,	
+				b.stake,
+				b.currency, 
+				b.status 
+			FROM bettrans b WITH (NOLOCK)			
+			WHERE b.transid IN(SELECT transid FROM #BetDelete)
+			ORDER BY transid
+
+		END   
+	ELSE
+		BEGIN
+		-- Get Match info
+			SELECT
+				MATCH.homeid,
+				MATCH.awayid,
+				MATCH.matchcode,
+				MATCH.eventdate,
+				MATCH.leagueid,
+				GETDATE() AS DATETIME,
+				isnull(MATCH.isNeutral, CONVERT(BIT,0)) AS IsNeutral
+			FROM
+				MATCH WITH (NOLOCK)
+			WHERE 
+				MATCH.matchid = @matchID
+
+
+			-- Get deleted tickets Info	 
+			SELECT
+				b.transid,
+				b.CustId,
+				b.username,
+				b.odds,   
+				b.OddsType,  
+				b.transdate,
+				b.bettype,
+				betteam,
+				hdp1,
+				hdp2,
+				b.Liveindicator,
+				b.livehomescore,
+				b.liveawayscore,
+				stake,
+				b.CurrencyName,
+					CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
+					 ELSE b.status 
+					 END as status,
+				ISNULL(SecAcceptFlag,0) SecAcceptFlag,
+				m.HomeId, 
+				m.AwayId, 
+				m.SportType,
+				m.LeagueId
+			FROM bettrans b WITH (NOLOCK)
+				INNER JOIN Match m WITH (NOLOCK) 
+					ON b.MatchId = m.MatchId
+			WHERE b.transid IN(SELECT transid FROM #BetDelete)
+					AND m.matchID = @matchID
+			ORDER BY transid
+
+		END	
+	-----End : Send mail when delete tickets 
 
 	 
 	---- List data to put Message
@@ -594,5 +562,4 @@ Param's Explanation: Special bet delete option
 	 
 GO
 GRANT EXECUTE ON [dbo].[Acc_BettransDelSpecial] TO [aplweb] AS [dbo]
-GO
---GRANT VIEW DEFINITION ON [dbo].[Acc_BettransDelSpecial] TO [vnteam] AS [dbo]
+GO 
