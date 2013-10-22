@@ -178,8 +178,8 @@ SET NOCOUNT ON
 	END 	
 	----################### End of check for concurrent running ###################----
 	
-	CREATE TABLE #BetDelete (transid BIGINT,refno bigint,custid INT, Username nvarchar(50), betfrom NVARCHAR(1),statusID INT)
-	CREATE TABLE #BetmDelete (transid BIGINT,refno bigint,custid INT, Username nvarchar(50), betfrom NVARCHAR(1),statusID INT)
+	CREATE TABLE #BetDelete (transid BIGINT,refno bigint,custid INT, Username nvarchar(50), betfrom NVARCHAR(1),statusID INT, Status Varchar(10))
+	CREATE TABLE #BetmDelete (transid BIGINT,refno bigint,custid INT, Username nvarchar(50), betfrom NVARCHAR(1),statusID INT, Status Varchar(10))
 		
  
 	DECLARE @Status TABLE (statusID TINYINT)	
@@ -203,8 +203,8 @@ SET NOCOUNT ON
 ------------------***** Insert all data into #BetDelete,#BetmDelete *****------------------	
 	
 	--bettype <> 4
-	INSERT INTO #BetDelete (transid,refno,custid, Username, betfrom, statusID)   
-	SELECT DISTINCT transid,refno,custid, Username, betfrom, statusID
+	INSERT INTO #BetDelete (transid,refno,custid, Username, betfrom, statusID,Status)   
+	SELECT DISTINCT transid,refno,custid, Username, betfrom, statusID, Status
 	FROM bettrans b WITH (nolock)
 		INNER JOIN dbo.strSplit(@bettypes,'^') AS fb ON b.bettype=fb.val
 	WHERE
@@ -228,8 +228,8 @@ SET NOCOUNT ON
 	
 
 	--bettype = 4
-	INSERT INTO #BetDelete (transid,refno,custid,Username,betfrom, statusID)   
-	SELECT DISTINCT transid,refno,custid, Username, betfrom, statusID
+	INSERT INTO #BetDelete (transid,refno,custid,Username,betfrom, statusID,Status)   
+	SELECT DISTINCT transid,refno,custid, Username, betfrom, statusID,Status
 	FROM bettrans b WITH (nolock)
 	WHERE
 			b.matchid=@matchid	
@@ -241,8 +241,8 @@ SET NOCOUNT ON
 			AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
 		
 	
-	INSERT INTO #BetDelete (transid,refno,custid,Username, betfrom, statusID)   
-	SELECT DISTINCT transid,refno,custid, Username,betfrom, statusID
+	INSERT INTO #BetDelete (transid,refno,custid,Username, betfrom, statusID,Status)   
+	SELECT DISTINCT transid,refno,custid, Username,betfrom, statusID,Status
 	FROM bettrans b WITH (nolock)
 	WHERE
 			b.matchid=@matchid	
@@ -254,8 +254,8 @@ SET NOCOUNT ON
 			AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
 		
 	
-	INSERT INTO #BetDelete (transid,refno,custid,Username,betfrom, statusID)   
-	SELECT DISTINCT transid,refno,custid,Username,betfrom, statusID
+	INSERT INTO #BetDelete (transid,refno,custid,Username,betfrom, statusID,Status)   
+	SELECT DISTINCT transid,refno,custid,Username,betfrom, statusID, Status
 	FROM bettrans b WITH (nolock)
 		LEFT JOIN dbo.strSplit(@betteam14,'^') AS goal ON goal.val=b.betteam 
 	WHERE
@@ -268,8 +268,8 @@ SET NOCOUNT ON
 			AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
 		
 	
-	INSERT INTO #BetDelete (transid,refno,custid,Username,betfrom, statusID)   
-	SELECT DISTINCT transid,refno,custid,Username,betfrom, statusID
+	INSERT INTO #BetDelete (transid,refno,custid,Username,betfrom, statusID,Status)   
+	SELECT DISTINCT transid,refno,custid,Username,betfrom, statusID, Status
 	FROM bettrans b WITH (nolock)
 	WHERE
 			b.matchid=@matchid	
@@ -283,10 +283,10 @@ SET NOCOUNT ON
 				
 	--GET sub ticket of the matchid for mix parlay
 	IF EXISTS (SELECT 1 FROM dbo.strSplit(@bettypes,'^') WHERE val IN (9,29))	
-		AND EXISTS (SELECT 1 FROM dbo.bettransm AS b WITH(NOLOCK) WHERE b.matchid=@matchid  AND b.transdate>=@KickOffDate AND b.statusID NOT IN (101,102) AND b.liveindicator=0 AND betfrom <>'P')
+		AND EXISTS (SELECT 1 FROM dbo.bettransm AS b WITH(NOLOCK) WHERE b.matchid=@matchid AND b.transdate>=@KickOffDate AND b.statusID NOT IN (101,102) AND b.liveindicator=0 AND betfrom <>'P')
 	BEGIN	
-		INSERT INTO #BetmDelete (transid,refno,custid,Username, betfrom, statusID)   
-		SELECT DISTINCT b.transid,b.refno,b.custid,bt.Username, b.betfrom, b.statusID
+		INSERT INTO #BetmDelete (transid,refno,custid,Username, betfrom, statusID, Status)   
+		SELECT DISTINCT b.transid,b.refno,b.custid,bt.Username, b.betfrom, b.statusID , b.Status
 		FROM bettransm AS b with (NOLOCK)			
 			INNER JOIN bettrans bt WITH(NOLOCK) ON b.refno = bt.refno 
 			INNER JOIN (SELECT CONVERT(SMALLINT,val) AS bettype FROM dbo.strSplit(@bettypes,'^') WHERE val IN (9,29)) t ON t.bettype = bt.bettype	
@@ -296,7 +296,7 @@ SET NOCOUNT ON
 			AND b.betfrom <>'P'
 			AND bt.matchid IN (9,29) AND bt.bettype IN (9,29)
 			AND CASE when @SAFilter = 2 then 0 else 1 END = 1
-			AND (bt.betid = 0 OR bt.betid IS NULL)			
+			---AND (bt.betid = 0 OR bt.betid IS NULL)			
 	END
 
 ------------------***** End of insert all data into #BetDelete,#BetmDelete *****------------------	
@@ -498,28 +498,7 @@ SET NOCOUNT ON
 		INNER JOIN	#AfterUpd a 	
 				ON	a.custid = b.custid
 		WHERE	    (a.balance - b.balance) < 0
-
-		
-	---- update totalbets
-	--DECLARE @Total TABLE (oddsid INT, HomeTotal MONEY, AwayTotal MONEY)
-
-	--INSERT INTO @Total	
-	--SELECT
-	--	oddsid,
-	--	SUM(CASE WHEN betteam='h' THEN (CASE WHEN ABS(odds) > 1 THEN ABS(odds) ELSE 1 END * b.stake * e.actualrate * (1-b.tpositiontaking)) ELSE 0 END) homeTotal,
-	--	SUM(CASE WHEN betteam='a' THEN (CASE WHEN ABS(odds) > 1 THEN ABS(odds) ELSE 1 END * b.stake * e.actualrate * (1-b.tpositiontaking)) ELSE 0 END) awayTotal
-	--FROM dbo.bettrans AS b WITH (nolock)
-	--	INNER JOIN dbo.exchange AS e WITH (nolock) ON b.currency = e.exchangeid
-	--WHERE bettype in (1,3,7,8) AND ruben = 0 AND oddsid <> 0 AND matchid = @matchid
-	--GROUP BY oddsid
-	
-		
-	--UPDATE odds WITH (rowlock, updlock)
-	--SET hometotal = t.HomeTotal, awaytotal = t.AwayTotal
-	--FROM @Total t 
-	--WHERE odds.oddsid = t.oddsid AND odds.matchid = @matchid
-	
-	---CREATE TABLE #Currency (TransID bigint, Refno bigint, CurrencyID tinyint,oddstype tinyint, ParlayType smallint)
+		 
 	
 	IF EXISTS (SELECT 1 FROM #BetmDelete)
 	BEGIN	
@@ -616,7 +595,113 @@ SET NOCOUNT ON
 	EXEC WriteLog_UserLog_T @UserID = @UserID, @Doing = @LogData
 
 	
-	---- List data to put Message
+
+
+---------BEGIN : Send mail  
+
+		-- Get Match info
+			SELECT
+				MATCH.homeid,
+				MATCH.awayid,
+				MATCH.matchcode,
+				MATCH.eventdate,
+				MATCH.leagueid,
+				GETDATE() AS DATETIME,
+				isnull(MATCH.isNeutral, CONVERT(BIT,0)) AS IsNeutral
+			FROM
+				MATCH WITH (NOLOCK)
+			WHERE 
+				MATCH.matchid = @matchID
+
+
+			-- Get deleted tickets Info	 
+			SELECT
+				b.transid,
+				b.transid AS SubTransID,
+				b.refno,
+				b.custid,  
+				b.username, 
+				b.odds,  
+				b.modds,       
+				b.OddsType,    
+				b.transdate,  
+				b.bettype,  
+				b.betteam,  
+				b.hdp1,  
+				hdp2,  
+				b.livehomescore,  
+				b.liveawayscore, 	
+				b.Actual_stake,
+				b.stake,  
+				b.CurrencyName,   
+				d.status,					 
+				m.HomeId, 
+				m.AwayId, 
+				m.SportType,
+				m.LeagueId  
+			FROM bettrans b WITH (NOLOCK)
+			INNER JOIN #BetDelete d WITH (NOLOCK)
+				ON b.transID = d.transID
+			INNER JOIN Match m WITH (NOLOCK) 
+				ON b.MatchId = m.MatchId
+			WHERE  m.matchID = @matchID
+ 
+
+			UNION ALL 
+								
+			SELECT
+				b.transid,
+				d.transid AS SubTransID,			
+				d.refno,
+				d.custid,    
+				b.username,
+				d.odds,     
+				b.modds,    
+				b.OddsType,    
+				d.transdate,  
+				d.bettype,  
+				d.betteam,  
+				d.hdp1,  
+				d.hdp2,  
+				d.livehomescore,  
+				d.liveawayscore,    
+				b.Actual_stake,
+				b.stake,
+				b.currencyName, 		
+				d.status,	
+				m.HomeId, 
+				m.AwayId, 
+				m.SportType,
+				m.LeagueId,  		
+				b.bettype as parlaytype 
+			FROM bettrans b WITH (NOLOCK)
+			INNER JOIN #BetmDelete d WITH (NOLOCK)
+				ON b.refno = d.refno
+			INNER JOIN Match m WITH (NOLOCK) 
+				ON b.MatchId = m.MatchId
+			WHERE  m.matchID = @matchID
+			ORDER BY b.transid
+
+		-----Get username having negative balance 
+		SELECT  I.Username , (C.Balance + PC.Balance) - (D.Balance+ PD.Balance) as Balance
+		FROM	CustInfo I WITH (NOLOCK)		
+		INNER JOIN BalanceCredit C 
+				ON I.CustId = C.CustID
+		INNER JOIN BalanceDebit D   
+				ON I.CustId = D.CustId
+		LEFT JOIN BalancePendingCredit PC
+				ON C.CustId = PC.CustId
+		LEFT JOIN BalancePendingDebit PD
+				ON D.CustId = PD.CustId
+		WHERE	(C.Balance + PC.Balance) - (D.Balance+ PD.Balance) < 0
+				AND I.CustID IN (SELECT CustID FROM #BetDelete UNION ALL SELECT CustID FROM #BetmDelete )
+
+									
+
+--------END : Send mail  
+			
+	
+	----BEGIN: List data to put Message
 	SELECT  B.TransId, A.AgentID as TargetID, I.Username as TargetName, 1 as IsAgent
 	FROM	#BetDelete B
 	INNER JOIN Bettrans_Agent A WITH (NOLOCK)
@@ -639,81 +724,11 @@ SET NOCOUNT ON
 	SELECT  B.TransId, B.CustId as TargetID, B.Username as TargetName, 0 as IsAgent
 	FROM	#BetmDelete B
 
+	----END : List data to put Message
 
-
----------BEGIN : Send mail Internal when delete real currencies and creator username like 'dba%' or 'pgm%' or 'vndbateam',  'VnQaTeam'	/OR UUS Currency
--- Get Match/outright info
-	IF EXISTS(SELECT CONVERT(INT,val) FROM dbo.strSplit(@bettypes,'^') WHERE CONVERT(INT, val) = 10)  --@bettype = 10
-		BEGIN
-			SELECT
-				MATCH.teamid AS homeid,
-				0 AS awayid,
-				MATCH.matchcode,
-				MATCH.eventdate,
-				MATCH.leagueid,
-				GETDATE() AS DATETIME,
-				CONVERT(BIT,0) AS IsNeutral
-			FROM
-				Outright AS MATCH WITH (NOLOCK)
-			WHERE 
-				MATCH.orid = @matchID
-		END   
-	ELSE
-		BEGIN
-			SELECT
-				MATCH.homeid,
-				MATCH.awayid,
-				MATCH.matchcode,
-				MATCH.eventdate,
-				MATCH.leagueid,
-				GETDATE() AS DATETIME,
-				isnull(MATCH.isNeutral, CONVERT(BIT,0)) AS IsNeutral
-			FROM
-				MATCH WITH (NOLOCK)
-			WHERE 
-				MATCH.matchid = @matchID
-		END
-	
-	-- Get deleted tickets Info
-	 
-		SELECT
-			b.transid,
-			b.CustId,
-			b.username,
-			b.odds,   
-			b.OddsType,  
-			b.transdate,
-			b.bettype,
-			betteam,
-			hdp1,
-			hdp2,
-			b.Liveindicator,
-			b.livehomescore,
-			b.liveawayscore,
-			stake as StakePositiontaking,
-			b.currency, 
-				CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
-				 ELSE b.status 
-				 END as status,
-			ISNULL(SecAcceptFlag,0) SecAcceptFlag,
-			m.HomeId, 
-			m.AwayId, 
-			m.SportType,
-			m.LeagueId
-		FROM bettrans b WITH (NOLOCK)
-			INNER JOIN Match m WITH (NOLOCK) 
-				ON b.MatchId = m.MatchId
-		WHERE b.transid IN(SELECT transid FROM #BetDelete)
-				AND m.matchID = @matchID
-		ORDER BY transid
-
-
---------END : Send mail Internal when delete real currencies and creator username like 'dba%' or 'pgm%' or 'vndbateam',  'VnQaTeam'/ OR UUS Currency
-			
-						
+					
 	DROP TABLE #BetDelete	
-	DROP TABLE #BetmDelete
-	--DROP TABLE #Currency
+	DROP TABLE #BetmDelete 
 	
 	DROP TABLE #BeforeUpd
 	DROP TABLE #AfterUpd

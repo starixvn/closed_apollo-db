@@ -46,11 +46,10 @@ BEGIN
 			@bettype = bettype ,			
 			@Status = status,
 			@Username = Username,
-			@CustId = CustId
+			@CustId = CustId,
+			@bf_balance = winlost - actual_stake + playercomm
 	FROM	Bettrans WITH (NOLOCK) 
-	WHERE   transid=@transid
-      
-    
+	WHERE   transid=@transid 
 		
 	----################ Check concurrent running #####################----
 	DECLARE @KeyID TINYINT
@@ -213,10 +212,10 @@ BEGIN
 	-------End : Get data to send mail
 --------------------------------------------------------------
 
-	----Get data before update				
-	SELECT	@bf_balance = b.winlost - b.actual_stake + b.playercomm
-	FROM	bettrans b WITH (NOLOCK)			
-	WHERE   b.transid = @transid	
+	------Get data before update				
+	--SELECT	@bf_balance = b.winlost - b.actual_stake + b.playercomm
+	--FROM	bettrans b WITH (NOLOCK)			
+	--WHERE   b.transid = @transid	
 
 	
 	------ Recover 

@@ -16,12 +16,13 @@ DB: SVRCSD.RepDB
 Revisions:
 	  - 20130725@Sophia: Change username nvarchar(50)
 	  - 20130924@Sophia: Change Currency Tinyint
+	  - 20131022@Sophia: Get CurrencyName not user currency
 	
 Explanation's Param:
 
 */
 
-CREATE TABLE #OutrightDeleteBets (transid bigint,custid int,username nvarchar(50),odds smallmoney,transdate datetime, Stake money,currency tinyint,status nvarchar(10))
+CREATE TABLE #OutrightDeleteBets (transid bigint,custid int,username nvarchar(50),odds smallmoney,transdate datetime, Stake money,CurrencyName varchar(50),status nvarchar(10))
 
 INSERT INTO #OutrightDeleteBets
 select
@@ -31,7 +32,7 @@ select
 	b.odds,
 	b.transdate,	
 	b.stake,
-	b.currency, 
+	b.CurrencyName, 
 	b.status 
 from 
 	bettrans b with (NOLOCK)

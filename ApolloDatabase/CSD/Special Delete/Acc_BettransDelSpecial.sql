@@ -418,7 +418,7 @@ Param's Explanation: Special bet delete option
 				b.odds,
 				b.transdate,	
 				b.stake,
-				b.currency, 
+				b.CurrencyName, 
 				d.status 
 			FROM bettrans b WITH (NOLOCK)
 			INNER JOIN #BetDelete d WITH (NOLOCK)
