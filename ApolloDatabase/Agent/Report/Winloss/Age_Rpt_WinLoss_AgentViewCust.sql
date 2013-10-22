@@ -242,7 +242,7 @@ IF @FromDate < @BalanceUpDay
 				- (SUM(WinLost + PlayerComm) + SUM(UplineWinlost) + SUM(UplineComm - PlayerComm))as UplineTotal
 	    FROM	SummaryDB.dbo.Sum_WinLoss_Cust_Old A WITH(NOLOCK)		
 		WHERE	AgentId = @AgentId 
-				AND WinLostDate BETWEEN @tmpdate AND @ToDate 
+				AND WinLostDate BETWEEN @FromDate AND @ToDate 
 				AND (@Sporttypes = '0' OR A.sporttype IN (Select sporttype FROM #SportsList))
 				AND (@Bettypes = '0' OR A.Bettype IN (Select bettype FROM #BettypeList))		 
  

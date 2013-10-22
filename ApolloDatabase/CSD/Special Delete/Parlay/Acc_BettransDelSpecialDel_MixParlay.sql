@@ -394,39 +394,38 @@ BEGIN
 	 
 		---Get Ticket Info
 		SELECT
-			b.transid,
-			r.transid AS SubTransID,
-			r.refno,
-			b.username,
-			b.custid,
-			b.transdate,			
-			cr.username as creator,	
-			b.stake as StakePositiontaking,
-			b.winlost-b.actual_stake AS winlost,
-			b.odds,   
-			b.OddsType, 	
-			b.bettype,
-			b.status,
-			b.spositiontaking,
-			b.mpositiontaking,
-			b.apositiontaking,				
-			b.currency,			
-			b.mrecommend,			 
-			r.bettype AS choice_bettype
-			,m.homeid
-			,m.awayid
-			,r.hdp1 AS choice_hdp1
-			,r.hdp2 AS choice_hdp2
-			,r.odds AS choice_odds
-			,r.betteam
-			,r.livehomescore
-			,r.liveawayscore
-			,r.liveindicator
-			,m.leagueid
-			,m.sporttype
-			,m.isNeutral
-			,m.matchID
-			,m.matchCode
+			   b.transid,  
+			   r.transid AS SubTransID,  
+			   r.refno,  
+			   b.username,  
+			   b.CustId,  
+			   b.transdate,  
+			   b.actual_stake,
+			   b.stake as StakePositiontaking,  
+			   b.winlost-b.actual_stake AS winlost,  
+			   b.odds, 
+			   b.modds,    
+			   b.OddsType,
+			   b.bettype, 
+			   b.betteam,  
+			   b.status,  
+			   b.tpositiontaking,  
+			   b.currency,       
+			   r.bettype AS choice_bettype  
+			   ,m.homeid  
+			   ,m.awayid  
+			   ,r.hdp1 AS choice_hdp1  
+			   ,r.hdp2 AS choice_hdp2  
+			   ,r.odds AS choice_odds  
+			   ,r.betteam  
+			   ,r.livehomescore  
+			   ,r.liveawayscore  
+			   ,r.liveindicator  
+			   ,m.leagueid  
+			   ,m.sporttype  
+			   ,m.isNeutral  
+			   ,m.matchID  
+			   ,m.matchCode  
 	FROM dbo.bettrans AS b with (NOLOCK)
 		INNER JOIN #Ref AS r WITH(NOLOCK) ON b.refno=r.refno AND b.matchid IN (9,29) AND b.bettype IN (9,29)
 		INNER JOIN dbo.match AS m WITH(NOLOCK) ON m.matchid=@MatchID 

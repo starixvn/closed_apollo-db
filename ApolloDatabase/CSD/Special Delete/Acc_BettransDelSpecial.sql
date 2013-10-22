@@ -124,12 +124,8 @@ Param's Explanation: Special bet delete option
 	END 
 	-------------------		
 		
-	CREATE TABLE #BetDelete (transid BIGINT, CustId INT, PlayerName nvarchar(50), betfrom NVARCHAR(1),statusID INT)
-	
-	--DECLARE @UUSCust TABLE (custid INT, username VARCHAR(30))
-
-	--DECLARE @RealCurrCust TABLE (custid INT, username VARCHAR(30))
-
+	CREATE TABLE #BetDelete (transid BIGINT, CustId INT, PlayerName nvarchar(50), betfrom NVARCHAR(1),statusID INT, status VARCHAR(10))
+ 
 	DECLARE @Status TABLE (statusID TINYINT)
 
 		/*
@@ -151,8 +147,8 @@ Param's Explanation: Special bet delete option
 
 ------------------***** Insert all data into #BetDelete *****------------------
 	--bettype <> 4
-	INSERT INTO #BetDelete (transid, CustId, PlayerName, betfrom, statusID)   
-	SELECT DISTINCT transid, CustId, username, betfrom, statusID
+	INSERT INTO #BetDelete (transid, CustId, PlayerName, betfrom, statusID, status )   
+	SELECT DISTINCT transid, CustId, username, betfrom, statusID, status
 	FROM bettrans b WITH (nolock)
 		INNER JOIN dbo.strSplit(@bettypes,'^') AS bt ON bt.val=b.bettype
 	WHERE
@@ -179,8 +175,8 @@ Param's Explanation: Special bet delete option
 		AND b.TransID IN (SELECT CONVERT(BIGINT, val) FROM dbo.strSplit(@transids, ','))
         
 	--bettype = 4
-	INSERT INTO #BetDelete (transid, CustId, PlayerName, betfrom, statusID)   
-	SELECT DISTINCT transid, CustId, Username, betfrom, statusID
+	INSERT INTO #BetDelete (transid, CustId, PlayerName, betfrom, statusID, status)   
+	SELECT DISTINCT transid, CustId, Username, betfrom, statusID, status
 	FROM bettrans b WITH (nolock)
 		LEFT JOIN dbo.strSplit(@betteam430,'^') AS bt ON b.betteam=CONVERT(varchar(3),bt.val)
 	WHERE
@@ -197,8 +193,8 @@ Param's Explanation: Special bet delete option
 		AND b.TransID IN (SELECT CONVERT(BIGINT, val) FROM dbo.strSplit(@transids, ','))	
 
  
-	INSERT INTO #BetDelete (transid, CustId, PlayerName, betfrom, statusID)   
-	SELECT DISTINCT transid, CustId, Username, betfrom, statusID
+	INSERT INTO #BetDelete (transid, CustId, PlayerName, betfrom, statusID, status)   
+	SELECT DISTINCT transid, CustId, Username, betfrom, statusID, status
 	FROM dbo.bettrans AS b WITH (nolock)
 		LEFT JOIN dbo.strSplit(@betteam6,'^') AS bt ON bt.val=b.betteam
 	WHERE
@@ -214,8 +210,8 @@ Param's Explanation: Special bet delete option
 		AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
 		AND b.TransID IN (SELECT CONVERT(BIGINT, val) FROM dbo.strSplit(@transids, ','))
 	
-	INSERT INTO #BetDelete (transid, CustId, PlayerName, betfrom, statusID)   
-	SELECT DISTINCT transid, CustId, Username, betfrom, statusID
+	INSERT INTO #BetDelete (transid, CustId, PlayerName, betfrom, statusID,status)   
+	SELECT DISTINCT transid, CustId, Username, betfrom, statusID, status
 	FROM bettrans b WITH (nolock)
 		LEFT JOIN dbo.strSplit(@betteam14,'^') AS bt ON b.betteam=CONVERT(varchar(3),bt.val)
 	WHERE
@@ -231,8 +227,8 @@ Param's Explanation: Special bet delete option
 		AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
 		AND b.TransID IN (SELECT CONVERT(BIGINT, val) FROM dbo.strSplit(@transids, ','))	
 		
-	INSERT INTO #BetDelete (transid, CustId, PlayerName, betfrom, statusID)   
-	SELECT DISTINCT transid, CustId, Username, betfrom, statusID
+	INSERT INTO #BetDelete (transid, CustId, PlayerName, betfrom, statusID, status)   
+	SELECT DISTINCT transid, CustId, Username, betfrom, statusID, status
 	FROM dbo.bettrans AS b WITH (nolock)
 		LEFT JOIN dbo.strSplit(@betteam16,'^') AS bt ON bt.val=b.betteam
 	WHERE
@@ -367,23 +363,7 @@ Param's Explanation: Special bet delete option
 			WHERE	A.transid in (SELECT transid FROM #BetDelete)
 
 
-		---- update totalbets
-		--DECLARE @Total TABLE (oddsid INT, HomeTotal MONEY, AwayTotal MONEY)
-
-		--INSERT INTO @Total
-		--SELECT
-		--	oddsid,
-		--	SUM(CASE WHEN betteam='h' THEN (CASE WHEN ABS(odds) > 1 THEN ABS(odds) ELSE 1 END * b.stake * e.actualrate * (1-TPositionTaking)) ELSE 0 END) homeTotal,
-		--	SUM(CASE WHEN betteam='a' THEN (CASE WHEN ABS(odds) > 1 THEN ABS(odds) ELSE 1 END * b.stake * e.actualrate * (1-b.TPositionTaking)) ELSE 0 END) awayTotal
-		--FROM bettrans b WITH (nolock)
-		--	INNER JOIN exchange e WITH (nolock) ON b.currency = e.exchangeid
-		--WHERE bettype in (1,3,7,8) AND ruben = 0 AND oddsid <> 0 and matchid = @matchid
-		--GROUP BY oddsid
-
-		--UPDATE odds WITH (rowlock, updlock)
-		--SET hometotal = t.HomeTotal, awaytotal = t.AwayTotal
-		--FROM @Total t WHERE odds.oddsid = t.oddsid AND odds.matchid = @matchid
-
+	
 	--Get data after update
 	INSERT INTO #AfterUpd (CustId, balance)
 	SELECT	b.CustId, SUM (b.winlost - b.actual_stake + b.playercomm) balance
@@ -410,6 +390,7 @@ Param's Explanation: Special bet delete option
 
 	SELECT @LogData ='Delete bet for matchid ' + CONVERT(VARCHAR(20), @matchid) + ' from ' + CONVERT(VARCHAR(20), @FromTransId) + ' to ' + CONVERT(VARCHAR(20), @ToTransId) + ' IP=' + COALESCE(CAST(@IP AS VARCHAR(15)),SPACE(1))
 	EXEC WriteLog_UserLog_T @UserID = @UserID, @Doing = @LogData
+		 
 
 ------after delete, return all deleted with additional information for mailing 
 	
@@ -438,15 +419,16 @@ Param's Explanation: Special bet delete option
 				b.transdate,	
 				b.stake,
 				b.currency, 
-				b.status 
-			FROM bettrans b WITH (NOLOCK)			
-			WHERE b.transid IN(SELECT transid FROM #BetDelete)
-			ORDER BY transid
+				d.status 
+			FROM bettrans b WITH (NOLOCK)
+			INNER JOIN #BetDelete d WITH (NOLOCK)
+				ON b.transID = d.transID		
+			ORDER BY b.transid
 
 		END   
 	ELSE
 		BEGIN
-		-- Get Match info
+			-- Get Match info
 			SELECT
 				MATCH.homeid,
 				MATCH.awayid,
@@ -470,34 +452,48 @@ Param's Explanation: Special bet delete option
 				b.OddsType,  
 				b.transdate,
 				b.bettype,
-				betteam,
-				hdp1,
-				hdp2,
+				b.betteam,
+				b.hdp1,
+				b.hdp2,
 				b.Liveindicator,
 				b.livehomescore,
 				b.liveawayscore,
-				stake,
+				b.stake,
 				b.CurrencyName,
-					CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
-					 ELSE b.status 
-					 END as status,
-				ISNULL(SecAcceptFlag,0) SecAcceptFlag,
+				d.status,
+				ISNULL(b.SecAcceptFlag,0) SecAcceptFlag,
 				m.HomeId, 
 				m.AwayId, 
 				m.SportType,
 				m.LeagueId
 			FROM bettrans b WITH (NOLOCK)
-				INNER JOIN Match m WITH (NOLOCK) 
-					ON b.MatchId = m.MatchId
-			WHERE b.transid IN(SELECT transid FROM #BetDelete)
-					AND m.matchID = @matchID
-			ORDER BY transid
+			INNER JOIN #BetDelete d WITH (NOLOCK)
+				ON b.transID = d.transID
+			INNER JOIN Match m WITH (NOLOCK) 
+				ON b.MatchId = m.MatchId
+			WHERE  m.matchID = @matchID
+			ORDER BY b.transid
 
 		END	
+
+		-----Get username having negative balance 
+		SELECT  B.PlayerName as username, (C.Balance + PC.Balance) - (D.Balance+ PD.Balance) as Balance
+		FROM	#BetDelete B 
+		INNER JOIN BalanceCredit C 
+				ON B.CustId = C.CustID
+		INNER JOIN BalanceDebit D   
+				ON B.CustId = D.CustId
+		LEFT JOIN BalancePendingCredit PC
+				ON C.CustId = PC.CustId
+		LEFT JOIN BalancePendingDebit PD
+				ON D.CustId = PD.CustId
+		WHERE (C.Balance + PC.Balance) - (D.Balance+ PD.Balance) < 0
+
+		 
 	-----End : Send mail when delete tickets 
 
-	 
-	---- List data to put Message
+	
+	----Begin: List data to put Message
 	SELECT  B.TransId, A.AgentID as TargetID, I.Username as TargetName, 1 as IsAgent
 	FROM	#BetDelete B
 	INNER JOIN Bettrans_Agent A WITH (NOLOCK)
@@ -506,10 +502,12 @@ Param's Explanation: Special bet delete option
 			ON I.AgentId = A.AgentId
 	UNION ALL
 	SELECT  B.TransId, B.CustId as TargetID, B.PlayerName as TargetName, 0 as IsAgent
-	FROM	#BetDelete B
+	FROM	#BetDelete B	
+	
+	----END: List data to put Message
 
-
-
+	
+	------Release	
 	DROP TABLE #BetDelete
 	
 	DROP TABLE #BeforeUpd

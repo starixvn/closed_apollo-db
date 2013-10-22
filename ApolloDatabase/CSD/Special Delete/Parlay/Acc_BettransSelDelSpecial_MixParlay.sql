@@ -198,8 +198,8 @@ BEGIN
    r.refno,  
    b.username,  
    b.CustId,  
-   b.transdate,
-   b.actual_stake,     
+   b.transdate,  
+   b.actual_stake,
    b.stake as StakePositiontaking,  
    b.winlost-b.actual_stake AS winlost,  
    b.odds, 
@@ -250,5 +250,4 @@ END
 
 GO
 GRANT EXECUTE ON [dbo].[Acc_BettransSelDelSpecial_MixParlay] TO [aplweb]
-GO
---GRANT VIEW DEFINITION ON [dbo].[Acc_BettransSelDelSpecial_MixParlay] TO [vnteam]
+GO 
