@@ -15,6 +15,7 @@ Revisions:
 	  - 20130725@Sophia: Change username nvarchar(50)
 	  - 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
 	  - 20130924@Sophia: get EventStatus to show recommendation popup when recover bet
+	  - 20131021@Sophia: Get data to send mail
 Param's Explanation:
 
 */
@@ -45,11 +46,10 @@ BEGIN
 			@bettype = bettype ,			
 			@Status = status,
 			@Username = Username,
-			@CustId = CustId
+			@CustId = CustId,
+			@bf_balance = winlost - actual_stake + playercomm
 	FROM	Bettrans WITH (NOLOCK) 
-	WHERE   transid=@transid
-      
-    
+	WHERE   transid=@transid 
 		
 	----################ Check concurrent running #####################----
 	DECLARE @KeyID TINYINT
@@ -93,30 +93,16 @@ BEGIN
 					
 	
 	-------------------		
-		
+		 	
     IF @bettype = 10  
     BEGIN
-        SELECT	@EventStatus = OddsStatus
-				--MATCH.teamid AS homeid,
-				--0 AS awayid,
-				--MATCH.matchcode,
-				--MATCH.eventdate,
-				--MATCH.leagueid,
-				--GETDATE() AS DATETIME,
-				--CONVERT(BIT,0) AS IsNeutral		
+        SELECT	@EventStatus = OddsStatus 
         FROM      Outright WITH (NOLOCK)
         WHERE     Outright.orid = @matchID
     END  
     ELSE
     BEGIN
-        SELECT	@EventStatus = EventStatus
-				--MATCH.homeid,
-				--MATCH.awayid,
-				--MATCH.matchcode,
-				--MATCH.eventdate,
-				--MATCH.leagueid,
-				--GETDATE() AS DATETIME,
-				--isnull(MATCH.isNeutral, CONVERT(BIT,0)) AS IsNeutral
+        SELECT	@EventStatus = EventStatus 
         FROM	MATCH WITH (NOLOCK)
         WHERE   MATCH.matchid = @matchID
     END
@@ -130,10 +116,8 @@ BEGIN
 	BEGIN 
 		SELECT @ErrCode = 0, @ErrMsg = 'Parlay recalculation for the match <b>'+ CONVERT(VARCHAR(20),@MatchID)+'</b> has been reverted to "Running" status.'
 	END
-
-   --- exec ApolloArchive.DB06.dbo.Acc_BettransSelRecoverSpecialBets @transid = @transid 
-
-
+ 
+  
 	-- check if the ticket is not in zzzbettrans
 	IF NOT EXISTS (	
 				SELECT 1 
@@ -188,13 +172,53 @@ BEGIN
 		RETURN
 	END
 
-	----Get data before update				
-	SELECT	@bf_balance = b.winlost - b.actual_stake + b.playercomm
-	FROM	bettrans b WITH (NOLOCK)			
-	WHERE   b.transid = @transid	
+-------------------------------------------------------------------
+	
+	 -------Begin : Get data to send mail
+
+	  IF @bettype = 10  --@bettype = 10
+		BEGIN
+			SELECT
+				MATCH.teamid AS homeid,
+				0 AS awayid,
+				MATCH.matchcode,
+				MATCH.eventdate,
+				MATCH.leagueid,
+				GETDATE() AS DATETIME,
+				CONVERT(BIT,0) AS IsNeutral
+			FROM
+				Outright AS MATCH WITH (NOLOCK)
+			WHERE
+				MATCH.orid = @matchID
+		END  
+		ELSE
+		BEGIN
+			SELECT
+				MATCH.homeid,
+				MATCH.awayid,
+				MATCH.matchcode,
+				MATCH.eventdate,
+				MATCH.leagueid,
+				GETDATE() AS DATETIME,
+				isnull(MATCH.isNeutral, CONVERT(BIT,0)) AS IsNeutral
+			FROM
+				MATCH WITH (NOLOCK)
+			WHERE
+				MATCH.matchid = @matchID
+		END
+
+		exec SVRCSD.REPDB.dbo.Acc_BettransSelRecoverSpecialBets @transid = @transid 
+
+	-------End : Get data to send mail
+--------------------------------------------------------------
+
+	------Get data before update				
+	--SELECT	@bf_balance = b.winlost - b.actual_stake + b.playercomm
+	--FROM	bettrans b WITH (NOLOCK)			
+	--WHERE   b.transid = @transid	
 
 	
------- Recover 
+	------ Recover 
 	-- update Bettrans 
     UPDATE bettrans WITH(ROWLOCK,UPDLOCK)
     SET winlost = 0, 
@@ -218,7 +242,7 @@ BEGIN
 	FROM	Bettrans_Agent A 
 		INNER JOIN Bettrans B  WITH (NOLOCK)
 			ON A.TransID = B.TransID
-	 WHERE b.transid = @transid
+	WHERE b.transid = @transid
 
 	----Get data after update
     SELECT	@at_balance = b.winlost - b.actual_stake + b.playercomm
@@ -269,7 +293,23 @@ BEGIN
 	EXEC WriteLog_UserLog_T @UserID = @UserID, @Doing = @LogData
 	
 
-	
+	-----Get username having negative balance 
+		SELECT  B.Username , (C.Balance + PC.Balance) - (D.Balance+ PD.Balance) as Balance
+		FROM	bettrans B 
+		INNER JOIN BalanceCredit C 
+				ON B.CustId = C.CustID
+		INNER JOIN BalanceDebit D   
+				ON B.CustId = C.CustId
+		LEFT JOIN BalancePendingCredit PC
+				ON C.CustId = PC.CustId
+		LEFT JOIN BalancePendingDebit PD
+				ON D.CustId = PD.CustId
+		WHERE	B.TransID = @TransID 
+				AND (C.Balance + PC.Balance) - (D.Balance+ PD.Balance) < 0
+				
+
+
+
 	---- List data to put Message
 	SELECT  @TransId as TransId, A.AgentID as TargetID, I.Username as TargetName, 1 as IsAgent
 	FROM	Bettrans B WITH (NOLOCK)

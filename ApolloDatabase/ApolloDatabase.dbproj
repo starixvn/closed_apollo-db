@@ -124,7 +124,6 @@
     <Folder Include="CSD\Admin\MailingList" />
     <Folder Include="Agent\Report\Result\BK" />
     <Folder Include="CSD\Special Delete\DeleteBetID" />
-    <Folder Include="CSD\Special Delete\DeletBetID\" />
     <Folder Include="Agent\BetList\TotalBets" />
     <Folder Include="Agent\BetList\TicketCancel" />
     <Folder Include="Agent\BetList\OutStanding" />
@@ -332,9 +331,6 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\BetList\Age_BetList_AgentDetail.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_TotalBets_SelRunningByBettypeMatch.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Function\StrSplit.sql">
@@ -1066,9 +1062,6 @@
     <NotInBuild Include="Agent\Message\Age_CustomerUpdMessagesRead.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_TotalBets_SelRunningByBettype.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="Agent\Customer Setting\Unit Test\AgentK.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1753,10 +1746,10 @@
     <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\Task_SummaryReport_GenData.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\DeletBetID\Acc_BettransDelBet.sql">
+    <NotInBuild Include="CSD\Special Delete\DeleteBetID\Acc_BettransDelBet.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\DeletBetID\Acc_BetsSelBetList_ByTransID.sql">
+    <NotInBuild Include="CSD\Special Delete\DeleteBetID\Acc_BetsSelBetList_ByTransID.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Customer Setting\Age_Customer_GetPositionTakingForUpdateDirectMember.sql">
