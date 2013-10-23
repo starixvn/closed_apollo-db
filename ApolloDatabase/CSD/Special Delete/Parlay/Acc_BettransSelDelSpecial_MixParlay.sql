@@ -201,7 +201,7 @@ BEGIN
    b.CustId,  
    b.transdate,  
    --b.actual_stake,
-   b.stake as StakePositiontaking,  
+   b.stake as Stake,  
    --b.winlost-b.actual_stake AS winlost,  
    b.odds, 
    b.modds,    
