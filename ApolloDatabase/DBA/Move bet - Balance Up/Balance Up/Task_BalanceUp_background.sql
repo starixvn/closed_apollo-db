@@ -48,7 +48,7 @@ END
 PRINT '@fdate = ' + CONVERT(varchar(10), @fdate, 120)
 
 SET @Doing = 'call Task_BalanceUp_background @fdate = ' + CONVERT(nvarchar(10), @fdate, 120) + ', @step = ' + CAST(@step as nvarchar(2))
-EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing  
+EXEC dbo.WriteLog_UserLog_T @UserID = 70, @Doing = @Doing  
 
 
 
@@ -329,7 +329,7 @@ BEGIN
 	WHERE VName = 'isArchivingBet' 
 
 	SET @Doing = 'Task_BalanceUp_background : Done'
-	EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing  
+	EXEC dbo.WriteLog_UserLog_T @UserID = 70, @Doing = @Doing  
 -- ================== END STEP : 6
 END
 -- ================== Finishing
