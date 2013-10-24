@@ -240,8 +240,8 @@ BEGIN
 			   b.tpositiontaking,  
 			   b.CurrencyName,       
 			   r.bettype AS choice_bettype  
-			   ,m.homeid  
-			   ,m.awayid  
+			   ,m.homeid AS choice_HomeID  
+			   ,m.awayid AS choice_AwayID
 			   ,r.hdp1 AS choice_hdp1  
 			   ,r.hdp2 AS choice_hdp2  
 			   ,r.odds AS choice_odds  

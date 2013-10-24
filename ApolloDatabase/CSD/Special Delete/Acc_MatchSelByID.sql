@@ -12,6 +12,7 @@ DB: SVRCSD.RepDB
 Original:
 
 Revisions: 
+- 20131024@Sophia: Add IsOutright
 
 */
 SET NOCOUNT ON
@@ -28,7 +29,8 @@ if @bettype = 10
         MATCH.eventdate,
         MATCH.leagueid,
         GETDATE() AS DATETIME,
-        CONVERT(BIT,0) AS IsNeutral
+        CONVERT(BIT,0) AS IsNeutral,
+		1 as IsOutright
     FROM
         Outright AS MATCH WITH (NOLOCK)
     WHERE 
@@ -41,7 +43,8 @@ else
 			match.matchcode, 
 			match.eventdate, 
 			match.leagueid,
-			isnull(match.isNeutral, CONVERT(BIT,0)) as IsNeutral
+			isnull(match.isNeutral, CONVERT(BIT,0)) as IsNeutral,
+			0 as IsOutright
 		FROM 
 			match WITH (NOLOCK) 
 		WHERE  
