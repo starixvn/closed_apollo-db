@@ -300,6 +300,22 @@ SET NOCOUNT ON
 	END
 
 ------------------***** End of insert all data into #BetDelete,#BetmDelete *****------------------	
+
+------------------***** Remove data no need to special delete out of #BetDelete *****------------------	
+	
+	IF @transids <> ''
+	BEGIN
+		DELETE FROM #BetDelete
+		WHERE transid NOT IN (SELECT CONVERT(BIGINT, val) FROM dbo.strSplit(@transids, ','))
+			
+		
+		DELETE FROM #BetmDelete
+		WHERE transid NOT IN (SELECT CONVERT(BIGINT, val) FROM dbo.strSplit(@transids, ','))			
+	END
+
+------------------***** End of Remove data no need to special delete out of #BetDelete  *****------------------
+
+-------------------Checking 
 		
 	IF EXISTS (SELECT 1 FROM #BetDelete WHERE statusID IN (111,112,113)
 			UNION ALL 
@@ -369,20 +385,6 @@ SET NOCOUNT ON
 	END
 
 	 
-------------------***** Remove data no need to special delete out of #BetDelete *****------------------	
-	
-	IF @transids <> ''
-	BEGIN
-		DELETE FROM #BetDelete
-		WHERE transid NOT IN (SELECT CONVERT(BIGINT, val) FROM dbo.strSplit(@transids, ','))
-			
-		
-		DELETE FROM #BetmDelete
-		WHERE transid NOT IN (SELECT CONVERT(BIGINT, val) FROM dbo.strSplit(@transids, ','))			
-	END
-
-------------------***** End of Remove data no need to special delete out of #BetDelete  *****------------------
-
 ------------------***** Begin special delete early kickoff *****------------------
 
 	-- STEP 1 : BackUp of bettrans and bettransm
@@ -628,7 +630,7 @@ SET NOCOUNT ON
 				b.bettype,  
 				b.betteam,  
 				b.hdp1,  
-				hdp2,  
+				b.hdp2,  
 				b.livehomescore,  
 				b.liveawayscore, 	
 				b.Actual_stake,
@@ -638,33 +640,34 @@ SET NOCOUNT ON
 				m.HomeId, 
 				m.AwayId, 
 				m.SportType,
-				m.LeagueId  
+				m.LeagueId , 
+				b.bettype as parlaytype,
+				0 as IsMP
 			FROM bettrans b WITH (NOLOCK)
 			INNER JOIN #BetDelete d WITH (NOLOCK)
 				ON b.transID = d.transID
 			INNER JOIN Match m WITH (NOLOCK) 
 				ON b.MatchId = m.MatchId
 			WHERE  m.matchID = @matchID
- 
 
-			UNION ALL 
-								
+			UNION ALL 							
+									
 			SELECT
 				b.transid,
-				d.transid AS SubTransID,			
-				d.refno,
-				d.custid,    
+				bm.transid AS SubTransID,			
+				bm.refno,
+				bm.custid,    
 				b.username,
-				d.odds,     
+				bm.odds,     
 				b.modds,    
 				b.OddsType,    
-				d.transdate,  
-				d.bettype,  
-				d.betteam,  
-				d.hdp1,  
-				d.hdp2,  
-				d.livehomescore,  
-				d.liveawayscore,    
+				bm.transdate,  
+				bm.bettype,  
+				bm.betteam,  
+				bm.hdp1,  
+				bm.hdp2,  
+				bm.livehomescore,  
+				bm.liveawayscore,    
 				b.Actual_stake,
 				b.stake,
 				b.currencyName, 		
@@ -673,8 +676,11 @@ SET NOCOUNT ON
 				m.AwayId, 
 				m.SportType,
 				m.LeagueId,  		
-				b.bettype as parlaytype 
+				b.bettype as parlaytype,
+				1 as IsMP
 			FROM bettrans b WITH (NOLOCK)
+			INNER JOIN BettransM bm WITH (NOLOCK)
+				ON bm.Refno = b.refno
 			INNER JOIN #BetmDelete d WITH (NOLOCK)
 				ON b.refno = d.refno
 			INNER JOIN Match m WITH (NOLOCK) 
