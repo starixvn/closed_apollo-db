@@ -187,7 +187,7 @@ BEGIN
 				FROM BetTrans_Agent BP  WITH (ROWLOCK, index =IX_WinlostDate_StatusId_Bettype) 			
 				WHERE	BP.Winlostdate <  @Fdate		
 						AND BP.STatusID NOT IN (0,1)	
-						AND BP.bettype = 20000  --BALANCE 								
+						AND BP.bettype >= 20000  --BALANCE 								
 				GROUP BY BP.AgentId 	
 			) T
 		GROUP BY AgentId  

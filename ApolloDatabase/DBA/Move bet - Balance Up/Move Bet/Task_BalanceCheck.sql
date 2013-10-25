@@ -51,7 +51,7 @@ FROM
 			INNER JOIN exchange e with (nolock) ON BP.currency=e.exchangeid
 		WHERE	BP.Winlostdate <= @winlostdate	
 				AND BP.STatusID NOT IN (0,1)	
-				AND BP.bettype = 20000  --BALANCE 								
+				AND BP.bettype >= 20000  --BALANCE 								
 		GROUP BY BP.AgentId 	
 	) T
 

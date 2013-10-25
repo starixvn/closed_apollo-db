@@ -1818,6 +1818,9 @@
     <NotInBuild Include="OWA\Task_PostStaging.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="DBA\Task\Task_BackupFull_SummaryDB.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">

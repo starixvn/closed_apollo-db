@@ -60,7 +60,9 @@ Declare @modds smallmoney, @commWinRate smallmoney, @commLostRate smallmoney, @m
 		
 		--create index		
 		CREATE CLUSTERED INDEX IX_tmp on #ba (transid,AgentLevel desc)	
-		--CREATE INDEX IX_tmp on #ba (transid,[AgentLevel]) INCLUDE (APositionTaking)	
+		--try again
+		IF @@ERROR>0
+			CREATE CLUSTERED INDEX IX_tmp on #ba (transid,AgentLevel desc)	
 		
 		DECLARE @prevtransid BIGINT =0 
 	
@@ -198,6 +200,8 @@ Declare @modds smallmoney, @commWinRate smallmoney, @commLostRate smallmoney, @m
 			--[status] NOT IN (N'VOID', N'REJECT')
 			BetTrans.statusID NOT IN (101,102)
 
+		DROP TABLE #ba 	
+
 		IF @FGLG2 IS NULL OR @FGLG2 = ''
 			SET @FGLG2 = @correctscore
 
@@ -236,7 +240,7 @@ Declare @modds smallmoney, @commWinRate smallmoney, @commLostRate smallmoney, @m
 				AND matchid = @matchid
 				AND statusID NOT IN (101,102) --VOID, REJECT
 				
-																							UPDATE dbo.betParlayDetail WITH(ROWLOCK,UPDLOCK)
+		UPDATE dbo.betParlayDetail WITH(ROWLOCK,UPDLOCK)
 		SET
 			@modds =
 				case 

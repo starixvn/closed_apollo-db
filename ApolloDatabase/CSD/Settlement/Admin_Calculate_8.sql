@@ -65,7 +65,9 @@ Declare @modds smallmoney, @commWinRate smallmoney, @commLostRate smallmoney, @D
 		
 	--create index		
 	CREATE CLUSTERED INDEX IX_tmp on #ba (transid,AgentLevel desc)	
-	--CREATE INDEX IX_tmp on #ba (transid,[AgentLevel]) INCLUDE (APositionTaking)	
+	--try again
+	IF @@ERROR>0
+		CREATE CLUSTERED INDEX IX_tmp on #ba (transid,AgentLevel desc)	
 		
 	DECLARE @prevtransid BIGINT =0 
 	
@@ -194,6 +196,9 @@ Declare @modds smallmoney, @commWinRate smallmoney, @commLostRate smallmoney, @D
 		BetTrans.bettype=@bettype AND
 		--[status] NOT IN (N'VOID', N'REJECT')
 		BetTrans.statusID NOT IN (101,102)	
+
+	DROP TABLE #ba 
+
 	END
 GO
 

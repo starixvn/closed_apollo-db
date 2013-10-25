@@ -269,7 +269,7 @@ BEGIN
 
 					AND (@Sporttypes = '0' 
 							OR EXISTS (	SELECT	1 
-										FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
+										FROM	BettransM BM WITH (NOLOCK)--, index=IX_RefNo 
 										INNER JOIN Match M WITH (NOLOCK) 
 											ON	 M.matchID = BM.MatchId 
 											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
