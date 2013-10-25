@@ -689,20 +689,19 @@ SET NOCOUNT ON
 			ORDER BY b.transid
 
 		-----Get username having negative balance 
-		SELECT  I.Username , (C.Balance + PC.Balance) - (D.Balance+ PD.Balance) as Balance
-		FROM	CustInfo I WITH (NOLOCK)		
-		INNER JOIN BalanceCredit C 
-				ON I.CustId = C.CustID
-		INNER JOIN BalanceDebit D   
-				ON I.CustId = D.CustId
-		LEFT JOIN BalancePendingCredit PC
-				ON C.CustId = PC.CustId
-		LEFT JOIN BalancePendingDebit PD
-				ON D.CustId = PD.CustId
-		WHERE	(C.Balance + PC.Balance) - (D.Balance+ PD.Balance) < 0
-				AND I.CustID IN (SELECT CustID FROM #BetDelete UNION ALL SELECT CustID FROM #BetmDelete )
+		SELECT	SUM(b.Winlost - B.actual_stake + B.PlayerComm) as Balance, B.Username
+		FROM	Bettrans B 
+		INNER JOIN #BetDelete D ON B.TransID = D.TransID
+		GROUP BY  B.Username
+		HAVING SUM(b.Winlost - B.actual_stake + B.PlayerComm) < 0
 
-									
+		UNION ALL
+		
+		SELECT	SUM(b.Winlost - B.actual_stake + B.PlayerComm) as Balance, B.Username
+		FROM	Bettrans B 
+		INNER JOIN #BetmDelete D ON B.Refno  = D.Refno
+		GROUP BY  B.Username
+		HAVING SUM(b.Winlost - B.actual_stake + B.PlayerComm) < 0						
 
 --------END : Send mail  
 			

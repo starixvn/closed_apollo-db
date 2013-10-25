@@ -131,6 +131,7 @@
     <Folder Include="Agent\BetList\Transaction" />
     <Folder Include="Agent\BetList\Winloss" />
     <Folder Include="OWA" />
+    <Folder Include="LiReport" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1834,6 +1835,9 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Customer Setting\Age_AgentUser_GetUserFunctionPolicy.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="OWA\Task_PrepareStaging_ALL.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>

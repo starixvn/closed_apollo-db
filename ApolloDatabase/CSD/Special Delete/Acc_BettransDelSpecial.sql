@@ -477,17 +477,11 @@ Param's Explanation: Special bet delete option
 		END	
 
 		-----Get username having negative balance 
-		SELECT  B.PlayerName as username, (C.Balance + PC.Balance) - (D.Balance+ PD.Balance) as Balance
-		FROM	#BetDelete B 
-		INNER JOIN BalanceCredit C 
-				ON B.CustId = C.CustID
-		INNER JOIN BalanceDebit D   
-				ON B.CustId = D.CustId
-		LEFT JOIN BalancePendingCredit PC
-				ON C.CustId = PC.CustId
-		LEFT JOIN BalancePendingDebit PD
-				ON D.CustId = PD.CustId
-		WHERE (C.Balance + PC.Balance) - (D.Balance+ PD.Balance) < 0
+		SELECT	SUM(b.Winlost - B.actual_stake + B.PlayerComm) as Balance, B.Username
+		FROM	Bettrans B 
+		INNER JOIN #BetDelete D ON B.TransID = D.TransID
+		GROUP BY  B.Username
+		HAVING SUM(b.Winlost - B.actual_stake + B.PlayerComm) < 0
 
 		 
 	-----End : Send mail when delete tickets 

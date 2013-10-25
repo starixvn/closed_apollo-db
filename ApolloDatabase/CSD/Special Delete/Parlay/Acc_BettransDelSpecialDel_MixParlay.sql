@@ -409,19 +409,12 @@ BEGIN
 		ORDER BY transid
 	
 		-----Get username having negative balance 
-		SELECT  I.Username , (C.Balance + PC.Balance) - (D.Balance+ PD.Balance) as Balance
-		FROM	#Ref B 		
-		INNER JOIN CustInfo I WITH (NOLOCK)
-			ON I.CustID = B.CustID
-		INNER JOIN BalanceCredit C 
-				ON B.CustId = C.CustID
-		INNER JOIN BalanceDebit D   
-				ON B.CustId = D.CustId
-		LEFT JOIN BalancePendingCredit PC
-				ON C.CustId = PC.CustId
-		LEFT JOIN BalancePendingDebit PD
-				ON D.CustId = PD.CustId
-		WHERE (C.Balance + PC.Balance) - (D.Balance+ PD.Balance) < 0
+		SELECT	SUM(b.Winlost - B.actual_stake + B.PlayerComm) as Balance, B.Username
+		FROM	Bettrans B 
+		INNER JOIN #Ref D ON B.RefNo = D.RefNo
+		GROUP BY  B.Username
+		HAVING SUM(b.Winlost - B.actual_stake + B.PlayerComm) < 0
+
 	 
 	-------END : Send mail After Deleted
 	

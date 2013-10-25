@@ -296,18 +296,11 @@ BEGIN
 	
 
 	-----Get username having negative balance 
-		SELECT  B.Username , (C.Balance + PC.Balance) - (D.Balance+ PD.Balance) as Balance
-		FROM	bettrans B 
-		INNER JOIN BalanceCredit C 
-				ON B.CustId = C.CustID
-		INNER JOIN BalanceDebit D   
-				ON B.CustId = C.CustId
-		LEFT JOIN BalancePendingCredit PC
-				ON C.CustId = PC.CustId
-		LEFT JOIN BalancePendingDebit PD
-				ON D.CustId = PD.CustId
-		WHERE	B.TransID = @TransID 
-				AND (C.Balance + PC.Balance) - (D.Balance+ PD.Balance) < 0
+		SELECT	SUM(b.Winlost - B.actual_stake + B.PlayerComm) as Balance, B.Username
+		FROM	Bettrans B 		
+		WHERE	B.TransId = @TransId
+		GROUP BY  B.Username
+		HAVING SUM(b.Winlost - B.actual_stake + B.PlayerComm) < 0
 				
 
 
@@ -319,7 +312,7 @@ BEGIN
 			ON A.TransID = B.TransID
 	INNER JOIN AgentInfo I WITH (NOLOCK)
 			ON I.AgentId = A.AgentId
-	WHERE B.TransId = @TransId
+	WHERE	B.TransId = @TransId
 	UNION ALL
 	SELECT  @TransId as TransId, @CustId as TargetId, @Username as TargetName, 0 as IsAgent
 
