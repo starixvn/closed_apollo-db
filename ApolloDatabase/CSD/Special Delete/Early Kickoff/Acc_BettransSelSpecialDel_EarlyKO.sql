@@ -217,7 +217,7 @@ BEGIN
         --AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END		
 	
 	---get sub ticket of a mix parlay	
-	CREATE TABLE #Currency (transid bigint,Refno bigint, CurrencyName tinyint,oddstype tinyint, bettype smallint, username NVARCHAR(50), modds smallmoney, Actual_stake MONEY, stake MONEY)
+	CREATE TABLE #Currency (transid bigint,Refno bigint, CurrencyName varchar(100),oddstype tinyint, bettype smallint, username NVARCHAR(50), modds smallmoney, Actual_stake MONEY, stake MONEY)
 	IF EXISTS (SELECT 1 FROM dbo.strSplit(@bettypes,'^') WHERE val IN (9,29))
 		AND EXISTS (SELECT 1 FROM dbo.bettransm AS b WITH(NOLOCK) 
 					WHERE b.matchid=@matchid  AND b.transdate>=@KickOffDate 

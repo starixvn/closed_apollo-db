@@ -25,7 +25,7 @@ AS
 	SET NOCOUNT ON
 	CREATE TABLE #Betlist (transid bigint,CustId int,username nvarchar(50),Creator Int, odds smallmoney, OddsType int, 
 							transdate datetime, bettype smallint, betteam nvarchar(10),hdp1 smallmoney, hdp2 smallmoney,
-							Liveindicator bit, livehomescore smallint, liveawayscore smallint, StakePositiontaking money,CurrencyName varchar(10),
+							Liveindicator bit, livehomescore smallint, liveawayscore smallint, Stake money,CurrencyName varchar(10),
 							status nvarchar(10), SecAcceptFlag bit,  HomeId Int, AwayId int, SportType smallint, LeagueId int, Winlost MONEY)
 	---by @TransID
 	 IF ISNULL(@TransID,0) <> 0
@@ -46,7 +46,7 @@ AS
 			b.Liveindicator,
 			b.livehomescore,
 			b.liveawayscore,
-			stake as StakePositiontaking,
+			stake as Stake,
 			b.CurrencyName, 
 				CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 				 ELSE b.status 
@@ -82,7 +82,7 @@ AS
 			b.Liveindicator,
 			b.livehomescore,
 			b.liveawayscore,
-			stake as StakePositiontaking,
+			stake as Stake,
 			b.CurrencyName, 
 				CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 				 ELSE b.status 
@@ -129,7 +129,7 @@ AS
 			b.Liveindicator,
 			b.livehomescore,
 			b.liveawayscore,
-			stake as StakePositiontaking,
+			stake as Stake,
 			b.CurrencyName, 
 				CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 				 ELSE b.status 
@@ -165,7 +165,7 @@ AS
 			b.Liveindicator,
 			b.livehomescore,
 			b.liveawayscore,
-			stake as StakePositiontaking,
+			stake as Stake,
 			b.CurrencyName, 
 				CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 				 ELSE b.status 

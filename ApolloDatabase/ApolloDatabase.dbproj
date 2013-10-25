@@ -1821,6 +1821,24 @@
     <NotInBuild Include="DBA\Task\Task_BackupFull_SummaryDB.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_Function_GetAll.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetParentInfoWithAgentUser.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_AgentUser_AssignFunction.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_AgentUser_GetByAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_AgentUser_GetFunctionPolicy.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_AgentUser_GetUserFunctionPolicy.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">

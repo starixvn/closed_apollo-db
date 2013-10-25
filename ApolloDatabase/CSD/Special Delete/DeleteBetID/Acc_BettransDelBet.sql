@@ -62,10 +62,10 @@ SET NOCOUNT ON
 	END
 	
 ------------------***** Insert all data into #BetDelete *****------------------
-	CREATE TABLE #BetDelete (transid BIGINT, CustId INT, PlayerName nvarchar(50), Status Varchar(10), KeyValue INT, KeyID INT )
+	CREATE TABLE #BetDelete (transid BIGINT, CustId INT, PlayerName nvarchar(50), Status Varchar(10), winlost MONEY, KeyValue INT, KeyID INT )
 	    	 
-	INSERT INTO #BetDelete (transid, CustId, PlayerName, Status, KeyValue, KeyID)   
-	SELECT	transid, CustId, Username, Status, MatchID as KeyValue, CASE WHEN Bettype = 10 THEN 2 ELSE 1 END AS KeyID
+	INSERT INTO #BetDelete (transid, CustId, PlayerName, Status, winlost , KeyValue, KeyID)   
+	SELECT	transid, CustId, Username, Status, winlost, MatchID as KeyValue, CASE WHEN Bettype = 10 THEN 2 ELSE 1 END AS KeyID
 	FROM	bettrans b WITH (NOLOCK)		
 	WHERE   TransID IN (SELECT CONVERT(BIGINT, val) FROM dbo.strSplit(@transids, ','))    	 
 
@@ -235,7 +235,7 @@ SET NOCOUNT ON
 			b.Liveindicator,
 			b.livehomescore,
 			b.liveawayscore,
-			stake as StakePositiontaking,
+			stake as Stake,
 			b.CurrencyName, 
 			D.status,
 			ISNULL(SecAcceptFlag,0) SecAcceptFlag,
@@ -243,7 +243,7 @@ SET NOCOUNT ON
 			m.AwayId, 			
 			m.SportType,
 			m.LeagueId,
-			b.Winlost
+			d.Winlost
 		FROM bettrans b WITH (NOLOCK)	
 		INNER JOIN #BetDelete D
 				ON 	D.transid = b.TransID
@@ -266,7 +266,7 @@ SET NOCOUNT ON
 			b.Liveindicator,
 			b.livehomescore,
 			b.liveawayscore,
-			stake as StakePositiontaking,
+			stake as Stake,
 			b.CurrencyName, 
 			D.status,
 			ISNULL(SecAcceptFlag,0) SecAcceptFlag,
@@ -274,7 +274,7 @@ SET NOCOUNT ON
 			0 as AwayId, 			
 			l.SportType,
 			m.LeagueId,
-			b.Winlost
+			d.Winlost
 		FROM bettrans b WITH (NOLOCK)		
 		INNER JOIN #BetDelete D	ON 	D.transid = b.TransID	
 		INNER JOIN outright m WITH(NOLOCK) ON b.matchid = m.orid

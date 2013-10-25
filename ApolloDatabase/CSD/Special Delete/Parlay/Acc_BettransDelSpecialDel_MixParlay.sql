@@ -229,7 +229,7 @@ BEGIN
 			   b.CustId,  
 			   b.transdate,  
 			 --b.actual_stake,
-			   b.stake as StakePositiontaking,  
+			   b.stake as Stake,  
 			 --b.winlost-b.actual_stake AS winlost,  
 			   b.odds, 
 			   b.modds,    
@@ -240,8 +240,8 @@ BEGIN
 			   b.tpositiontaking,  
 			   b.CurrencyName,       
 			   r.bettype AS choice_bettype  
-			   ,m.homeid  
-			   ,m.awayid  
+			   ,m.homeid AS choice_HomeID  
+			   ,m.awayid AS choice_AwayID
 			   ,r.hdp1 AS choice_hdp1  
 			   ,r.hdp2 AS choice_hdp2  
 			   ,r.odds AS choice_odds  
@@ -409,10 +409,10 @@ BEGIN
 		ORDER BY transid
 	
 		-----Get username having negative balance 
-		SELECT  C.Username , (C.Balance + PC.Balance) - (D.Balance+ PD.Balance) as Balance
+		SELECT  I.Username , (C.Balance + PC.Balance) - (D.Balance+ PD.Balance) as Balance
 		FROM	#Ref B 		
-		INNER JOIN CustInfo C WITH (NOLOCK)
-			ON C.CustID = B.CustID
+		INNER JOIN CustInfo I WITH (NOLOCK)
+			ON I.CustID = B.CustID
 		INNER JOIN BalanceCredit C 
 				ON B.CustId = C.CustID
 		INNER JOIN BalanceDebit D   

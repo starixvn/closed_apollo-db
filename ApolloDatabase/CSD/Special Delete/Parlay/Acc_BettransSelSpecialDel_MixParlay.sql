@@ -41,7 +41,7 @@ BEGIN
 		m.isNeutral as IsNeutral,
 		m.matchid,
 		m.matchcode
-		,b.stake AS StakePositionTaking
+		,b.stake AS Stake
 		,@CurrencyName AS currency
 		,CASE WHEN transid=@Transid THEN 1 ELSE 0 END AS IsDeleted
 		,b.statusid

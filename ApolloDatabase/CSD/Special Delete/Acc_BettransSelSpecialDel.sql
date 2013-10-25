@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[Acc_BettransSelSpecialDel]
+﻿ALTEr PROCEDURE [dbo].[Acc_BettransSelSpecialDel]
 	@MatchID int,
 	@FromRefNo bigint,
 	@ToRefNo bigint,	
@@ -46,7 +46,7 @@ BEGIN
 	SET NOCOUNT ON
 	CREATE TABLE #SpecialDeleteBets (transid bigint,CustId int,username nvarchar(50),odds smallmoney, OddsType int, 
 									 transdate datetime, bettype smallint, betteam nvarchar(10),hdp1 smallmoney, hdp2 smallmoney,
-									 Liveindicator bit, livehomescore smallint, liveawayscore smallint, StakePositiontaking money,CurrencyName varchar(50),
+									 Liveindicator bit, livehomescore smallint, liveawayscore smallint, Stake money,CurrencyName varchar(50),
 									 status nvarchar(10), SecAcceptFlag bit,  HomeId Int, AwayId int, SportType smallint, LeagueId int)
 
 	IF exists( SELECT convert(int,val) FROM dbo.strSplit(@bettypes,'^') Where convert(int,val) in (4,30) )
@@ -65,7 +65,7 @@ BEGIN
 			b.Liveindicator,
 			b.livehomescore,
 			b.liveawayscore,
-			stake as StakePositiontaking,
+			stake as Stake,
 			b.CurrencyName, 
 				CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 				 ELSE b.status 
@@ -109,7 +109,7 @@ BEGIN
 		b.Liveindicator,
 		b.livehomescore,
 		b.liveawayscore,
-		stake as StakePositiontaking,
+		stake as Stake,
 		b.CurrencyName, 
 		CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 			 ELSE b.status 
@@ -163,7 +163,7 @@ BEGIN
 		b.Liveindicator,
 		b.livehomescore,
 		b.liveawayscore,
-		stake as StakePositiontaking,
+		stake as Stake,
 		b.CurrencyName, 
 		CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 			 ELSE b.status 
@@ -213,7 +213,7 @@ BEGIN
 		b.Liveindicator,
 		b.livehomescore,
 		b.liveawayscore,
-		stake as StakePositiontaking,
+		stake as Stake,
 		b.CurrencyName, 
 		CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 			 ELSE b.status 
