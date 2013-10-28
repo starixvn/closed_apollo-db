@@ -62,7 +62,10 @@ IF @@SERVERNAME IN ('DB04', 'DB042', 'DB043', 'DB044') RETURN
 		
 		--create index		
 		CREATE CLUSTERED INDEX IX_tmp on #ba (transid,AgentLevel desc)	
-		--CREATE INDEX IX_tmp on #ba (transid,[AgentLevel]) INCLUDE (APositionTaking)	
+		--try again
+		IF @@ERROR>0
+			CREATE CLUSTERED INDEX IX_tmp on #ba (transid,AgentLevel desc)	
+
 		
 		DECLARE @prevtransid BIGINT =0 
 	
@@ -191,6 +194,8 @@ IF @@SERVERNAME IN ('DB04', 'DB042', 'DB043', 'DB044') RETURN
 			BetTrans.bettype=@bettype AND
 			--[status] NOT IN (N'VOID', N'REJECT')
 			BetTrans.statusID NOT IN (101,102)
+
+		DROP TABLE #ba 	
 	END
 GO
 
