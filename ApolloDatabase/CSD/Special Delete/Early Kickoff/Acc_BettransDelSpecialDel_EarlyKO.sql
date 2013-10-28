@@ -179,7 +179,7 @@ SET NOCOUNT ON
 	----################### End of check for concurrent running ###################----
 	
 	CREATE TABLE #BetDelete (transid BIGINT,refno bigint,custid INT, Username nvarchar(50), betfrom NVARCHAR(1),statusID INT, Status Varchar(10))
-	CREATE TABLE #BetmDelete (transid BIGINT,refno bigint,custid INT, Username nvarchar(50), betfrom NVARCHAR(1),statusID INT, Status Varchar(10))
+	CREATE TABLE #BetmDelete (MainTransID BIGINT , transid BIGINT,refno bigint,custid INT, Username nvarchar(50), betfrom NVARCHAR(1),statusID INT, Status Varchar(10))
 		
  
 	DECLARE @Status TABLE (statusID TINYINT)	
@@ -285,8 +285,8 @@ SET NOCOUNT ON
 	IF EXISTS (SELECT 1 FROM dbo.strSplit(@bettypes,'^') WHERE val IN (9,29))	
 		AND EXISTS (SELECT 1 FROM dbo.bettransm AS b WITH(NOLOCK) WHERE b.matchid=@matchid AND b.transdate>=@KickOffDate AND b.statusID NOT IN (101,102) AND b.liveindicator=0 AND betfrom <>'P')
 	BEGIN	
-		INSERT INTO #BetmDelete (transid,refno,custid,Username, betfrom, statusID, Status)   
-		SELECT DISTINCT b.transid,b.refno,b.custid,bt.Username, b.betfrom, b.statusID , b.Status
+		INSERT INTO #BetmDelete (MainTransID,transid,refno,custid,Username, betfrom, statusID, Status)   
+		SELECT DISTINCT bt.TransID AS MainTransID, b.transid,b.refno,b.custid,bt.Username, b.betfrom, b.statusID , b.Status
 		FROM bettransm AS b with (NOLOCK)			
 			INNER JOIN bettrans bt WITH(NOLOCK) ON b.refno = bt.refno 
 			INNER JOIN (SELECT CONVERT(SMALLINT,val) AS bettype FROM dbo.strSplit(@bettypes,'^') WHERE val IN (9,29)) t ON t.bettype = bt.bettype	
@@ -310,7 +310,7 @@ SET NOCOUNT ON
 			
 		
 		DELETE FROM #BetmDelete
-		WHERE transid NOT IN (SELECT CONVERT(BIGINT, val) FROM dbo.strSplit(@transids, ','))			
+		WHERE MainTransID NOT IN (SELECT CONVERT(BIGINT, val) FROM dbo.strSplit(@transids, ','))			
 	END
 
 ------------------***** End of Remove data no need to special delete out of #BetDelete  *****------------------
@@ -684,7 +684,7 @@ SET NOCOUNT ON
 			INNER JOIN #BetmDelete d WITH (NOLOCK)
 				ON b.refno = d.refno
 			INNER JOIN Match m WITH (NOLOCK) 
-				ON b.MatchId = m.MatchId
+				ON bm.MatchId = m.MatchId
 			WHERE  m.matchID = @matchID
 			ORDER BY b.transid
 

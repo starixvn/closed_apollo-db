@@ -404,7 +404,8 @@ Param's Explanation: Special bet delete option
 				MATCH.eventdate,
 				MATCH.leagueid,
 				GETDATE() AS DATETIME,
-				CONVERT(BIT,0) AS IsNeutral
+				CONVERT(BIT,0) AS IsNeutral,
+				1 as IsOutright
 			FROM
 				Outright AS MATCH WITH (NOLOCK)
 			WHERE 
@@ -436,7 +437,8 @@ Param's Explanation: Special bet delete option
 				MATCH.eventdate,
 				MATCH.leagueid,
 				GETDATE() AS DATETIME,
-				isnull(MATCH.isNeutral, CONVERT(BIT,0)) AS IsNeutral
+				isnull(MATCH.isNeutral, CONVERT(BIT,0)) AS IsNeutral,
+				0 as IsOutright
 			FROM
 				MATCH WITH (NOLOCK)
 			WHERE 
