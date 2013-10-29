@@ -1896,6 +1896,9 @@
     <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_UpdateStatus.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="CSD\Admin\Function\NAP_Function_GetByParentKeyAndSite.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">
