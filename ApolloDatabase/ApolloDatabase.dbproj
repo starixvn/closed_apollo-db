@@ -1698,9 +1698,6 @@
     <NotInBuild Include="API\Mem_API_GetFundTransBySGSTransId.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_GetByFunction.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_Insert.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1876,6 +1873,27 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="API\DeleteAccount\Age_AgentUser_Archive.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_GetByFunctionKeyAndSite.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_GetById.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_GetByKey.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_GetByName.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_GetByUserAndSiteIncludeGroup.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_UpdateIsInternal.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_UpdateStatus.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
