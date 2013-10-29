@@ -187,7 +187,7 @@ BEGIN
 	IF @@ERROR > 0
 		BEGIN
 			SELECT 
-				@ErrCode = 5112, 
+				@ErrCode = 5116, 
 				@ErrMsg = 'Failed to archive agent user permission [AgentId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
 			RETURN
 		END	
@@ -216,7 +216,7 @@ BEGIN
 	IF @@ERROR > 0
 		BEGIN
 			SELECT 
-				@ErrCode = 5113, 
+				@ErrCode = 5112, 
 				@ErrMsg = 'Failed to archive agent bet limit [AgentId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
 			RETURN
 		END	
@@ -247,7 +247,7 @@ BEGIN
 	IF @@ERROR > 0
 		BEGIN
 			SELECT 
-				@ErrCode = 5114, 
+				@ErrCode = 5113, 
 				@ErrMsg = 'Failed to archive agent discount [AgentId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
 			RETURN
 		END	
@@ -278,7 +278,7 @@ BEGIN
 	IF @@ERROR > 0
 		BEGIN
 			SELECT 
-				@ErrCode = 5115, 
+				@ErrCode = 5114, 
 				@ErrMsg = 'Failed to archive agent position taking [AgentId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
 			RETURN
 		END	
@@ -307,7 +307,7 @@ BEGIN
 	IF @@ERROR > 0
 		BEGIN
 			SELECT 
-				@ErrCode = 5116, 
+				@ErrCode = 5115, 
 				@ErrMsg = 'Failed to archive agent cust position taking [AgentId = ' + COALESCE(CAST(@AgentId AS VARCHAR(10)), SPACE(1)) + ']'
 			RETURN
 		END	

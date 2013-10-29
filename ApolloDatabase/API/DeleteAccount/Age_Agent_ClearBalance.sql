@@ -65,7 +65,7 @@ DECLARE @refNo		BIGINT,
 			IF @@ERROR > 0
 			BEGIN
 				SELECT 
-					@ErrCode = 5217, 
+					@ErrCode = 5117, 
 					@ErrMsg = 'Failed to clear balance of agent [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
 				RETURN
 			END	
@@ -88,7 +88,7 @@ DECLARE @refNo		BIGINT,
 			IF @@ERROR > 0
 			BEGIN
 				SELECT 
-					@ErrCode = 5218, 
+					@ErrCode = 5118, 
 					@ErrMsg = 'Failed to clear balance of agent [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
 				RETURN
 			END	

@@ -20,7 +20,7 @@ DECLARE @refNo		BIGINT,
 			BEGIN
 				SELECT 
 					@ErrCode = 5209, 
-					@ErrMsg = 'Failed to clear table BalanceCredit of customer [CustId = ' + COALESCE(CAST(@CustId AS VARCHAR(10)), SPACE(1)) + ']'						 
+					@ErrMsg = 'Failed to clear balance of customer [CustId = ' + COALESCE(CAST(@CustId AS VARCHAR(10)), SPACE(1)) + ']'						 
 				RETURN
 			END	
 
@@ -29,7 +29,7 @@ DECLARE @refNo		BIGINT,
 			BEGIN
 				SELECT 
 					@ErrCode = 5210, 
-					@ErrMsg = 'Failed to clear table BalanceDebit of customer [CustId = ' + COALESCE(CAST(@CustId AS VARCHAR(10)), SPACE(1)) + ']'						 
+					@ErrMsg = 'Failed to clear table balance of customer [CustId = ' + COALESCE(CAST(@CustId AS VARCHAR(10)), SPACE(1)) + ']'						 
 				RETURN
 			END	
 

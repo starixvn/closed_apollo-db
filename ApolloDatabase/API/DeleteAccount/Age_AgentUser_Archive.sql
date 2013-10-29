@@ -88,7 +88,7 @@ BEGIN
 	IF @@ERROR > 0
 		BEGIN
 			SELECT 
-				@ErrCode = 5211, 
+				@ErrCode = 5311, 
 				@ErrMsg = 'Failed to archive agent user [AgentUserId = ' + COALESCE(CAST(@AgentUserId AS VARCHAR(10)), SPACE(1)) + ']'
 			RETURN
 		END	
@@ -114,7 +114,7 @@ BEGIN
 	IF @@ERROR > 0
 		BEGIN
 			SELECT 
-				@ErrCode = 5216, 
+				@ErrCode = 5316, 
 				@ErrMsg = 'Failed to archive agent user permission [AgentUserId = ' + COALESCE(CAST(@AgentUserId AS VARCHAR(10)), SPACE(1)) + ']'
 			RETURN
 		END	
@@ -134,7 +134,7 @@ BEGIN
 			WHERE AgentUserId = @AgentUserId
 
 			SELECT 
-				@ErrCode = 5211, 
+				@ErrCode = 5311, 
 				@ErrMsg = 'Failed to archive agent user [AgentUserId = ' + COALESCE(CAST(@AgentUserId AS VARCHAR(10)), SPACE(1)) + ']'
 			RETURN
 		END	
