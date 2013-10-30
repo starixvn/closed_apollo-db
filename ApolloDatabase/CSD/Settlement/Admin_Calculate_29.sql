@@ -127,12 +127,14 @@ IF @@SERVERNAME IN ('DB042', 'DB043', 'DB044') RETURN
 	
 	-- calculate downline PT for each agent (so we can calculate commission later)
 	UPDATE #temp_bettrans_Agent 
-	SET 
-		@DownlinePT=DownlinePT = case when @prevtransid <> transid 
+	SET 		
+		@DownlinePT= case when @prevtransid <> transid 
 						then APositionTaking
 						else APositionTaking + @DownlinePT -- accumulated PT for upper agent --> for calculating agent commision
-						end,
-		@prevtransid = transid					
+						end,		
+
+		DownlinePT = @DownlinePT,		
+		@prevtransid = transid
 	OPTION (MAXDOP 1) --should use this for quirky update to avoid parallelism problem	
 
 	-- get BetParlayResult_Agent
