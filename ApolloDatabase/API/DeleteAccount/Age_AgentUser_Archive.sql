@@ -122,20 +122,24 @@ BEGIN
 	-- Delete data in CustDB
 	DELETE FROM AgentUser WITH (ROWLOCK)
 	WHERE AgentUserId = @AgentUserId
-
-	DELETE FROM AgentUserFunction WITH (ROWLOCK)
-	WHERE AgentUserId = @AgentUserId
-
 	-- Check error
 	IF @@ERROR > 0
 		BEGIN
-			-- Rollback
-			DELETE FROM SVRCUSTARC.CustArchiveDB.dbo.AgentUser WITH (ROWLOCK)
-			WHERE AgentUserId = @AgentUserId
-
 			SELECT 
-				@ErrCode = 5311, 
+				@ErrCode = 5312, 
 				@ErrMsg = 'Failed to archive agent user [AgentUserId = ' + COALESCE(CAST(@AgentUserId AS VARCHAR(10)), SPACE(1)) + ']'
+			RETURN
+		END	
+
+
+	DELETE FROM AgentUserFunction WITH (ROWLOCK)
+	WHERE AgentUserId = @AgentUserId
+	-- Check error
+	IF @@ERROR > 0
+		BEGIN
+			SELECT 
+				@ErrCode = 5313, 
+				@ErrMsg = 'Failed to archive agent user permission [AgentUserId = ' + COALESCE(CAST(@AgentUserId AS VARCHAR(10)), SPACE(1)) + ']'
 			RETURN
 		END	
 
