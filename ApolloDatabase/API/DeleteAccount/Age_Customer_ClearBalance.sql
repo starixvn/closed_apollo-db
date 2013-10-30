@@ -5,7 +5,7 @@
 	@CurrencyName VARCHAR(5),
 	@ActualRate FLOAT,
 	@ErrCode INT = 0 OUTPUT,
-	@ErrMsg VARCHAR(500) = '' OUTPUT
+	@ErrMsg VARCHAR(1000) = '' OUTPUT
 AS
 
 DECLARE @refNo		BIGINT,
@@ -35,7 +35,7 @@ DECLARE @refNo		BIGINT,
 
 		----
 		
-		SELECT	@Balance = SUM (Winlost - Actual_stake + PlayerComm)
+		SELECT	@Balance = ISNULL(SUM (Winlost - Actual_stake + PlayerComm),0)
 		FROM	Bettrans WITH (NOLOCK)
 		WHERE	CustID = @CustID
 		 

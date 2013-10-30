@@ -5,7 +5,7 @@
 	@CurrencyName VARCHAR(5),
 	@ActualRate FLOAT,
 	@ErrCode INT = 0 OUTPUT,
-	@ErrMsg VARCHAR(500) = '' OUTPUT
+	@ErrMsg VARCHAR(1000) = '' OUTPUT
 AS
 
 DECLARE @refNo		BIGINT,
@@ -16,7 +16,7 @@ DECLARE @refNo		BIGINT,
 		SELECT @Now = CURRENT_TIMESTAMP
 			 	
 		--Calculate Balance Of Agent		
-		SELECT  @Balance = SUM(Amount) 
+		SELECT  @Balance = ISNULL(SUM(Amount) ,0)
 		FROM
 			(
 			-- get winlost for direct child agent
@@ -50,10 +50,13 @@ DECLARE @refNo		BIGINT,
 				GROUP BY BP.AgentId 	
 			) T
  
-		--- Gen RefNo
-		EXEC Acc_SelRefNo @RefNo = @RefNo OUTPUT
-		SELECT @RefNo = @RefNo + 100000000000
-
+		
+		IF @Balance <> 0
+		BEGIN
+			EXEC Acc_SelRefNo @RefNo = @RefNo OUTPUT
+			SELECT @RefNo = @RefNo + 100000000000
+		
+		
 
 		-- create a dummy record in bettrans so that we can link to bettrans_agent record
 		INSERT INTO Bettrans 
@@ -92,4 +95,6 @@ DECLARE @refNo		BIGINT,
 					@ErrMsg = 'Failed to clear balance of agent [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
 				RETURN
 			END	
+		
+	END
 GO

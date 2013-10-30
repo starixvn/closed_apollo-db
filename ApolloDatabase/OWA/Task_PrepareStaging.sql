@@ -13,8 +13,8 @@ WITH RECOMPILE
 AS  
 /*
 Created: 20131009@winnie
-Task: 
-DB: KPIReport
+Task: Prepare data from RepDB to ReportDB
+DB: SVRReport.ReportDB
 
 Revisions:
 
@@ -103,7 +103,7 @@ BEGIN
                 b.statusid,
 				b.LiveIndicator            
 			FROM RepDB.dbo.bettrans b WITH (NOLOCK)			    
-			WHERE b.bettype<19000
+			WHERE b.bettype<=19000
 			    AND b.statusid NOT IN (0,101,102,121)  -- 'void', 'reject', 'running','done'
 	            AND b.winlostdate=@tmpDate
 				AND b.TransID NOT IN  (		SELECT	TransID 
@@ -156,7 +156,7 @@ BEGIN
                 b.statusid,
 				b.LiveIndicator     
 			FROM RepDB.dbo.bettrans14 b WITH (NOLOCK)
-			WHERE  b.bettype<19000
+			WHERE  b.bettype<=19000
 			    AND b.statusid NOT IN (0,101,102,121)  -- 'void', 'reject', 'running','done'
 	            AND b.winlostdate=@tmpDate
 				AND b.TransID NOT IN  (		SELECT	TransID 

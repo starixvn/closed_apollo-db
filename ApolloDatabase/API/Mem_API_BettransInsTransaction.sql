@@ -17,7 +17,7 @@ Date : 2013-04-23
 Task : record transfer in/out
 DB: DBTXN/TransDB
 History:
-
+	
 Param's Explanation:
 • @custid: player
 • @SGS_transid: Transaction Id at SGS
@@ -84,11 +84,11 @@ END
 
 IF @type=3
 	SELECT  @amount = ISNULL(SUM(winlost-actual_stake+playercomm),0),
-		@osbalance = ISNULL(SUM(case when bettype < 19000  and ruben=0 then actual_stake else 0 end),0) 
+		@osbalance = ISNULL(SUM(case when bettype <= 19000  and ruben=0 then actual_stake else 0 end),0) 
 	FROM bettrans WITH (NOLOCK) 
 	WHERE custid = @custid 
 ELSE
-	SELECT  @osbalance = ISNULL(SUM(case when bettype < 19000  and ruben=0 then actual_stake else 0 end),0) 
+	SELECT  @osbalance = ISNULL(SUM(case when bettype <= 19000  and ruben=0 then actual_stake else 0 end),0) 
 	FROM bettrans WITH (NOLOCK) 
 	WHERE custid = @custid 
 
