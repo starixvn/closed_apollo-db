@@ -40,7 +40,7 @@ WHERE [exchangeid] = @currencyid
 
 SELECT  
 	@Balance = ISNULL(SUM(winlost-actual_stake+playercomm),0),
-	@osbalance = ISNULL(SUM(case when bettype < 19000  and ruben=0 then actual_stake else 0 end),0) 
+	@osbalance = ISNULL(SUM(case when bettype <= 19000  and ruben=0 then actual_stake else 0 end),0) 
 FROM bettrans WITH (NOLOCK) 
 WHERE custid = @custid 
 

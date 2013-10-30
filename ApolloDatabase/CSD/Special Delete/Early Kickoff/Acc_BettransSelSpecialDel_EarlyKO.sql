@@ -232,7 +232,7 @@ BEGIN
 			 INNER JOIN dbo.strSplit(@bettypes,'^') AS fb ON b2.bettype=fb.val
 		WHERE b2.matchid IN (9,29)
 			AND b2.bettype IN (9,29)
-			AND (b2.betid IS NULL OR b2.betid = 0)
+			--AND (b2.betid IS NULL OR b2.betid = 0)
 			AND liveindicator=0
 			AND transdate>=@KickOffDate	
 			AND statusID NOT IN (101,102)

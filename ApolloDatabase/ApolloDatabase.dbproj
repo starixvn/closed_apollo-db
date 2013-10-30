@@ -131,6 +131,9 @@
     <Folder Include="Agent\BetList\Transaction" />
     <Folder Include="Agent\BetList\Winloss" />
     <Folder Include="OWA" />
+    <Folder Include="LiReport" />
+    <Folder Include="OWA\KPI" />
+    <Folder Include="API\DeleteAccount" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1695,9 +1698,6 @@
     <NotInBuild Include="API\Mem_API_GetFundTransBySGSTransId.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_GetByFunction.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_Insert.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1837,6 +1837,66 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Customer Setting\Age_AgentUser_GetUserFunctionPolicy.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="OWA\Task_PrepareStaging_ALL.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="OWA\KPI\GEN_rptKPI_Account.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="OWA\KPI\GEN_RptKPI_MTD_Account.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="OWA\KPI\GEN_RptKPI_MTD_Betting.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="OWA\KPI\OAS_Report_KPI.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="OWA\KPI\OAS_Get_TopSports_KPIs.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="OWA\KPI\OAS_Get_TopSportsAll_KPIs.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="API\DeleteAccount\Age_Customer_Archive.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="API\DeleteAccount\Age_Customer_ClearBalance.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="API\DeleteAccount\Age_Agent_Archive.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="API\DeleteAccount\Age_Agent_ClearBalance.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="API\DeleteAccount\Age_AgentUser_Archive.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_GetByFunctionKeyAndSite.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_GetById.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_GetByKey.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_GetByName.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_GetByUserAndSiteIncludeGroup.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_UpdateIsInternal.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_UpdateStatus.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Admin\Function\NAP_Function_GetByParentKeyAndSite.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>

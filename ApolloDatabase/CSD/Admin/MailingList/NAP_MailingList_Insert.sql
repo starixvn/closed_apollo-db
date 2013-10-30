@@ -1,89 +1,155 @@
-﻿ALTER PROCEDURE [dbo].[NAP_MailingList_Insert]
-	@FunctionId			SMALLINT,
-	@ToList				NVARCHAR(MAX) = '',
-	@CCLIST				NVARCHAR(MAX) = '',
-	@BCCList			NVARCHAR(MAX) = '',
-	@CreatedBy			INT	= NULL,
+﻿USE [bodb_NAP]
+GO
+/****** Object:  StoredProcedure [dbo].[NAP_MailingList_Insert]    Script Date: 10/29/2013 12:39:48 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[NAP_MailingList_Insert]
+	@ListId			    INT							OUTPUT,	
+	@ListName			NVARCHAR(50),	
+	@ListKey			NVARCHAR(50),	
+	@Description		NVARCHAR(200)	= NULL,
+	@SiteId				INT,	
+	@Environment		VARCHAR(10)		= 'UAT',	-- 'UAT', 'LIVE'	
+	@ListFunctionId		INT,
+	@FunctionId			INT,	
+	@ToList				NVARCHAR(MAX)	= NULL,
+	@CCList				NVARCHAR(MAX)	= NULL,
+	@BCCList			NVARCHAR(MAX)	= NULL,
+	@IsInternal			BIT,	
+	@IsActive			BIT,	
+	@CreatedBy			INT				= NULL, 
 	@CreatedDate		DATETIME,
 	@CurrentUserId		INT,
 	@CurrentSiteId		INT,
 	@LogDate			DATETIME,
 	@LoginIP			VARCHAR(30)		= '',
 	@Language			VARCHAR(20)		= 'en-us',
-	@ErrCode			INT				= 0	OUTPUT, 
-	@ErrMsg				NVARCHAR(1000)	= '' OUTPUT 
+	@ErrCode			INT				= 0			OUTPUT, 
+	@ErrMsg				NVARCHAR(1000)	= ''		OUTPUT 
 AS
 
 /*  
- * Created	: 20130827@Sophia
- * Task		: Add a new Mailing List
- * DB		:  bodb_NAP
+ * Created	: 20120927@Quinn
+ * Task		: Add a new mailing list
+ * DB		: bodb_NAP
  *  
  * Revisions:
  * Param's Explanation:	
-	• Main	:	<root><xml path="r" />
+ • Main	:	
+				<root><xml path="r" />
 					<row item="ListId" alias="li" />
+					<row item="ListKey" alias="lk" />
+					<row item="ListName" alias="ln" />
+					<row item="Description" alias="d" />
+					<row item="SiteId" alias="si" />
+					<row item="SiteName" alias="sn" />
+					<row item="Environment" alias="ev" />
+					<row item="ListFunctionId" alias="lf" />
+					<row item="ListFunctionName" alias="lfn" />		
 					<row item="FunctionId" alias="fi" />
-					<row item="ToList" alias="to" />
-					<row item="CCList" alias="cc" />
-					<row item="BCCList" alias="bc" />
+					<row item="FunctionName" alias="f" />
+					<row item="ToList" alias="tl" />					
+					<row item="CcList" alias="cl" />
+					<row item="BccList" alias="bl" />
+					<row item="IsInternal" alias="in" />	
+					<row item="IsActive" alias="i" />
 				</root>
 */
 
-SET NOCOUNT ON
+BEGIN
 
--- For write log
-DECLARE 
-	@startRun		DATETIME,
-	@endRun			DATETIME,
-	@duration		INT,
-	@logSPData		VARCHAR(5000),
-	@logSPDataOld	VARCHAR(5000),	
-	@xml			XML,
-	@ListId			SMALLINT
+	SET NOCOUNT ON
 
-SET @startRun = GETDATE()	
+	-- For write log
+	DECLARE
+		@ListFunctionName	VARCHAR(50),
+		@startRun			DATETIME,
+		@endRun				DATETIME,
+		@duration			INT,
+		@logSPData			VARCHAR(5000),
+		@logSPDataOld		VARCHAR(5000),	
+		@xml				XML
 
--- Inserts Mailing List
-INSERT INTO MailingList (		
+	SET @startRun = GETDATE()	
+
+	-- Inserts function
+	INSERT dbo.MailingList (
+		ListKey,
+		ListName,
+		Description,
+		SiteId,
+		Environment,
+		ListFunctionId,
 		FunctionId,
 		ToList,
-		CCLIST,
+		CCList,
 		BCCList,
+		IsInternal,
+		IsActive,
 		CreatedBy,
 		CreatedDate,
 		ModifiedBy,
-		ModifiedDate )
-VALUES(	@FunctionId,
+		ModifiedDate
+	)
+	VALUES (
+		@ListKey,
+		@ListName,
+		@Description,
+		@SiteId,	
+		@Environment,
+		@ListFunctionId,
+		@FunctionId,	
 		@ToList,
-		@CCLIST,
+		@CCList,
 		@BCCList,
-		@CreatedBy,
+		@IsInternal,	
+		@IsActive,	
+		@CreatedBy, 
 		@CreatedDate,
-		@CreatedBy,
+		@CreatedBy, 
 		@CreatedDate
-		)
-
- 	-- Get ListId, current insert
+	)
+	
+	-- Get ListId, current insert
 	SET @ListId = SCOPE_IDENTITY()
 
+	-- Write log after insert
 	IF @@ERROR > 0
-			BEGIN
-				SELECT 
-					@ErrCode = 1, 
-					@ErrMsg = 'Failed to insert Mailing List [ListId = ' + COALESCE(CAST(@ListId AS VARCHAR(10)), SPACE(1)) + ']'
-				RETURN
-			END		
+	BEGIN
+		SELECT 
+			@ErrCode = 1, 
+			@ErrMsg = 'Failed to insert Mailing List [ListId = ' + COALESCE(CAST(@ListId AS VARCHAR(10)), SPACE(1)) + ']'
+		RETURN
+	END		
 
+	SELECT @ListFunctionName = FunctionName FROM dbo.Functions WHERE FunctionId = @ListFunctionId
 
 	-- Write log after insert
 	SET @xml = (
 		SELECT 
-			@ListId			AS '@li'
-			,@FunctionId	AS '@fi'
-			,@ToList		AS '@to'
-			,@CCList		AS '@cc'			
-			,@BCCList		AS '@bc'			
+			@ListId				AS '@li'
+			,@ListKey			AS '@lk'
+			,@ListName			AS '@ln'
+			,@Description		AS '@d'
+			,@SiteId			AS '@si'
+			,s.SiteName			AS '@sn'
+			,@Environment		AS '@ev'
+			,@ListFunctionId	AS '@lf'
+			,@ListFunctionName	AS '@lfn'
+			,@FunctionId		AS '@fi'
+			,f.FunctionName		AS '@f'
+			,@ToList			AS '@tl'
+			,@CCList			AS '@cl'			
+			,@BCCList			AS '@bl'
+			,@IsInternal		AS '@in'
+			,@IsActive			AS '@i'
+		FROM 
+			dbo.Functions AS f WITH (NOLOCK)
+			INNER JOIN dbo.Sites AS s WITH (NOLOCK) ON f.SiteId = s.SiteId
+		WHERE f.FunctionId = @FunctionId		
 		FOR XML PATH('r'), TYPE
 	)	
 
@@ -104,10 +170,4 @@ VALUES(	@FunctionId,
 		@Data			= @logSPData,
 		@OldData		= @logSPDataOld,
 		@Duration		= @Duration
- 
-
-GO
-GRANT EXECUTE ON [NAP_MailingList_Insert] TO [bodbAdminNet]
-GO
-
-
+END
