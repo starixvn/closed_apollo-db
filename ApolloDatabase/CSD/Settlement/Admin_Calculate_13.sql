@@ -21,6 +21,11 @@ IF @@SERVERNAME IN ('DB04', 'DB042', 'DB043', 'DB044') RETURN
 SET NOCOUNT ON
 Declare @modds smallmoney, @commWinRate smallmoney, @commLostRate smallmoney, @DownlinePT smallmoney
 
+IF OBJECT_ID('tempdb..#ba') IS NOT NULL
+	BEGIN
+		DROP TABLE #ba
+	END
+
 --get the needed data to settle for agent
 SELECT ba.transid, ba.[AgentId], [AgentLevel], b.[DoubleCommLosing], b.odds, b.[Stake], b.[Actual_Stake],
 	AWinLost,AComm,APositionTaking, ADiscount, cast(0 as smallmoney) as DownlinePT, 
@@ -38,19 +43,23 @@ WHERE
 		
 --create index		
 CREATE CLUSTERED INDEX IX_tmp on #ba (transid,AgentLevel desc)	
---CREATE INDEX IX_tmp on #ba (transid,[AgentLevel]) INCLUDE (APositionTaking)	
+--try again
+IF @@ERROR>0
+	CREATE CLUSTERED INDEX IX_tmp on #ba (transid,AgentLevel desc)	
 		
 DECLARE @prevtransid BIGINT =0 
 	
 -- settle for agent in temporary table
 UPDATE #ba 
 SET 
-	@DownlinePT=DownlinePT = case when @prevtransid <> transid 
-					then APositionTaking
-					else APositionTaking + @DownlinePT -- accumulated PT for upper agent --> for calculating agent commision
-					end,
-	@prevtransid = transid,			
-	
+	@DownlinePT= case when @prevtransid <> transid 
+						then APositionTaking
+						else APositionTaking + @DownlinePT -- accumulated PT for upper agent --> for calculating agent commision
+						end,		
+
+	DownlinePT = @DownlinePT,		
+	@prevtransid = transid,
+
 	@modds = CASE
 		WHEN betteam = 'hy' AND @fta = 0 THEN 1
 		WHEN betteam = 'hn' AND @fta > 0 THEN 1
@@ -93,7 +102,7 @@ SET
 		WHEN @modds > 0 THEN 112 --WON
 		WHEN @modds = 0 THEN 111 --DRAW
 		WHEN @modds < 0 THEN 113 --LOSE
-		END			
+		END	
 OPTION (MAXDOP 1) --should use this for quirky update to avoid parallelism problem	
 		
 --settle for BetTrans_Agent
@@ -174,7 +183,7 @@ WHERE
 	--[status] NOT IN (N'VOID', N'REJECT')
 	BetTrans.statusID NOT IN (101,102)	
 
-
+DROP TABLE #ba 	
 
 
 GO

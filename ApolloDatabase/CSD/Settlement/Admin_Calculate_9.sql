@@ -28,13 +28,13 @@ IF @@SERVERNAME IN ('DB042', 'DB043', 'DB044') RETURN
 ------- 20121105@Viet : bring modds value from DBTrans to replicated servers.----
 -- 1st call: RUN at DBTRANS only
 --IF @targetserver = 'DBTRANS' AND @@SERVERNAME <> 'DBTRANS' RETURN
-IF @targetserver = 'TRANSDB' AND ( @@SERVERNAME NOT IN('SDBTrans1','SDBTrans2','DB215\SQL2012')  --TRANSDB SERVER
+IF @targetserver = 'TRANSDB' AND ( @@SERVERNAME NOT IN('SDBTrans1','SDBTrans2','DB215\SQL2012', 'SANDBOX-TRANS')  --TRANSDB SERVER
 					or db_name() <> N'TransDB') --JUST FOR LOCAL 
 	 RETURN
 
 -- 2nd call: RUN all servers except DBTRANS
 --IF @targetserver = '' AND @@SERVERNAME = 'DBTRANS' RETURN
-IF @targetserver = '' AND (@@SERVERNAME IN('SDBTrans1','SDBTrans2','DB215\SQL2012')  --TRANSDB SERVER
+IF @targetserver = '' AND (@@SERVERNAME IN('SDBTrans1','SDBTrans2','DB215\SQL2012', 'SANDBOX-TRANS')  --TRANSDB SERVER
 			and db_name() = N'TransDB')
 	RETURN
 
@@ -141,7 +141,7 @@ INSERT INTO @modds (m_refno, modds, NoRefund, loseCnt, runningCnt, matchdate_max
 	GROUP BY refno  
 
 ------- 20121105@Viet : bring modds value from DBTrans to replicated servers.----
-IF (@targetserver = 'TRANSDB' AND @@SERVERNAME IN('SDBTrans1','SDBTrans2','DB215\SQL2012'))
+IF (@targetserver = 'TRANSDB' AND @@SERVERNAME IN('SDBTrans1','SDBTrans2','DB215\SQL2012', 'SANDBOX-TRANS'))
 BEGIN 
 	-- export modds for replicated servers to use [edited by viet @ 20121213]
 	SET @strXML = CONVERT(varchar(max),(
@@ -151,7 +151,7 @@ BEGIN
 		FOR XML PATH('r'), ROOT('root'), TYPE
 	))				
 END
-ELSE IF (@targetserver = '' AND @@SERVERNAME NOT IN('SDBTrans1','SDBTrans2','DB215\SQL2012'))
+ELSE IF (@targetserver = '' AND @@SERVERNAME NOT IN('SDBTrans1','SDBTrans2','DB215\SQL2012', 'SANDBOX-TRANS'))
 BEGIN
 	-- get modds from XML string [edited by viet @ 20121213]
 	declare @xml XML
@@ -174,28 +174,34 @@ END
 Declare @statusID tinyint, @odds money, @DownlinePT smallmoney
 Declare @oldstatusID tinyint, @oldwinlost money, @winlost money
 
+IF OBJECT_ID('tempdb..#baP') IS NOT NULL
+BEGIN
+	DROP TABLE #baP
+END
 
 --get the needed data to settle for agent
 SELECT ba.transid, ba.[AgentId], [AgentLevel], b.[DoubleCommLosing], b.[Stake],
 	AWinLost,ba.AComm,APositionTaking, ADiscount, cast(0 as smallmoney) as DownlinePT, 
 	ba.Status, ba.StatusId, b.RefNo, b.WinLostDate, cast(0 as bit) as IsUpdated 
-INTO #ba 
+INTO #baP 
 FROM #tmp_bettrans B WITH (NOLOCK) JOIN BetTrans_Agent ba WITH (ROWLOCK) ON 
 	b.TransId=ba.TransId JOIN AgentInfo a WITH (NOLOCK) ON a.AgentID=ba.AgentID	
 		
 --create index		
-CREATE CLUSTERED INDEX IX_tmp on #ba (transid,AgentLevel desc)		
+CREATE CLUSTERED INDEX IX_tmp on #baP (transid,AgentLevel desc)		
 		
 DECLARE @prevtransid BIGINT =0 
 	
 -- settle for agent in temporary table
-UPDATE #ba 
+UPDATE #baP 
 SET 
-	@DownlinePT=DownlinePT = case when @prevtransid <> transid 
-					then APositionTaking
-					else APositionTaking + @DownlinePT -- accumulated PT for upper agent --> for calculating agent commision
-					end,
-	@prevtransid = transid,	
+	@DownlinePT= case when @prevtransid <> transid 
+						then APositionTaking
+						else APositionTaking + @DownlinePT -- accumulated PT for upper agent --> for calculating agent commision
+						end,		
+
+	DownlinePT = @DownlinePT,		
+	@prevtransid = transid,
 		
 	@oldstatusID = statusID,
 	@oldwinlost = awinlost,
@@ -249,7 +255,7 @@ SET
 		WHEN (@oldstatusID <> @statusID) OR (@oldwinlost <> @winlost) THEN 1
 		ELSE 0 END
 			
-FROM #ba INNER JOIN @modds m ON #ba.refno = m.m_refno
+FROM #baP INNER JOIN @modds m ON #baP.refno = m.m_refno
 OPTION (MAXDOP 1) --should use this for quirky update to avoid parallelism problem	
 		
 UPDATE T
@@ -318,7 +324,7 @@ SET
 FROM #tmp_bettrans T 
 		INNER JOIN @modds m ON T.refno = m.m_refno
 		INNER JOIN (SELECT TransId, sum(AWinLost) aWinlost
-					FROM #ba 
+					FROM #baP 
 					GROUP BY TransId) AgentWinlost ON T.TransID=AgentWinlost.TransId 
 -------------------------------------------------------------------------------------  
 
@@ -355,24 +361,24 @@ SET @subStart = CURRENT_TIMESTAMP
 					THEN 0
 					ELSE 1
 		END,		
-		winlostdate = 	case when #ba.statusID = 0 then #ba.winlostdate --max_matchdate
-							when @ruben = 0 and #ba.statusID <> 0 then @matchdate
+		winlostdate = 	case when #baP.statusID = 0 then #baP.winlostdate --max_matchdate
+							when @ruben = 0 and #baP.statusID <> 0 then @matchdate
 						else BetTrans_Agent.winlostdate
 						end,
 
-		aWinLost = #ba.AWinLost,
-		aComm = #ba.aComm,			
-		Status = #BA.Status,
-		StatusID = #ba.StatusId			
+		aWinLost = #baP.AWinLost,
+		aComm = #baP.aComm,			
+		Status = #baP.Status,
+		StatusID = #baP.StatusId			
 	FROM BetTrans_Agent 
-			join #ba ON BetTrans_Agent.TransId = #ba.TransId AND BetTrans_Agent.AgentId = #ba.AgentId
-	WHERE #ba.IsUpdated = 1
+			join #baP ON BetTrans_Agent.TransId = #baP.TransId AND BetTrans_Agent.AgentId = #baP.AgentId
+	WHERE #baP.IsUpdated = 1
 
 SET @updTime = @updTime + DATEDIFF(millisecond, @subStart, CURRENT_TIMESTAMP)
 
 drop table #tmp_bettrans
 drop table #parlay
-drop table #ba
+drop table #baP
 ---------------------------------------------------------------  
 GO
 GRANT EXECUTE ON [dbo].[Admin_Calculate_9] TO [aplweb]  as dbo

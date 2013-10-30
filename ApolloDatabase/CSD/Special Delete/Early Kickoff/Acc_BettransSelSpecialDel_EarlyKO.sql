@@ -18,6 +18,7 @@ AS
 	DB: SVRCSD/RepDB
 
 	Revisions:		
+		 - 20131022@Sophia: Get CurrencyName not user currency
 		
 	Explanation's Param:
 	    --- @SAFilter: 
@@ -31,11 +32,11 @@ BEGIN
 	
 	CREATE TABLE #SpecialDeleteBets (transid bigint,SubTransid bigint,refno bigint
 	,custid int, username nvarchar(50), odds smallmoney,modds smallmoney, OddsType int, transdate datetime,bettype smallint, betteam nvarchar(10),hdp1 smallmoney, hdp2 smallmoney,livehomescore smallint, liveawayscore smallint
-	,Actualstake Money, Stake money,currency tinyint,status nvarchar(10),  HomeId Int, AwayId int, SportType smallint, LeagueId int)  
+	,Actualstake Money, Stake money, CurrencyName varchar(50) ,status nvarchar(10),  HomeId Int, AwayId int, SportType smallint, LeagueId int)  
 	
 	CREATE TABLE #SpecialDeleteBetms (transid bigint,SubTransid bigint,refno bigint
 	,custid int, username nvarchar(50), odds smallmoney,modds smallmoney, OddsType int, transdate datetime,bettype smallint, betteam nvarchar(10),hdp1 smallmoney, hdp2 smallmoney,livehomescore smallint, liveawayscore smallint
-	,Actualstake Money, Stake money,currency tinyint, status nvarchar(10), HomeId Int, AwayId int, SportType smallint, LeagueId int, ParlayType smallint)  
+	,Actualstake Money, Stake money, CurrencyName varchar(50) , status nvarchar(10), HomeId Int, AwayId int, SportType smallint, LeagueId int, ParlayType smallint)  
 
 	IF EXISTS( SELECT convert(int,val) FROM dbo.strSplit(@bettypes,'^') Where convert(int,val) in (4,30) )	
 		INSERT INTO #SpecialDeleteBets 
@@ -57,7 +58,7 @@ BEGIN
 			b.liveawayscore,  			
 			b.Actual_stake,
 			b.stake, 
-			b.currency,   				
+			b.CurrencyName,   				
 			CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 				 ELSE b.status 
 				 END as status,  
@@ -98,7 +99,7 @@ BEGIN
 		b.liveawayscore,  
 		b.Actual_stake,
 		b.stake, 
-		b.currency,   	
+		b.CurrencyName,   	
 		CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 			 ELSE b.status 
 			 END as status,		
@@ -149,7 +150,7 @@ BEGIN
 		b.liveawayscore, 		
 		b.Actual_stake,
 		b.stake,  
-		b.currency,   		
+		b.CurrencyName,   		
 		CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 			 ELSE b.status 
 			 END as status,  	
@@ -195,7 +196,7 @@ BEGIN
 		b.liveawayscore, 	
 		b.Actual_stake,
 		b.stake,  
-		b.currency,   
+		b.CurrencyName,   
 		CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 			 ELSE b.status 
 			 END as status,		
@@ -216,7 +217,7 @@ BEGIN
         --AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END		
 	
 	---get sub ticket of a mix parlay	
-	CREATE TABLE #Currency (transid bigint,Refno bigint, CurrencyID tinyint,oddstype tinyint, bettype smallint, username NVARCHAR(50), modds smallmoney, Actual_stake MONEY, stake MONEY)
+	CREATE TABLE #Currency (transid bigint,Refno bigint, CurrencyName varchar(100),oddstype tinyint, bettype smallint, username NVARCHAR(50), modds smallmoney, Actual_stake MONEY, stake MONEY)
 	IF EXISTS (SELECT 1 FROM dbo.strSplit(@bettypes,'^') WHERE val IN (9,29))
 		AND EXISTS (SELECT 1 FROM dbo.bettransm AS b WITH(NOLOCK) 
 					WHERE b.matchid=@matchid  AND b.transdate>=@KickOffDate 
@@ -226,12 +227,12 @@ BEGIN
 						
 	BEGIN		
 		INSERT INTO #Currency
-		SELECT transid,Refno,Currency,oddstype, b2.bettype, b2.username,b2.modds, b2.Actual_stake, b2.stake
+		SELECT transid,Refno,CurrencyName,oddstype, b2.bettype, b2.username,b2.modds, b2.Actual_stake, b2.stake
 		FROM dbo.bettrans AS b2 WITH(NOLOCK)
 			 INNER JOIN dbo.strSplit(@bettypes,'^') AS fb ON b2.bettype=fb.val
 		WHERE b2.matchid IN (9,29)
 			AND b2.bettype IN (9,29)
-			AND (b2.betid IS NULL OR b2.betid = 0)
+			--AND (b2.betid IS NULL OR b2.betid = 0)
 			AND liveindicator=0
 			AND transdate>=@KickOffDate	
 			AND statusID NOT IN (101,102)
@@ -257,7 +258,7 @@ BEGIN
 			b.liveawayscore,    
 			cy.Actual_stake,
 			cy.stake,
-			cy.currencyID, 		
+			cy.currencyName, 		
 			b.status,	
 			m.HomeId, 
 			m.AwayId, 

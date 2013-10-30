@@ -45,6 +45,11 @@ IF @@SERVERNAME IN ('DB04', 'DB042', 'DB043', 'DB044') RETURN
 	--END
 	--ELSE 
 	BEGIN
+		IF OBJECT_ID('tempdb..#ba') IS NOT NULL
+		BEGIN
+			DROP TABLE #ba
+		END
+
 		--get the needed data to settle for agent
 		SELECT ba.transid, ba.[AgentId], [AgentLevel], b.[DoubleCommLosing], b.odds, b.[Stake], b.[Actual_Stake],
 			AWinLost,AComm,APositionTaking, ADiscount, cast(0 as smallmoney) as DownlinePT, 
@@ -62,17 +67,22 @@ IF @@SERVERNAME IN ('DB04', 'DB042', 'DB043', 'DB044') RETURN
 		
 		--create index		
 		CREATE CLUSTERED INDEX IX_tmp on #ba (transid,AgentLevel desc)	
-		--CREATE INDEX IX_tmp on #ba (transid,[AgentLevel]) INCLUDE (APositionTaking)	
+		--try again
+		IF @@ERROR>0
+			CREATE CLUSTERED INDEX IX_tmp on #ba (transid,AgentLevel desc)	
+
 		
 		DECLARE @prevtransid BIGINT =0 
 	
 		-- settle for agent in temporary table
 		UPDATE #ba 
 		SET 
-			@DownlinePT=DownlinePT = case when @prevtransid <> transid 
-							then APositionTaking
-							else APositionTaking + @DownlinePT -- accumulated PT for upper agent --> for calculating agent commision
-							end,
+			@DownlinePT= case when @prevtransid <> transid 
+						then APositionTaking
+						else APositionTaking + @DownlinePT -- accumulated PT for upper agent --> for calculating agent commision
+						end,		
+
+			DownlinePT = @DownlinePT,		
 			@prevtransid = transid,			
 			
 			@modds = CASE betteam
@@ -191,6 +201,8 @@ IF @@SERVERNAME IN ('DB04', 'DB042', 'DB043', 'DB044') RETURN
 			BetTrans.bettype=@bettype AND
 			--[status] NOT IN (N'VOID', N'REJECT')
 			BetTrans.statusID NOT IN (101,102)
+
+		DROP TABLE #ba 	
 	END
 GO
 

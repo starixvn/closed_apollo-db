@@ -24,7 +24,8 @@ AS
 	Original:   
    
 	Revisions:   	
-	- 20130725@Sophia: Change username nvarchar(50)
+	 - 20130725@Sophia: Change username nvarchar(50)
+	 - 20131022@Sophia: Get CurrencyName not user currency
 	
 	Param's Explanation:
 			@Type
@@ -46,9 +47,9 @@ BEGIN
         ,username nvarchar(50)  
         ,CustId int  
         ,transdate datetime 
-		,actual_stake money
+	---	,actual_stake money
         ,stake money  
-        ,winlost money  
+      ---  ,winlost money  
         ,odds smallmoney
 		,modds Smallmoney  
         ,OddsType tinyint  
@@ -56,7 +57,7 @@ BEGIN
 		,betteam varchar(10)
         ,status nvarchar(10)  
         ,spositiontaking smallmoney  
-        ,currency tinyint    
+        ,currencyName varchar(50)
         ,choice_Bettype int  
         ,choice_HomeID int  
         ,choice_AwayID int   
@@ -198,10 +199,10 @@ BEGIN
    r.refno,  
    b.username,  
    b.CustId,  
-   b.transdate,
-   b.actual_stake,     
-   b.stake as StakePositiontaking,  
-   b.winlost-b.actual_stake AS winlost,  
+   b.transdate,  
+   --b.actual_stake,
+   b.stake as Stake,  
+   --b.winlost-b.actual_stake AS winlost,  
    b.odds, 
    b.modds,    
    b.OddsType,
@@ -209,7 +210,7 @@ BEGIN
    b.betteam,  
    b.status,  
    b.tpositiontaking,  
-   b.currency,       
+   b.currencyName,       
    r.bettype AS choice_bettype  
    ,m.homeid  
    ,m.awayid  
@@ -230,7 +231,7 @@ BEGIN
   INNER JOIN dbo.match AS m WITH(NOLOCK) ON m.matchid=@MatchID  
   WHERE ((@bettype = 0 and b.matchid in (9,29)) OR b.matchid = @bettype ) 
 	AND ((@bettype = 0 AND b.bettype IN (9,29)) OR b.bettype = @bettype) 
-	AND (b.betid = 0 OR b.betid IS NULL)
+	--AND (b.betid = 0 OR b.betid IS NULL)
 
 
  SELECT *
@@ -250,5 +251,4 @@ END
 
 GO
 GRANT EXECUTE ON [dbo].[Acc_BettransSelDelSpecial_MixParlay] TO [aplweb]
-GO
---GRANT VIEW DEFINITION ON [dbo].[Acc_BettransSelDelSpecial_MixParlay] TO [vnteam]
+GO 

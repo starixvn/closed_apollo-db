@@ -47,7 +47,13 @@ Declare @modds smallmoney, @commWinRate smallmoney, @commLostRate smallmoney, @R
 	--END 
 	--ELSE 
 	BEGIN
-		--get the needed data to settle for agent
+	
+	IF OBJECT_ID('tempdb..#ba') IS NOT NULL
+	BEGIN
+		DROP TABLE #ba
+	END
+
+	--get the needed data to settle for agent
 	SELECT ba.transid, ba.[AgentId], [AgentLevel], b.[DoubleCommLosing], b.odds, b.[Stake], b.[Actual_Stake],
 		AWinLost,AComm,APositionTaking, ADiscount, cast(0 as smallmoney) as DownlinePT, 
 		hdp1, hdp2,	livehomescore, 	liveawayscore, betteam, ba.bettype, ba.Status, ba.StatusId
@@ -64,18 +70,22 @@ Declare @modds smallmoney, @commWinRate smallmoney, @commLostRate smallmoney, @R
 		
 	--create index		
 	CREATE CLUSTERED INDEX IX_tmp on #ba (transid,AgentLevel desc)	
-	--CREATE INDEX IX_tmp on #ba (transid,[AgentLevel]) INCLUDE (APositionTaking)	
+	--try again
+	IF @@ERROR>0
+		CREATE CLUSTERED INDEX IX_tmp on #ba (transid,AgentLevel desc)	
 		
 	DECLARE @prevtransid BIGINT =0 
 	
 	-- settle for agent in temporary table
 	UPDATE #ba 
 	SET 
-		@DownlinePT=DownlinePT = case when @prevtransid <> transid 
+		@DownlinePT= case when @prevtransid <> transid 
 						then APositionTaking
 						else APositionTaking + @DownlinePT -- accumulated PT for upper agent --> for calculating agent commision
-						end,
-		@prevtransid = transid,	
+						end,		
+
+		DownlinePT = @DownlinePT,		
+		@prevtransid = transid,		
 						
 		@modds = CASE betteam
 			WHEN 'h' THEN (hdp2-hdp1) + (@hth - livehomescore) - (@hta - liveawayscore) 
@@ -193,6 +203,8 @@ Declare @modds smallmoney, @commWinRate smallmoney, @commLostRate smallmoney, @R
 		BetTrans.bettype=@bettype AND
 		--[status] NOT IN (N'VOID', N'REJECT')
 		BetTrans.statusID NOT IN (101,102)
+
+	DROP TABLE #ba 	
 
 	END
 

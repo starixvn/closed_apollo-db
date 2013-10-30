@@ -14,7 +14,7 @@ AS
 	DB: SVRCSD.RepDB
 
 	Revisions:		 
-		
+		 - 20131022@Sophia: Get CurrencyName not user currency
 	Explanation's Param:
 	 	- @IsDeleteAll:
 			 + 0: can only delete the unsettled or refunded tickets
@@ -25,7 +25,7 @@ AS
 	SET NOCOUNT ON
 	CREATE TABLE #Betlist (transid bigint,CustId int,username nvarchar(50),Creator Int, odds smallmoney, OddsType int, 
 							transdate datetime, bettype smallint, betteam nvarchar(10),hdp1 smallmoney, hdp2 smallmoney,
-							Liveindicator bit, livehomescore smallint, liveawayscore smallint, StakePositiontaking money,currency tinyint,
+							Liveindicator bit, livehomescore smallint, liveawayscore smallint, Stake money,CurrencyName varchar(10),
 							status nvarchar(10), SecAcceptFlag bit,  HomeId Int, AwayId int, SportType smallint, LeagueId int, Winlost MONEY)
 	---by @TransID
 	 IF ISNULL(@TransID,0) <> 0
@@ -46,8 +46,8 @@ AS
 			b.Liveindicator,
 			b.livehomescore,
 			b.liveawayscore,
-			stake as StakePositiontaking,
-			b.currency, 
+			stake as Stake,
+			b.CurrencyName, 
 				CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 				 ELSE b.status 
 				 END as status,
@@ -82,8 +82,8 @@ AS
 			b.Liveindicator,
 			b.livehomescore,
 			b.liveawayscore,
-			stake as StakePositiontaking,
-			b.currency, 
+			stake as Stake,
+			b.CurrencyName, 
 				CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 				 ELSE b.status 
 				 END as status,
@@ -102,8 +102,6 @@ AS
 				AND B.StatusID NOT IN (101,102) -- Void, Reject
 			    AND (B.StatusId IN (0,1) OR @IsShowAll = 1)	
  
-
-
 			   
 	END 
 	ELSE
@@ -131,8 +129,8 @@ AS
 			b.Liveindicator,
 			b.livehomescore,
 			b.liveawayscore,
-			stake as StakePositiontaking,
-			b.currency, 
+			stake as Stake,
+			b.CurrencyName, 
 				CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 				 ELSE b.status 
 				 END as status,
@@ -167,8 +165,8 @@ AS
 			b.Liveindicator,
 			b.livehomescore,
 			b.liveawayscore,
-			stake as StakePositiontaking,
-			b.currency, 
+			stake as Stake,
+			b.CurrencyName, 
 				CASE WHEN b.status = 'running' AND IsNull(b.SecAcceptFlag, 0) = 1 and IsNull(b.checktime, CURRENT_TIMESTAMP) > CURRENT_TIMESTAMP THEN 'waiting'
 				 ELSE b.status 
 				 END as status,

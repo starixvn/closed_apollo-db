@@ -46,6 +46,11 @@ IF @@SERVERNAME IN ('DB04', 'DB042', 'DB043', 'DB044') RETURN
 --END
 --ELSE 
 BEGIN
+	IF OBJECT_ID('tempdb..#ba') IS NOT NULL
+	BEGIN
+		DROP TABLE #ba
+	END
+
 	--get the needed data to settle for agent
 	SELECT ba.transid, ba.[AgentId], [AgentLevel], b.[DoubleCommLosing], b.odds, b.[Stake], b.[Actual_Stake],
 		AWinLost,AComm,APositionTaking, ADiscount, cast(0 as smallmoney) as DownlinePT, 
@@ -63,19 +68,24 @@ BEGIN
 		
 	--create index		
 	CREATE CLUSTERED INDEX IX_tmp on #ba (transid,AgentLevel desc)	
-	--CREATE INDEX IX_tmp on #ba (transid,[AgentLevel]) INCLUDE (APositionTaking)	
+	--try again
+	IF @@ERROR>0
+		CREATE CLUSTERED INDEX IX_tmp on #ba (transid,AgentLevel desc)	
+
 		
 	DECLARE @prevtransid BIGINT =0 
 	
 	-- settle for agent in temporary table
 	UPDATE #ba 
 	SET 
-		@DownlinePT=DownlinePT = case when @prevtransid <> transid 
+		@DownlinePT= case when @prevtransid <> transid 
 						then APositionTaking
 						else APositionTaking + @DownlinePT -- accumulated PT for upper agent --> for calculating agent commision
-						end,
-		@prevtransid = transid,	
-				
+						end,		
+
+		DownlinePT = @DownlinePT,		
+		@prevtransid = transid,								
+
 		@modds = CASE betteam
 		WHEN 'h' THEN (hdp2-hdp1) + (@fth - livehomescore) - (@fta - liveawayscore) 
 		WHEN 'a' THEN (hdp1-hdp2) - (@fth - livehomescore) + (@fta - liveawayscore)
@@ -115,7 +125,8 @@ BEGIN
 			WHEN @modds > 0 THEN 112 --WON
 			WHEN @modds = 0 THEN 111 --DRAW
 			WHEN @modds < 0 THEN 113 --LOSE
-			END			
+			END
+				
 	OPTION (MAXDOP 1) --should use this for quirky update to avoid parallelism problem	
 		
 	--settle for BetTrans_Agent
@@ -193,6 +204,7 @@ BEGIN
 		--[status] NOT IN (N'VOID', N'REJECT')
 		BetTrans.statusID NOT IN (101,102)
 	
+	DROP TABLE #ba 	
 END
 	
 GO

@@ -9,7 +9,7 @@ Date:  20130307
 Task: get data to recover bet
 DB: SVRCSD.RepDB
 Revisions: 
-
+	- 20131022@Sophia: Get CurrencyName not user currency
 	
 Param's Explanation:
 	- @Type: sports type
@@ -52,7 +52,7 @@ BEGIN
 					b.hdp1, 
 					b.hdp2, 
 					b.odds, 
-					b.stake AS StakePositiontaking, 
+					b.stake AS Stake, 
 					z.STATUS, 
 					b.livehomescore, 
 					b.liveawayscore, 
@@ -60,7 +60,7 @@ BEGIN
 					b.liveindicator, 
 					b.betteam, 
 					b.OddsType, 
-					b.currency, 
+					b.CurrencyName, 
 					b.betfrom,
 					m.teamId as HomeId, 
 					0 as AwayId,
@@ -86,7 +86,7 @@ BEGIN
 					b.hdp1, 
 					b.hdp2, 
 					b.odds, 
-					b.stake AS StakePositiontaking, 
+					b.stake AS Stake, 
 					z.STATUS, 
 					b.livehomescore, 
 					b.liveawayscore, 
@@ -94,7 +94,7 @@ BEGIN
 					b.liveindicator, 
 					b.betteam, 
 					b.OddsType, 
-					b.currency, 
+					b.CurrencyName, 
 					b.betfrom,
 					m.HomeId, 
 					m.AwayId,
