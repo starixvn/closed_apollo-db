@@ -22,6 +22,11 @@ IF @@SERVERNAME IN ('DB04', 'DB042', 'DB043', 'DB044') RETURN
 
 SET NOCOUNT ON
 Declare @modds smallmoney, @commWinRate smallmoney, @commLostRate smallmoney, @DownlinePT smallmoney
+	
+	IF OBJECT_ID('tempdb..#ba') IS NOT NULL
+	BEGIN
+		DROP TABLE #ba
+	END
 
 	--get the needed data to settle for agent
 	SELECT ba.transid, ba.[AgentId], [AgentLevel], b.[DoubleCommLosing], b.odds, b.[Stake], b.[Actual_Stake],
@@ -49,11 +54,13 @@ Declare @modds smallmoney, @commWinRate smallmoney, @commLostRate smallmoney, @D
 	-- settle for agent in temporary table
 	UPDATE #ba 
 	SET 
-		@DownlinePT=DownlinePT = case when @prevtransid <> transid 
+		@DownlinePT= case when @prevtransid <> transid 
 						then APositionTaking
 						else APositionTaking + @DownlinePT -- accumulated PT for upper agent --> for calculating agent commision
-						end,
-		@prevtransid = transid,	
+						end,		
+
+		DownlinePT = @DownlinePT,		
+		@prevtransid = transid,
 						
 		@modds = CASE
 		WHEN betteam = 'h' AND (@fth > @fta AND @fta = 0 ) THEN 1
