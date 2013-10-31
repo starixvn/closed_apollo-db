@@ -267,7 +267,7 @@ BEGIN
 					AND B.Bettype In (9,29)
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
 
-<<<<<<< HEAD
+ 
 					--AND (@Sporttypes = '0' 
 					--		OR EXISTS (	SELECT	1 
 					--					FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
@@ -277,17 +277,7 @@ BEGIN
 					--					WHERE	BM.RefNo = B.RefNo
 					--					 )	
 					--	)	
-=======
-					AND (@Sporttypes = '0' 
-							OR EXISTS (	SELECT	1 
-										FROM	BettransM BM WITH (NOLOCK)--, index=IX_RefNo 
-										INNER JOIN Match M WITH (NOLOCK) 
-											ON	 M.matchID = BM.MatchId 
-											AND (M.sporttype IN (Select sporttype FROM #SportsList))							
-										WHERE	BM.RefNo = B.RefNo
-										 )	
-						)	
->>>>>>> e33d4513a91e5fbdec1c59f620b9294ed060a796
+ 
 				) B
 	GROUP BY B.AgentId
 
@@ -322,11 +312,11 @@ BEGIN
 
 END
 	 
-SELECT Username, AgentID , IsAgent , SUM (Outstanding) Outstanding , SUM (Positiontaking) Positiontaking --, SUM(Outstanding_NG) Outstanding_NG , SUM (Positiontaking_NG)Positiontaking_NG 
+SELECT Username, AgentID , IsAgent , SUM (Outstanding) Outstanding , SUM (Positiontaking) Positiontaking 
 FROM @AgentOutstanding
 GROUP BY  Username, AgentID , IsAgent 
 UNION ALL
-SELECT Username, AgentID , IsAgent , SUM (Outstanding) Outstanding , SUM (Positiontaking) Positiontaking --, SUM(Outstanding_NG) Outstanding_NG , SUM (Positiontaking_NG)Positiontaking_NG 
+SELECT Username, AgentID , IsAgent , SUM (Outstanding) Outstanding , SUM (Positiontaking) Positiontaking  
 FROM @MemberOutstanding 
 GROUP BY Username, AgentID , IsAgent 
 ORDER BY IsAgent DESC, Username ASC

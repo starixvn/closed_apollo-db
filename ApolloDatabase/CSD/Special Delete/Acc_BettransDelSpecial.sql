@@ -479,10 +479,10 @@ Param's Explanation: Special bet delete option
 		END	
 
 		-----Get username having negative balance 
-		SELECT	SUM(b.Winlost - B.actual_stake + B.PlayerComm) as Balance, B.Username
+		SELECT	SUM(b.Winlost - B.actual_stake + B.PlayerComm) as Balance, B.Username, b.CurrencyName
 		FROM	Bettrans B 
-		INNER JOIN #BetDelete D ON B.TransID = D.TransID
-		GROUP BY  B.Username
+		WHERE	CustID  IN (SELECT DISTINCT CustID FROM #BetDelete)
+		GROUP BY  B.Username,  B.CurrencyName
 		HAVING SUM(b.Winlost - B.actual_stake + B.PlayerComm) < 0
 
 		 

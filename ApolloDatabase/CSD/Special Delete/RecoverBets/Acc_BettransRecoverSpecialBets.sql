@@ -296,10 +296,10 @@ BEGIN
 	
 
 	-----Get username having negative balance 
-		SELECT	SUM(b.Winlost - B.actual_stake + B.PlayerComm) as Balance, B.Username
+		SELECT	SUM(b.Winlost - B.actual_stake + B.PlayerComm) as Balance, B.Username, B.CurrencyName
 		FROM	Bettrans B 		
-		WHERE	B.TransId = @TransId
-		GROUP BY  B.Username
+		WHERE	B.CustID = @custid
+		GROUP BY  B.Username,  B.CurrencyName
 		HAVING SUM(b.Winlost - B.actual_stake + B.PlayerComm) < 0
 				
 
