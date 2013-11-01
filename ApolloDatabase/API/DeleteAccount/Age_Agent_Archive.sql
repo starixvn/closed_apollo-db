@@ -339,7 +339,7 @@ BEGIN
 			BEGIN
 				SELECT 
 					@ErrCode = 5119, 
-					@ErrMsg = 'Failed to delete agent [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
+					@ErrMsg = 'Failed to delete agent bet limit [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
 				RETURN
 			END	
 
@@ -350,7 +350,7 @@ BEGIN
 			BEGIN
 				SELECT 
 					@ErrCode = 5120, 
-					@ErrMsg = 'Failed to delete agent [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
+					@ErrMsg = 'Failed to delete agent discount [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
 				RETURN
 			END	
 
@@ -361,7 +361,7 @@ BEGIN
 			BEGIN
 				SELECT 
 					@ErrCode = 5121, 
-					@ErrMsg = 'Failed to delete agent [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
+					@ErrMsg = 'Failed to delete agent position taking [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
 				RETURN
 			END	
 
@@ -372,7 +372,7 @@ BEGIN
 			BEGIN
 				SELECT 
 					@ErrCode = 5122, 
-					@ErrMsg = 'Failed to delete agent [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
+					@ErrMsg = 'Failed to delete agent cust position taking [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
 				RETURN
 			END	
 
@@ -383,7 +383,7 @@ BEGIN
 			BEGIN
 				SELECT 
 					@ErrCode = 5123, 
-					@ErrMsg = 'Failed to delete agent [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
+					@ErrMsg = 'Failed to delete agent user permission [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
 				RETURN
 			END
 
@@ -394,7 +394,7 @@ BEGIN
 			BEGIN
 				SELECT 
 					@ErrCode = 5124, 
-					@ErrMsg = 'Failed to delete agent [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
+					@ErrMsg = 'Failed to delete agent user [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
 				RETURN
 			END		
 

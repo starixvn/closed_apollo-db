@@ -130,7 +130,7 @@ BEGIN
 		BEGIN
 			SELECT 
 				@ErrCode = 5313, 
-				@ErrMsg = 'Failed to archive agent user permission [AgentUserId = ' + COALESCE(CAST(@AgentUserId AS VARCHAR(10)), SPACE(1)) + ']'
+				@ErrMsg = 'Failed to delete agent user permission [AgentUserId = ' + COALESCE(CAST(@AgentUserId AS VARCHAR(10)), SPACE(1)) + ']'
 			RETURN
 		END	
 
@@ -142,7 +142,7 @@ BEGIN
 		BEGIN
 			SELECT 
 				@ErrCode = 5312, 
-				@ErrMsg = 'Failed to archive agent user [AgentUserId = ' + COALESCE(CAST(@AgentUserId AS VARCHAR(10)), SPACE(1)) + ']'
+				@ErrMsg = 'Failed to delete agent user [AgentUserId = ' + COALESCE(CAST(@AgentUserId AS VARCHAR(10)), SPACE(1)) + ']'
 			RETURN
 		END	
 
