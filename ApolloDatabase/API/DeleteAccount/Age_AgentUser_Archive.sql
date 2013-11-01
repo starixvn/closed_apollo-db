@@ -58,7 +58,8 @@ BEGIN
 	WHERE AgentUserId = @AgentUserId
 
 	-- Archive AgentUser 
-	INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.AgentUser (
+	IF NOT EXISTS (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentUser WHERE AgentUserId = @AgentUserId) 
+	INSERT INTO CustArchiveDB.dbo.AgentUser (
 		AgentUserId,
 		AgentId,
 		Username,
@@ -94,7 +95,8 @@ BEGIN
 		END	
 
 	-- Archive agent user permission (master and shadow)
-	INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.AgentUserFunction (
+	IF NOT EXISTS (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentUserFunction WHERE AgentUserId = @AgentUserId)
+	INSERT INTO CustArchiveDB.dbo.AgentUserFunction (
 		AgentUserId,
 		FunctionId,
 		AgentId,
@@ -119,7 +121,20 @@ BEGIN
 			RETURN
 		END	
 
+
 	-- Delete data in CustDB
+	DELETE FROM AgentUserFunction WITH (ROWLOCK)
+	WHERE AgentUserId = @AgentUserId
+	-- Check error
+	IF @@ERROR > 0
+		BEGIN
+			SELECT 
+				@ErrCode = 5313, 
+				@ErrMsg = 'Failed to archive agent user permission [AgentUserId = ' + COALESCE(CAST(@AgentUserId AS VARCHAR(10)), SPACE(1)) + ']'
+			RETURN
+		END	
+
+		
 	DELETE FROM AgentUser WITH (ROWLOCK)
 	WHERE AgentUserId = @AgentUserId
 	-- Check error
@@ -131,17 +146,6 @@ BEGIN
 			RETURN
 		END	
 
-
-	DELETE FROM AgentUserFunction WITH (ROWLOCK)
-	WHERE AgentUserId = @AgentUserId
-	-- Check error
-	IF @@ERROR > 0
-		BEGIN
-			SELECT 
-				@ErrCode = 5313, 
-				@ErrMsg = 'Failed to archive agent user permission [AgentUserId = ' + COALESCE(CAST(@AgentUserId AS VARCHAR(10)), SPACE(1)) + ']'
-			RETURN
-		END	
 
 	-- Write log for archive agent
 	SET @xml = (

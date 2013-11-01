@@ -110,7 +110,7 @@ BEGIN
 											FROM	RepDb.dbo.Bettrans_Agent WITH (NOLOCK)
 											WHERE	winlostdate = @tmpDate			 
 													AND statusID not in (0,101,102,121)  
-													AND bettype < 19001
+													AND bettype <=19000
 													AND AgentID = 53288 -----line test Suntest
 									   ) 
 				AND b.Currency <> 20 
@@ -163,7 +163,7 @@ BEGIN
 											FROM	RepDb.dbo.Bettrans14_Agent WITH (NOLOCK)
 											WHERE	winlostdate = @tmpDate			 
 													AND statusID not in (0,101,102,121) 
-													AND bettype < 19001
+													AND bettype <=19000
 													AND AgentID = 53288 -----line test Suntest
 										)
 				AND b.Currency <> 20 

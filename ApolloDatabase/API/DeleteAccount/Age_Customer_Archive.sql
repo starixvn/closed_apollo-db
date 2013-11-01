@@ -75,7 +75,8 @@ BEGIN
 	--########## Step 2: Archive #########--
 
 	-- Archive AgentInfo
-	INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.CustInfo (
+	IF NOT EXISTS (SELECT TOP 1 1 FROM CustArchiveDB.dbo.CustInfo WHERE CustId = @CustId)
+	INSERT INTO CustArchiveDB.dbo.CustInfo (
 		CustId,
 		AgentId,
 		Username,
@@ -131,7 +132,8 @@ BEGIN
 		END	
 
 	-- Archive agent bet limit
-	INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.CustBetLimit (
+	IF NOT EXISTS (SELECT TOP 1 1 FROM CustArchiveDB.dbo.CustBetLimit WHERE CustId = @CustId)
+	INSERT INTO CustArchiveDB.dbo.CustBetLimit (
 		CustId,
 		SportType,
 		BetType,
@@ -160,7 +162,8 @@ BEGIN
 		END	
 
 	-- Archive agent discount
-	INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.CustDiscount (
+	IF NOT EXISTS (SELECT TOP 1 1 FROM CustArchiveDB.dbo.CustDiscount WHERE CustId = @CustId)
+	INSERT INTO CustArchiveDB.dbo.CustDiscount (
 		CustId,
 		SportType,
 		BetType,
@@ -195,15 +198,40 @@ BEGIN
 
 	--########## Step 4: Delete Data  #########--
 
-	-- Delete data in CustDB
-	DELETE FROM CustInfo WITH (ROWLOCK)
-	WHERE CustId = @CustId
-
+	
 	DELETE FROM CustBetLimit WITH (ROWLOCK)
 	WHERE CustId = @CustId
+	-- Check error
+			IF @@ERROR > 0
+			BEGIN
+				SELECT 
+					@ErrCode = 5212, 
+					@ErrMsg = 'Failed to delete customer [CustID = ' + COALESCE(CAST(@CustID AS VARCHAR(10)), SPACE(1)) + ']'						 
+				RETURN
+			END	
 
 	DELETE FROM CustDiscount WITH (ROWLOCK)
 	WHERE CustId = @CustId
+	-- Check error
+			IF @@ERROR > 0
+			BEGIN
+				SELECT 
+					@ErrCode = 5213, 
+					@ErrMsg = 'Failed to delete customer [CustID = ' + COALESCE(CAST(@CustID AS VARCHAR(10)), SPACE(1)) + ']'						 
+				RETURN
+			END	
+
+	-- Delete data in CustDB
+	DELETE FROM CustInfo WITH (ROWLOCK)
+	WHERE CustId = @CustId
+	-- Check error
+			IF @@ERROR > 0
+			BEGIN
+				SELECT 
+					@ErrCode = 5214, 
+					@ErrMsg = 'Failed to delete customer [CustID = ' + COALESCE(CAST(@CustID AS VARCHAR(10)), SPACE(1)) + ']'						 
+				RETURN
+			END	
 
 	-- Write log for archive agent
 	SET @xml = (

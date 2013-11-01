@@ -85,7 +85,8 @@ BEGIN
 	--########## Step 2: Archive data #########--
 
 	-- Archive AgentInfo
-	INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.AgentInfo (
+	IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentInfo WHERE AgentID = @AgentId)
+	INSERT INTO CustArchiveDB.dbo.AgentInfo (
 		AgentId,
 		AgentHId,
 		AgentLevel,
@@ -130,8 +131,10 @@ BEGIN
 			RETURN
 		END	
 
+	
 	-- Archive AgentUser (master and shadow)
-	INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.AgentUser (
+	IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentUser WHERE AgentID = @AgentId)
+	INSERT INTO CustArchiveDB.dbo.AgentUser (
 		AgentUserId,
 		AgentId,
 		Username,
@@ -167,7 +170,8 @@ BEGIN
 		END	
 
 	-- Archive agent user permission (master and shadow)
-	INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.AgentUserFunction (
+	IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentUserFunction WHERE AgentID = @AgentId)
+	INSERT INTO CustArchiveDB.dbo.AgentUserFunction (
 		AgentUserId,
 		FunctionId,
 		AgentId,
@@ -193,7 +197,8 @@ BEGIN
 		END	
 
 	-- Archive agent bet limit
-	INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.AgentBetLimit (
+	IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentBetLimit WHERE AgentID = @AgentId)
+	INSERT INTO CustArchiveDB.dbo.AgentBetLimit (
 		AgentId,
 		SportType,
 		BetType,
@@ -222,7 +227,8 @@ BEGIN
 		END	
 
 	-- Archive agent discount
-	INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.AgentDiscount (
+	IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentDiscount WHERE AgentID = @AgentId)
+	INSERT INTO CustArchiveDB.dbo.AgentDiscount (
 		AgentId,
 		SportType,
 		BetType,
@@ -253,7 +259,8 @@ BEGIN
 		END	
 
 	-- Archive agent position taking
-	INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.AgentPositionTaking (
+	IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentPositionTaking WHERE AgentID = @AgentId)
+	INSERT INTO CustArchiveDB.dbo.AgentPositionTaking (
 		AgentId,
 		SportType,
 		BetType,
@@ -284,7 +291,8 @@ BEGIN
 		END	
 
 	-- Archive agent cust position taking
-	INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.AgentCustPositionTaking (
+	IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentCustPositionTaking WHERE AgentCustId = @AgentId)
+	INSERT INTO CustArchiveDB.dbo.AgentCustPositionTaking (
 		AgentCustId,
 		AgentId,
 		SportType,
@@ -323,26 +331,86 @@ BEGIN
 	--########## Step 4: Delete data #########--
 	--------- Delete data in CustDB
 
-	DELETE FROM AgentInfo WITH (ROWLOCK)
-	WHERE AgentId = @AgentId
-
-	DELETE FROM AgentUser WITH (ROWLOCK)
-	WHERE AgentId = @AgentId
-
+	
 	DELETE FROM AgentBetLimit WITH (ROWLOCK)
 	WHERE AgentId = @AgentId
+	-- Check error
+			IF @@ERROR > 0
+			BEGIN
+				SELECT 
+					@ErrCode = 5119, 
+					@ErrMsg = 'Failed to delete agent [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
+				RETURN
+			END	
 
 	DELETE FROM AgentDiscount WITH (ROWLOCK)
 	WHERE AgentId = @AgentId
+	-- Check error
+			IF @@ERROR > 0
+			BEGIN
+				SELECT 
+					@ErrCode = 5120, 
+					@ErrMsg = 'Failed to delete agent [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
+				RETURN
+			END	
 
 	DELETE FROM AgentPositionTaking WITH (ROWLOCK)
 	WHERE AgentId = @AgentId
+	-- Check error
+			IF @@ERROR > 0
+			BEGIN
+				SELECT 
+					@ErrCode = 5121, 
+					@ErrMsg = 'Failed to delete agent [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
+				RETURN
+			END	
 
 	DELETE FROM AgentCustPositionTaking WITH (ROWLOCK)
 	WHERE  AgentCustId  = @AgentId
+	-- Check error
+			IF @@ERROR > 0
+			BEGIN
+				SELECT 
+					@ErrCode = 5122, 
+					@ErrMsg = 'Failed to delete agent [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
+				RETURN
+			END	
 
 	DELETE FROM AgentUserFunction WITH (ROWLOCK)
 	WHERE AgentId = @AgentId
+	-- Check error
+			IF @@ERROR > 0
+			BEGIN
+				SELECT 
+					@ErrCode = 5123, 
+					@ErrMsg = 'Failed to delete agent [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
+				RETURN
+			END
+
+	DELETE FROM AgentUser WITH (ROWLOCK)
+	WHERE AgentId = @AgentId
+	-- Check error
+			IF @@ERROR > 0
+			BEGIN
+				SELECT 
+					@ErrCode = 5124, 
+					@ErrMsg = 'Failed to delete agent [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
+				RETURN
+			END		
+
+	DELETE FROM AgentInfo WITH (ROWLOCK)
+	WHERE AgentId = @AgentId
+		-- Check error
+			IF @@ERROR > 0
+			BEGIN
+				SELECT 
+					@ErrCode = 5125, 
+					@ErrMsg = 'Failed to delete agent [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
+				RETURN
+			END	
+
+
+	
 
 	-- Write log for archive agent
 	SET @xml = (

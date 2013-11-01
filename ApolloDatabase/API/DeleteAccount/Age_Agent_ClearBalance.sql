@@ -90,7 +90,9 @@ DECLARE @refNo		BIGINT,
 			-- Check error
 			IF @@ERROR > 0
 			BEGIN
-				SELECT 
+				DELETE Bettrans WHERE TransID= @TransID
+
+				SELECT 					
 					@ErrCode = 5118, 
 					@ErrMsg = 'Failed to clear balance of agent [AgentID = ' + COALESCE(CAST(@AgentID AS VARCHAR(10)), SPACE(1)) + ']'						 
 				RETURN
