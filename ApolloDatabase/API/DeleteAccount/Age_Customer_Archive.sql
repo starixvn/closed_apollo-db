@@ -68,7 +68,7 @@ BEGIN
 	
 	IF EXISTS (	 SELECT 1 FROM SVRTXN.TransDB.dbo.bettrans WITH (NOLOCK) WHERE custid = @CustId And bettype NOT IN (19999,20000))
 	BEGIN
-		SELECT @ErrMsg = @Username +':'+ 'There is active transactions. Please re-check!!', @ErrCode = 5101
+		SELECT @ErrMsg = @Username +':'+ 'There is active transactions. Please re-check!!', @ErrCode = 5215
 		RETURN
 	END
 

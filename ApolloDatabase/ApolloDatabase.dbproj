@@ -1899,6 +1899,9 @@
     <NotInBuild Include="CSD\Admin\Function\NAP_Function_GetByParentKeyAndSite.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="DBA\Task\Task_MoveCustArchive.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">
