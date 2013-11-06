@@ -35,7 +35,7 @@ BEGIN
 	IF NOT EXISTS ( SELECT 1 FROM CustInfo WITH (NOLOCK) WHERE CustId = @CustId )
 		BEGIN
 			SELECT 
-				@ErrCode = 5100, 
+				@ErrCode = 5200, 
 				@ErrMsg = 'Customer ID not exist [CustId = ' + COALESCE(CAST(@CustId AS VARCHAR(10)), SPACE(1)) + ']'
 			RETURN
 		END
@@ -68,7 +68,7 @@ BEGIN
 	
 	IF EXISTS (	 SELECT 1 FROM SVRTXN.TransDB.dbo.bettrans WITH (NOLOCK) WHERE custid = @CustId And bettype NOT IN (19999,20000))
 	BEGIN
-		SELECT @ErrMsg = @Username +':'+ 'There is active transactions. Please re-check!!', @ErrCode = 5101
+		SELECT @ErrMsg = @Username +':'+ 'There is active transactions. Please re-check!!', @ErrCode = 5215
 		RETURN
 	END
 
@@ -206,7 +206,7 @@ BEGIN
 			BEGIN
 				SELECT 
 					@ErrCode = 5212, 
-					@ErrMsg = 'Failed to delete customer [CustID = ' + COALESCE(CAST(@CustID AS VARCHAR(10)), SPACE(1)) + ']'						 
+					@ErrMsg = 'Failed to delete customer bet limit [CustID = ' + COALESCE(CAST(@CustID AS VARCHAR(10)), SPACE(1)) + ']'						 
 				RETURN
 			END	
 
@@ -217,7 +217,7 @@ BEGIN
 			BEGIN
 				SELECT 
 					@ErrCode = 5213, 
-					@ErrMsg = 'Failed to delete customer [CustID = ' + COALESCE(CAST(@CustID AS VARCHAR(10)), SPACE(1)) + ']'						 
+					@ErrMsg = 'Failed to delete customer discount [CustID = ' + COALESCE(CAST(@CustID AS VARCHAR(10)), SPACE(1)) + ']'						 
 				RETURN
 			END	
 
