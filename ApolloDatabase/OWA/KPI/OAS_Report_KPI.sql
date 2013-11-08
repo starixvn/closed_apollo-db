@@ -1,12 +1,4 @@
-﻿USE [ReportDB]
-GO
-/****** Object:  StoredProcedure [dbo].[OAS_Report_KPI]    Script Date: 10/28/2013 5:09:12 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-ALTER  PROCEDURE [dbo].[OAS_Report_KPI]
+﻿ALTER PROCEDURE [dbo].[OAS_Report_KPI]
     @ReportDate datetime = NULL
 AS
 /*
@@ -48,9 +40,8 @@ ELSE
     SELECT @FromDate = @FirstDayOfYear
 
 
-DECLARE @ExchangeDaily TABLE(ExchangeDate SMALLDATETIME,ExchangeId INT,EUR FLOAT,UNIQUE CLUSTERED (ExchangeDate,ExchangeId)) 
-INSERT INTO @ExchangeDaily(ExchangeDate,ExchangeId,EUR) 
-SELECT exchangedate,exchangeid,EUR FROM RepDB.dbo.Lrf_f_GetExchangeDaily(@FromDate,@ToDate)
+DECLARE @ExchangeDaily TABLE(ExchangeDate SMALLDATETIME,ExchangeId INT,EUR FLOAT,UNIQUE CLUSTERED (ExchangeDate,ExchangeId)) INSERT INTO @ExchangeDaily(ExchangeDate,ExchangeId,EUR) SELECT exchangedate,exchangeid,EUR FROM RepDB.dbo.Lrf_f_GetExchangeDaily
+(@FromDate,@ToDate)
 
 
 CREATE TABLE #TmpMTDCross
@@ -127,372 +118,86 @@ INSERT INTO #TmpMTDCross(Day, Currency, StatId, MonthToDate, Type)
     FROM dbo.rptKPI_MTD_Cross (NOLOCK)
     WHERE rptDate BETWEEN @FirstDayOfLastThreeMonths AND @LastDayOfLastMonth
 	-- ****** Return result ******
-
-
-     SELECT		
-        s.StatID,s.StatName,
+	    SELECT		
+        s.StatName,s.StatID,
         SUM(CASE 
-            WHEN type = '1' AND o.StatID !=5 AND o.StatID !=7 AND o.StatID !=17 THEN ISNULL(Monthtodate,0)*e.EUR
-			WHEN type = '1' AND (o.StatID =7  OR o.StatID =17) THEN ISNULL(Monthtodate,0)
-			WHEN type = '1' AND (o.StatID =5  ) THEN ISNULL(Monthtodate,0)
-			ELSE 0			            
+            WHEN type = '1' AND o.StatID !=5 AND o.StatID !=7 AND o.StatID !=17  AND o.StatID !=27 THEN ISNULL(Monthtodate,0)*e.EUR
+			WHEN type = '1' AND (o.StatID =5  OR o.StatID =7 OR o.StatID =17 OR o.StatID =27) THEN ISNULL(Monthtodate,0)
+            ELSE 0
         END) AS [CurrentDate],
         SUM(CASE 
-            WHEN type = '2' AND o.StatID !=5 AND o.StatID !=7 AND o.StatID !=17 THEN ISNULL(Monthtodate,0)*e.EUR
-			WHEN type = '2' AND (o.StatID =7  OR o.StatID =17  ) THEN ISNULL(Monthtodate,0)
-			
-			WHEN type = '2' AND (o.StatID =5   ) THEN  ISNULL(Monthtodate,0)
-			ELSE 0	          
-        END) AS [CurrentMonthMonthToDate],
-		SUM(CASE 
-				WHEN type = '3' AND  o.StatID !=5 AND o.StatID !=7 AND o.StatID !=17 THEN ISNULL(Monthtodate,0)*e.EUR
-				WHEN type = '3' AND (o.StatID =7  OR o.StatID =17) THEN ISNULL(Monthtodate,0)
-				WHEN type = '3' AND (o.StatID =5 ) THEN ISNULL(Monthtodate,0)/DATEDIFF(dd,@FirstDayOfLastMonth,@CurrentDayOfLastMonth)
-				ELSE 0
-        END) AS [LastMonthMonthToDate],
-		SUM(CASE 
-			WHEN type = '4' AND  o.StatID !=5 AND o.StatID !=7 AND o.StatID !=17  THEN ISNULL(Monthtodate,0)*e.EUR
-			WHEN type = '4' AND (o.StatID =7  OR o.StatID =17) THEN ISNULL(Monthtodate,0)
-			WHEN type = '4' AND (o.StatID =5   ) THEN ISNULL(Monthtodate,0)/DATEDIFF(dd,@FirstDayOfLastMonth,@LastDayOfLastMonth) 
-			ELSE 0
-        END) AS [LastMonthFullMonth],
-		SUM(CASE 
-			WHEN type = '5' AND o.StatID !=5 AND o.StatID !=7 AND o.StatID !=17 THEN ISNULL(Monthtodate,0)*e.EUR
-			WHEN type = '5' AND (o.StatID =7  OR o.StatID =17) THEN ISNULL(Monthtodate,0)
-			WHEN type = '5' AND (o.StatID =5    ) THEN ISNULL(Monthtodate,0)/DATEDIFF(dd,@FirstDayOfYear,@ToDate) 
-			ELSE 0
-        END) AS [FullYearToCurrentDateActual],
+            WHEN type = '2' AND o.StatID !=5 AND o.StatID !=7 AND o.StatID !=17 AND o.StatID !=27 AND o.StatID !=8 AND o.StatID !=24 THEN ISNULL(Monthtodate,0)*e.EUR
+			WHEN type = '2'  AND  (o.StatID =5  OR o.StatID =7 OR o.StatID =17 )  THEN ISNULL(Monthtodate,0)
+			WHEN type = '2'  AND  ( o.StatID =27) THEN ISNULL(Monthtodate,0)/(DATEDIFF(dd,@FirstDayOfCurrentMonth,@ToDate)+1)
+			WHEN type = '2'  AND  ( o.StatID =8 OR o.StatID=24) THEN ISNULL(Monthtodate,0)*e.EUR/(DATEDIFF(dd,@FirstDayOfCurrentMonth,@ToDate)+1)
+            ELSE 0
+        END)
+		AS [CurrentMonthMonthToDate],
 
 		SUM(CASE 
-			WHEN type = '5' AND o.StatID !=5 AND o.StatID !=7 AND o.StatID !=17   THEN ISNULL(Monthtodate,0)*e.EUR			
-			WHEN type = '5' AND (o.StatID =7  OR o.StatID =17) THEN ISNULL(Monthtodate,0)
-			WHEN type = '5' AND (o.StatID =5   ) THEN ISNULL(Monthtodate,0)/DATEDIFF(dd,@FirstDayOfYear,@ToDate) 
+				WHEN type = '3' AND  o.StatID !=5 AND o.StatID !=7 AND o.StatID !=17  AND o.StatID !=27 AND o.StatID !=8 AND o.StatID !=24 THEN ISNULL(Monthtodate,0)*e.EUR
+				WHEN type = '3' AND (o.StatID =5  OR o.StatID =7 OR o.StatID =17) THEN ISNULL(Monthtodate,0)
+				WHEN type = '3' AND (o.StatID =27 ) THEN ISNULL(Monthtodate,0)/(DATEDIFF(dd,@FirstDayOfLastMonth,@CurrentDayOfLastMonth)+1)
+				WHEN type = '3'  AND  ( o.StatID =8 OR o.StatID=24) THEN ISNULL(Monthtodate,0)*e.EUR/(DATEDIFF(dd,@FirstDayOfLastMonth,@CurrentDayOfLastMonth)+1)
+            ELSE 0
+        END)
+		AS [LastMonthMonthToDate],
+		SUM(CASE 
+			WHEN type = '4' AND  o.StatID !=5 AND o.StatID !=7 AND o.StatID !=17 AND o.StatID !=27 AND o.StatID !=8 AND o.StatID !=24 THEN ISNULL(Monthtodate,0)*e.EUR
+			WHEN type = '4' AND (o.StatID =5  OR o.StatID =7 OR o.StatID =17 )  THEN ISNULL(Monthtodate,0)
+			WHEN type = '4' AND (o.StatID =27)  THEN ISNULL(Monthtodate,0)/(DATEDIFF(dd,@FirstDayOfLastMonth,@LastDayOfLastMonth)+1)
+			WHEN type = '4'  AND  ( o.StatID =8 OR o.StatID=24) THEN ISNULL(Monthtodate,0)*e.EUR/(DATEDIFF(dd,@FirstDayOfLastMonth,@LastDayOfLastMonth)+1)
 			ELSE 0
-        END)/DATEDIFF(dd,@FirstDayOfYear,@ToDate) AS [FullYearToCurrentDateDailyAve],
+        END)
+		AS [LastMonthFullMonth],
 
 		SUM(CASE 
-			WHEN type = '6' AND o.StatID !=5 AND o.StatID !=7 AND o.StatID !=17  THEN ISNULL(Monthtodate,0)*e.EUR			
-			WHEN type = '6' AND (o.StatID =7  OR o.StatID =17) THEN ISNULL(Monthtodate,0)
-			WHEN type = '6' AND (o.StatID =5   ) THEN ISNULL(Monthtodate,0)/DATEDIFF(dd,@FirstDayOfYear,@LastDayOfLastMonth) 
+			WHEN type = '5' AND o.StatID !=5 AND o.StatID !=7 AND o.StatID !=17 AND o.StatID !=27 AND o.StatID !=8 AND o.StatID !=24 THEN ISNULL(Monthtodate,0)*e.EUR
+			WHEN type = '5' AND  (o.StatID =5  OR o.StatID =7 OR o.StatID =17 )  THEN ISNULL(Monthtodate,0)
+			WHEN type = '5' AND  (o.StatID =27)  THEN ISNULL(Monthtodate,0)/(DATEDIFF(dd,@FirstDayOfYear,@ToDate)+1)
+			WHEN type = '5'  AND  ( o.StatID =8 OR o.StatID=24) THEN ISNULL(Monthtodate,0)*e.EUR/(DATEDIFF(dd,@FirstDayOfYear,@ToDate)+1)
 			ELSE 0
-        END)/DATEDIFF(mm,@FirstDayOfYear,@LastDayOfLastMonth) AS [FullYearToLastMonthMonthlyAve],
+        END)
+		AS [FullYearToCurrentDateActual],
 
 		SUM(CASE 
-			WHEN type = '7' AND o.StatID !=5 AND o.StatID !=7 AND o.StatID !=17  THEN ISNULL(Monthtodate,0)*e.EUR		
-			WHEN type = '7' AND (o.StatID =7  OR o.StatID =17) THEN ISNULL(Monthtodate,0)
-			WHEN type = '7' AND (o.StatID =5 ) THEN ISNULL(Monthtodate,0)/DATEDIFF(dd,@FirstDayOfLastThreeMonths,@LastDayOfLastMonth) 
+			WHEN type = '5' AND o.StatID !=5 AND o.StatID !=7 AND o.StatID !=17 AND o.StatID !=27 THEN ISNULL(Monthtodate,0)*e.EUR
+			WHEN type = '5' AND  (o.StatID =5  OR o.StatID =7 OR o.StatID =17 OR o.StatID =27)  THEN ISNULL(Monthtodate,0)
 			ELSE 0
-        END)/DATEDIFF(mm,@FirstDayOfLastThreeMonths,@LastDayOfLastMonth) AS [ThreeLastMonthsMonthlyAve],
+        END)/ (DATEDIFF(dd,@FirstDayOfYear,@ToDate)+1)
+		 AS [FullYearToCurrentDateDailyAve],
 
 		SUM(CASE 
-			WHEN type = '7'  AND o.StatID !=5 AND o.StatID !=7 AND o.StatID !=17 THEN ISNULL(Monthtodate,0)*e.EUR			
-			WHEN type = '7' AND (o.StatID =7  OR o.StatID =17) THEN ISNULL(Monthtodate,0)
-			WHEN type = '7' AND (o.StatID =5  ) THEN ISNULL(Monthtodate,0)/DATEDIFF(dd,@FirstDayOfLastThreeMonths,@LastDayOfLastMonth) 
+			WHEN type = '6' AND o.StatID !=5 AND o.StatID !=7 AND o.StatID !=17 AND o.StatID !=27 AND o.StatID !=8 AND o.StatID !=24 THEN ISNULL(Monthtodate,0)*e.EUR/(DATEDIFF(mm,@FirstDayOfYear,@LastDayOfLastMonth)+1)
+			WHEN type = '6' AND  (o.StatID =5  OR o.StatID =7 OR o.StatID =17)  THEN ISNULL(Monthtodate,0)/(DATEDIFF(mm,@FirstDayOfYear,@LastDayOfLastMonth)+1)
+			WHEN type = '6' AND  (o.StatID =27)  THEN ISNULL(Monthtodate,0)/(DATEDIFF(dd,@FirstDayOfYear,@LastDayOfLastMonth)+1)
+			WHEN type = '6'  AND  ( o.StatID =8 OR o.StatID=24) THEN ISNULL(Monthtodate,0)*e.EUR/(DATEDIFF(dd,@FirstDayOfYear,@LastDayOfLastMonth)+1)
 			ELSE 0
-		 END)/DATEDIFF(dd,@FirstDayOfLastThreeMonths,@LastDayOfLastMonth) AS [ThreeLastMonthsDailyAve]
+        END)
+		AS [FullYearToLastMonthMonthlyAve],
+
+		SUM(CASE 
+			WHEN type = '7' AND o.StatID !=5 AND o.StatID !=7 AND o.StatID !=17 AND o.StatID !=27 AND o.StatID !=8 AND o.StatID !=24  THEN ISNULL(Monthtodate,0)*e.EUR/(DATEDIFF(mm,@FirstDayOfLastThreeMonths,@LastDayOfLastMonth)+1) 
+			WHEN type = '7' AND  (o.StatID =5  OR o.StatID =7 OR o.StatID =17)  THEN ISNULL(Monthtodate,0)/(DATEDIFF(mm,@FirstDayOfLastThreeMonths,@LastDayOfLastMonth) +1)
+			WHEN type = '7' AND  (o.StatID =27)  THEN ISNULL(Monthtodate,0)/(DATEDIFF(dd,@FirstDayOfLastThreeMonths,@LastDayOfLastMonth)+1)
+			WHEN type = '7'  AND  ( o.StatID =8 OR o.StatID=24) THEN ISNULL(Monthtodate,0)*e.EUR/(DATEDIFF(dd,@FirstDayOfLastThreeMonths,@LastDayOfLastMonth)+1)
+			ELSE 0
+        END)
+		AS [ThreeLastMonthsMonthlyAve],
+
+		SUM(CASE 
+			WHEN type = '7' AND o.StatID !=5 AND o.StatID !=7 AND o.StatID !=17 AND o.StatID !=27  THEN ISNULL(Monthtodate,0)*e.EUR
+			WHEN type = '7' AND  (o.StatID =5  OR o.StatID =7 OR o.StatID =17 OR o.StatID =27)  THEN ISNULL(Monthtodate,0)
+			ELSE 0
+        END)/(DATEDIFF(dd,@FirstDayOfLastThreeMonths,@LastDayOfLastMonth)+1) AS [ThreeLastMonthsDailyAve]
     FROM
         #TmpMTDCross o (nolock)      
 	LEFT JOIN tbl_KPI_Stats s ON o.StatID=s.StatID
 	LEFT JOIN @ExchangeDaily e ON o.Currency = e.ExchangeId AND o.Day=e.ExchangeDate	
-	WHERE s.StatID !=8 AND s.StatID !=24 AND s.StatID !=27
     GROUP BY        
-        s.StatID,s.StatName
-	--statid=8 aveBetSize
-	UNION ALL 
-	SELECT t1.id AS StatID, 'AveBetSize' AS StatName ,t1.CurrentDate/NULLIF(t2.CurrentDate,0) AS CurrentDate,
-			t1.[CurrentMonthMonthToDate]/NULLIF(t2.CurrentMonthMonthToDate,0) AS  CurrentMonthMonthToDate
-			,t1.[LastMonthMonthToDate]/NULLIF(t2.[LastMonthMonthToDate],0) AS [LastMonthMonthToDate]
-			,t1.[LastMonthFullMonth]/NULLIF(t2.[LastMonthFullMonth],0) AS [LastMonthFullMonth]
-			,t1.[FullYearToCurrentDateActual]/NULLIF(t2.[FullYearToCurrentDateActual],0) AS [FullYearToCurrentDateActual]
-			,t1.[FullYearToCurrentDateDailyAve]/NULLIF(t2.[FullYearToCurrentDateDailyAve],0) AS [FullYearToCurrentDateDailyAve]
-			,t1.[FullYearToLastMonthMonthlyAve]/NULLIF(t2.[FullYearToLastMonthMonthlyAve],0) AS [FullYearToLastMonthMonthlyAve]
-			,t1.[ThreeLastMonthsMonthlyAve]/NULLIF(t2.[ThreeLastMonthsMonthlyAve],0) AS [ThreeLastMonthsMonthlyAve]
-			,t1.[ThreeLastMonthsDailyAve]/NULLIF(t2.[ThreeLastMonthsDailyAve],0) AS [ThreeLastMonthsDailyAve]
-		FROM
-	   ( SELECT		
-        --o.statid,
-		8 as id,
-        SUM(CASE 
-            WHEN type = '1' AND o.StatID =9 THEN ISNULL(Monthtodate,0)*e.EUR	
-			ELSE 0			            
-        END) AS [CurrentDate],
-         SUM(CASE 
-            WHEN type = '2' AND o.StatID =9 THEN ISNULL(Monthtodate,0)*e.EUR	
-			ELSE 0			            
-        END) AS [CurrentMonthMonthToDate],
-		   SUM(CASE 
-            WHEN type = '3' AND o.StatID =9 THEN ISNULL(Monthtodate,0)*e.EUR	
-			ELSE 0			            
-        END) AS [LastMonthMonthToDate],
-		   SUM(CASE 
-            WHEN type = '4' AND o.StatID =9 THEN ISNULL(Monthtodate,0)*e.EUR	
-			ELSE 0			            
-        END) AS [LastMonthFullMonth],
-		   SUM(CASE 
-            WHEN type = '5' AND o.StatID =9 THEN ISNULL(Monthtodate,0)*e.EUR	
-			ELSE 0			            
-        END)AS [FullYearToCurrentDateActual],
+       s.StatName,s.StatID
 
-		0 AS [FullYearToCurrentDateDailyAve],
-
-		   SUM(CASE 
-            WHEN type = '6' AND o.StatID =9 THEN ISNULL(Monthtodate,0)*e.EUR	
-			ELSE 0			            
-        END)/DATEDIFF(mm,@FirstDayOfYear,@LastDayOfLastMonth) AS [FullYearToLastMonthMonthlyAve],
-
-		   SUM(CASE 
-            WHEN type = '7' AND o.StatID =9 THEN ISNULL(Monthtodate,0)*e.EUR	
-			ELSE 0			            
-        END)/DATEDIFF(mm,@FirstDayOfLastThreeMonths,@LastDayOfLastMonth) AS [ThreeLastMonthsMonthlyAve],
-
-		0 AS [ThreeLastMonthsDailyAve]
-    FROM
-        #TmpMTDCross o (nolock)      
-	
-	LEFT JOIN @ExchangeDaily e ON o.Currency = e.ExchangeId AND o.Day=e.ExchangeDate	
-	WHERE o.StatID =9) t1
-	LEFT JOIN 
-	   ( SELECT		
-        --o.statid,
-		8 AS id,
-         SUM(CASE 
-            WHEN type = '1' AND o.StatID =7 THEN ISNULL(Monthtodate,0)	
-			ELSE 0			            
-        END) AS [CurrentDate],
-       SUM(CASE 
-            WHEN type = '2' AND o.StatID =7 THEN ISNULL(Monthtodate,0)	
-			ELSE 0			            
-        END)  AS [CurrentMonthMonthToDate],
-		  SUM(CASE 
-            WHEN type = '3' AND o.StatID =7 THEN ISNULL(Monthtodate,0)	
-			ELSE 0			            
-        END)  AS [LastMonthMonthToDate],
-		 SUM(CASE 
-            WHEN type = '4' AND o.StatID =7 THEN ISNULL(Monthtodate,0)	
-			ELSE 0			            
-        END)  AS [LastMonthFullMonth],
-		  SUM(CASE 
-            WHEN type = '5' AND o.StatID =7 THEN ISNULL(Monthtodate,0)	
-			ELSE 0			            
-        END)AS [FullYearToCurrentDateActual],
-
-		0 AS [FullYearToCurrentDateDailyAve],
-
-		 SUM(CASE 
-            WHEN type = '6' AND o.StatID =7 THEN ISNULL(Monthtodate,0)	
-			ELSE 0			            
-        END)/DATEDIFF(mm,@FirstDayOfYear,@LastDayOfLastMonth) AS [FullYearToLastMonthMonthlyAve],
-
-		  SUM(CASE 
-            WHEN type = '7' AND o.StatID =7 THEN ISNULL(Monthtodate,0)	
-			ELSE 0			            
-        END)/DATEDIFF(mm,@FirstDayOfLastThreeMonths,@LastDayOfLastMonth) AS [ThreeLastMonthsMonthlyAve],
-
-		0 AS [ThreeLastMonthsDailyAve]
-    FROM
-        #TmpMTDCross o (nolock)    
-			
-	WHERE o.StatID =7) t2
-	ON	t1.id=t2.id
-
-	--statid=24 aveBetSize(NoDraw)
-	UNION ALL 
-	SELECT t1.id AS StatID, 'AveBetSize(NoDraw)' AS StatName ,t1.CurrentDate/NULLIF(t2.CurrentDate,0) AS CurrentDate,
-			t1.[CurrentMonthMonthToDate]/NULLIF(t2.CurrentMonthMonthToDate,0) AS  CurrentMonthMonthToDate
-			,t1.[LastMonthMonthToDate]/NULLIF(t2.[LastMonthMonthToDate],0) AS [LastMonthMonthToDate]
-			,t1.[LastMonthFullMonth]/NULLIF(t2.[LastMonthFullMonth],0) AS [LastMonthFullMonth]
-			,t1.[FullYearToCurrentDateActual]/NULLIF(t2.[FullYearToCurrentDateActual],0) AS [FullYearToCurrentDateActual]
-			,t1.[FullYearToCurrentDateDailyAve]/NULLIF(t2.[FullYearToCurrentDateDailyAve],0) AS [FullYearToCurrentDateDailyAve]
-			,t1.[FullYearToLastMonthMonthlyAve]/NULLIF(t2.[FullYearToLastMonthMonthlyAve],0) AS [FullYearToLastMonthMonthlyAve]
-			,t1.[ThreeLastMonthsMonthlyAve]/NULLIF(t2.[ThreeLastMonthsMonthlyAve],0) AS [ThreeLastMonthsMonthlyAve]
-			,t1.[ThreeLastMonthsDailyAve]/NULLIF(t2.[ThreeLastMonthsDailyAve],0) AS [ThreeLastMonthsDailyAve]
-		FROM
-	   ( SELECT		
-        --o.statid,
-		24 as id,
-        SUM(CASE 
-            WHEN type = '1' AND o.StatID =19 THEN ISNULL(Monthtodate,0)*e.EUR	
-			ELSE 0			            
-        END) AS [CurrentDate],
-         SUM(CASE 
-            WHEN type = '2' AND o.StatID =19 THEN ISNULL(Monthtodate,0)*e.EUR	
-			ELSE 0			            
-        END) AS [CurrentMonthMonthToDate],
-		   SUM(CASE 
-            WHEN type = '3' AND o.StatID =19 THEN ISNULL(Monthtodate,0)*e.EUR	
-			ELSE 0			            
-        END) AS [LastMonthMonthToDate],
-		   SUM(CASE 
-            WHEN type = '4' AND o.StatID =19 THEN ISNULL(Monthtodate,0)*e.EUR	
-			ELSE 0			            
-        END) AS [LastMonthFullMonth],
-		   SUM(CASE 
-            WHEN type = '5' AND o.StatID =19 THEN ISNULL(Monthtodate,0)*e.EUR	
-			ELSE 0			            
-        END)AS [FullYearToCurrentDateActual],
-
-		0 AS [FullYearToCurrentDateDailyAve],
-
-		   SUM(CASE 
-            WHEN type = '6' AND o.StatID =19 THEN ISNULL(Monthtodate,0)*e.EUR	
-			ELSE 0			            
-        END)/DATEDIFF(mm,@FirstDayOfYear,@LastDayOfLastMonth) AS [FullYearToLastMonthMonthlyAve],
-
-		   SUM(CASE 
-            WHEN type = '7' AND o.StatID =19 THEN ISNULL(Monthtodate,0)*e.EUR	
-			ELSE 0			            
-        END)/DATEDIFF(mm,@FirstDayOfLastThreeMonths,@LastDayOfLastMonth) AS [ThreeLastMonthsMonthlyAve],
-
-		0 AS [ThreeLastMonthsDailyAve]
-    FROM
-        #TmpMTDCross o (nolock)      
-	
-	LEFT JOIN @ExchangeDaily e ON o.Currency = e.ExchangeId AND o.Day=e.ExchangeDate	
-	WHERE o.StatID =19) t1
-	LEFT JOIN 
-	   ( SELECT		
-        --o.statid,
-		24 AS id,
-         SUM(CASE 
-            WHEN type = '1' AND o.StatID =17 THEN ISNULL(Monthtodate,0)	
-			ELSE 0			            
-        END) AS [CurrentDate],
-       SUM(CASE 
-            WHEN type = '2' AND o.StatID =17 THEN ISNULL(Monthtodate,0)	
-			ELSE 0			            
-        END)  AS [CurrentMonthMonthToDate],
-		  SUM(CASE 
-            WHEN type = '3' AND o.StatID =17 THEN ISNULL(Monthtodate,0)	
-			ELSE 0			            
-        END)  AS [LastMonthMonthToDate],
-		 SUM(CASE 
-            WHEN type = '4' AND o.StatID =17 THEN ISNULL(Monthtodate,0)	
-			ELSE 0			            
-        END)  AS [LastMonthFullMonth],
-		  SUM(CASE 
-            WHEN type = '5' AND o.StatID =17 THEN ISNULL(Monthtodate,0)	
-			ELSE 0			            
-        END)AS [FullYearToCurrentDateActual],
-
-		0 AS [FullYearToCurrentDateDailyAve],
-
-		 SUM(CASE 
-            WHEN type = '6' AND o.StatID =17 THEN ISNULL(Monthtodate,0)	
-			ELSE 0			            
-        END)/DATEDIFF(mm,@FirstDayOfYear,@LastDayOfLastMonth) AS [FullYearToLastMonthMonthlyAve],
-
-		  SUM(CASE 
-            WHEN type = '7' AND o.StatID =17 THEN ISNULL(Monthtodate,0)	
-			ELSE 0			            
-        END)/DATEDIFF(mm,@FirstDayOfLastThreeMonths,@LastDayOfLastMonth) AS [ThreeLastMonthsMonthlyAve],
-
-		0 AS [ThreeLastMonthsDailyAve]
-    FROM
-        #TmpMTDCross o (nolock)    
-			
-	WHERE o.StatID =17) t2
-	ON	t1.id=t2.id
-
-	--statid=27 Margin
-	UNION ALL 
-	SELECT t1.id AS StatID, 'Margin' AS StatName ,t1.CurrentDate/NULLIF(t2.CurrentDate,0) AS CurrentDate,
-			t1.[CurrentMonthMonthToDate]/NULLIF(t2.CurrentMonthMonthToDate,0) AS  CurrentMonthMonthToDate
-			,t1.[LastMonthMonthToDate]/NULLIF(t2.[LastMonthMonthToDate],0) AS [LastMonthMonthToDate]
-			,t1.[LastMonthFullMonth]/NULLIF(t2.[LastMonthFullMonth],0) AS [LastMonthFullMonth]
-			,t1.[FullYearToCurrentDateActual]/NULLIF(t2.[FullYearToCurrentDateActual],0) AS [FullYearToCurrentDateActual]
-			,t1.[FullYearToCurrentDateDailyAve]/NULLIF(t2.[FullYearToCurrentDateDailyAve],0) AS [FullYearToCurrentDateDailyAve]
-			,t1.[FullYearToLastMonthMonthlyAve]/NULLIF(t2.[FullYearToLastMonthMonthlyAve],0) AS [FullYearToLastMonthMonthlyAve]
-			,t1.[ThreeLastMonthsMonthlyAve]/NULLIF(t2.[ThreeLastMonthsMonthlyAve],0) AS [ThreeLastMonthsMonthlyAve]
-			,t1.[ThreeLastMonthsDailyAve]/NULLIF(t2.[ThreeLastMonthsDailyAve],0) AS [ThreeLastMonthsDailyAve]
-		FROM
-	   ( SELECT		
-        --o.statid,
-		27 as id,
-        SUM(CASE 
-            WHEN type = '1' AND o.StatID =25 THEN ISNULL(Monthtodate,0)*e.EUR	
-			ELSE 0			            
-        END) AS [CurrentDate],
-         SUM(CASE 
-            WHEN type = '2' AND o.StatID =25 THEN ISNULL(Monthtodate,0)*e.EUR	
-			ELSE 0			            
-        END) AS [CurrentMonthMonthToDate],
-		   SUM(CASE 
-            WHEN type = '3' AND o.StatID =25 THEN ISNULL(Monthtodate,0)*e.EUR	
-			ELSE 0			            
-        END) AS [LastMonthMonthToDate],
-		   SUM(CASE 
-            WHEN type = '4' AND o.StatID =25 THEN ISNULL(Monthtodate,0)*e.EUR	
-			ELSE 0			            
-        END) AS [LastMonthFullMonth],
-		   SUM(CASE 
-            WHEN type = '5' AND o.StatID =25 THEN ISNULL(Monthtodate,0)*e.EUR	
-			ELSE 0			            
-        END)AS [FullYearToCurrentDateActual],
-
-		0 AS [FullYearToCurrentDateDailyAve],
-
-		   SUM(CASE 
-            WHEN type = '6' AND o.StatID =25 THEN ISNULL(Monthtodate,0)*e.EUR	
-			ELSE 0			            
-        END)/DATEDIFF(mm,@FirstDayOfYear,@LastDayOfLastMonth) AS [FullYearToLastMonthMonthlyAve],
-
-		   SUM(CASE 
-            WHEN type = '7' AND o.StatID =25 THEN ISNULL(Monthtodate,0)*e.EUR	
-			ELSE 0			            
-        END)/DATEDIFF(mm,@FirstDayOfLastThreeMonths,@LastDayOfLastMonth) AS [ThreeLastMonthsMonthlyAve],
-
-		0 AS [ThreeLastMonthsDailyAve]
-    FROM
-        #TmpMTDCross o (nolock)      
-	
-	LEFT JOIN @ExchangeDaily e ON o.Currency = e.ExchangeId AND o.Day=e.ExchangeDate	
-	WHERE o.StatID =25) t1
-	LEFT JOIN 
-	   ( SELECT		
-        --o.statid,
-		27 AS id,
-         SUM(CASE 
-            WHEN type = '1' AND o.StatID =19 THEN ISNULL(Monthtodate,0)	*e.EUR	
-			ELSE 0			            
-        END) AS [CurrentDate],
-       SUM(CASE 
-            WHEN type = '2' AND o.StatID =19 THEN ISNULL(Monthtodate,0)	*e.EUR	
-			ELSE 0			            
-        END)  AS [CurrentMonthMonthToDate],
-		  SUM(CASE 
-            WHEN type = '3' AND o.StatID =19 THEN ISNULL(Monthtodate,0)	*e.EUR	
-			ELSE 0			            
-        END)  AS [LastMonthMonthToDate],
-		 SUM(CASE 
-            WHEN type = '4' AND o.StatID =19 THEN ISNULL(Monthtodate,0)	*e.EUR	
-			ELSE 0			            
-        END)  AS [LastMonthFullMonth],
-		  SUM(CASE 
-            WHEN type = '5' AND o.StatID =19 THEN ISNULL(Monthtodate,0)	*e.EUR	
-			ELSE 0			            
-        END)AS [FullYearToCurrentDateActual],
-
-		0 AS [FullYearToCurrentDateDailyAve],
-
-		 SUM(CASE 
-            WHEN type = '6' AND o.StatID =19 THEN ISNULL(Monthtodate,0)	*e.EUR
-			ELSE 0			            
-        END)/DATEDIFF(mm,@FirstDayOfYear,@LastDayOfLastMonth) AS [FullYearToLastMonthMonthlyAve],
-
-		  SUM(CASE 
-            WHEN type = '7' AND o.StatID =19 THEN ISNULL(Monthtodate,0)	*e.EUR
-			ELSE 0			            
-        END)/DATEDIFF(mm,@FirstDayOfLastThreeMonths,@LastDayOfLastMonth) AS [ThreeLastMonthsMonthlyAve],
-
-		0 AS [ThreeLastMonthsDailyAve]
-    FROM
-        #TmpMTDCross o (nolock)    				
-	LEFT JOIN @ExchangeDaily e ON o.Currency = e.ExchangeId AND o.Day=e.ExchangeDate	
-	WHERE o.StatID =19) t2
-	ON	t1.id=t2.id
-
+    
 SET NOCOUNT OFF
 
-GO
-GRANT EXECUTE ON  OAS_Report_KPI TO aplweb
-GO
+
