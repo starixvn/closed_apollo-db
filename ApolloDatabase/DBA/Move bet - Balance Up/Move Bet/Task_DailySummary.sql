@@ -63,6 +63,14 @@ IF EXISTS (
 			AND custid <> 0
 			AND bettype <=19000 AND bettype <> 10 AND winlostdate <= @winlostdate
 			AND currency <> 20
+			AND transid NOT IN (
+					SELECT	TransID 
+					FROM	dbo.Bettrans_Agent WITH (NOLOCK)
+					WHERE	winlostdate <= @winlostdate	 
+							AND statusID in (0,1)  
+							AND bettype <=19000
+							AND AgentID = 53288 -----line test Suntest
+					)
 )
 BEGIN
 	SELECT DISTINCT matchid, bettype, 'EXEC DBA_MatchName ' + CAST(matchid as nvarchar(20)) cmd FROM bettrans WITH (NOLOCK)
@@ -70,6 +78,14 @@ BEGIN
 			AND statusID = 0 
 			AND bettype <=19000 and bettype NOT IN (9, 10, 29)
 			AND currency <> 20
+			AND transid NOT IN (
+					SELECT	TransID 
+					FROM	dbo.Bettrans_Agent WITH (NOLOCK)
+					WHERE	winlostdate <= @winlostdate	 
+							AND statusID in (0,1)  
+							AND bettype <=19000
+							AND AgentID = 53288 -----line test Suntest
+					)
 
 	SELECT DISTINCT 'EXEC DBA_MatchName ' + CAST(bm.matchid as varchar(10)) matchid, m.eventdate, bm.matchid, ',' [Comma]
 	FROM dbo.bettrans b WITH (NOLOCK)
@@ -80,6 +96,14 @@ BEGIN
 			AND b.bettype in (9,29)
 			AND b.matchID in (9,29)
 			AND b.currency <> 20
+			AND b.transid NOT IN (
+					SELECT	TransID 
+					FROM	dbo.Bettrans_Agent WITH (NOLOCK)
+					WHERE	winlostdate <= @winlostdate	 
+							AND statusID in (0,1)  
+							AND bettype <=19000
+							AND AgentID = 53288 -----line test Suntest
+					)
 	ORDER BY m.eventdate
 
 	IF @@ROWCOUNT > 0
@@ -199,13 +223,15 @@ END
 -- =====================
 -- AUTO VOID TEST TICKET
 -- =====================
+-- currency 20
+	DECLARE @custs TABLE (custid int)
+
 	IF EXISTS (
 		SELECT 1 FROM dbo.bettrans WITH (NOLOCK)
 		WHERE currency = 20 AND winlostdate = @winlostdate AND bettype <=19000
-		AND statusID = 0
+		AND statusID = 0		
 	)
-	BEGIN
-		DECLARE @custs TABLE (custid int)
+	BEGIN		
 		
 		UPDATE dbo.bettrans with (ROWLOCK, UPDLOCK)  
 		SET winlost=actual_stake, 
@@ -236,8 +262,61 @@ END
 		FROM @custs
 		
 		EXEC dbo.[Task_CheckBalance] @step = 33, @Action = 'JustFix'
+
+		DELETE FROM @custs
 	END
 
+
+----line test Suntest
+	IF EXISTS (
+		SELECT	1
+					FROM	dbo.Bettrans_Agent WITH (NOLOCK)
+					WHERE	winlostdate <= @winlostdate	 
+							AND statusID in (0,1)  
+							AND bettype <=19000
+							AND AgentID = 53288 -----line test Suntest
+	)
+	BEGIN
+		UPDATE dbo.bettrans with (ROWLOCK, UPDLOCK)  
+		SET winlost=actual_stake, 
+			playercomm = 0,
+			Twinlost = 0,
+			Tcomm = 0, 
+			ruben=1, 
+			statuswinlost=6, 
+			status = 'Void',
+			statusid = 102,
+			transdesc = '[AutoVoid]' + transdesc
+		OUTPUT deleted.custid INTO @custs
+		where winlostdate = @winlostdate AND bettype <=19000
+		AND statusID IN (0,1)
+		AND transid IN (
+					SELECT	TransID 
+					FROM	dbo.Bettrans_Agent WITH (NOLOCK)
+					WHERE	winlostdate = @winlostdate	 
+							AND statusID in (0,1)  
+							AND bettype <=19000
+							AND AgentID = 53288 -----line test Suntest
+					)
+
+		UPDATE dbo.BetTrans_Agent with (ROWLOCK, UPDLOCK)  
+		SET AWinLost=0, 
+			AComm = 0,
+			status = 'Void',
+			statusid = 102,
+			transdesc = '[AutoVoid]' + transdesc
+		where 
+			winlostdate = @winlostdate	 
+			AND statusID in (0,1)  
+			AND bettype <=19000
+			AND AgentID = 53288 -----line test Suntest
+		
+		INSERT INTO dbo.Task_Cust_CheckBalanceVerify (custid)
+		SELECT DISTINCT custid
+		FROM @custs
+		
+		EXEC dbo.[Task_CheckBalance] @step = 33, @Action = 'JustFix'
+	END
 
 IF @TestMode <> 0 -- @TestMode = 2
 BEGIN
