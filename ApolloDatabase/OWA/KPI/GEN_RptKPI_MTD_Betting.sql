@@ -50,7 +50,7 @@ CREATE TABLE #Betting
 			,SUM(b.turnover)/sum(b.betcount)				AS AverageBetsize
 			,SUM(CASE WHEN b.status = 111 then 0 WHEN b.status in (114,115) THEN (0.5*b.turnover) ELSE b.turnover END)/SUM(CASE WHEN b.status = 111 THEN 0 ELSE b.betcount END)	AS AverageBetsizeNoDraw
 			,- SUM(Winloss + TWinLoss + TCommission) AS TotalNetWin
-			,SUM(b.TCommission) AS TotalCommGiven
+			,- SUM(b.TCommission) AS TotalCommGiven
 			,- SUM(Winloss + TWinLoss + TCommission)/SUM(CASE WHEN b.status = 111 THEN 0 WHEN b.status in (114,115) THEN (0.5*b.turnover) ELSE b.turnover END) AS Margin
 			,- SUM(Winloss + TWinLoss + TCommission) AS FinancialSportRevenue
         FROM dbo.rpt_Betting b (NOLOCK)           
