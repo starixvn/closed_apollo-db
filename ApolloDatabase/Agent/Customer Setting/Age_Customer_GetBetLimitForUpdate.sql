@@ -1,14 +1,6 @@
-﻿USE [RepDB]
-GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_GetBetLimitForUpdate]    Script Date: 5/3/2013 4:46:30 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-ALTER PROCEDURE [dbo].[Age_Customer_GetBetLimitForUpdate]
-	@CustId		INT	
+﻿ALTER PROCEDURE [dbo].[Age_Customer_GetBetLimitForUpdate]
+	@CustId		INT,		
+	@MaxBetLimit MONEY = 0 OUTPUT
 AS
 
 /**
@@ -16,8 +8,8 @@ AS
  * Date			: 20130302
  * Task			: Get customer and its parent bet limit
  * DB			: SVRAGE.RepDB
- * Revisions	:
- *	•	
+ * Revisions	: 
+ *	•	20131111@Sophia: Get @MaxBetLimit
  * Parameters:
  *	•
  *	•
@@ -27,6 +19,7 @@ AS
 BEGIN
 
 	SET NOCOUNT ON
+	DECLARE @CurrencyId	tinyint 
 
 	DECLARE 
 		@agentHId	HIERARCHYID,
@@ -35,11 +28,16 @@ BEGIN
 	SET @SUPERLEVEL = 0
 
 	-- Get agent hierarchy ID
-	SELECT @agentHId = ai.AgentHId
+	SELECT @agentHId = ai.AgentHId,
+		@CurrencyId=ci.Currency
 	FROM 
 		CustInfo AS ci WITH (NOLOCK)
 		INNER JOIN AgentInfo AS ai WITH (NOLOCK) ON ci.AgentId = ai.AgentId
 	WHERE ci.CustId = @CustId
+	
+	SELECT @MaxBetLimit = MinMaxBet
+	FROM   Exchange WITH (NOLOCK)
+	WHERE  ExchangeId = @CurrencyId
 
 	SELECT 
 		cbl.SportType,
@@ -74,3 +72,4 @@ BEGIN
 	WHERE cbl.CustId = @CustId
 
 END	
+

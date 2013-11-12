@@ -1,13 +1,6 @@
-﻿USE [RepDB]
-GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_GetBetLimitForUpdate]    Script Date: 5/3/2013 3:41:51 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-ALTER PROCEDURE [dbo].[Age_Agent_GetBetLimitForUpdate]
-	@AgentId	INT
+﻿ALTER PROCEDURE [dbo].[Age_Agent_GetBetLimitForUpdate]
+	@AgentId	INT,	
+	@MaxBetLimit MONEY = 0 OUTPUT
 AS
 
 /**
@@ -17,6 +10,7 @@ AS
  * DB			: SVRAGE.RepDB
  * Revisions	:
  *	•	20132802@Edward : Implement
+  *	•	20131111@Sophia: Get @MaxBetLimit
  * Parameters:
  *	•
  *	•
@@ -26,6 +20,9 @@ AS
 BEGIN
 
 	SET NOCOUNT ON
+	DECLARE @CurrencyId	tinyint 
+	 
+	
 
 	DECLARE 
 		@agentHId	HIERARCHYID,
@@ -34,9 +31,14 @@ BEGIN
 	SET @SUPERLEVEL = 0
 
 	-- Get agent hierarchy ID
-	SELECT @agentHId = AgentHId
+	SELECT @agentHId = AgentHId,
+		@CurrencyId = Currency
 	FROM AgentInfo WITH (NOLOCK)
 	WHERE AgentId = @AgentId
+
+	SELECT @MaxBetLimit = MinMaxBet			
+	FROM   Exchange WITH (NOLOCK)
+	WHERE  ExchangeId = @CurrencyId
 
 	-- Select of AgentBetLimit
 	SELECT  
@@ -74,4 +76,6 @@ BEGIN
 	WHERE abl.AgentId = @AgentId
 
 END
+
+
 
