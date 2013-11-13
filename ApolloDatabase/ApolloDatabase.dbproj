@@ -1908,6 +1908,12 @@
     <NotInBuild Include="DBA\Task\Task_MoveCustArchive.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdatePositionTaking_xtest7.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdatePositionTaking_xtest8.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">
