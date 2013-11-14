@@ -134,6 +134,7 @@
     <Folder Include="LiReport" />
     <Folder Include="OWA\KPI" />
     <Folder Include="API\DeleteAccount" />
+    <Folder Include="DBA\ExecRep" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1906,6 +1907,36 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="DBA\Task\Task_MoveCustArchive.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Message\Acc_Msg_DeleteMessage.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Message\Acc_Msg_GetAllSite.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Message\Acc_Msg_GetListMessage.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Message\Acc_Msg_GetRecipientInfo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Message\Acc_Msg_GetUplineById.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Message\Acc_Msg_InsertMessage.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Message\Acc_Msg_UpdateMessage.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdatePositionTaking_xtest8.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_AgentUser_AssignFunction_xtest.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\ExecRep\Acc_ExecRep_00.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
