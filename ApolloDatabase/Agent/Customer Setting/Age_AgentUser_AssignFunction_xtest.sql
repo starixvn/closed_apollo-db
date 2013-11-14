@@ -78,7 +78,7 @@ BEGIN
 		FOR XML PATH('z')
 	)
 
-	SET @logSPDataOld = '<r u="'+@AgentUsername+'" ia="'+CONVERT(VARCHAR(1),@IsApplyDownLine)+'">'+ REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')+'</r>'
+	SET @logSPDataOld = '<r u="'+@AgentUsername+'" ia="'+CONVERT(VARCHAR(2),@IsApplyDownLine)+'">'+ REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')+'</r>'
 
 	-- end write log			
 
@@ -189,7 +189,7 @@ BEGIN
 		FOR XML PATH('z')
 	)
 
-	SET @logSPData = '<r u="'+@AgentUsername+'" ia="'+CONVERT(VARCHAR(1),@IsApplyDownLine)+'">'+REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')+'</r>'
+	SET @logSPData = '<r u="'+@AgentUsername+'" ia="'+CONVERT(VARCHAR(2),@IsApplyDownLine)+'">'+REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')+'</r>'
 
 	-- end write log
 
