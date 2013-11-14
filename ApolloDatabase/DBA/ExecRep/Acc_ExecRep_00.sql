@@ -59,6 +59,7 @@ SET NOCOUNT ON
 					ON auf.FunctionId = f.FunctionId
 			WHERE	ai.AgentHId.IsDescendantOf(@AgentHId) = 1	
 					AND auf.Policy > f.Policy
+			OPTION(RECOMPILE)
 		END
 		ELSE  --- Check Permission 
 		BEGIN 		
@@ -82,6 +83,6 @@ SET NOCOUNT ON
 				INNER JOIN @FunctionPolicy AS f
 					ON auf.FunctionId = f.FunctionId
 			WHERE	ai.AgentHId.IsDescendantOf(@AgentHId) = 1	
-					 
+			OPTION(RECOMPILE)		 
 		END	
  
