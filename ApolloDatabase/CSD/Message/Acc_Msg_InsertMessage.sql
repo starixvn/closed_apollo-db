@@ -3,7 +3,7 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE type = 'P' AND name = 'Acc_Msg_
 GO
 CREATE PROC dbo.Acc_Msg_InsertMessage
 (
-	 @MsgType			TINYINT			= 1--++0 is private msg, 3 is public msg
+	 @MsgType			TINYINT			= 1--++1 is private msg, 3 is public msg
 	, @IsSpecialMsg		BIT				= 0
 	, @UserLoginId		INT				= NULL
 	, @UserLoginName	NVARCHAR(20)	= NULL
