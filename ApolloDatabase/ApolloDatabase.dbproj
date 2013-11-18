@@ -1909,7 +1909,6 @@
     <NotInBuild Include="DBA\Task\Task_MoveCustArchive.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-
     <NotInBuild Include="CSD\Message\Acc_Msg_DeleteMessage.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1931,23 +1930,18 @@
     <NotInBuild Include="CSD\Message\Acc_Msg_UpdateMessage.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    
     <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdatePositionTaking_xtest7.sql">
-
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdatePositionTaking_xtest8.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-
-    <NotInBuild Include="Agent\Customer Setting\Age_AgentUser_AssignFunction_xtest.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="DBA\ExecRep\Acc_ExecRep_00.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-
-
+    <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetParentInfoWithAgentUser_xtest.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">
