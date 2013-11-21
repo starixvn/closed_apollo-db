@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[Age_Customer_Insert]
+﻿CREATE PROCEDURE [dbo].[Age_Customer_Insert_xtest]
 	@CustId				INT,	
 	@Username			NVARCHAR(50),
 	@AgentId			INT,	
@@ -27,6 +27,7 @@ AS
  *	• 2013070/@Edward	: Insert CustPositionTaking
  *	• 20130823@Kos		: Change default UGroup to 'b'
  *	• 20130902@Kos		: Enhance performance
+ *	• 20131120@Sophia	: Don't care UplineStatus, UplineBetStatus
  * Parameters:
  *	•
  *	•
@@ -113,8 +114,8 @@ BEGIN
 		DoubleCommLosing,
 		Status,
 		BetStatus,
-		UplineStatus,
-		UplineBetStatus,
+		--UplineStatus,
+		--UplineBetStatus,
 		IsUGroupChanged)
 	SELECT	
 		@CustId,
@@ -133,8 +134,8 @@ BEGIN
 		@DoubleCommLosing,
 		@Status,
 		@BetStatus,
-		CASE WHEN Status = 2 OR UplineStatus = 2 THEN 2 ELSE 1 END,			-- UplineStatus
-		CASE WHEN BetStatus = 2 OR UplineBetStatus = 2 THEN 2 ELSE 1 END,	-- UplineBetStatus
+		--CASE WHEN Status = 2 OR UplineStatus = 2 THEN 2 ELSE 1 END,			-- UplineStatus
+		--CASE WHEN BetStatus = 2 OR UplineBetStatus = 2 THEN 2 ELSE 1 END,	-- UplineBetStatus
 		0
 	FROM AgentInfo WITH (NOLOCK)
 	WHERE AgentId = @AgentId
