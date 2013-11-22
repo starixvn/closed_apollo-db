@@ -44,8 +44,8 @@ BEGIN
 		UNION ALL
 
 		SELECT a.ParentId
-		FROM dbo.AgentInfo AS a WITH (NOLOCK), SelfAndAncestor AS b
-		WHERE a.AgentId = b.AgentId
+		FROM dbo.AgentInfo AS a WITH (NOLOCK)
+		INNER JOIN SelfAndAncestor AS b ON a.AgentId = b.AgentId
 	)
 
 	--++

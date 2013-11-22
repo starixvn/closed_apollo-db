@@ -21,6 +21,7 @@ BEGIN
 	SET NOCOUNT ON
 	SELECT Content_ch, Content_cs, Content_en, Content_jp
 			, Content_ko, Content_th, Content_vn, MessageId
+			, IsSticky AS 'IsSpecial', MsgType, PostTime
 	FROM dbo.Msg WITH(NOLOCK)
 	WHERE MessageId = @MessageId
 END
