@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[Age_Customer_Insert_xtest]
+﻿ALTER PROCEDURE [dbo].[Age_Customer_Insert]
 	@CustId				INT,	
 	@Username			NVARCHAR(50),
 	@AgentId			INT,	
@@ -521,4 +521,5 @@ BEGIN
 				@OldData	= NULL
 		END CATCH
 END										
+
 

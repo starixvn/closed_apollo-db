@@ -1,12 +1,4 @@
-﻿USE [CustDB]
-GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateStatus]    Script Date: 9/5/2013 5:02:15 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-ALTER PROCEDURE [dbo].[Age_Agent_UpdateStatus_Xtest]
+﻿ALTER PROCEDURE [dbo].[Age_Agent_UpdateStatus]
 	@AgentId	INT,
 	@Type		TINYINT,
 	@Status		TINYINT,
@@ -309,3 +301,4 @@ BEGIN
 				@OldData		= @logSPDataOld
 		END CATCH 	
 END
+
