@@ -21,6 +21,7 @@ Revisions:
 	- 20130722@Sophia: Revise parlay section
 	- 20130724@Sophia: Add @RptType
 	- 20131014@Sophia: add hthomescore,htawayscore
+	- 20131118@Sophia: add IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) ) OR @Bettypes = '0'	at @RptType = 3  section
 
 Param's Explanation:  
 	@RptType: = 0: Called from Account Info-Betlist
@@ -250,7 +251,8 @@ BEGIN
 	BEGIN 
 		IF @FromDate <= @MoveBetsDay 
 		BEGIN 
-			----Sportsbook																																																												IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) ) OR @Bettypes = '0'
+			----Sportsbook	
+			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) ) OR @Bettypes = '0'																																																											IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) ) OR @Bettypes = '0'
 			INSERT INTO #Betlist
 			SELECT 	
 					B.TransId,
@@ -310,7 +312,8 @@ BEGIN
 					
 
 
-			----- Parlay																																																					IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) ) OR @Bettypes = '0'
+			----- Parlay	
+			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) ) OR @Bettypes = '0'																																																				IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) ) OR @Bettypes = '0'
 			INSERT INTO #Betlist
 			SELECT 
 					B.TransId,
@@ -363,7 +366,8 @@ BEGIN
 					
 					
 
-			----- Outright 																																																								IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype =10 ) OR @Bettypes = '0'
+			----- Outright 	
+			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype = 10 ) OR @Bettypes = '0'																																																							IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype =10 ) OR @Bettypes = '0'
 			INSERT INTO #Betlist
 			SELECT 		
 					B.transid,
