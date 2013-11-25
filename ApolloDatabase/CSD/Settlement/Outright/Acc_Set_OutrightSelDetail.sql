@@ -1,5 +1,6 @@
 ALTER PROCEDURE [dbo].[Acc_Set_OutrightSelDetail]	
-	@LeagueID int	
+	@LeagueID int,
+	@isSettled bit = 0
 AS 
 /**
  * Created by	: Dan
@@ -7,13 +8,13 @@ AS
  * Task			: Outright results 
  * DB			: SVRTXN/TransDB
  * Revisions	:
- *	•
+ 	•2013/11/25: add @isSettled for undo action
  * Parameters:
  *  @FromDate: From  date,
 	@ToDate: To date ,
 	@sporttype: Sport type,	
 	@LeagueID: = 0: show info of all leagues     
-	
+	@isSettled: 0- all outrights; 1- only settled outright
  *  
  */
    
@@ -32,6 +33,7 @@ INTO #tmp
 FROM SVRPRO.ProdDB.dbo.outright o WITH(NOLOCK) 
 	LEFT JOIN SVRPRO.ProdDB.dbo.outright_ex orex WITH(NOLOCK) ON o.orid= orex.orid_ex	
 WHERE o.leagueID = @LeagueID
+	AND (@isSettled = 0 or (@isSettled= 1 and ISNULL(orex.oddsstatus_ex,'')='completed')) 	
 
 SELECT * 
 FROM #tmp	

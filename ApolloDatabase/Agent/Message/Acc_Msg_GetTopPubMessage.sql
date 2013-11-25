@@ -41,7 +41,7 @@ BEGIN
 	SET @site8 = ''
 
 	-- 20111230(Vivi): chage @LatestMsgID to provide good performance. (175903 posttime is 2011-11-1)
-	IF @LatestMsgID = 0 SET @LatestMsgID = 175903
+	--IF @LatestMsgID = 0 SET @LatestMsgID = 175903
 
 	IF @Site1 <> '' SET @Site1 = dbo.FixSiteID(@Site1)
 	IF @Site2 <> '' SET @Site2 = dbo.FixSiteID(@Site2)
