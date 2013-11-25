@@ -1,6 +1,20 @@
 ﻿ALTER  PROCEDURE [dbo].[Task_MoveCustArchive]
 	@Date Date = NULL
 AS 
+/**
+ * Created by	: Sophia
+ * Date			: 20131102
+ * Task			: Move data from table tempt SVRCUST.CustArchiveDB to table SVRCUSTARC.CustArchiveDB
+ * DB			: SVRCUST.CustArchiveDB
+ * Revisions	:
+ *	• 
+ * Parameters:
+ *	•
+ *	•
+ *  
+ */
+
+SET NOCOUNT ON
 BEGIN 
 	IF @Date IS NULL SET @Date = GETDATE()
 
@@ -234,8 +248,8 @@ INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.AgentInfo (
 		DoubleCommLosing,
 		Status,
 		BetStatus,
-		UplineStatus,
-		UplineBetStatus,
+		--UplineStatus,
+		--UplineBetStatus,
 		ArchiveDate
 	)
 	SELECT 
@@ -251,8 +265,8 @@ INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.AgentInfo (
 		DoubleCommLosing,
 		Status,
 		BetStatus,
-		UplineStatus,
-		UplineBetStatus,
+		--UplineStatus,
+		--UplineBetStatus,
 		ArchiveDate
 	FROM AgentInfo WITH (NOLOCK)	
 	WHERE ArchiveDate < CONVERT( DATE, @Date) 
@@ -354,8 +368,8 @@ INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.CustInfo (
 		DoubleCommLosing,
 		Status,
 		BetStatus,
-		UplineStatus,
-		UplineBetStatus,
+		--UplineStatus,
+		--UplineBetStatus,
 		IsUGroupChanged,
 		ArchiveDate
 	)
@@ -376,8 +390,8 @@ INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.CustInfo (
 		DoubleCommLosing,
 		Status,
 		BetStatus,
-		UplineStatus,
-		UplineBetStatus,
+		--UplineStatus,
+		--UplineBetStatus,
 		IsUGroupChanged,
 		ArchiveDate
 	FROM CustInfo WITH (NOLOCK)

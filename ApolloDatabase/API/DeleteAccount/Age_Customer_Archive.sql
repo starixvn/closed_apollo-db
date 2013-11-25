@@ -93,8 +93,8 @@ BEGIN
 		DoubleCommLosing,
 		Status,
 		BetStatus,
-		UplineStatus,
-		UplineBetStatus,
+		--UplineStatus,
+		--UplineBetStatus,
 		IsUGroupChanged,
 		ArchiveDate
 	)
@@ -115,8 +115,8 @@ BEGIN
 		DoubleCommLosing,
 		Status,
 		BetStatus,
-		UplineStatus,
-		UplineBetStatus,
+		--UplineStatus,
+		--UplineBetStatus,
 		IsUGroupChanged,
 		@Now
 	FROM CustInfo WITH (NOLOCK)

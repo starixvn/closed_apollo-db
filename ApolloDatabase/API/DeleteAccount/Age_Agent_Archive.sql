@@ -99,8 +99,8 @@ BEGIN
 		DoubleCommLosing,
 		Status,
 		BetStatus,
-		UplineStatus,
-		UplineBetStatus,
+		--UplineStatus,
+		--UplineBetStatus,
 		ArchiveDate
 	)
 	SELECT 
@@ -116,8 +116,8 @@ BEGIN
 		DoubleCommLosing,
 		Status,
 		BetStatus,
-		UplineStatus,
-		UplineBetStatus,
+		--UplineStatus,
+		--UplineBetStatus,
 		GETDATE()
 	FROM AgentInfo WITH (NOLOCK)
 	WHERE AgentId = @AgentId

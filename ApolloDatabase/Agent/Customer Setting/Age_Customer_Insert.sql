@@ -1,12 +1,4 @@
-﻿USE [CustDB]
-GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_Insert]    Script Date: 9/5/2013 5:01:55 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-ALTER PROCEDURE [dbo].[Age_Customer_Insert]
+﻿ALTER PROCEDURE [dbo].[Age_Customer_Insert]
 	@CustId				INT,	
 	@Username			NVARCHAR(50),
 	@AgentId			INT,	
@@ -35,6 +27,7 @@ AS
  *	• 2013070/@Edward	: Insert CustPositionTaking
  *	• 20130823@Kos		: Change default UGroup to 'b'
  *	• 20130902@Kos		: Enhance performance
+ *	• 20131120@Sophia	: Don't care UplineStatus, UplineBetStatus
  * Parameters:
  *	•
  *	•
@@ -87,7 +80,8 @@ BEGIN
 		@logPositionTakingSPData	NVARCHAR(MAX),
 		@xml						XML,
 		@agentHId					HIERARCHYID,
-		@agentUsername				NVARCHAR(50)
+		@agentUsername				NVARCHAR(50),
+		@tempCustId					INT				= NULL
 
 	SELECT 
 		@agentHId = AgentHId,
@@ -98,6 +92,9 @@ BEGIN
 	SET @startRun = GETDATE()
 
 	SET @UGroup = LOWER(@Ugroup)
+
+	-- Check agent has member ?
+	SELECT TOP(1) @tempCustId = CustId FROM CustInfo WITH (NOLOCK) WHERE AgentId = @AgentId	
 
 	-- Insert into CustInfo
 	INSERT INTO CustInfo (
@@ -117,8 +114,8 @@ BEGIN
 		DoubleCommLosing,
 		Status,
 		BetStatus,
-		UplineStatus,
-		UplineBetStatus,
+		--UplineStatus,
+		--UplineBetStatus,
 		IsUGroupChanged)
 	SELECT	
 		@CustId,
@@ -137,8 +134,8 @@ BEGIN
 		@DoubleCommLosing,
 		@Status,
 		@BetStatus,
-		CASE WHEN Status = 2 OR UplineStatus = 2 THEN 2 ELSE 1 END,			-- UplineStatus
-		CASE WHEN BetStatus = 2 OR UplineBetStatus = 2 THEN 2 ELSE 1 END,	-- UplineBetStatus
+		--CASE WHEN Status = 2 OR UplineStatus = 2 THEN 2 ELSE 1 END,			-- UplineStatus
+		--CASE WHEN BetStatus = 2 OR UplineBetStatus = 2 THEN 2 ELSE 1 END,	-- UplineBetStatus
 		0
 	FROM AgentInfo WITH (NOLOCK)
 	WHERE AgentId = @AgentId
@@ -190,178 +187,181 @@ BEGIN
 	FROM AgentDiscount WITH (NOLOCK)
 	WHERE AgentId = @AgentId
 
-	-- Get upline agent
-	DECLARE @TableAgent TABLE (
-		AgentId		INT, 
-		AgentLevel	SMALLINT, 
-		Username	NVARCHAR(50) )
+	IF @tempCustId IS NULL
+	BEGIN
+		-- Get upline agent
+		DECLARE @TableAgent TABLE (
+			AgentId		INT, 
+			AgentLevel	SMALLINT, 
+			Username	NVARCHAR(50) )
 
-	;WITH Tree(AgentId, AgentLevel, Username, Path)
-	AS
-	(
+		;WITH Tree(AgentId, AgentLevel, Username, Path)
+		AS
+		(
+			SELECT 
+				AgentId,
+				AgentLevel,
+				Username,
+				AgentHId 
+			FROM AgentInfo WITH (NOLOCK)
+			WHERE AgentId = @AgentId
+
+			UNION ALL
+
+			SELECT  
+				ai.AgentId,
+				CAST(ai.AgentLevel AS SMALLINT) AS AgentLevel,
+				ai.Username,
+				ai.AgentHId        
+			FROM
+				AgentInfo AS ai WITH (NOLOCK)
+				INNER JOIN Tree AS t ON	t.[Path].GetAncestor(1) = ai.AgentHId
+			WHERE ai.AgentLevel > 0
+		)   
+
+		INSERT INTO @TableAgent
 		SELECT 
 			AgentId,
 			AgentLevel,
-			Username,
-			@agentHId AS AgentHId 
-		FROM AgentInfo WITH (NOLOCK)
-		WHERE AgentId = @AgentId
-
-		UNION ALL
-
-		SELECT  
-			ai.AgentId,
-			CAST(ai.AgentLevel AS SMALLINT) AS AgentLevel,
-			ai.Username,
-			ai.AgentHId        
-		FROM
-			AgentInfo AS ai WITH (NOLOCK)
-			INNER JOIN Tree AS t ON	t.[Path].GetAncestor(1) = ai.AgentHId
-		WHERE ai.AgentLevel > 0
-	)   
-
-	INSERT INTO @TableAgent
-	SELECT 
-		AgentId,
-		AgentLevel,
-		Username  
-	FROM Tree
-	ORDER BY AgentLevel		
+			Username  
+		FROM Tree
+		ORDER BY AgentLevel		
 	
-	-- Insert default position taking
-	DECLARE @TableUpdatePT TABLE (
-		AgentId			INT,
-		AgentLevel		SMALLINT,
-		SportType		SMALLINT,
-		BetType			SMALLINT,
-		IsLive			BIT,
-		PositionTaking	SMALLINT,
-		MinGiven		SMALLINT,
-		SumDownline		SMALLINT,
-		MaxDownDelta	SMALLINT)	
+		-- Insert default position taking
+		DECLARE @TableUpdatePT TABLE (
+			AgentId			INT,
+			AgentLevel		SMALLINT,
+			SportType		SMALLINT,
+			BetType			SMALLINT,
+			IsLive			BIT,
+			PositionTaking	SMALLINT,
+			MinGiven		SMALLINT,
+			SumDownline		SMALLINT,
+			MaxDownDelta	SMALLINT)	
 
-	INSERT INTO @TableUpdatePT (
-		AgentId
-		,AgentLevel
-		,SportType
-		,BetType
-		,IsLive
-		,PositionTaking
-		,MinGiven
-		,SumDownline
-		,MaxDownDelta)		   
-	SELECT 
-		apt.AgentId
-		,ai.AgentLevel
-		,apt.SportType
-		,apt.BetType
-		,apt.IsLive
-		,CASE	
-			WHEN apt.AgentId = @AgentId THEN apt.MaxGivenPositionTaking
-			ELSE capt.MaxUpperPositionTaking
-		END
-		,apt.MinGivenPositionTaking
-		,0
-		,0		
-	FROM 
-		AgentPositionTaking AS apt WITH (NOLOCK)			
-		INNER JOIN @TableAgent AS ai ON apt.AgentId	= ai.AgentId
-		LEFT JOIN @TableAgent AS ta	ON ai.AgentLevel = ta.AgentLevel - 1
-		LEFT JOIN AgentPositionTaking AS capt WITH (NOLOCK)
-			ON capt.AgentId		= ta.AgentId
-			AND capt.SportType	= apt.SportType
-			AND capt.BetType	= apt.BetType
-			AND capt.IsLive		= apt.IsLive	
-
-	-- Get downline position taking
-	UPDATE tupt
-	SET tupt.SumDownline = temp.SumDownline
-	FROM 
-		@TableUpdatePT AS tupt
-		INNER JOIN 
-			(
-				SELECT 
-					m.AgentId,
-					m.SportType,
-					m.BetType,
-					m.IsLive,
-					SUM(s.PositionTaking) AS SumDownline
-				FROM 
-					@TableUpdatePT AS m
-					INNER JOIN @TableUpdatePT AS s 
-					ON
-						m.AgentLevel <= s.AgentLevel
-						AND m.SportType = s.SportType
-						AND m.BetType = s.BetType
-						AND m.IsLive = s.IsLive
-				WHERE m.AgentId <> @AgentId AND m.MinGiven > 0
-				GROUP BY 
-					m.AgentId,
-					m.SportType,
-					m.BetType,
-					m.IsLive				
-			) AS temp
-		ON tupt.AgentId	= temp.AgentId
-			AND tupt.SportType	= temp.SportType
-			AND tupt.BetType	= temp.BetType
-			AND tupt.IsLive		= temp.IsLive
+		INSERT INTO @TableUpdatePT (
+			AgentId
+			,AgentLevel
+			,SportType
+			,BetType
+			,IsLive
+			,PositionTaking
+			,MinGiven
+			,SumDownline
+			,MaxDownDelta)		   
+		SELECT 
+			apt.AgentId
+			,ai.AgentLevel
+			,apt.SportType
+			,apt.BetType
+			,apt.IsLive
+			,CASE	
+				WHEN apt.AgentId = @AgentId THEN apt.MaxGivenPositionTaking 
+				ELSE capt.MaxUpperPositionTaking
+			END
+			,apt.MinGivenPositionTaking
+			,0
+			,0		
+		FROM 
+			AgentPositionTaking AS apt WITH (NOLOCK)			
+			INNER JOIN @TableAgent AS ai ON apt.AgentId	= ai.AgentId
+			LEFT JOIN @TableAgent AS ta	ON ai.AgentLevel = ta.AgentLevel - 1
+			LEFT JOIN AgentPositionTaking AS capt WITH (NOLOCK)
+				ON capt.AgentId		= ta.AgentId
+				AND capt.SportType	= apt.SportType
+				AND capt.BetType	= apt.BetType
+				AND capt.IsLive		= apt.IsLive				
+	
+		-- Get downline position taking
+		UPDATE tupt
+		SET tupt.SumDownline = temp.SumDownline
+		FROM 
+			@TableUpdatePT AS tupt
+			INNER JOIN 
+				(
+					SELECT 
+						m.AgentId,
+						m.SportType,
+						m.BetType,
+						m.IsLive,
+						SUM(s.PositionTaking) AS SumDownline
+					FROM 
+						@TableUpdatePT AS m
+						INNER JOIN @TableUpdatePT AS s 
+						ON
+							m.AgentLevel <= s.AgentLevel
+							AND m.SportType = s.SportType
+							AND m.BetType = s.BetType
+							AND m.IsLive = s.IsLive
+					WHERE m.AgentId <> @AgentId AND m.MinGiven > 0
+					GROUP BY 
+						m.AgentId,
+						m.SportType,
+						m.BetType,
+						m.IsLive				
+				) AS temp
+			ON tupt.AgentId	= temp.AgentId
+				AND tupt.SportType	= temp.SportType
+				AND tupt.BetType	= temp.BetType
+				AND tupt.IsLive		= temp.IsLive
 				
-	-- Insert max downline delta (min - downline PT)
-	UPDATE tupt
-	SET tupt.MaxDownDelta = temp.MaxDownDelta
-	FROM 
-		@TableUpdatePT AS tupt
-		INNER JOIN 
-			(
-				SELECT 
-					m.AgentId,
-					m.SportType,
-					m.BetType,
-					m.IsLive,
-					MAX(CASE WHEN s.AgentId <> @AgentId THEN s.MinGiven - s.SumDownline ELSE 0 END) AS MaxDownDelta
-				FROM 
-					@TableUpdatePT AS m
-					INNER JOIN @TableUpdatePT AS s 
-					ON
-						m.AgentLevel < s.AgentLevel
-						AND m.SportType = s.SportType
-						AND m.BetType = s.BetType
-						AND m.IsLive = s.IsLive
-				WHERE m.AgentId <> @AgentId AND m.MinGiven > 0 AND s.MinGiven > 0
-				GROUP BY 
-					m.AgentId,
-					m.SportType,
-					m.BetType,
-					m.IsLive				
-			) AS temp
-		ON tupt.AgentId	= temp.AgentId
-			AND tupt.SportType	= temp.SportType
-			AND tupt.BetType	= temp.BetType
-			AND tupt.IsLive		= temp.IsLive
-	WHERE tupt.AgentId <> @AgentId
+		-- Insert max downline delta (min - downline PT)
+		UPDATE tupt
+		SET tupt.MaxDownDelta = temp.MaxDownDelta
+		FROM 
+			@TableUpdatePT AS tupt
+			INNER JOIN 
+				(
+					SELECT 
+						m.AgentId,
+						m.SportType,
+						m.BetType,
+						m.IsLive,
+						MAX(CASE WHEN s.AgentId <> @AgentId THEN s.MinGiven - s.SumDownline ELSE 0 END) AS MaxDownDelta
+					FROM 
+						@TableUpdatePT AS m
+						INNER JOIN @TableUpdatePT AS s 
+						ON
+							m.AgentLevel < s.AgentLevel
+							AND m.SportType = s.SportType
+							AND m.BetType = s.BetType
+							AND m.IsLive = s.IsLive
+					WHERE m.AgentId <> @AgentId AND m.MinGiven > 0 AND s.MinGiven > 0
+					GROUP BY 
+						m.AgentId,
+						m.SportType,
+						m.BetType,
+						m.IsLive				
+				) AS temp
+			ON tupt.AgentId	= temp.AgentId
+				AND tupt.SportType	= temp.SportType
+				AND tupt.BetType	= temp.BetType
+				AND tupt.IsLive		= temp.IsLive
+		WHERE tupt.AgentId <> @AgentId
 
-	-- Update position taking if break min rule
-	UPDATE @TableUpdatePT
-	SET PositionTaking = PositionTaking + MinGiven - SumDownline - MaxDownDelta
-	WHERE MinGiven - SumDownline > MaxDownDelta
-	AND AgentId <> @AgentId
+		-- Update position taking if break min rule
+		UPDATE @TableUpdatePT
+		SET PositionTaking = PositionTaking + MinGiven - SumDownline - MaxDownDelta
+		WHERE MinGiven - SumDownline > MaxDownDelta
+		AND AgentId <> @AgentId
 
-	-- Insert customer position taking
-	INSERT INTO CustPositionTaking (
-		CustId
-		,AgentId
-		,SportType
-		,BetType
-		,IsLive
-		,PositionTaking)
-	SELECT 
-		@CustId
-		 ,AgentId
-		 ,SportType
-		 ,BetType
-		 ,IsLive
-		 ,PositionTaking
-	FROM @TableUpdatePT
+		-- Insert customer position taking
+		INSERT INTO AgentCustPositionTaking (
+			AgentCustId
+			,AgentId
+			,SportType
+			,BetType
+			,IsLive
+			,PositionTaking)
+		SELECT 
+			@AgentId
+			 ,AgentId
+			 ,SportType
+			 ,BetType
+			 ,IsLive
+			 ,PositionTaking
+		FROM @TableUpdatePT
+	END
 
 	-- Insert into balance tables 	
 	INSERT INTO SVRTXN.TransDB.dbo.BalanceCredit (CustId, Balance)
@@ -423,8 +423,8 @@ BEGIN
 			BetType			AS '@b',
 			IsLive			AS '@i',
 			PositionTaking	AS '@p'
-		FROM CustPositionTaking WITH (NOLOCK)
-		WHERE CustId = @CustId AND AgentId = @AgentId
+		FROM AgentCustPositionTaking WITH (NOLOCK)
+		WHERE AgentCustId = @AgentId AND AgentId = @AgentId
 		ORDER BY 
 			SportType
 			--,BetType
@@ -521,3 +521,5 @@ BEGIN
 				@OldData	= NULL
 		END CATCH
 END										
+
+

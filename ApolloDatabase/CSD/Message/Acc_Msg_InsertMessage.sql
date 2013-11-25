@@ -3,18 +3,18 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE type = 'P' AND name = 'Acc_Msg_
 GO
 CREATE PROC dbo.Acc_Msg_InsertMessage
 (
-	 @MsgType			TINYINT			= 1--++0 is private msg, 3 is public msg
+	 @MsgType			TINYINT			= 1--++1 is private msg, 3 is public msg
 	, @IsSpecialMsg		BIT				= 0
 	, @UserLoginId		INT				= NULL
-	, @UserLoginName	NVARCHAR(20)	= NULL
+	, @UserLoginName	NVARCHAR(50)	= NULL
 	, @Recipient		NVARCHAR(MAX)
-	, @Content_en		NVARCHAR(4000)	= NULL
-	, @Content_ch		NVARCHAR(4000)	= NULL
-	, @Content_cs		NVARCHAR(4000)	= NULL
-	, @Content_th		NVARCHAR(4000)	= NULL
-	, @Content_jp		NVARCHAR(4000)	= NULL
-	, @Content_ko		NVARCHAR(4000)	= NULL
-	, @Content_vn		NVARCHAR(4000)	= NULL
+	, @ContentEn		NVARCHAR(4000)	= NULL
+	, @ContentCh		NVARCHAR(4000)	= NULL
+	, @ContentCs		NVARCHAR(4000)	= NULL
+	, @ContentTh		NVARCHAR(4000)	= NULL
+	, @ContentJp		NVARCHAR(4000)	= NULL
+	, @ContentKo		NVARCHAR(4000)	= NULL
+	, @ContentVn		NVARCHAR(4000)	= NULL
 )
 AS
 /*
@@ -69,8 +69,8 @@ BEGIN
 		, Content_th, Content_jp, Content_ko, Content_vn)
 	VALUES(@CurrentDate, @IsSpecialMsg, @IsPublic, @UserLoginId, @UserLoginName, @MsgType
 		, @UserLoginId, @UserLoginName, 0, 0, 0, 0
-		, @CurrentDate, @CurrentDate, 0, @Content_en, @Content_ch, @Content_cs
-		, @Content_th, @Content_jp, @Content_ko, @Content_vn)
+		, @CurrentDate, @CurrentDate, 0, @ContentEn, @ContentCh, @ContentCs
+		, @ContentTh, @ContentJp, @ContentKo, @ContentVn)
 
 	SET @MsgId = SCOPE_IDENTITY()
 
