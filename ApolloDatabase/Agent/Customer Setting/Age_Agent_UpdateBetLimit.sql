@@ -26,6 +26,7 @@ AS
  * Revisions	:
  *	• 20132702@Edward	: Implement
  *	• 20131707@Edward	: Add parameter @AdminId for write log
+ *	• 20131126@Sophia	: not to update Minbet
  * Parameters:
  *	• @BetLimit : 
 		<ROOT>
@@ -762,7 +763,7 @@ BEGIN
 					---- Update for current agent, not effect for all line
 					UPDATE abt 
 					SET 
-						abt.MinBet		= blt.MinBet,
+						--abt.MinBet		= blt.MinBet,
 						abt.MaxBet		= blt.MaxBet,
 						abt.MaxPerMatch	= blt.MaxPerMatch
 					FROM 
@@ -774,7 +775,7 @@ BEGIN
 					
 					UPDATE abt 
 					SET 
-						abt.MinBet		= blt.MinBet,
+						--abt.MinBet		= blt.MinBet,
 						abt.MaxBet		= blt.MaxBet,
 						abt.MaxPerMatch	= blt.MaxPerMatch
 					FROM 
@@ -786,7 +787,7 @@ BEGIN
 					
 					UPDATE cbt 
 					SET 
-						cbt.MinBet		= blt.MinBet,
+						--cbt.MinBet		= blt.MinBet,
 						cbt.MaxBet		= blt.MaxBet,
 						cbt.MaxPerMatch	= blt.MaxPerMatch
 					FROM 
@@ -801,7 +802,7 @@ BEGIN
 						SELECT  
 							blt.SportType		AS '@s'
 							,blt.BetType		AS '@b'
-							,blt.MinBet			AS '@mib'
+							,blt.MinBet			AS '@mib'							
 							,blt.MaxBet			AS '@mab'
 							,blt.MaxPerMatch	AS '@mam'
 						FROM @BetLimitTable AS blt
