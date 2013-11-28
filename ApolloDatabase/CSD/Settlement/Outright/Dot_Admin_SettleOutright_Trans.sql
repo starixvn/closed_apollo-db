@@ -15,7 +15,7 @@ DB: SVRTXN/TRANSDB
 Original:
 
 Revisions:
-	
+	- 20131125@Dan: add undo action
 Param's Explanation:
 	- @deadheat = fraction of deadheat to divide (1,2,3  etc)
 */
@@ -95,7 +95,9 @@ CREATE TABLE #BalanceAfter (custid int PRIMARY KEY , balance money)
 			and statusID = case @status when 'won' then 112
 				when 'lose' then 113
 				when 'Refund' then 103
+				when 'UNDO' then statusID
 				else 999 end
+			and statusID NOT IN (101, 102)
 		Group by custid
 
 -------------------------------------------------------------

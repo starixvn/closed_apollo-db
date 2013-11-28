@@ -4,7 +4,7 @@ GO
 CREATE PROC dbo.Acc_Msg_GetListMessage
 (
 	@TopNewMsg INT = 100 --default value 100
-	, @MsgType TINYINT = NULL --++0 is private msg, 3 is public msg
+	, @MsgType TINYINT = NULL --++1 is private msg, 3 is public msg
 	, @Special BIT = NULL
 	, @FromDate DATETIME = NULL
 	, @ToDate DATETIME = NULL
@@ -32,7 +32,7 @@ BEGIN
 			, a.PostTime, a.Content_ch, a.Content_cs, a.Content_en, a.Content_jp
 			, a.Content_ko, a.Content_th, a.Content_vn
 			, a.MsgType, a.IsSticky AS 'IsSpecial', a.CreatorName, b.TargetId
-			, b.TargetName AS 'Recipient'
+			, b.TargetName AS 'Recipient', a.MessageId
 		FROM dbo.Msg a WITH(NOLOCK) 
 		INNER JOIN dbo.MsgTarget b WITH(NOLOCK) ON a.MessageId = b.MessageId
 		WHERE a.PostTime >= @FromDate AND a.PostTime <= @ToDate

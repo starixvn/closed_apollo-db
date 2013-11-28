@@ -12,9 +12,8 @@ Task : execRep sp for outright settlement
 DB: DBTRANS.bodb02
 Original: 
 
-Revisions:
-	- 20120202@Thien: receive @winlostdate param from outside SP, to resolve late replication in DBDW/2
-	- 20121018@Johnson: Merge code for checking double comm losing from production
+Revisions:	
+	- 20131125@Dan: add undo action
 Param's Explanation:
 
 */
@@ -202,8 +201,29 @@ BEGIN
 		matchid=@matchid
 		and bettype = 10 and statusID NOT IN (101, 102) -- 101:reject, 102:void
 END
+ELSE IF @status = 'UNDO'
+BEGIN
+	UPDATE bettrans WITH (ROWLOCK, UPDLOCK)
+	SET
+		ruben = 0, status = 'running', statusID = 0,
+		statuswinlost = NULL,
+		winlost = 0, TWinLost=0,
+		playercomm = 0, TComm=0
+	WHERE matchid = @matchid AND 
+		bettype=10 AND		
+		--status NOT IN ('running','waiting','void','reject')
+		statusID NOT IN (0,1,102,101)
 
-
+	UPDATE dbo.BetTrans_Agent with (ROWLOCK, UPDLOCK)
+	SET
+		status = 'running', statusID = 0,
+		awinlost = 0, acomm = 0
+	WHERE
+		 matchid = @matchid AND 
+		 bettype=10 AND		
+		--status NOT IN ('running','waiting','void','reject')
+		statusID NOT IN (0,1,102,101)
+END
 GO
 --GRANT EXECUTE ON [dbo].[Admin_Calculate_10] TO [ibc_admin]
 GO

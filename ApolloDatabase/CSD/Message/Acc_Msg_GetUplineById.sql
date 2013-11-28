@@ -11,7 +11,7 @@ AS
 * Created by	: Patrick
 * Date			: 20131112
 * Task			: Get upline for cust & agent by id
-* DB			: SVRCUST/CUSTDB
+* DB			: SVRCSD/RepDB
 * Parameters:
 * Test string:
 	exec dbo.Acc_Msg_GetUplineById 1, 3
@@ -44,8 +44,8 @@ BEGIN
 		UNION ALL
 
 		SELECT a.ParentId
-		FROM dbo.AgentInfo AS a WITH (NOLOCK), SelfAndAncestor AS b
-		WHERE a.AgentId = b.AgentId
+		FROM dbo.AgentInfo AS a WITH (NOLOCK)
+		INNER JOIN SelfAndAncestor AS b ON a.AgentId = b.AgentId
 	)
 
 	--++

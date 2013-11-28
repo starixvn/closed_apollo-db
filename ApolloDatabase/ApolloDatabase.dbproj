@@ -131,7 +131,6 @@
     <Folder Include="Agent\BetList\Transaction" />
     <Folder Include="Agent\BetList\Winloss" />
     <Folder Include="OWA" />
-    <Folder Include="LiReport" />
     <Folder Include="OWA\KPI" />
     <Folder Include="API\DeleteAccount" />
     <Folder Include="DBA\ExecRep" />

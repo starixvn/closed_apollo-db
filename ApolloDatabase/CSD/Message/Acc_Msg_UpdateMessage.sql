@@ -6,13 +6,13 @@ CREATE PROC dbo.Acc_Msg_UpdateMessage
 	 @MsgId INT
 	, @UserLoginId INT = NULL
 	, @UserLoginName NVARCHAR(20) = NULL
-	, @Content_en NVARCHAR(4000) = NULL
-	, @Content_ch NVARCHAR(4000) = NULL
-	, @Content_cs NVARCHAR(4000) = NULL
-	, @Content_th NVARCHAR(4000) = NULL
-	, @Content_jp NVARCHAR(4000) = NULL
-	, @Content_ko NVARCHAR(4000) = NULL
-	, @Content_vn NVARCHAR(4000) = NULL
+	, @ContentEn NVARCHAR(4000) = NULL
+	, @ContentCh NVARCHAR(4000) = NULL
+	, @ContentCs NVARCHAR(4000) = NULL
+	, @ContentTh NVARCHAR(4000) = NULL
+	, @ContentJp NVARCHAR(4000) = NULL
+	, @ContentKo NVARCHAR(4000) = NULL
+	, @ContentVn NVARCHAR(4000) = NULL
  
 )
 AS
@@ -34,13 +34,13 @@ BEGIN
 		RETURN
 
 	UPDATE dbo.Msg WITH(ROWLOCK, UPDLOCK)
-	SET Content_ch = @Content_ch
-		, Content_cs = @Content_cs
-		, Content_en = @Content_en
-		, Content_th = @Content_th
-		, Content_jp = @Content_jp
-		, Content_ko = @Content_ko
-		, Content_vn = @Content_vn
+	SET Content_ch = @ContentCh
+		, Content_cs = @ContentCs
+		, Content_en = @ContentEn
+		, Content_th = @ContentTh
+		, Content_jp = @ContentJp
+		, Content_ko = @ContentKo
+		, Content_vn = @ContentVn
 		, LastUpdator = @UserLoginId
 		, LastUpdateName = @UserLoginName
 		, LastUpdateTime = GETDATE()

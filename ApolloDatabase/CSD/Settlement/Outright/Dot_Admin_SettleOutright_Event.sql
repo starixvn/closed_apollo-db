@@ -15,8 +15,10 @@ DB: SVRPRO/ProdDB
 Original: DBPRO.BODB02.Dot_Admin_SettleOutright_Event 
 
 Revisions:						
+	- 20131125@Dan: add undo action
 Param's Explanation:
 	- @deadheat = fraction of deadheat to divide (1,2,3  etc)
+
 */
 SET NOCOUNT ON
 
@@ -89,6 +91,15 @@ BEGIN
 		status_ex = 'Refund',
 		changetime_ex = getdate(),
 		IsDeadheat_ex = @isDeadheat
+	WHERE orid_ex = @matchid
+END
+ELSE IF @status = 'UNDO'
+BEGIN	
+	UPDATE outright_ex with (updlock,rowlock) 
+	SET oddsstatus_ex = 'running', 
+		status_ex = NULL  , 
+		changetime_ex = getdate(),
+		IsDeadheat_ex = NULL
 	WHERE orid_ex = @matchid
 END
 ELSE

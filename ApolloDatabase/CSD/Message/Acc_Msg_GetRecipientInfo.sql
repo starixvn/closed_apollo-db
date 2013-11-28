@@ -11,7 +11,7 @@ AS
 * Created by	: Patrick
 * Date			: 20131112
 * Task			: Get recipient info
-* DB			: SVRCUST/CUSTDB
+* DB			: SVRCSD/RepDB
 * Parameters:
 * Test string:
 	exec dbo.Acc_Msg_GetRecipientInfo 1, 'super'
