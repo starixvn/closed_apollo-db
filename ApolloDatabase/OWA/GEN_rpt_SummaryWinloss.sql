@@ -1,4 +1,11 @@
-﻿ALTER PROCEDURE [dbo].[GEN_rpt_SummaryWinloss]
+﻿USE [ReportDB]
+GO
+/****** Object:  StoredProcedure [dbo].[GEN_rpt_SummaryWinloss]    Script Date: 11/28/2013 9:03:45 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[GEN_rpt_SummaryWinloss]
     @date datetime, 
     @date2 datetime = null
 AS
@@ -8,6 +15,7 @@ Task: Generate data into rpt_SummaryWinloss
 DB: ReportDB
 
 Revisions:
+- 20131127@Sophia: Add TCommission column 
 
 Param's Explanation:
 
@@ -21,7 +29,8 @@ SELECT  b.rptDate,
 		SUM(Betcount) Betcount,
 		SUM(Turnover) Turnover,
 		SUM(WinLoss) winloss,
-		- SUM(Winloss + TWinLoss + TCommission) WinLossCompany
+		- SUM(Winloss + TWinLoss) WinLossCompany,
+		SUM(TCommission) TCommission
 INTO	#TMP
 FROM	dbo.rpt_Betting b (NOLOCK) 	 	       
 WHERE	rptDate>=@date AND rptDate<@date2
@@ -42,6 +51,7 @@ INSERT INTO dbo.rpt_SummaryWinloss
       ,[TurnOver]
       ,[WinLoss]
 	  , WinLossCompany      
+	  , TCommission 
      )
 SELECT  [rptDate]
       ,[CurrencyID]
@@ -49,6 +59,7 @@ SELECT  [rptDate]
       ,[BetCount]
       ,[TurnOver]
       ,[WinLoss]
-	  , WinLossCompany      
+	  , WinLossCompany     
+	  , TCommission 
 FROM    #TMP 
 
