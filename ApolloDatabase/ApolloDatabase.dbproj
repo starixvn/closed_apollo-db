@@ -1941,6 +1941,12 @@
     <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetParentInfoWithAgentUser_xtest.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="Agent\View Log\ReadLog_RunSpAgent_xtest.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\View Log\ReadLog_RunSpCust_xtest.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">

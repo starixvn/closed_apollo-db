@@ -12,6 +12,7 @@ DB:  SVRReport.ReportDB
 Original:  
 
 Revisions:
+- 20131128@Sophia: Add column TCommission, TCommissionEUR, GrossWinLossCompany, GrossWinLossCompanyEUR
     
 Param's Explanation:  
 	 @DrawType = 0: Normal
@@ -64,7 +65,11 @@ SELECT  @Str = @Str
 				+ ' SUM (WinLoss) as WinLoss, 
 				SUM (WinLoss)*EUR as WinLossEUR,
 				SUM (WinLossCompany) as WinLossCompany, 
-				SUM (WinLossCompany)*EUR as WinLossCompanyEUR
+				SUM (WinLossCompany)*EUR as WinLossCompanyEUR,
+				SUM (TCommission) as TCommission, 
+				SUM (TCommission)*EUR as TCommissionEUR,
+				SUM (WinLossCompany+TCommission) as GrossWinLossCompany, 
+				SUM (WinLossCompany+TCommission)*EUR as GrossWinLossCompanyEUR
 		FROM	rpt_SummaryWinloss b WITH (NOLOCK)
 			LEFT JOIN REPDB.DBO.Exchange c WITH (NOLOCK) ON c.ExchangeId = CurrencyID
 			LEFT JOIN @ExchangeDaily e ON b.CurrencyID = e.exchangeid AND b.rptdate = e.exchangedate
@@ -75,7 +80,7 @@ SELECT  @Str = @Str
 				+ ' ORDER BY rptDate, Currency'
  		 	 
   
-PRINT @Str
+--PRINT @Str
 EXEC ( @Str)
 
 GO 

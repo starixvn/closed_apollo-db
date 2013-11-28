@@ -15,6 +15,7 @@ Task: Generate data into rpt_SummaryWinloss
 DB: ReportDB
 
 Revisions:
+- 20131127@Sophia: Add TCommission column 
 
 Param's Explanation:
 
