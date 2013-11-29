@@ -134,6 +134,7 @@
     <Folder Include="OWA\KPI" />
     <Folder Include="API\DeleteAccount" />
     <Folder Include="DBA\ExecRep" />
+    <Folder Include="CSD\CheckBet" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1938,13 +1939,28 @@
     <NotInBuild Include="DBA\ExecRep\Acc_ExecRep_00.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetParentInfoWithAgentUser_xtest.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="Agent\View Log\ReadLog_RunSpAgent_xtest.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\View Log\ReadLog_RunSpCust_xtest.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\CheckBet\Acc_Rpt_CheckBet_Normal.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\CheckBet\Acc_Rpt_CheckBet_Reject.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\CheckBet\Acc_Rpt_CheckBet.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\CheckBet\Task_Bets_Trans.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\CheckBet\Task_Bets_TransReject.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\CheckBet\Task_ClearOldBet.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
