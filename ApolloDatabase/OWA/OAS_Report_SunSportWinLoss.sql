@@ -68,8 +68,8 @@ SELECT  @Str = @Str
 				SUM (WinLossCompany)*EUR as WinLossCompanyEUR,
 				SUM (TCommission) as TCommission, 
 				SUM (TCommission)*EUR as TCommissionEUR,
-				SUM (WinLossCompany+TCommission) as GrossWinLossCompany, 
-				SUM (WinLossCompany+TCommission)*EUR as GrossWinLossCompanyEUR
+				SUM (WinLossCompany - TCommission) as GrossWinLossCompany, 
+				SUM (WinLossCompany - TCommission)*EUR as GrossWinLossCompanyEUR
 		FROM	rpt_SummaryWinloss b WITH (NOLOCK)
 			LEFT JOIN REPDB.DBO.Exchange c WITH (NOLOCK) ON c.ExchangeId = CurrencyID
 			LEFT JOIN @ExchangeDaily e ON b.CurrencyID = e.exchangeid AND b.rptdate = e.exchangedate

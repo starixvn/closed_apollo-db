@@ -1,6 +1,6 @@
 ﻿USE [LogDB]
 GO
-/****** Object:  StoredProcedure [dbo].[ReadLog_RunSpCust]    Script Date: 8/9/2013 9:07:07 AM ******/
+/****** Object:  StoredProcedure [dbo].[ReadLog_RunSpCust]    Script Date: 11/22/2013 11:13:38 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -24,77 +24,114 @@ AS
  * DB: SVRLOG.LogDB
  *  
  * Revisions:
+ - 20131129@Sophia: Enhance Sps	
  * Param's Explanation: 
 */
 
 BEGIN
 	
 	SET NOCOUNT ON
+	
+	--CREATE TABLE  #TempUsername  (
+	--	AgentId		INT,
+	--	CustId		INT,
+	--	UGroup		VARCHAR(3) )
+	
+	--CREATE TABLE  #TempAgent  (	
+	--	AgentID		INT,
+	--	AgentHId	HIERARCHYID,
+	--	Username	NVARCHAR(50) )
 
-	DECLARE 
-		@FirstRec INT
-		,@LastRec INT
-
-	SELECT 
-		@FirstRec	= ((@PageIndex - 1) * @PageSize) + 1
-		,@LastRec	= ((@PageIndex * @PageSize + 1)) - 1
-
-	DECLARE @Temp TABLE (
-		AgentId		INT,
-		AgentHId	HIERARCHYID,
-		Username	NVARCHAR(50) )
 
 	DECLARE 
 		@agentHId		HIERARCHYID,
 		@actorAgentHId	HIERARCHYID,
 		@agentId		INT,
-		@uGroup			VARCHAR(3),
-		@isCheck		BIT				= 1
+		@CustId			INT,
+		@UGroup			VARCHAR(3),
+		@isCheck		BIT	= 1	
 
-	INSERT INTO @Temp
-	SELECT * FROM OPENQUERY(SVRAGE, 'SELECT AgentId, AgentHId, Username FROM [RepDB].[dbo].[AgentInfo] WITH (NOLOCK)')
 
-	SELECT @actorAgentHId = AgentHId
-	FROM @Temp
-	WHERE AgentId = @ActorAgentId
+	--SELECT @Str = 'SELECT * FROM OPENQUERY(SVRAGE, ''SELECT AgentId, CustId, UGroup FROM [RepDB].[dbo].[CustInfo] WITH (NOLOCK) WHERE Username = '''''+ @Username+''''' '')' 
+	----PRINT @Str
 
-	SELECT 
-		@agentId = AgentId,
-		@uGroup	= UGroup
-	FROM SVRAGE.RepDB.dbo.CustInfo WITH (NOLOCK) 
-	WHERE Username = @Username
+	--INSERT INTO #TempUsername
+	--EXEC (@Str)
+		
+	--SELECT 	@AgentId = AgentId,
+	--		@CustId= CustId,
+	--		@UGroup = UGroup
+	--FROM	#TempUsername
+	 
+	----------------------------
 
-	SELECT @agentHId = AgentHId
-	FROM @Temp
-	WHERE AgentId = @agentId
+	--SELECT @Str2 = 'SELECT * FROM OPENQUERY(SVRAGE, ''SELECT AgentID, AgentHId, Username FROM [RepDB].[dbo].[AgentInfo] WITH (NOLOCK) WHERE AgentId IN ('+ CONVERT(VARCHAR(20),@ActorAgentId)+ ' , '+CONVERT(VARCHAR(20),@AgentId)+')'')'  
+	----PRINT @Str2
+
+	--INSERT INTO #TempAgent
+	--EXEC (@Str2)
+
+	--SELECT	@actorAgentHId = AgentHId, @ActorUsername = Username
+	--FROM	#TempAgent
+	--WHERE	AgentID = @ActorAgentId
+	
+	  
+	--SELECT	@agentHId = AgentHId
+	--FROM	#TempAgent
+	--WHERE	AgentId = @agentId
+	 
+	--------------------------	
+
+	SELECT 	@AgentId = AgentId,
+			@CustId= CustId,
+			@UGroup = UGroup
+	FROM	RepDB.dbo.CustInfo WITH (NOLOCK)
+	WHERE	Username = @Username
+
+
+	SELECT	@actorAgentHId = AgentHId
+	FROM	RepDB.dbo.AgentInfo WITH (NOLOCK)
+	WHERE	AgentID = @ActorAgentId
+	
+	  
+	SELECT	@agentHId = AgentHId
+	FROM	RepDB.dbo.AgentInfo WITH (NOLOCK)
+	WHERE	AgentId = @agentId
+
+
+	--------------------------	
 
 	IF @agentHId.IsDescendantOf(@actorAgentHId) <> 1
 		BEGIN
-			SET @isCheck = 0	
+			--SET @isCheck = 0
+
+			SELECT 
+				CONVERT (bigint, 0) as LogId,
+				CONVERT (datetime, '') as LogDate,
+				CONVERT (nvarchar(50), '') as Username,
+				CONVERT (nvarchar(50), '') as AdminUsername,
+				CONVERT (int, 0) as ActionTypeId,
+				CONVERT (nvarchar(256), '') as ActionName,
+				CONVERT (nvarchar(max), '') as OldData,
+				CONVERT (nvarchar(max), '') as Data 
+			WHERE 1 = 2
+			RETURN 
 		END
+
 
 	-- gets total rows
 	SET @TotalRows = (
-		SELECT COUNT(1)
-		FROM 
-			RunSpCust AS rsc WITH (NOLOCK)
-			INNER JOIN SVRAGE.RepDB.dbo.CustInfo AS ci WITH (NOLOCK) ON rsc.CustId	= ci.CustId
-			INNER JOIN @Temp AS ui ON rsc.UserId = ui.AgentId
-			INNER JOIN LogAction AS la WITH (NOLOCK) ON rsc.ActionId = la.ActionId
-		WHERE 
-			(@ActionTypeId = 0 OR la.ActionTypeId  = @ActionTypeId OR (@ActionTypeId = 5 AND la.ActionTypeId =6))
-			AND rsc.LogDate BETWEEN @From AND @To
-			AND ci.Username = @Username
-			AND @isCheck = 1
-			AND (ui.AgentHId.IsDescendantOf(@actorAgentHId) = 1 OR ui.AgentId = 1 )
-	)
+						SELECT COUNT(1)
+						FROM RunSpCust AS rsc WITH (NOLOCK)	
+							INNER JOIN LogAction AS la WITH (NOLOCK) ON rsc.ActionId = la.ActionId
+						WHERE 
+							(@ActionTypeId = 0 OR la.ActionTypeId = @ActionTypeId OR (@ActionTypeId = 5 AND la.ActionTypeId =6))
+							AND rsc.LogDate BETWEEN @From AND @To
+							AND rsc.CustID = @CustId
+							AND @isCheck = 1 
+					 )						 
+						
 
-	-- temp for not paging
-	SET @PageSize = @TotalRows
-
-	-- gets data
-	SELECT TOP (@PageSize) *
-	FROM (
 			SELECT 
 				rsc.LogId,
 				rsc.LogDate,
@@ -113,23 +150,20 @@ BEGIN
 					ELSE la.ActionNameEN 
 				END	AS ActionName,
 				rsc.OldData,
-				rsc.Data,
-				ROW_NUMBER() OVER (ORDER BY rsc.LogDate DESC) AS num
+				rsc.Data 
 			FROM 
-				RunSpCust AS rsc WITH (NOLOCK)
-				INNER JOIN SVRAGE.RepDB.dbo.CustInfo AS ci WITH (NOLOCK) ON rsc.CustId = ci.CustId
-				INNER JOIN @Temp AS ui ON rsc.UserId = ui.AgentId
+				RunSpCust AS rsc WITH (NOLOCK)			
 				INNER JOIN LogAction AS la WITH (NOLOCK) ON rsc.ActionId = la.ActionId
-				LEFT JOIN SVRAGE.RepDB.dbo.AdminInfo AS adi WITH (NOLOCK) ON rsc.AdminId = adi.AdminId
+				INNER JOIN RepDB.dbo.AgentInfo AS ui ON rsc.UserId = ui.AgentId
+				LEFT JOIN RepDB.dbo.AdminInfo AS adi WITH (NOLOCK) ON rsc.AdminId = adi.AdminId
 			WHERE 
 				(@ActionTypeId = 0 OR la.ActionTypeId  = @ActionTypeId OR (@ActionTypeId = 5 AND la.ActionTypeId =6))
 				AND rsc.LogDate BETWEEN @From AND @To
-				AND ci.Username = @Username
-				AND (ui.AgentHId.IsDescendantOf(@actorAgentHId) = 1 OR ui.AgentId = 1 )
-		) AS Temp
-	WHERE
-		@isCheck = 1
-		AND Temp.num BETWEEN @FirstRec AND @LastRec
-	ORDER BY Temp.num
+				AND rsc.CustId = @CustId
+				AND @isCheck = 1 
+			ORDER BY rsc.LogDate, rsc.LogId 
+			OFFSET @PageIndex ROWS
+			FETCH NEXT @PageSize ROWS ONLY
+
 		
 END

@@ -16,6 +16,7 @@ DB: ReportDB
 
 Revisions:
 - 20131127@Sophia: Add TCommission column 
+- 20131129@Sophia: Calculate Turnover/2 for Half Won, Half Lose
 
 Param's Explanation:
 
@@ -27,7 +28,7 @@ SELECT  b.rptDate,
 		b.CurrencyID,
 		Status,			
 		SUM(Betcount) Betcount,
-		SUM(Turnover) Turnover,
+		SUM(CASE WHEN Status IN (114,115) THEN Turnover / 2 ELSE Turnover END) Turnover,
 		SUM(WinLoss) winloss,
 		- SUM(Winloss + TWinLoss) WinLossCompany,
 		SUM(TCommission) TCommission
