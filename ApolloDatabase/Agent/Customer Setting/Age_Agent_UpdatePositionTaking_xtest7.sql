@@ -1,19 +1,4 @@
-USE [CustDB]
-GO
-
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdatePositionTaking_xtest7]    Script Date: 11/12/2013 4:33:29 AM ******/
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
-/****** Object:  Stored Procedure dbo.Age_Agent_UpdatePositionTaking_xtest7    Script Date: 10/7/2013 4:56:44 PM ******/
-
-
-
-
-
+ 
 
  /*
 USE [CustDB]
@@ -46,8 +31,7 @@ CREATE PROCEDURE [dbo].[Age_Agent_UpdatePositionTaking_xtest7]
 	@ActorAgentId			INT				= NULL,
 	@AdminId				INT				= NULL,
 	@AgentId				INT,
-	@PositionTaking			VARCHAR(MAX)	= '',	
-	@MemberPositionTaking	VARCHAR(MAX)	= '',	
+	@PositionTaking			VARCHAR(MAX)	= '',		
 	@Language				VARCHAR(5)		= 'en-US',	
 	@ErrCode				INT				= 0			OUTPUT,
 	@ErrMsg					NVARCHAR(1000)	= ''		OUTPUT
@@ -118,8 +102,7 @@ BEGIN
 				IsLive		BIT,
 				MaxUpperPT	SMALLINT,
 				MaxGivenPT	SMALLINT,
-				MinGivenPT	SMALLINT,
-				IsApply		BIT)
+				MinGivenPT	SMALLINT)
 
 			-- write log before update
 			SET @xml = (
@@ -129,8 +112,7 @@ BEGIN
 					,IsLive					AS '@i'
 					,MaxUpperPositionTaking	AS '@p'
 					,MaxGivenPositionTaking	AS '@ma'
-					,MinGivenPositionTaking	AS '@mi'
-					,0						AS '@ia'
+					,MinGivenPositionTaking	AS '@mi'					
 				FROM AgentPositionTaking WITH (NOLOCK)							
 				WHERE AgentId = @AgentId	
 				FOR XML PATH('z'), ROOT('r')
@@ -217,16 +199,14 @@ BEGIN
 				IsLive,
 				MaxUpperPT,
 				MaxGivenPT,
-				MinGivenPT,
-				IsApply)
+				MinGivenPT)
 			SELECT
 				Data.SportType,
 				Data.BetType,
 				Data.IsLive,
 				Data.MaxUpper,
 				Data.MaxGiven,
-				Data.MinGiven,
-				1
+				Data.MinGiven
 			FROM OPENXML (@DocHandler, '/ROOT/PositionTaking',1) 
 			WITH (
 				SportType	SMALLINT,
@@ -1074,7 +1054,6 @@ BEGIN
 					,MaxUpperPT		AS '@p'
 					,MaxGivenPT		AS '@ma'
 					,MinGivenPT		AS '@mi'
-					,IsApply		AS '@ia'
 				FROM #TablePositionTaking								
 				FOR XML PATH('z'), ROOT('r')
 			)
@@ -1111,10 +1090,8 @@ BEGIN
 					@OldData	= @logSPDataOld
 				END CATCH 
 		END	
-END
-GO
+END	   
 
-GRANT EXECUTE ON [dbo].[Age_Agent_UpdatePositionTaking_xtest7] TO [aplweb] AS [dbo]
-GO
+
 
 
