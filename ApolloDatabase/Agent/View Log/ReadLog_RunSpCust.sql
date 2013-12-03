@@ -161,7 +161,7 @@ BEGIN
 				AND rsc.LogDate BETWEEN @From AND @To
 				AND rsc.CustId = @CustId
 				AND @isCheck = 1 
-			ORDER BY rsc.LogDate, rsc.LogId 
+			ORDER BY rsc.LogDate DESC , rsc.LogId DESC 
 			OFFSET (@PageIndex-1)*@PageSize ROWS
 			FETCH NEXT @PageSize ROWS ONLY
 

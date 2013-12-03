@@ -140,7 +140,7 @@ BEGIN
 		AND rsa.AgentID = @agentId
 		AND @isCheck = 1
 
-	ORDER BY rsa.LogDate, rsa.LogId
+	ORDER BY rsa.LogDate DESC, rsa.LogId DESC 
 	OFFSET (@PageIndex-1)*@PageSize ROWS
 	FETCH NEXT @PageSize ROWS ONLY
 
