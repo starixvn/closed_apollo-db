@@ -162,7 +162,7 @@ BEGIN
 				AND rsc.CustId = @CustId
 				AND @isCheck = 1 
 			ORDER BY rsc.LogDate, rsc.LogId 
-			OFFSET @PageIndex ROWS
+			OFFSET (@PageIndex-1)*@PageSize ROWS
 			FETCH NEXT @PageSize ROWS ONLY
 
 		

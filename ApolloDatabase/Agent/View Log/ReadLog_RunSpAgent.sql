@@ -141,7 +141,7 @@ BEGIN
 		AND @isCheck = 1
 
 	ORDER BY rsa.LogDate, rsa.LogId
-	OFFSET @PageIndex ROWS
+	OFFSET (@PageIndex-1)*@PageSize ROWS
 	FETCH NEXT @PageSize ROWS ONLY
 
 	--DROP TABLE #TempActor
