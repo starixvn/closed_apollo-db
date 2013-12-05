@@ -2020,6 +2020,9 @@
     <NotInBuild Include="CSD\Function\f_GetAgentUplineStatusById.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_Agent_ResetDefaultBetLimit.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">
