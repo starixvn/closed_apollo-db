@@ -14,7 +14,7 @@ DB: SVRPRO.ProdDB
 Original:
 
 Revisions: 
-	
+	- 20131205@Dan: add match_remark table
 Param's Explanation: 
 
 */
@@ -66,6 +66,22 @@ Param's Explanation:
 			sporttype, Resourceid, ResultKey, creator, tstamp
 	FROM odds14 
 	WHERE matchid in (select matchid from match14 where eventdate = @winlostdate)
+	
+	INSERT INTO SVRARC.ArchiveDB.dbo.match_remark (
+		[matchid],[calculate],[multiple] ,[calrefund],[refund],[calStatus]
+		,[IsTotalBetDenied_1],[IsTotalBetDenied_3],[IsTotalBetDenied_7],[IsTotalBetDenied_8]
+		,[LiveTimer] ,[HomeRedCard], [AwayRedCard], [LivePeriod], [HedgeForecast],[IsTotalBetDenied_20]
+		,[IsTotalBetDenied_21],[IsNeutral],[StreamingID],[IsInternal],[IsHTCal],[LiveDeleteChecker],[HomeColor]
+		,[AwayColor],[ConfirmHT],[ConfirmFT],[PausePeriod],[TimerSuspend],[IsPending],[isUndecided],[StdDelBetCheck])
+	SELECT			
+			[matchid],[calculate],[multiple] ,[calrefund],[refund],[calStatus]
+			,[IsTotalBetDenied_1],[IsTotalBetDenied_3],[IsTotalBetDenied_7],[IsTotalBetDenied_8]
+			,[LiveTimer] ,[HomeRedCard], [AwayRedCard], [LivePeriod], [HedgeForecast],[IsTotalBetDenied_20]
+			,[IsTotalBetDenied_21],[IsNeutral],[StreamingID],[IsInternal],[IsHTCal],[LiveDeleteChecker],[HomeColor]
+			,[AwayColor],[ConfirmHT],[ConfirmFT],[PausePeriod],[TimerSuspend],[IsPending],[isUndecided],[StdDelBetCheck]
+	FROM	Match_remark mr
+	WHERE	matchid in (select matchid from match14 where eventdate = @winlostdate)
+
 
 	INSERT INTO SVRARC.ArchiveDB.dbo.match_remark_ex (
 			matchid, eventstatus, betstatus, finalhomescore, finalawayscore, hthomescore, htawayscore, GoalRecord, 
@@ -109,6 +125,7 @@ Param's Explanation:
 ----Delete table [14]	
 	DELETE FROM odds_ex14 WHERE oddsid_ex in (select oddsid from odds14 where matchid in (select matchid from match14 where eventdate=@winlostdate))  
 	DELETE FROM odds14 WHERE matchid in (SELECT matchid FROM match14 WHERE eventdate = @winlostdate)	
+	DELETE FROM match_remark WHERE MatchId IN (SELECT MatchId FROM Match14 WHERE eventdate = @winlostdate)
 	DELETE FROM match_remark_ex WHERE MatchId IN (SELECT MatchId FROM Match14 WHERE eventdate = @winlostdate)
 	DELETE FROM match14 WHERE eventdate = @winlostdate
 	DELETE FROM outright_ex14 WHERE orid_ex in (select orid from outright14 where eventdate = @winlostdate)

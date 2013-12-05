@@ -2,7 +2,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[Task_DailySummary_Verify]
+ALTER PROCEDURE [dbo].[Task_DailySummary_Verify]
 	@WinLostDate date,
 	@TestMode tinyint = 1
 AS
@@ -14,7 +14,7 @@ Task:	- Daily Summary
 		- Update outright on ProdDB via linked server call: Task_DailySummary_DB02_Copy/Delete 
 DB: SVRAGE/RepDB
 Revisions:	
-
+	-20131129@Dan: update more check condition
 
  */
 
@@ -26,10 +26,18 @@ SET NOCOUNT ON
 
 IF EXISTS (
 	SELECT	TransId FROM bettrans WITH (NOLOCK)
-	WHERE	statusID = 0
+	WHERE	statusID in (0,1)
 			AND custid <> 0
 			AND bettype <=19000 AND bettype <> 10 AND winlostdate <= @winlostdate
-			AND currency <> 20
+			AND currency <> 20			
+			AND transid NOT IN (
+					SELECT	TransID 
+					FROM	dbo.Bettrans_Agent WITH (NOLOCK)
+					WHERE	winlostdate <= @winlostdate	 
+							AND statusID in (0,1)  
+							AND bettype <=19000
+							AND AgentID = 53288 -----line test Suntest
+					)
 )
 BEGIN
 	SELECT DISTINCT matchid, bettype, 'EXEC DBA_MatchName ' + CAST(matchid as nvarchar(20)) cmd FROM bettrans WITH (NOLOCK)
@@ -43,10 +51,18 @@ BEGIN
 		INNER JOIN dbo.bettransm bm WITH (NOLOCK) ON b.refno = bm.refno
 		INNER JOIN dbo.match m WITH (NOLOCK) ON bm.matchid = m.matchid
 	WHERE	b.winlostdate <= @winlostdate 
-			AND b.statusID = 0 AND bm.statusID = 0 
+			AND b.statusID in (0,1) AND bm.statusID in (0,1)
 			AND b.bettype in (9,29)
 			AND b.matchID in (9,29)
 			AND b.currency <> 20
+			AND b.transid NOT IN (
+					SELECT	TransID 
+					FROM	dbo.Bettrans_Agent WITH (NOLOCK)
+					WHERE	winlostdate <= @winlostdate	 
+							AND statusID in (0,1)  
+							AND bettype <=19000
+							AND AgentID = 53288 -----line test Suntest
+					)
 	ORDER BY m.eventdate
 
 	IF @@ROWCOUNT > 0
@@ -74,6 +90,7 @@ END
 --END
 
 -- ====================
+
 IF EXISTS (
 	SELECT transid FROM BetTrans WITH (NOLOCK)
 	WHERE (PlayerComm IS NULL OR WinLost IS NULL)
@@ -106,6 +123,20 @@ BEGIN
 	RAISERROR ('FAILED: Multiple Exchange Rate', 16, 1)
 	RETURN
 END
+
+-- ====================
+IF EXISTS(
+	SELECT 1
+	FROM bettrans b (nolock)
+		join BetTrans_Agent ba (nolock) on b.TransId=ba.TransId
+	where b.StatusId <> ba.StatusId
+		AND b.bettype <=19000 AND b.winlostdate = @winlostdate
+	)
+BEGIN
+	RAISERROR ('FAILED: Status in bettrans is difference from bettrans_agent ', 16, 1)
+	RETURN
+END
+
 -- ====================
  
 IF @TestMode = 1
