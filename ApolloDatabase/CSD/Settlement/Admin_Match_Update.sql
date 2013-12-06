@@ -155,8 +155,7 @@ BEGIN
 		SET		
 			betstatus = '',
 			eventstatus = 'Closed',
-			changetime = CURRENT_TIMESTAMP,
-			settleTime = CURRENT_TIMESTAMP
+			changetime = CURRENT_TIMESTAMP
 		WHERE matchid = @MatchID
 	END
 	
