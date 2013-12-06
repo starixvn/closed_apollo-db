@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[Admin_Settlement_CloseMatch]
+ALTER PROCEDURE [dbo].[Admin_Settlement_CloseMatch]
 	@matchid int,
 	@adminid int,	
 	@IP varchar(15) = '',
@@ -31,23 +31,26 @@ END
 
 /**begin to close match**/
 
---validate match check event status and DisabledAutoSettle
+--validate IBC match event status and Apolo match disabledAutoSettle
 DECLARE @disabledAutoSettle bit = 0
-	, @matchEvenStatus nvarchar(50);
+	, @matchEvenStatus nvarchar(50)
+	, @matchEvenStatusEx nvarchar(50);
 
-SELECT TOP(1) @matchEvenStatus=mt.EvenStatus
-	, @disabledAutoSettle=mtex.DisabledAutoSettle 
+SELECT TOP(1) @matchEvenStatus=LOWER(mt.eventstatus)
+	, @matchEvenStatusEx=LOWER(mtex.eventstatus)  
+	, @disabledAutoSettle=mtex.DisabledAutoSettle
 FROM dbo.match_remark_ex mtex with (nolock)
-JOIN dbo.match with (nolock) ON mtex.matchid=mt.matchid
-WHERE mt.matchid=@matchid
+JOIN dbo.match mt with (nolock) ON mtex.matchid=mt.matchid
+WHERE mtex.matchid=@matchid
 
-IF @matchEvenStatus='Closed' AND @disableAutoSetle=1
+IF @matchEvenStatus='closed' 
+	AND (@disabledAutoSettle=1 AND @matchEvenStatusEx = 'running')
 BEGIN
 	--validate trans to close
 	IF(EXISTS(SELECT TOP(1) 1 FROM dbo.BetTrans trans with (nolock) 
 				WHERE trans.matchid=@matchid))
 	BEGIN
-		SELECT @ErrCode = 102,
+		SELECT @ErrCode = 104,
 				@ErrMsg = 'Sorry!Operation failed because there exists bet tickets for this match.'
 		RETURN;
 	END
@@ -65,8 +68,15 @@ BEGIN
 END
 ELSE
 BEGIN
-	SELECT  @ErrCode = 101,
-			@ErrMsg = 'Sorry!Operation rejected because this match is invalid.'
+	IF @matchEvenStatus IS NULL OR @disabledAutoSettle IS NULL
+		SELECT  @ErrCode = 102,
+				@ErrMsg = 'Sorry!Operation rejected because this macth was not exists.'
+	ELSE IF(@disabledAutoSettle=0 OR @matchEvenStatusEx <> 'running')
+		SELECT  @ErrCode = 103,
+				@ErrMsg = 'Sorry!Operation rejected due to auto settlement constraint.'
+	ELSE
+		SELECT  @ErrCode = 101,
+				@ErrMsg = 'Sorry!Operation rejected due to any constraints.'
 	RETURN;
 END
 

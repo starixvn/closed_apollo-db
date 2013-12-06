@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateBetLimit]    Script Date: 7/19/2013 9:42:52 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateBetLimit]    Script Date: 11/27/2013 3:34:04 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -166,8 +166,7 @@ BEGIN
 							AND abt.BetType = blt.BetType
 						WHERE 
 							abt.AgentId = @AgentId
-							AND (abt.MinBet <> blt.MinBet
-							OR abt.MaxBet <> blt.MaxBet
+							AND (abt.MaxBet <> blt.MaxBet
 							OR abt.MaxPerMatch <> blt.MaxPerMatch) )
 				BEGIN
 
@@ -422,10 +421,7 @@ BEGIN
 							,abl.MaxBet			AS '@mab'
 							,abl.MaxPerMatch	AS '@mam'
 						FROM 
-							AgentBetLimit AS abl WITH (NOLOCK)
-							--INNER JOIN @BetLimitTable AS blt
-							--	ON abl.SportType	= blt.SportType
-							--	AND abl.BetType		= blt.BetType
+							AgentBetLimit AS abl WITH (NOLOCK)							
 						WHERE abl.AgentId = @AgentId
 						FOR XML PATH('z'),ROOT('r')
 					)
@@ -797,51 +793,59 @@ BEGIN
 							AND blt.BetType		= cbt.BetType
 							AND blt.CustId		= cbt.CustId
 					-- write log after update
-				
+									
 					SET @xml = (
 						SELECT  
-							blt.SportType		AS '@s'
-							,blt.BetType		AS '@b'
-							,blt.MinBet			AS '@mib'							
-							,blt.MaxBet			AS '@mab'
-							,blt.MaxPerMatch	AS '@mam'
-						FROM @BetLimitTable AS blt
-						FOR XML PATH('z'), ROOT('r')
+							abl.SportType		AS '@s'
+							,abl.BetType		AS '@b'
+							,abl.MinBet			AS '@mib'
+							,abl.MaxBet			AS '@mab'
+							,abl.MaxPerMatch	AS '@mam'
+						FROM 
+							AgentBetLimit AS abl WITH (NOLOCK)							
+						WHERE abl.AgentId = @AgentId
+						FOR XML PATH('z'),ROOT('r')
 					)
 
 					SET @logSPData = REPLACE(CONVERT(VARCHAR(MAX), @xml), '" />', '"/"')
 
 					-- end write log
-				END
-			
 
-			SET @endRun		= GETDATE()
-			SET @duration	= DATEDIFF(MILLISECOND, @startRun, @endRun)
+					SET @endRun		= GETDATE()
+					SET @duration	= DATEDIFF(MILLISECOND, @startRun, @endRun)
 
-			IF @@ERROR = 0
-				BEGIN TRY
-					EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
-						@UserId			= @ActorAgentId,
-						@AdminId		= @AdminId,
-						@SPName			= 'Age_Agent_UpdateBetLimit',
-						@LogDate		= @startRun,
-						@AgentId		= @AgentId,
-						@Duration		= @Duration,
-						@Data			= @logSPData,
-						@OldData		= @logSPDataOld
-				END	TRY
-				BEGIN CATCH
-					EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
-						@UserId			= @ActorAgentId,
-						@AdminId		= @AdminId,
-						@SPName			= 'Age_Agent_UpdateBetLimit',
-						@LogDate		= @startRun,
-						@AgentId		= @AgentId,
-						@Duration		= @Duration,
-						@Data			= @logSPData,
-						@OldData		= @logSPDataOld
-				END CATCH
+					IF @@ERROR = 0
+						BEGIN TRY
+							EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
+								@UserId			= @ActorAgentId,
+								@AdminId		= @AdminId,
+								@SPName			= 'Age_Agent_UpdateBetLimit',
+								@LogDate		= @startRun,
+								@AgentId		= @AgentId,
+								@Duration		= @Duration,
+								@Data			= @logSPData,
+								@OldData		= @logSPDataOld
+						END	TRY
+						BEGIN CATCH
+							EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
+								@UserId			= @ActorAgentId,
+								@AdminId		= @AdminId,
+								@SPName			= 'Age_Agent_UpdateBetLimit',
+								@LogDate		= @startRun,
+								@AgentId		= @AgentId,
+								@Duration		= @Duration,
+								@Data			= @logSPData,
+								@OldData		= @logSPDataOld
+						END CATCH
+				END	
 		END 
 END
+
+
+GO
+
+GRANT EXECUTE ON [dbo].[Age_Agent_UpdateBetLimit] TO [aplweb] AS [dbo]
+GO
+
 
 

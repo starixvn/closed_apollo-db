@@ -1963,6 +1963,9 @@
     <NotInBuild Include="CSD\CheckBet\Task_ClearOldBet.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="CSD\Settlement\Admin_Settlement_CloseMatch.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">
