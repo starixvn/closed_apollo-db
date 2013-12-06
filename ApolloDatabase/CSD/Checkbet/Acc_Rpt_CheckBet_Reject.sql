@@ -73,7 +73,7 @@ BEGIN
 			b.status as OldStatus
 	FROM REPDB.dbo.bettrans bt with (NOLOCK)
 		inner join dbo.betsreject b with (nolock) on bt.transid=b.transid		 
-		inner JOIN @Match m on b.matchid = m.matchid AND m.type = CASE WHEN b.bettype = 10 THEN 'outright' ELSE 'match' END	
+		LEFT JOIN @Match m on b.matchid = m.matchid AND m.type = CASE WHEN b.bettype = 10 THEN 'outright' ELSE 'match' END	
 	WHERE  bt.transid in (SELECT transid from #tmp)			
 			
 	ORDER BY bt.transid		

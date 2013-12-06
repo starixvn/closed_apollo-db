@@ -1,6 +1,6 @@
 ﻿USE [ReportDB]
 GO
-/****** Object:  StoredProcedure [dbo].[GEN_rpt_SummaryWinloss]    Script Date: 11/28/2013 9:03:45 AM ******/
+/****** Object:  StoredProcedure [dbo].[GEN_rpt_SummaryWinloss]    Script Date: 11/27/2013 5:47:32 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
