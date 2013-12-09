@@ -14,18 +14,18 @@ AS
  * Date			: 20131203
  * Task			: Get customer by agentid
  * DB			: SVRCSD/RepDB
- * Test string	:
-	exec [dbo].[Acc_Customer_GetCustomerByAgentId] 152
-	
  * Revisions	:
  *	• 
  * Parameters:
+ * Test string	:
+	exec [dbo].[Acc_Customer_GetCustomerByAgentId] 152
+	
  */
 
 BEGIN
 	SET NOCOUNT ON
 
-	SELECT AgentId, Username
+	SELECT CustId, Username
 	FROM dbo.CustInfo WITH(NOLOCK)
 	WHERE AgentId = @AgentId
 	ORDER BY Username

@@ -36,7 +36,7 @@ DECLARE @disabledAutoSettle bit = 0
 	, @matchEvenStatusEx nvarchar(50);
 
 SELECT TOP(1) @matchEvenStatus=LOWER(mt.eventstatus)
-	, @matchEvenStatusEx=LOWER(mtex.eventstatus)  
+	, @matchEvenStatusEx=LOWER(IsNull(mtex.eventstatus, 'running'))  
 	, @disabledAutoSettle=IsNull(mtex.DisabledAutoSettle, 0)
 FROM dbo.match mt with (nolock)
 LEFT JOIN dbo.match_remark_ex mtex with (nolock) ON mt.matchid=mtex.matchid
@@ -46,7 +46,7 @@ WHERE mtex.matchid=@matchid
 IF @matchEvenStatus IS NULL
 BEGIN
 	SELECT  @ErrCode = 101,
-		@ErrMsg = 'Sorry!Operation rejected because this macth was not exists.'; 
+		@ErrMsg = 'Sorry!Operation rejected because this macth does not exist.'; 
 	RETURN;
 END
 

@@ -1,9 +1,9 @@
 USE [RepDB]
 GO
-IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE type = 'P' AND name = 'Age_Customer_GetByAgent')
-	DROP PROC dbo.Age_Customer_GetByAgent
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE type = 'P' AND name = 'Acc_Customer_GetByAgent')
+	DROP PROC dbo.Acc_Customer_GetByAgent
 GO
-CREATE PROCEDURE [dbo].[Age_Customer_GetByAgent]
+CREATE PROCEDURE [dbo].[Acc_Customer_GetByAgent]
 (
 	@AgentId	INT,
 	@Status		INT				= 1,
@@ -19,11 +19,6 @@ AS
  * Date			: 20130306
  * Task			: Retrieve all player by agent
  * DB			: SVRCSD/RepDB
- * Test string	:
-	declare @TotalItems int
-	exec [dbo].[Age_Customer_GetByAgent] 107086, 1, null, 50, 0, @TotalItems out
-	select @TotalItems
-
  * Revisions	:
  *	• 20130328@Terry.Nguyen: get active col. Noted that 0/1/2 is Active/Suspended/Closed
  *  • 20130417@Terry.Nguyen: Remove 3rd table and get status, betstatus columns
@@ -36,6 +31,10 @@ AS
  *  			3. Locked
  *  			4. C.Lock
  *	• @PageIndex : 0 it mean is page first
+  * Test string	:
+	declare @TotalItems int
+	exec [dbo].[Acc_Customer_GetByAgent] 107086, 1, null, 50, 0, @TotalItems out
+	select @TotalItems
  */
 
 BEGIN
@@ -72,5 +71,5 @@ BEGIN
 	
 END
 GO
-GRANT EXECUTE ON [dbo].[Age_Customer_GetByAgent] TO [aplweb]
+GRANT EXECUTE ON [dbo].[Acc_Customer_GetByAgent] TO [aplweb]
 GO

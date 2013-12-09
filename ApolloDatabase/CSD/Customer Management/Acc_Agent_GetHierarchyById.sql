@@ -1,4 +1,4 @@
-USE [RepDB]
+USE [RepDB]	
 GO
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE type = 'P' AND name = 'Acc_Agent_GetHierarchyById')
 	DROP PROC dbo.Acc_Agent_GetHierarchyById
@@ -6,6 +6,7 @@ GO
 CREATE PROCEDURE [dbo].[Acc_Agent_GetHierarchyById]
 (
 	@AgentId INT
+	, @Username NVARCHAR(50) = NULL
 )
 AS
 
@@ -14,16 +15,21 @@ AS
  * Date			: 20131203
  * Task			: Get hierarchy agent by id
  * DB			: SVRCSD/RepDB
- * Test string	:
-	exec [dbo].[Acc_Agent_GetHierarchyById] 62
-	
  * Revisions	:
  *	• 
  * Parameters:
+ * Test string	:
+	exec [dbo].[Acc_Agent_GetHierarchyById] 62, null
+
  */
 
 BEGIN
 	SET NOCOUNT ON
+	
+	IF @AgentId IS NULL
+	BEGIN
+		SELECT @AgentId = AgentId FROM dbo.AgentInfo WITH(NOLOCK) WHERE Username = @Username
+	END
 
 	;WITH UplinePath(AgentId, Username, ParentId, AgentLevel, HasAgentDownline) AS
 	(
@@ -36,8 +42,8 @@ BEGIN
 
 		SELECT a.AgentId, a.Username, a.ParentId, a.AgentLevel
 			, IIF(EXISTS (SELECT 1 FROM dbo.AgentInfo WITH (NOLOCK) WHERE ParentId = a.AgentId), CAST(1 AS BIT), CAST(0 AS BIT)) AS HasAgentDownline       
-		FROM dbo.AgentInfo AS a WITH (NOLOCK)
-		INNER JOIN UplinePath AS b ON b.ParentId = a.AgentId
+		FROM UplinePath AS b
+		INNER JOIN dbo.AgentInfo AS a WITH (NOLOCK) ON b.ParentId = a.AgentId
 	)   
 
 	SELECT AgentId, Username, ParentId, AgentLevel, HasAgentDownline

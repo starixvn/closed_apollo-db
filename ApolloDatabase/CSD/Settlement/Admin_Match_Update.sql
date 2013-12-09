@@ -23,7 +23,7 @@ AS
 	Original: bodb02.[Admin_Match_Update]
 
 	Revisions:
-	
+		-2013-12-05@bobby: Allow user to change match's event status to "Closed" manually
 */
 BEGIN
 	SET @betstatus = ISNULL(@betstatus, N'')
