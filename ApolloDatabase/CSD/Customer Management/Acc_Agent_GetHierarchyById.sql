@@ -1,4 +1,4 @@
-USE [RepDB]
+USE [RepDB]	
 GO
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE type = 'P' AND name = 'Acc_Agent_GetHierarchyById')
 	DROP PROC dbo.Acc_Agent_GetHierarchyById
@@ -6,6 +6,7 @@ GO
 CREATE PROCEDURE [dbo].[Acc_Agent_GetHierarchyById]
 (
 	@AgentId INT
+	, @Username NVARCHAR(50) = NULL
 )
 AS
 
@@ -18,12 +19,17 @@ AS
  *	• 
  * Parameters:
  * Test string	:
-	exec [dbo].[Acc_Agent_GetHierarchyById] 62
+	exec [dbo].[Acc_Agent_GetHierarchyById] 62, null
 
  */
 
 BEGIN
 	SET NOCOUNT ON
+	
+	IF @AgentId IS NULL
+	BEGIN
+		SELECT @AgentId = AgentId FROM dbo.AgentInfo WITH(NOLOCK) WHERE Username = @Username
+	END
 
 	;WITH UplinePath(AgentId, Username, ParentId, AgentLevel, HasAgentDownline) AS
 	(

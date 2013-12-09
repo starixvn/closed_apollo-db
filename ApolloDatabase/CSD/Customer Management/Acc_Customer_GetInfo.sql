@@ -29,34 +29,28 @@ AS
 BEGIN
 	
 	SET NOCOUNT ON	
-	IF @CustId IS NOT NULL -- for case search by id
+
+	DECLARE @SoprtCredit MONEY = 0
+	IF @CustId IS NULL
 	BEGIN
-		SELECT ci.CustId, ci.Username, ci.[Status], ci.BetStatus, ci.AgentId
-			, (SELECT TOP(1) Currency FROM dbo.Exchange WHERE exchangeid = ci.Currency) AS Currency
-			, dbo.f_GetAgentUplineStatusById(ci.AgentId)  AS 'UplineStatus'
-			, dbo.f_GetAgentUplineBetStatusById(ci.AgentId) AS 'UplineBetStatus'
-			, ISNULL(SUM(bt.Winlost - bt.Actual_Stake + bt.PlayerComm), 0) AS SportCredit
-			, ai.Username AS AgentUsername, AgentLevel AS AgentLevel
-		FROM dbo.CustInfo AS ci WITH (NOLOCK)
-		INNER JOIN dbo.AgentInfo AS ai WITH (NOLOCK) ON ci.AgentId = ai.AgentId
-		INNER JOIN dbo.BetTrans AS bt WITH(NOLOCK) ON ci.CustId = bt.CustId
-		WHERE ci.CustId = @CustId
-		GROUP BY ci.CustId, ci.Username, ci.[Status], ci.BetStatus, ci.AgentId, ci.Currency, ai.Username, AgentLevel
+		SELECT @CustId = CustId FROM dbo.CustInfo WITH (NOLOCK) WHERE Username = @Username
 	END
-	ELSE -- for case search by username
-	BEGIN
-		SELECT ci.CustId, ci.Username, ci.[Status], ci.BetStatus, ci.AgentId
-			, (SELECT TOP(1) Currency FROM dbo.Exchange WHERE exchangeid = ci.Currency) AS Currency
-			, dbo.f_GetAgentUplineStatusById(ci.AgentId)  AS 'UplineStatus'
-			, dbo.f_GetAgentUplineBetStatusById(ci.AgentId) AS 'UplineBetStatus'
-			, ISNULL(SUM(bt.Winlost - bt.Actual_Stake + bt.PlayerComm), 0) AS SportCredit
-			, ai.Username AS AgentUsername, AgentLevel AS AgentLevel
-		FROM dbo.CustInfo AS ci WITH (NOLOCK)
-		INNER JOIN dbo.AgentInfo AS ai WITH (NOLOCK) ON ci.AgentId = ai.AgentId
-		INNER JOIN dbo.BetTrans AS bt WITH(NOLOCK) ON ci.CustId = bt.CustId
-		WHERE ci.Username = @Username
-		GROUP BY ci.CustId, ci.Username, ci.[Status], ci.BetStatus, ci.AgentId, ci.Currency, ai.Username, AgentLevel
-	END
+	
+	--Get sport credit
+	SELECT @SoprtCredit = ISNULL(SUM(a.Winlost - a.Actual_Stake + a.PlayerComm), 0)
+	FROM dbo.Bettrans a WITH (NOLOCK)
+	WHERE a.CustId = @CustId
+
+	SELECT ci.CustId, ci.Username, ci.[Status], ci.BetStatus, ci.AgentId
+		, (SELECT TOP(1) Currency FROM dbo.Exchange WHERE exchangeid = ci.Currency) AS Currency
+		, dbo.f_GetAgentUplineStatusById(ci.AgentId)  AS 'UplineStatus'
+		, dbo.f_GetAgentUplineBetStatusById(ci.AgentId) AS 'UplineBetStatus'
+		, @SoprtCredit AS SportCredit
+		, ai.Username AS AgentUsername, AgentLevel AS AgentLevel
+	FROM dbo.CustInfo AS ci WITH (NOLOCK)
+	INNER JOIN dbo.AgentInfo AS ai WITH (NOLOCK) ON ci.AgentId = ai.AgentId
+	WHERE ci.CustId = @CustId
+	
 END
 
 GO
