@@ -148,7 +148,17 @@ BEGIN
 			settleTime = CURRENT_TIMESTAMP
 		WHERE matchid = @MatchID
 	END
-
+	/**@bobby: add to close match**/
+	ELSE IF @Command = 'Admin_Settlement_CloseMatch'
+	BEGIN
+		UPDATE dbo.match_remark_ex WITH(ROWLOCK,UPDLOCK)
+		SET		
+			betstatus = '',
+			eventstatus = 'Closed',
+			changetime = CURRENT_TIMESTAMP
+		WHERE matchid = @MatchID
+	END
+	
 END
 
 GO

@@ -59,7 +59,7 @@ WHERE b.winlostdate <> m.eventdate
 
 IF EXISTS (
 	SELECT	TransId FROM bettrans WITH (NOLOCK)
-	WHERE	statusID = 0
+	WHERE	statusID in (0,1)  
 			AND custid <> 0
 			AND bettype <=19000 AND bettype <> 10 AND winlostdate <= @winlostdate
 			AND currency <> 20
@@ -75,7 +75,7 @@ IF EXISTS (
 BEGIN
 	SELECT DISTINCT matchid, bettype, 'EXEC DBA_MatchName ' + CAST(matchid as nvarchar(20)) cmd FROM bettrans WITH (NOLOCK)
 	WHERE	winlostdate <= @winlostdate 		
-			AND statusID = 0 
+			AND statusID in (0,1)  
 			AND bettype <=19000 and bettype NOT IN (9, 10, 29)
 			AND currency <> 20
 			AND transid NOT IN (
@@ -92,7 +92,7 @@ BEGIN
 		INNER JOIN dbo.bettransm bm WITH (NOLOCK) ON b.refno = bm.refno
 		INNER JOIN dbo.match m WITH (NOLOCK) ON bm.matchid = m.matchid
 	WHERE	b.winlostdate <= @winlostdate 
-			AND b.statusID = 0 AND bm.statusID = 0 
+			AND b.statusID in (0,1)  AND bm.statusID in (0,1)  
 			AND b.bettype in (9,29)
 			AND b.matchID in (9,29)
 			AND b.currency <> 20
@@ -155,7 +155,7 @@ IF EXISTS (
 	SELECT currency
 	FROM bettrans WITH (NOLOCK)
 	WHERE bettype <=19000 AND winlostdate = @winlostdate
-	AND NOT (bettype = 10 and statusID = 0) -- exclude running outright
+	AND NOT (bettype = 10 and statusID in (0,1)) -- exclude running outright
 	GROUP BY currency
 	HAVING COUNT(DISTINCT actualrate) > 1
 )
@@ -163,6 +163,20 @@ BEGIN
 	RAISERROR ('FAILED: Multiple Exchange Rate', 16, 1)
 	RETURN
 END
+
+-- ====================
+IF EXISTS(
+	SELECT 1
+	FROM bettrans b (nolock)
+		join BetTrans_Agent ba (nolock) on b.TransId=ba.TransId
+	where b.StatusId <> ba.StatusId
+		AND b.bettype <=19000 AND b.winlostdate = @winlostdate
+	)
+BEGIN
+	RAISERROR ('FAILED: Status in bettrans is difference from bettrans_agent ', 16, 1)
+	RETURN
+END
+
 -- ====================
  
 IF @TestMode = 1
@@ -229,7 +243,7 @@ END
 	IF EXISTS (
 		SELECT 1 FROM dbo.bettrans WITH (NOLOCK)
 		WHERE currency = 20 AND winlostdate = @winlostdate AND bettype <=19000
-		AND statusID = 0		
+		AND statusID in(0,1)
 	)
 	BEGIN		
 		
