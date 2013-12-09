@@ -1,6 +1,6 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateDiscount]    Script Date: 8/22/2013 10:57:13 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateDiscount]    Script Date: 11/28/2013 12:48:47 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -60,7 +60,8 @@ BEGIN
 		@duration		INT,
 		@logSPData		VARCHAR(5000),
 		@logSPDataOld	VARCHAR(5000),
-		@xml			XML
+		@xml			XML,
+		@isChange		BIT				= 0
 
 	SET @startRun = GETDATE()
 		
@@ -172,6 +173,8 @@ BEGIN
 					SET UGroup			= @UGroup,
 						IsUGroupChanged = 1						
 					WHERE CustId = @CustId
+
+					SET @isChange = 1
 				END
 		END
 
@@ -304,18 +307,31 @@ BEGIN
 					RETURN
 				END			
 
-			-- Update data
-			UPDATE CustDiscount WITH (ROWLOCK, UPDLOCK)
-			SET CustDiscount.Discount = dt.Discount
-			FROM 
-				CustDiscount AS pd
-				INNER JOIN @DiscountTable AS dt 
-					ON pd.SportType = dt.SportType 
-					AND pd.BetType	= dt.BetType
-			WHERE CustId = @CustId
+			IF EXISTS (
+					SELECT TOP(1) *
+					FROM CustDiscount AS pd
+					INNER JOIN @DiscountTable AS dt 
+						ON pd.SportType = dt.SportType 
+						AND pd.BetType	= dt.BetType
+					WHERE CustId = @CustId
+					AND pd.Discount <> dt.Discount
+				)
+			BEGIN
+				-- Update data
+				UPDATE CustDiscount WITH (ROWLOCK, UPDLOCK)
+				SET CustDiscount.Discount = dt.Discount
+				FROM 
+					CustDiscount AS pd
+					INNER JOIN @DiscountTable AS dt 
+						ON pd.SportType = dt.SportType 
+						AND pd.BetType	= dt.BetType
+				WHERE CustId = @CustId
+
+				SET @isChange = 1
+			END
 		END
 
-	IF @UGroup <> '' OR @Discount <> ''
+	IF (@UGroup <> '' OR @Discount <> '') AND @isChange = 1
 		BEGIN
 			
 			-- write log before update
@@ -364,3 +380,11 @@ BEGIN
 				END CATCH
 		END
 END
+
+
+GO
+
+GRANT EXECUTE ON [dbo].[Age_Customer_UpdateDiscount] TO [aplweb] AS [dbo]
+GO
+
+
