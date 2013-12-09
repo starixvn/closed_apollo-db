@@ -1,9 +1,9 @@
 USE [RepDB]
 GO
-IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE type = 'P' AND name = 'Age_Agent_GetByAgent')
-	DROP PROC dbo.Age_Agent_GetByAgent
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE type = 'P' AND name = 'Acc_Agent_GetByAgent')
+	DROP PROC dbo.Acc_Agent_GetByAgent
 GO
-CREATE PROCEDURE [dbo].[Age_Agent_GetByAgent]
+CREATE PROCEDURE [dbo].[Acc_Agent_GetByAgent]
 (
 	@AgentId	INT,
 	@Status		INT				= 1,
@@ -19,11 +19,6 @@ AS
  * Date			: 20130305
  * Task			: Get all children agent of an agent
  * DB			: SVRAGE/RepDB
- * Test string:
-	declare @TotalItems int
-	exec [dbo].[Age_Agent_GetByAgent] 6466, 1, null, 50, 0, @TotalItems out
-	select @TotalItems
-
  * Revisions	:
  *	• 20130306@Terry.Nguyen: Paging and Get more infor
  *	• 20130326@Ricky.Nguyen: Get Agent Level Col
@@ -37,6 +32,10 @@ AS
  *	•			2. Stopped
  *  			3. Locked
  *  			4. C.Lock
+  * Test string:
+	declare @TotalItems int
+	exec [dbo].[Acc_Agent_GetByAgent] 6466, 1, null, 50, 0, @TotalItems out
+	select @TotalItems
  */
 
 BEGIN
@@ -84,6 +83,6 @@ BEGIN
 END	
 
 GO
-GRANT EXECUTE ON [dbo].[Age_Agent_GetByAgent] TO [aplweb]
+GRANT EXECUTE ON [dbo].[Acc_Agent_GetByAgent] TO [aplweb]
 GO
 

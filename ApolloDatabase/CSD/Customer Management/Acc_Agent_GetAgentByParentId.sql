@@ -14,12 +14,12 @@ AS
  * Date			: 20131203
  * Task			: Get agent by parentid
  * DB			: SVRCSD/RepDB
- * Test string	:
-	exec [dbo].[Acc_Agent_GetAgentByParentId] 106914
-	
  * Revisions	:
  *	• 
  * Parameters:
+ * Test string	:
+	exec [dbo].[Acc_Agent_GetAgentByParentId] 106914
+	
  */
 
 BEGIN

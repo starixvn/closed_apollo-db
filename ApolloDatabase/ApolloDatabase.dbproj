@@ -57,7 +57,6 @@
     <Folder Include="Properties\" />
     <Folder Include="Agent" />
     <Folder Include="CSD" />
-    <Folder Include="CSD\CustomerManagement" />
     <Folder Include="Agent\Customer Setting" />
     <Folder Include="Agent\Total Bets" />
     <Folder Include="Agent\Forecast" />
@@ -135,6 +134,8 @@
     <Folder Include="API\DeleteAccount" />
     <Folder Include="DBA\ExecRep" />
     <Folder Include="CSD\CheckBet" />
+    <Folder Include="CSD\Customer Management\" />
+    <Folder Include="CSD\Function\" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1962,6 +1963,56 @@
     </NotInBuild>
     <NotInBuild Include="CSD\CheckBet\Task_ClearOldBet.sql">
       <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Customer Management\Acc_Agent_GetAgentByParentId.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Customer Management\Acc_Agent_GetAgentUplinePath.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Customer Management\Acc_Agent_GetHierarchyById.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Customer Management\Acc_Customer_GetCustomerByAgentId.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Customer Management\Age_Agent_GetAgentDownline.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Customer Management\Age_Agent_GetByAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Customer Management\Age_Agent_GetInfo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Customer Management\Age_Agent_GetStatus.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Customer Management\Age_Agent_SuggestByUsername.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Customer Management\Age_Customer_GetByAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Customer Management\Age_Customer_GetByUsername.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Customer Management\Age_Customer_GetInfo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Function\f_Agent_GetSportCreditById.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Function\f_Customer_GetSportCreditById.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Function\f_GetAgentUplineBetStatusById.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD\Function\f_GetAgentUplineStatusById.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent\Customer Setting\Age_Agent_ResetDefaultBetLimit.sql">
     </NotInBuild>
     <NotInBuild Include="CSD\Settlement\Admin_Settlement_CloseMatch.sql">
       <SubType>NotInBuild</SubType>
