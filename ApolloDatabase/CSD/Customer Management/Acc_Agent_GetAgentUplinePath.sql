@@ -12,16 +12,14 @@ AS
 /**
  * Created by	: Patrick
  * Date			: 20131204
- * Task			: Retrieve list agent in relationship between parent agent and current agent
+ * Task			: Get upline path by id
  * DB			: SVRCSD/RepDB
- * Test string	:
-	exec Acc_Agent_GetAgentUplinePath 6437
-
  * Revisions	:
  *	• 
  * Parameters:
- *	@ParentId: agent Id from
- *	@AgentId: agent ID to
+ * Test string	:
+	exec Acc_Agent_GetAgentUplinePath 6437
+
  */
 
 SET NOCOUNT ON
@@ -36,13 +34,14 @@ AS
 	UNION ALL
 
 	SELECT ai.AgentId, ai.AgentLevel, ai.Username, ai.ParentId
-	FROM dbo.AgentInfo AS ai WITH (NOLOCK)
-	INNER JOIN UplinePath AS t ON t.ParentId = ai.AgentId
+	FROM UplinePath AS t
+	INNER JOIN dbo.AgentInfo AS ai WITH (NOLOCK) ON t.ParentId = ai.AgentId
 )   
 
 SELECT AgentId, Username, AgentLevel, ParentId
-FROM UplinePath		
-ORDER BY AgentLevel
+FROM UplinePath
+WHERE AgentId <> @AgentId /*only get upline agent --> exclude this agent*/
+ORDER BY AgentLevel DESC
 GO
 GRANT EXECUTE ON [dbo].[Acc_Agent_GetAgentUplinePath] TO [aplweb]
 GO
