@@ -134,6 +134,8 @@
     <Folder Include="API\DeleteAccount" />
     <Folder Include="DBA\ExecRep" />
     <Folder Include="CSD\CheckBet" />
+    <Folder Include="CSD\Customer Management\" />
+    <Folder Include="CSD\Function\" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -1962,7 +1964,6 @@
     <NotInBuild Include="CSD\CheckBet\Task_ClearOldBet.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-<<<<<<< HEAD
     <NotInBuild Include="CSD\Customer Management\Acc_Agent_GetAgentByParentId.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -2012,9 +2013,8 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent\Customer Setting\Age_Agent_ResetDefaultBetLimit.sql">
-=======
+    </NotInBuild>
     <NotInBuild Include="CSD\Settlement\Admin_Settlement_CloseMatch.sql">
->>>>>>> 93e73eabed931068073ac521f806468db1f8a36e
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
