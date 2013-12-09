@@ -57,7 +57,6 @@
     <Folder Include="Properties\" />
     <Folder Include="Agent" />
     <Folder Include="CSD" />
-    <Folder Include="CSD\CustomerManagement" />
     <Folder Include="Agent\Customer Setting" />
     <Folder Include="Agent\Total Bets" />
     <Folder Include="Agent\Forecast" />
@@ -1991,12 +1990,6 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="CSD\Customer Management\Age_Agent_SuggestByUsername.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Customer Management\Age_AgentUser_GetFunctionPolicy.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Customer Management\Age_AgentUser_GetUserFunctionPolicy.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="CSD\Customer Management\Age_Customer_GetByAgent.sql">
