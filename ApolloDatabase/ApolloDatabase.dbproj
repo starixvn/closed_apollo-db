@@ -63,16 +63,9 @@
     <Folder Include="Agent Site\Report" />
     <Folder Include="Agent Site\User management" />
     <Folder Include="Agent Site\Misc" />
-    <Folder Include="CSD\Settlement" />
     <Folder Include="Agent Site\BetList" />
     <Folder Include="Agent Site\Function" />
     <Folder Include="Agent Site\Shadow" />
-    <Folder Include="CSD\Message" />
-    <Folder Include="CSD\Special Delete" />
-    <Folder Include="CSD\Special Delete\Number Game" />
-    <Folder Include="CSD\Special Delete\Parlay" />
-    <Folder Include="CSD\Special Delete\RecoverBets" />
-    <Folder Include="CSD\Special Delete\Tickets Listing" />
     <Folder Include="Agent Site\Message" />
     <Folder Include="Agent Site\Report\Outstanding" />
     <Folder Include="Agent Site\Report\Result" />
@@ -91,9 +84,6 @@
     <Folder Include="CSD Site\Admin\Site" />
     <Folder Include="CSD Site\Admin\User" />
     <Folder Include="API" />
-    <Folder Include="CSD\Write Log" />
-    <Folder Include="CSD\Others" />
-    <Folder Include="CSD\Report" />
     <Folder Include="DBA" />
     <Folder Include="DBA\BalanceDebitCredit" />
     <Folder Include="DBA\Move bet - Balance Up" />
@@ -101,24 +91,16 @@
     <Folder Include="CSD Site\Admin\Log" />
     <Folder Include="DBA\Move bet - Balance Up\Balance Up" />
     <Folder Include="Agent Site\Wagers" />
-    <Folder Include="CSD\Settlement\Auto Settlement" />
     <Folder Include="DBA\Task" />
     <Folder Include="DBA\Move bet - Balance Up\Move Bet\IBC" />
     <Folder Include="DBA\Move bet - Balance Up\Balance Up\IBC" />
-    <Folder Include="CSD\Settlement\Outright" />
-    <Folder Include="CSD\Settlement\Outright\IBC" />
-    <Folder Include="CSD\Special Delete\Early Kickoff" />
     <Folder Include="Agent Site\Admin\AccountInfo" />
     <Folder Include="Agent Site\Report\LineSportCredits" />
     <Folder Include="Maintenance" />
-    <Folder Include="CSD\Report\02a. Match Win Loss" />
-    <Folder Include="CSD\Report\02h. Daily Winloss" />
     <Folder Include="CSD Site\Exchange" />
     <Folder Include="Agent Site\BetList\BK" />
-    <Folder Include="CSD\Report\Daily Mix Parlay Winloss" />
     <Folder Include="CSD Site\Admin\MailingList" />
     <Folder Include="Agent Site\Report\Result\BK" />
-    <Folder Include="CSD\Special Delete\DeleteBetID" />
     <Folder Include="Agent Site\BetList\TotalBets" />
     <Folder Include="Agent Site\BetList\TicketCancel" />
     <Folder Include="Agent Site\BetList\OutStanding" />
@@ -248,96 +230,6 @@
     <NotInBuild Include="Agent Site\Forecast\Age_Forecast_OddsGetTopByMatch.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Match_Update.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_1.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_2.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_3.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_4.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_5.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_6.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_7.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_8.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_13.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_22.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_24.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_25.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_26.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_27.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_28.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_Undo.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Match_UpdateMatchRemark.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Settlement_1.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Settlement_2.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Settlement_3.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_RefundFGLG.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Settlement_FGLG.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Settlement_Refund_FGLG.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_RefundAll.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_RefundFT.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_RefundHT.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Settlement_Refund_All.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Settlement_RefundFT.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Settlement_RefundHT.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="Agent Site\BetList\Age_BetList_AgentDetail.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -359,87 +251,6 @@
     <NotInBuild Include="Agent Site\Report\Age_SelBalanceUpDay.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Message\Dot_Msg_DelMessage.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Message\Dot_Msg_GetMessage.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Message\Dot_Msg_SetMessage.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Message\Dot_Msg_SetUsrMessage.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Number Game\Acc_BettransDelSpecial_NumberGame.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Number Game\Acc_BettransSelSpecialDel_NumberGame.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Parlay\Acc_BettransSelDelSpecial_MixParlay.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Parlay\Acc_BettransSelSpecialDel_MixParlay.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\RecoverBets\Acc_BettransRecoverBet_NumberGame.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\RecoverBets\Acc_BettransRecoverSpecialBets.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\RecoverBets\Acc_BettransSelRecoverBet_NumberGame.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\RecoverBets\Acc_BettransSelRecoverSpecialBets.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Tickets Listing\Acc_Rpt_TicketsListing.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Tickets Listing\Acc_Rpt_TicketsListingDetail.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Acc_BettransDelSpecial.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Acc_BettransDelSpecial_LeagueSelOutright.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Acc_BettransDelSpecial_OutrightSel.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Acc_BettransSelDelSpecial_Outright.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Acc_BettransSelSpecialDel.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Acc_BetTypeSel.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Acc_ExchangeCurrencySel.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Acc_MatchSelByID.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Acc_SpecialDel_CheckMatchIdWithRefNo.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_9.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_9m.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Settlement_Checking.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Settlement_Parlay.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="Agent Site\Misc\Age_Common_GetBetLimitMapping.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -459,12 +270,6 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent Site\User management\Age_Admin_Insert.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_29.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_29_PreCal.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent Site\Message\Dot_Msg_GetPriMsgCount.sql">
@@ -489,9 +294,6 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent Site\Function\StrSplit_Key.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Acc_BettransSelBet_BatchMsg.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent Site\Report\Winloss\Age_Rpt_WinLoss.sql">
@@ -794,57 +596,6 @@
     <NotInBuild Include="CSD Site\Admin\DBA_Exec.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_SelSports.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_UserLog_Settle_MatchSelByID.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_ConfirmedAction.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_ConfirmedActionParlay.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_GetConfirmedAction.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_GetMatchLogDetail.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_LeagueSel.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_MatchGetResult.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_MatchSel.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_MatchSelCompleted.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_MatchSelCompletedHT.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_MatchSelDetail.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_MatchSelNumberGame.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_MatchSelNumberGameDetail.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_UserLog_Settle_MatchSelByCode.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_HedgeMatch_Update.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Parlay\Acc_BettransDelSpecialDel_MixParlay.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="Agent Site\Report\Winloss\Age_Rpt_MatchSelResultEntered.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -855,9 +606,6 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent Site\BetList\Age_BetList_SelMatchResult.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_MatchSelInfo.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent Site\BetList\Age_BetList_SelTransaction.sql">
@@ -885,30 +633,6 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="API\Mem_API_GetFundTrans.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Write Log\WriteLog_UserLog_T.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Write Log\WriteLog_UserLog_P.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Write Log\WriteLog_ExchangeRate.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Write Log\WriteLog_Settlement_Checking.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Write Log\WriteLog_Settlement_Settle.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Others\Acc_SelRefNo.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Write Log\WriteLog_RunSpAgent.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Write Log\WriteLog_RunSpCust.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent Site\BetList\Age_BetList_SelMatchResultParlay.sql">
@@ -953,9 +677,6 @@
     <NotInBuild Include="Agent Site\View Log\WriteLog_RunSpAgent.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Write Log\Task_CheckWriteLogFailed.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="DBA\BalanceDebitCredit\Dot_BalanceUpdCredit.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -978,12 +699,6 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="CSD Site\Admin\Log\NAP_LogRunSp_Insert.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Apl_ExecRep_00.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Apl_ExecRep_01.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Balance_Insert_Bettrans.sql">
@@ -1154,31 +869,10 @@
     <NotInBuild Include="Agent Site\Wagers\Age_Wagers_RunningBall.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Auto Settlement\Admin_AutoSettlement_GenerateCommand.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Auto Settlement\Task_AutoSettlement.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Auto Settlement\Task_AutoSettlement_CleanUp.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Auto Settlement\Task_AutoSettlement_Loop.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Auto Settlement\Admin_AutoSettlement_UpdateFlag.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\Task_BalanceCheck.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Auto Settlement\Admin_AutoSettlement_GetFlag.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="DBA\Task\Task_Sync_CustomerLog.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Auto Settlement\Admin_AutoSettlement_ClearFailAction.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\IBC\ExecRep_APL_01.sql">
@@ -1205,48 +899,6 @@
     <NotInBuild Include="DBA\Task\DBA_ReIndex.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Acc_Apl_ExecRep_02.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Acc_Set_ConfirmedActionOutright.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Admin_AutoSettlement_GenerateCommandOutright.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Admin_Calculate_10.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Dot_Admin_SettleOutright_Event.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Dot_Admin_SettleOutright_Trans.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\IBC\Dot_Admin_SettleOutright_Event.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\IBC\Dot_Admin_SettleOutright_Trans.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\IBC\table outright_log.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Acc_Set_OutrightSel.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Acc_Set_OutrightSelDetail.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Admin_AutoSettlement_ClearFailActionOutright.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Admin_AutoSettlement_UpdateFlagOutright.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Write Log\WriteLog_Settlement_SettleOutright.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="DBA\Task\DBA_GetSQLErrorLogEvents.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1262,9 +914,6 @@
     <NotInBuild Include="DBA\Task\TASK_CheckFreeSpace.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Acc_Set_LeagueSelOutright.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="DBA\Task\Task_BackupFull_RepDB.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1275,18 +924,6 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="DBA\Task\Task_BackupFull_LogDB.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Acc_Set_GetConfirmedActionOutright.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Acc_Set_OutrightSelInfo.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Early Kickoff\Acc_BettransDelSpecialDel_EarlyKO.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Early Kickoff\Acc_BettransSelSpecialDel_EarlyKO.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent Site\Admin\AccountInfo\Age_Agent_GetAgentDownline.sql">
@@ -1400,51 +1037,6 @@
     <NotInBuild Include="Maintenance\Mail_UpdateMailStatus.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Report\02a. Match Win Loss\Acc_Rpt_MatchWinloss2_New.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\02a. Match Win Loss\Acc_Rpt_MatchWinLoss2_New14.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\02a. Match Win Loss\Acc_Rpt_WinlossByBettype.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\02a. Match Win Loss\Acc_Rpt_WinlossByBettype14.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Details.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Details14.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_OtherSport.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_OtherSport_Bettype.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_OtherSport_Bettype14.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_OtherSport14.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Result.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Soccer_Bettype.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Soccer_Bettype14.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Sporttype.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Sporttype14.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="CSD Site\Exchange\Acc_ExchangeIns.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1470,18 +1062,6 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent Site\BetList\BK\--Age_BetList_SelWinloss_SuperViewSuper.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_Parlay_Advance.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_DailyMixParlayWinloss.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_DailyMixParlayWinloss14.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_Parlay_Advance14.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="DBA\Task\Task_Sync_NAPLOG.sql">
@@ -1521,12 +1101,6 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\Task_SummaryReport_GenData.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\DeleteBetID\Acc_BettransDelBet.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\DeleteBetID\Acc_BetsSelBetList_ByTransID.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent Site\BetList\Age_BetList_SelWinloss_Old.sql">
@@ -1652,27 +1226,6 @@
     <NotInBuild Include="DBA\Task\Task_MoveCustArchive.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Message\Acc_Msg_DeleteMessage.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Message\Acc_Msg_GetAllSite.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Message\Acc_Msg_GetListMessage.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Message\Acc_Msg_GetRecipientInfo.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Message\Acc_Msg_GetUplineById.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Message\Acc_Msg_InsertMessage.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Message\Acc_Msg_UpdateMessage.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="DBA\ExecRep\Acc_ExecRep_00.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1698,24 +1251,6 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="CSD Site\CheckBet\Task_ClearOldBet.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Function\f_Agent_GetSportCreditById.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Function\f_Customer_GetSportCreditById.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Function\f_GetAgentUplineBetStatusById.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Function\f_GetAgentUplineStatusById.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Settlement_CloseMatch.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Message\Acc_Msg_GetMessageById.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent Site\Function\f_GetAgentUplineBetStatusById.sql">
