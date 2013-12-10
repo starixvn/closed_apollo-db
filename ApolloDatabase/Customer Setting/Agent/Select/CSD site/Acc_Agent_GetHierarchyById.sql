@@ -19,16 +19,20 @@ AS
  *	• 
  * Parameters:
  * Test string	:
-	exec [dbo].[Acc_Agent_GetHierarchyById] 62, null
+	exec [dbo].[Acc_Agent_GetHierarchyById] 1, null
 
  */
 
 BEGIN
 	SET NOCOUNT ON
-	
+	DECLARE @Level SMALLINT
 	IF @AgentId IS NULL
 	BEGIN
-		SELECT @AgentId = AgentId FROM dbo.AgentInfo WITH(NOLOCK) WHERE Username = @Username
+		SELECT @AgentId = AgentId, @Level = AgentLevel FROM dbo.AgentInfo WITH(NOLOCK) WHERE Username = @Username
+	END
+	ELSE
+	BEGIN
+		SELECT @Level = AgentLevel FROM dbo.AgentInfo WITH(NOLOCK) WHERE @AgentId = AgentId
 	END
 
 	;WITH UplinePath(AgentId, Username, ParentId, AgentLevel, HasAgentDownline) AS
@@ -53,11 +57,12 @@ BEGIN
 		FROM UplinePath
 
 		UNION
-		--Get sibling of upline path
+		--Get sibling of upline path without this agent passing
 		SELECT b.AgentId, b.Username, b.ParentId, b.AgentLevel
 			, IIF(EXISTS (SELECT 1 FROM dbo.AgentInfo WITH (NOLOCK) WHERE ParentId = b.AgentId), CAST(1 AS BIT), CAST(0 AS BIT)) AS HasAgentDownline
 		FROM UplinePath a
 		INNER JOIN dbo.AgentInfo b WITH (NOLOCK) ON a.AgentId = b.ParentId
+		WHERE a.AgentLevel < @Level
 	)a
 	ORDER BY a.AgentLevel, a.Username, a.ParentId
 
