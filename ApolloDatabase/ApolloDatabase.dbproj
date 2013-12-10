@@ -55,87 +55,108 @@
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\TeamData\Microsoft.Data.Schema.SqlTasks.targets" />
   <ItemGroup>
     <Folder Include="Properties\" />
-    <Folder Include="Agent" />
-    <Folder Include="CSD" />
-    <Folder Include="Agent\Customer Setting" />
-    <Folder Include="Agent\Total Bets" />
-    <Folder Include="Agent\Forecast" />
-    <Folder Include="Agent\View Log" />
-    <Folder Include="Agent\Report" />
-    <Folder Include="Agent\User management" />
-    <Folder Include="Agent\Misc" />
-    <Folder Include="Agent\Customer Setting\Test" />
-    <Folder Include="CSD\Settlement" />
-    <Folder Include="Agent\BetList" />
-    <Folder Include="Agent\Function" />
-    <Folder Include="Agent\Shadow" />
-    <Folder Include="CSD\Message" />
-    <Folder Include="CSD\Special Delete" />
-    <Folder Include="CSD\Special Delete\Number Game" />
-    <Folder Include="CSD\Special Delete\Parlay" />
-    <Folder Include="CSD\Special Delete\RecoverBets" />
-    <Folder Include="CSD\Special Delete\Tickets Listing" />
-    <Folder Include="Agent\Message" />
-    <Folder Include="Agent\Report\Outstanding" />
-    <Folder Include="Agent\Report\Result" />
-    <Folder Include="Agent\Report\Winloss" />
-    <Folder Include="Agent\Admin" />
-    <Folder Include="Agent\Admin\Exchange Rate" />
-    <Folder Include="CSD\Admin" />
-    <Folder Include="CSD\Admin\AdminInfo" />
-    <Folder Include="CSD\Admin\Cust" />
-    <Folder Include="CSD\Admin\Function" />
-    <Folder Include="CSD\Admin\Group" />
-    <Folder Include="CSD\Admin\LogExecSp" />
-    <Folder Include="CSD\Admin\LogFunction" />
-    <Folder Include="CSD\Admin\LogUserLogin" />
-    <Folder Include="CSD\Admin\MenuItem" />
-    <Folder Include="CSD\Admin\Site" />
-    <Folder Include="CSD\Admin\User" />
+    <Folder Include="Agent Site" />
+    <Folder Include="CSD Site" />
+    <Folder Include="Agent Site\Total Bets" />
+    <Folder Include="Agent Site\Forecast" />
+    <Folder Include="Agent Site\View Log" />
+    <Folder Include="Agent Site\Report" />
+    <Folder Include="Agent Site\User management" />
+    <Folder Include="Agent Site\Misc" />
+    <Folder Include="Agent Site\BetList" />
+    <Folder Include="Agent Site\Function" />
+    <Folder Include="Agent Site\Shadow" />
+    <Folder Include="Agent Site\Message" />
+    <Folder Include="Agent Site\Report\Outstanding" />
+    <Folder Include="Agent Site\Report\Result" />
+    <Folder Include="Agent Site\Report\Winloss" />
+    <Folder Include="Agent Site\Admin" />
+    <Folder Include="Agent Site\Admin\Exchange Rate" />
+    <Folder Include="CSD Site\Admin" />
+    <Folder Include="CSD Site\Admin\AdminInfo" />
+    <Folder Include="CSD Site\Admin\Cust" />
+    <Folder Include="CSD Site\Admin\Function" />
+    <Folder Include="CSD Site\Admin\Group" />
+    <Folder Include="CSD Site\Admin\LogExecSp" />
+    <Folder Include="CSD Site\Admin\LogFunction" />
+    <Folder Include="CSD Site\Admin\LogUserLogin" />
+    <Folder Include="CSD Site\Admin\MenuItem" />
+    <Folder Include="CSD Site\Admin\Site" />
+    <Folder Include="CSD Site\Admin\User" />
     <Folder Include="API" />
-    <Folder Include="CSD\Write Log" />
-    <Folder Include="CSD\Others" />
-    <Folder Include="Agent\Customer Setting\Unit Test" />
-    <Folder Include="CSD\Report" />
     <Folder Include="DBA" />
     <Folder Include="DBA\BalanceDebitCredit" />
     <Folder Include="DBA\Move bet - Balance Up" />
     <Folder Include="DBA\Move bet - Balance Up\Move Bet" />
-    <Folder Include="CSD\Admin\Log" />
+    <Folder Include="CSD Site\Admin\Log" />
     <Folder Include="DBA\Move bet - Balance Up\Balance Up" />
-    <Folder Include="Agent\Wagers" />
-    <Folder Include="CSD\Settlement\Auto Settlement" />
+    <Folder Include="Agent Site\Wagers" />
     <Folder Include="DBA\Task" />
     <Folder Include="DBA\Move bet - Balance Up\Move Bet\IBC" />
     <Folder Include="DBA\Move bet - Balance Up\Balance Up\IBC" />
-    <Folder Include="CSD\Settlement\Outright" />
-    <Folder Include="CSD\Settlement\Outright\IBC" />
-    <Folder Include="CSD\Special Delete\Early Kickoff" />
-    <Folder Include="Agent\Admin\AccountInfo" />
-    <Folder Include="Agent\Report\LineSportCredits" />
-    <Folder Include="App Log" />
+    <Folder Include="Agent Site\Admin\AccountInfo" />
+    <Folder Include="Agent Site\Report\LineSportCredits" />
     <Folder Include="Maintenance" />
-    <Folder Include="CSD\Report\02a. Match Win Loss" />
-    <Folder Include="CSD\Report\02h. Daily Winloss" />
-    <Folder Include="CSD\Exchange" />
-    <Folder Include="Agent\BetList\BK" />
-    <Folder Include="CSD\Report\Daily Mix Parlay Winloss" />
-    <Folder Include="CSD\Admin\MailingList" />
-    <Folder Include="Agent\Report\Result\BK" />
-    <Folder Include="CSD\Special Delete\DeleteBetID" />
-    <Folder Include="Agent\BetList\TotalBets" />
-    <Folder Include="Agent\BetList\TicketCancel" />
-    <Folder Include="Agent\BetList\OutStanding" />
-    <Folder Include="Agent\BetList\AccInfo" />
-    <Folder Include="Agent\BetList\Transaction" />
-    <Folder Include="Agent\BetList\Winloss" />
+    <Folder Include="CSD Site\Exchange" />
+    <Folder Include="Agent Site\BetList\BK" />
+    <Folder Include="CSD Site\Admin\MailingList" />
+    <Folder Include="Agent Site\Report\Result\BK" />
+    <Folder Include="Agent Site\BetList\TotalBets" />
+    <Folder Include="Agent Site\BetList\TicketCancel" />
+    <Folder Include="Agent Site\BetList\OutStanding" />
+    <Folder Include="Agent Site\BetList\AccInfo" />
+    <Folder Include="Agent Site\BetList\Transaction" />
+    <Folder Include="Agent Site\BetList\Winloss" />
     <Folder Include="OWA" />
     <Folder Include="OWA\KPI" />
     <Folder Include="API\DeleteAccount" />
     <Folder Include="DBA\ExecRep" />
-    <Folder Include="CSD\CheckBet" />
-    <Folder Include="CSD\Customer Management\" />
-    <Folder Include="CSD\Function\" />
+    <Folder Include="CSD Site\CheckBet" />
+    <Folder Include="CSD Site\Function" />
+    <Folder Include="Maintenance\App Log" />
+    <Folder Include="Customer Setting" />
+    <Folder Include="Customer Setting\BK" />
+    <Folder Include="Customer Setting\BK\Test" />
+    <Folder Include="Customer Setting\BK\Unit Test" />
+    <Folder Include="Customer Setting\Agent" />
+    <Folder Include="Customer Setting\Agent\Update" />
+    <Folder Include="Customer Setting\Agent\Select" />
+    <Folder Include="Customer Setting\Agent\Insert" />
+    <Folder Include="Customer Setting\Agent User" />
+    <Folder Include="Customer Setting\Customer" />
+    <Folder Include="Customer Setting\Customer\Insert" />
+    <Folder Include="Customer Setting\Customer\Update" />
+    <Folder Include="Customer Setting\Customer\Select" />
+    <Folder Include="Customer Setting\Agent User\Update" />
+    <Folder Include="Customer Setting\Agent User\Insert" />
+    <Folder Include="Customer Setting\Agent User\Select" />
+    <Folder Include="DBA\Customer Setting" />
+    <Folder Include="Customer Setting\Agent\Select\Agent Site" />
+    <Folder Include="Customer Setting\Agent\Select\CSD site" />
+    <Folder Include="Customer Setting\Agent User\Select\Agent Site" />
+    <Folder Include="Customer Setting\Agent User\Select\CSD Site" />
+    <Folder Include="Customer Setting\Customer\Select\Agent Site" />
+    <Folder Include="Customer Setting\Customer\Select\CSD Site" />
+    <Folder Include="CSD Site" />
+    <Folder Include="CSD Site\Function" />
+    <Folder Include="CSD Site\Message" />
+    <Folder Include="CSD Site\Others" />
+    <Folder Include="CSD Site\Report" />
+    <Folder Include="CSD Site\Report\02a. Match Win Loss" />
+    <Folder Include="CSD Site\Report\02h. Daily Winloss" />
+    <Folder Include="CSD Site\Report\Daily Mix Parlay Winloss" />
+    <Folder Include="CSD Site\Settlement" />
+    <Folder Include="CSD Site\Settlement\Auto Settlement" />
+    <Folder Include="CSD Site\Settlement\Outright" />
+    <Folder Include="CSD Site\Settlement\Outright\IBC" />
+    <Folder Include="CSD Site\Special Delete" />
+    <Folder Include="CSD Site\Special Delete\DeleteBetID" />
+    <Folder Include="CSD Site\Special Delete\Early Kickoff" />
+    <Folder Include="CSD Site\Special Delete\Number Game" />
+    <Folder Include="CSD Site\Special Delete\Parlay" />
+    <Folder Include="CSD Site\Special Delete\RecoverBets" />
+    <Folder Include="CSD Site\Special Delete\Tickets Listing" />
+    <Folder Include="CSD Site\Write Log" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -152,835 +173,451 @@
     <BuildContributorArgument Include="OutDir=$(OutDir)" />
   </ItemGroup>
   <ItemGroup>
-    <NotInBuild Include="Agent\Total Bets\Age_TotalBets_1_3_7_8.sql">
+    <NotInBuild Include="Agent Site\Total Bets\Age_TotalBets_1_3_7_8.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Total Bets\Age_TotalBets_2_5_12_15_123.sql">
+    <NotInBuild Include="Agent Site\Total Bets\Age_TotalBets_2_5_12_15_123.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Total Bets\Age_TotalBets_10.sql">
+    <NotInBuild Include="Agent Site\Total Bets\Age_TotalBets_10.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Total Bets\Age_TotalBets_14.sql">
+    <NotInBuild Include="Agent Site\Total Bets\Age_TotalBets_14.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Forecast\Age_League_GetRunning.sql">
+    <NotInBuild Include="Agent Site\Forecast\Age_League_GetRunning.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Forecast\Age_Forecast_1_3_7_8_GetByLeague.sql">
+    <NotInBuild Include="Agent Site\Forecast\Age_Forecast_1_3_7_8_GetByLeague.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Forecast\Age_Forecast_5_15_GetByLeague.sql">
+    <NotInBuild Include="Agent Site\Forecast\Age_Forecast_5_15_GetByLeague.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Forecast\Age_Forecast_5_15_GetByMatch.sql">
+    <NotInBuild Include="Agent Site\Forecast\Age_Forecast_5_15_GetByMatch.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Forecast\Age_Forecast_1_7_GetByMatch.sql">
+    <NotInBuild Include="Agent Site\Forecast\Age_Forecast_1_7_GetByMatch.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Forecast\Age_Forecast_3_8_GetByMatch.sql">
+    <NotInBuild Include="Agent Site\Forecast\Age_Forecast_3_8_GetByMatch.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Total Bets\Age_TotalBets_20_21.sql">
+    <NotInBuild Include="Agent Site\Total Bets\Age_TotalBets_20_21.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Total Bets\Age_TotalBets_6.sql">
+    <NotInBuild Include="Agent Site\Total Bets\Age_TotalBets_6.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Total Bets\Age_TotalBets_16.sql">
+    <NotInBuild Include="Agent Site\Total Bets\Age_TotalBets_16.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Total Bets\Age_TotalBets_25_121_122.sql">
+    <NotInBuild Include="Agent Site\Total Bets\Age_TotalBets_25_121_122.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Total Bets\Age_TotalBets_161.sql">
+    <NotInBuild Include="Agent Site\Total Bets\Age_TotalBets_161.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Forecast\Age_ScoreMap_SelLeague.sql">
+    <NotInBuild Include="Agent Site\Forecast\Age_ScoreMap_SelLeague.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Forecast\Age_ScoreMap_SelBettype.sql">
+    <NotInBuild Include="Agent Site\Forecast\Age_ScoreMap_SelBettype.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Forecast\Age_ScoreMap_Result.sql">
+    <NotInBuild Include="Agent Site\Forecast\Age_ScoreMap_Result.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Forecast\Age_Forecast_OddsGetTopByMatch.sql">
+    <NotInBuild Include="Agent Site\Forecast\Age_Forecast_OddsGetTopByMatch.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Agent_Login.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_AgentDetail.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Test\SophiaTest_InsMember.sql">
+    <NotInBuild Include="Agent Site\Function\StrSplit.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Test\Test_ExecutePerformance.sql">
+    <NotInBuild Include="Agent Site\Shadow\Age_AgentUser_GetByAgent.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Test\Test_ExecuteReport.sql">
+    <NotInBuild Include="Agent Site\Shadow\Age_AgentUser_GetInfo.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Test\Test_ReportPerformance.sql">
+    <NotInBuild Include="Agent Site\Shadow\Age_AgentUser_Insert.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Test\zzz_BetTransCorrection.sql">
+    <NotInBuild Include="Agent Site\Shadow\Age_AgentUser_UpdatePermission.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Test\zzz_BetTransCorrection_xtest.sql">
+    <NotInBuild Include="Agent Site\Report\Age_SelBalanceUpDay.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Test\zzz_GenerateDepthFirstDownline.sql">
+    <NotInBuild Include="Agent Site\Misc\Age_Common_GetBetLimitMapping.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Test\zzz_GenerateDirectDownlines.sql">
+    <NotInBuild Include="Agent Site\Misc\Age_Common_GetPositionTakingMapping.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Test\zzz_GenerateDirectPlayer.sql">
+    <NotInBuild Include="Agent Site\Misc\Age_Common_GetDiscountMapping.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Test\zzz_RandomFloat.sql">
+    <NotInBuild Include="Agent Site\User management\Age_Admin_GetAll.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Test\zzz_RandomInteger.sql">
+    <NotInBuild Include="Agent Site\User management\Age_Admin_Update.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Match_Update.sql">
+    <NotInBuild Include="Agent Site\User management\Age_Admin_GetInfo.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_1.sql">
+    <NotInBuild Include="Agent Site\User management\Age_Admin_Insert.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_2.sql">
+    <NotInBuild Include="Agent Site\Message\Dot_Msg_GetPriMsgCount.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_3.sql">
+    <NotInBuild Include="Agent Site\Message\Dot_Msg_GetTopPriMessage24.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_4.sql">
+    <NotInBuild Include="Agent Site\Report\Outstanding\Age_Rpt_Outstanding.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_5.sql">
+    <NotInBuild Include="Agent Site\Report\Outstanding\Age_Rpt_Outstanding_Member.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_6.sql">
+    <NotInBuild Include="Agent Site\Report\Result\Age_Result_Outright.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_7.sql">
+    <NotInBuild Include="Agent Site\Report\Result\Age_Result_SelAvaiDate.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_8.sql">
+    <NotInBuild Include="Agent Site\Report\Result\Age_Result_SportSelByDate.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_13.sql">
+    <NotInBuild Include="Agent Site\Function\StrSplit_Key.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_22.sql">
+    <NotInBuild Include="Agent Site\Report\Winloss\Age_Rpt_WinLoss.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_24.sql">
+    <NotInBuild Include="Agent Site\Report\Winloss\Age_Rpt_WinLoss_Member.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_25.sql">
+    <NotInBuild Include="Agent Site\Admin\Exchange Rate\Age_Exchange_GetAll.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_26.sql">
+    <NotInBuild Include="Agent Site\Admin\Exchange Rate\Age_Exchange_GetByCurrency.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_27.sql">
+    <NotInBuild Include="Agent Site\Admin\Exchange Rate\Age_Exchange_GetById.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_28.sql">
+    <NotInBuild Include="Agent Site\Admin\Exchange Rate\Age_Exchange_InsertRate.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_Undo.sql">
+    <NotInBuild Include="Agent Site\Admin\Exchange Rate\Age_Exchange_UpdateRate.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Match_UpdateMatchRemark.sql">
+    <NotInBuild Include="CSD Site\Admin\AdminInfo\NAP_AdminInfo_Update.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Settlement_1.sql">
+    <NotInBuild Include="CSD Site\Admin\AdminInfo\NAP_AdminIns.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Settlement_2.sql">
+    <NotInBuild Include="CSD Site\Admin\Cust\NAP_Cust_GetByUsername.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Settlement_3.sql">
+    <NotInBuild Include="CSD Site\Admin\Cust\NAP_Cust_Insert.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_RefundFGLG.sql">
+    <NotInBuild Include="CSD Site\Admin\Cust\NAP_Cust_Update.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Settlement_FGLG.sql">
+    <NotInBuild Include="CSD Site\Admin\Cust\NAP_Cust_UpdatePassword.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Settlement_Refund_FGLG.sql">
+    <NotInBuild Include="CSD Site\Admin\Function\NAP_Function_AssignFunctionToGroups.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_RefundAll.sql">
+    <NotInBuild Include="CSD Site\Admin\Function\NAP_Function_AssignFunctionToUsers.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_RefundFT.sql">
+    <NotInBuild Include="CSD Site\Admin\Function\NAP_Function_Duplicate.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_RefundHT.sql">
+    <NotInBuild Include="CSD Site\Admin\Function\NAP_Function_GetAll.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Settlement_Refund_All.sql">
+    <NotInBuild Include="CSD Site\Admin\Function\NAP_Function_GetByGroup.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Settlement_RefundFT.sql">
+    <NotInBuild Include="CSD Site\Admin\Function\NAP_Function_GetByGroupAndSite.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Settlement_RefundHT.sql">
+    <NotInBuild Include="CSD Site\Admin\Function\NAP_Function_GetById.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_AgentDetail.sql">
+    <NotInBuild Include="CSD Site\Admin\Function\NAP_Function_GetByKeyAndSite.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Function\StrSplit.sql">
+    <NotInBuild Include="CSD Site\Admin\Function\NAP_Function_GetByNameAndSite.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Shadow\Age_AgentUser_GetByAgent.sql">
+    <NotInBuild Include="CSD Site\Admin\Function\NAP_Function_GetBySite.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Shadow\Age_AgentUser_GetInfo.sql">
+    <NotInBuild Include="CSD Site\Admin\Function\NAP_Function_GetByUser.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Shadow\Age_AgentUser_Insert.sql">
+    <NotInBuild Include="CSD Site\Admin\Function\NAP_Function_GetByUserAndFunctionKeyIncludeGroup.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Shadow\Age_AgentUser_UpdatePermission.sql">
+    <NotInBuild Include="CSD Site\Admin\Function\NAP_Function_GetByUserAndSite.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Report\Age_SelBalanceUpDay.sql">
+    <NotInBuild Include="CSD Site\Admin\Function\NAP_Function_GetByUserAndSiteIncludeGroup.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Message\Dot_Msg_DelMessage.sql">
+    <NotInBuild Include="CSD Site\Admin\Function\NAP_Function_GetParentById.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Message\Dot_Msg_GetMessage.sql">
+    <NotInBuild Include="CSD Site\Admin\Function\NAP_Function_Insert.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Message\Dot_Msg_SetMessage.sql">
+    <NotInBuild Include="CSD Site\Admin\Function\NAP_Function_Update.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Message\Dot_Msg_SetUsrMessage.sql">
+    <NotInBuild Include="CSD Site\Admin\Function\NAP_Function_UpdateStatus.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Number Game\Acc_BettransDelSpecial_NumberGame.sql">
+    <NotInBuild Include="CSD Site\Admin\Group\NAP_Group_AssignFunction.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Number Game\Acc_BettransSelSpecialDel_NumberGame.sql">
+    <NotInBuild Include="CSD Site\Admin\Group\NAP_Group_GetAll.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Parlay\Acc_BettransSelDelSpecial_MixParlay.sql">
+    <NotInBuild Include="CSD Site\Admin\Group\NAP_Group_GetAllWithNumOfUser.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Parlay\Acc_BettransSelSpecialDel_MixParlay.sql">
+    <NotInBuild Include="CSD Site\Admin\Group\NAP_Group_GetById.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\RecoverBets\Acc_BettransRecoverBet_NumberGame.sql">
+    <NotInBuild Include="CSD Site\Admin\Group\NAP_Group_GetByName.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\RecoverBets\Acc_BettransRecoverSpecialBets.sql">
+    <NotInBuild Include="CSD Site\Admin\Group\NAP_Group_GetByUser.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\RecoverBets\Acc_BettransSelRecoverBet_NumberGame.sql">
+    <NotInBuild Include="CSD Site\Admin\Group\NAP_Group_GetGroupByFunctionAndSite.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\RecoverBets\Acc_BettransSelRecoverSpecialBets.sql">
+    <NotInBuild Include="CSD Site\Admin\Group\NAP_Group_Insert.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Tickets Listing\Acc_Rpt_TicketsListing.sql">
+    <NotInBuild Include="CSD Site\Admin\Group\NAP_Group_SearchExcludeFunction.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Tickets Listing\Acc_Rpt_TicketsListingDetail.sql">
+    <NotInBuild Include="CSD Site\Admin\Group\NAP_Group_Update.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Acc_BettransDelSpecial.sql">
+    <NotInBuild Include="CSD Site\Admin\Group\NAP_Group_UpdateStatus.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Acc_BettransDelSpecial_LeagueSelOutright.sql">
+    <NotInBuild Include="CSD Site\Admin\LogExecSp\NAP_LogExecSp_GetById.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Acc_BettransDelSpecial_OutrightSel.sql">
+    <NotInBuild Include="CSD Site\Admin\LogExecSp\NAP_LogExecSp_Search.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Acc_BettransSelDelSpecial_Outright.sql">
+    <NotInBuild Include="CSD Site\Admin\LogFunction\NAP_LogFunction_Insert.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Acc_BettransSelSpecialDel.sql">
+    <NotInBuild Include="CSD Site\Admin\LogFunction\NAP_LogFunction_Search.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Acc_BetTypeSel.sql">
+    <NotInBuild Include="CSD Site\Admin\LogUserLogin\NAP_LogUserLogin_Insert.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Acc_ExchangeCurrencySel.sql">
+    <NotInBuild Include="CSD Site\Admin\LogUserLogin\NAP_LogUserLogin_Search.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Acc_MatchSelByID.sql">
+    <NotInBuild Include="CSD Site\Admin\MenuItem\NAP_MenuItem_GetAll.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Acc_SpecialDel_CheckMatchIdWithRefNo.sql">
+    <NotInBuild Include="CSD Site\Admin\MenuItem\NAP_MenuItem_GetById.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetByAgent.sql">
+    <NotInBuild Include="CSD Site\Admin\MenuItem\NAP_MenuItem_GetByNameAndSite.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_9.sql">
+    <NotInBuild Include="CSD Site\Admin\MenuItem\NAP_MenuItem_GetBySite.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_9m.sql">
+    <NotInBuild Include="CSD Site\Admin\MenuItem\NAP_MenuItem_GetByUserAndSiteIncludeGroup.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Settlement_Checking.sql">
+    <NotInBuild Include="CSD Site\Admin\MenuItem\NAP_MenuItem_GetByUserIncludeGroup.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Settlement_Parlay.sql">
+    <NotInBuild Include="CSD Site\Admin\MenuItem\NAP_MenuItem_GetParentById.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Agent_GetByUserName.sql">
+    <NotInBuild Include="CSD Site\Admin\MenuItem\NAP_MenuItem_Insert.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetDiscount.sql">
+    <NotInBuild Include="CSD Site\Admin\MenuItem\NAP_MenuItem_Search.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetDiscountForUpdate.sql">
+    <NotInBuild Include="CSD Site\Admin\MenuItem\NAP_MenuItem_Update.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetInfo.sql">
+    <NotInBuild Include="CSD Site\Admin\MenuItem\NAP_MenuItem_UpdateStatus.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetParentInfo.sql">
+    <NotInBuild Include="CSD Site\Admin\Site\NAP_Site_GetAll.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetPositionTaking.sql">
+    <NotInBuild Include="CSD Site\Admin\Site\NAP_Site_GetAllSiteUrl.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetPositionTakingForUpdate.sql">
+    <NotInBuild Include="CSD Site\Admin\Site\NAP_Site_GetAllWithNumOfUser.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_Insert.sql">
+    <NotInBuild Include="CSD Site\Admin\Site\NAP_Site_GetById.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdateBetLimit.sql">
+    <NotInBuild Include="CSD Site\Admin\Site\NAP_Site_GetByName.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdateDiscount.sql">
+    <NotInBuild Include="CSD Site\Admin\Site\NAP_Site_GetByUser.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdatePositionTaking.sql">
+    <NotInBuild Include="CSD Site\Admin\Site\NAP_Site_GetSiteURLById.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdateSetting.sql">
+    <NotInBuild Include="CSD Site\Admin\Site\NAP_Site_GetSiteURLBySiteId.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_GetBetLimit.sql">
+    <NotInBuild Include="CSD Site\Admin\Site\NAP_Site_GetSiteURLByUser.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_GetBetLimitForUpdate.sql">
+    <NotInBuild Include="CSD Site\Admin\Site\NAP_Site_GetUserSiteLevel.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_GetByAgent.sql">
+    <NotInBuild Include="CSD Site\Admin\Site\NAP_Site_InsertSiteURL.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_GetDiscount.sql">
+    <NotInBuild Include="CSD Site\Admin\Site\NAP_Site_InsertWithSiteURL.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_GetDiscountForUpdate.sql">
+    <NotInBuild Include="CSD Site\Admin\Site\NAP_Site_Update.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_Insert.sql">
+    <NotInBuild Include="CSD Site\Admin\Site\NAP_Site_UpdateDefaultSiteURL.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_SearchByUsername.sql">
+    <NotInBuild Include="CSD Site\Admin\Site\NAP_Site_UpdateSiteURL.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_UpdateBetLimit.sql">
+    <NotInBuild Include="CSD Site\Admin\Site\NAP_Site_UpdateStatus.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_UpdateDiscount.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_AssignFunction.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_UpdateSetting.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_AssignSite.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_CheckUpdatePermission.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_CheckIn.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetBetLimitForUpdate.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_DeleteUserFromNAPAdmin.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetBetLimit.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_GetAll.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Misc\Age_Common_GetBetLimitMapping.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_GetAllByUsernameGroupSite.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Misc\Age_Common_GetPositionTakingMapping.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_GetByGroupAndSite.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Misc\Age_Common_GetDiscountMapping.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_GetById.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\User management\Age_Admin_GetAll.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_GetBySite.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\User management\Age_Admin_Update.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_GetByUsername.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\User management\Age_Admin_GetInfo.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_GetUserByFunctionAndSite.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\User management\Age_Admin_Insert.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_GetUserFunctionPolicy.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetStatus.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_GetUserListSiteFunctionKeyPolicy.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_29.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_GetUserSiteFunctionKeyPolicy.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Calculate_29_PreCal.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_GetUserSiteLevel.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Message\Dot_Msg_GetPriMsgCount.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_Insert.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Message\Dot_Msg_GetTopPriMessage24.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_Logout.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Report\Outstanding\Age_Rpt_Outstanding.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_ReCheckIn.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Report\Outstanding\Age_Rpt_Outstanding_Member.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_Search.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Report\Result\Age_Result_Outright.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_SearchByUsername.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Report\Result\Age_Result_SelAvaiDate.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_SearchExcludeFunction.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Report\Result\Age_Result_SportSelByDate.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_SSOCheckIn.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Function\StrSplit_Key.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_SSOGetTime.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Acc_BettransSelBet_BatchMsg.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_UpgradeUserToPortalAdmin.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Report\Winloss\Age_Rpt_WinLoss.sql">
+    <NotInBuild Include="CSD Site\Admin\DBA_Exec.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Report\Winloss\Age_Rpt_WinLoss_Member.sql">
+    <NotInBuild Include="Agent Site\Report\Winloss\Age_Rpt_MatchSelResultEntered.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Admin\Exchange Rate\Age_Exchange_GetAll.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_GetId.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Admin\Exchange Rate\Age_Exchange_GetByCurrency.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Admin\Exchange Rate\Age_Exchange_GetById.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelMatchResult.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Admin\Exchange Rate\Age_Exchange_InsertRate.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelTransaction.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Admin\Exchange Rate\Age_Exchange_UpdateRate.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelWinloss.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Admin\AdminInfo\NAP_AdminInfo_Update.sql">
+    <NotInBuild Include="Agent Site\Message\Dot_Msg_GetPrivateMessage.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Admin\AdminInfo\NAP_AdminIns.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Cust\NAP_Cust_GetByUsername.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Cust\NAP_Cust_Insert.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Cust\NAP_Cust_Update.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Cust\NAP_Cust_UpdatePassword.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Function\NAP_Function_AssignFunctionToGroups.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Function\NAP_Function_AssignFunctionToUsers.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Function\NAP_Function_Duplicate.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Function\NAP_Function_GetAll.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Function\NAP_Function_GetByGroup.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Function\NAP_Function_GetByGroupAndSite.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Function\NAP_Function_GetById.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Function\NAP_Function_GetByKeyAndSite.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Function\NAP_Function_GetByNameAndSite.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Function\NAP_Function_GetBySite.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Function\NAP_Function_GetByUser.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Function\NAP_Function_GetByUserAndFunctionKeyIncludeGroup.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Function\NAP_Function_GetByUserAndSite.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Function\NAP_Function_GetByUserAndSiteIncludeGroup.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Function\NAP_Function_GetParentById.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Function\NAP_Function_Insert.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Function\NAP_Function_Update.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Function\NAP_Function_UpdateStatus.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Group\NAP_Group_AssignFunction.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Group\NAP_Group_GetAll.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Group\NAP_Group_GetAllWithNumOfUser.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Group\NAP_Group_GetById.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Group\NAP_Group_GetByName.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Group\NAP_Group_GetByUser.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Group\NAP_Group_GetGroupByFunctionAndSite.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Group\NAP_Group_Insert.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Group\NAP_Group_SearchExcludeFunction.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Group\NAP_Group_Update.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Group\NAP_Group_UpdateStatus.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\LogExecSp\NAP_LogExecSp_GetById.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\LogExecSp\NAP_LogExecSp_Search.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\LogFunction\NAP_LogFunction_Insert.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\LogFunction\NAP_LogFunction_Search.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\LogUserLogin\NAP_LogUserLogin_Insert.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\LogUserLogin\NAP_LogUserLogin_Search.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\MenuItem\NAP_MenuItem_GetAll.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\MenuItem\NAP_MenuItem_GetById.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\MenuItem\NAP_MenuItem_GetByNameAndSite.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\MenuItem\NAP_MenuItem_GetBySite.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\MenuItem\NAP_MenuItem_GetByUserAndSiteIncludeGroup.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\MenuItem\NAP_MenuItem_GetByUserIncludeGroup.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\MenuItem\NAP_MenuItem_GetParentById.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\MenuItem\NAP_MenuItem_Insert.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\MenuItem\NAP_MenuItem_Search.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\MenuItem\NAP_MenuItem_Update.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\MenuItem\NAP_MenuItem_UpdateStatus.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Site\NAP_Site_GetAll.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Site\NAP_Site_GetAllSiteUrl.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Site\NAP_Site_GetAllWithNumOfUser.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Site\NAP_Site_GetById.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Site\NAP_Site_GetByName.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Site\NAP_Site_GetByUser.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Site\NAP_Site_GetSiteURLById.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Site\NAP_Site_GetSiteURLBySiteId.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Site\NAP_Site_GetSiteURLByUser.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Site\NAP_Site_GetUserSiteLevel.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Site\NAP_Site_InsertSiteURL.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Site\NAP_Site_InsertWithSiteURL.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Site\NAP_Site_Update.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Site\NAP_Site_UpdateDefaultSiteURL.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Site\NAP_Site_UpdateSiteURL.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Site\NAP_Site_UpdateStatus.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_AssignFunction.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_AssignSite.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_CheckIn.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_DeleteUserFromNAPAdmin.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_GetAll.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_GetAllByUsernameGroupSite.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_GetByGroupAndSite.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_GetById.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_GetBySite.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_GetByUsername.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_GetUserByFunctionAndSite.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_GetUserFunctionPolicy.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_GetUserListSiteFunctionKeyPolicy.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_GetUserSiteFunctionKeyPolicy.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_GetUserSiteLevel.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_Insert.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_Logout.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_ReCheckIn.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_Search.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_SearchByUsername.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_SearchExcludeFunction.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_SSOCheckIn.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_SSOGetTime.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_UpgradeUserToPortalAdmin.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\DBA_Exec.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_SelSports.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_UserLog_Settle_MatchSelByID.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_ConfirmedAction.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_ConfirmedActionParlay.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_GetConfirmedAction.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_GetMatchLogDetail.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_LeagueSel.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_MatchGetResult.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_MatchSel.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_MatchSelCompleted.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_MatchSelCompletedHT.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_MatchSelDetail.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_MatchSelNumberGame.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_MatchSelNumberGameDetail.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_UserLog_Settle_MatchSelByCode.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_HedgeMatch_Update.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Parlay\Acc_BettransDelSpecialDel_MixParlay.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Report\Winloss\Age_Rpt_MatchSelResultEntered.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_GetId.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelMatchResult.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Set_MatchSelInfo.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelTransaction.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelWinloss.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_UpdatePositionTaking.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_GetPositionTakingForUpdate.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_GetPositionTaking.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdateStatus.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_AgentUser_Insert.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_AgentUser_UpdateStatus.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_UpdateStatus.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Message\Dot_Msg_GetPrivateMessage.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Message\Dot_Msg_GetPublicMessage.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_AgentUser_GetInfo.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_GetInfo.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\DBA_Agent_GetPT.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\DBA_Customer_GetPT.sql">
+    <NotInBuild Include="Agent Site\Message\Dot_Msg_GetPublicMessage.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="API\Mem_API_BettransInsTransaction.sql">
@@ -989,121 +626,55 @@
     <NotInBuild Include="API\Mem_API_GetCustBalance.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelSystemParlay_Details.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelSystemParlay_Details.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelParlayDetail.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelParlayDetail.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="API\Mem_API_GetFundTrans.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Write Log\WriteLog_UserLog_T.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelMatchResultParlay.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Write Log\WriteLog_UserLog_P.sql">
+    <NotInBuild Include="Agent Site\Function\f_Sport_GetNameByType.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Write Log\WriteLog_ExchangeRate.sql">
+    <NotInBuild Include="Agent Site\Function\f_Msg_GetContentById.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Write Log\WriteLog_Settlement_Checking.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_Authenticate.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Write Log\WriteLog_Settlement_Settle.sql">
+    <NotInBuild Include="Agent Site\Message\Dot_Msg_GetNotSpecialMessage.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Others\Acc_SelRefNo.sql">
+    <NotInBuild Include="Agent Site\Message\Dot_Msg_GetSpecialMessage.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Write Log\WriteLog_RunSpAgent.sql">
+    <NotInBuild Include="Agent Site\Message\Age_CustomerUpdMessagesRead.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Write Log\WriteLog_RunSpCust.sql">
+    <NotInBuild Include="Agent Site\Function\f_Bet_GetNameByType.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelMatchResultParlay.sql">
+    <NotInBuild Include="Agent Site\Message\Age_Msg_GetByCustomer.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Function\f_Sport_GetNameByType.sql">
+    <NotInBuild Include="Agent Site\Message\Age_Msg_UpdateRead.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Function\f_Msg_GetContentById.sql">
+    <NotInBuild Include="Agent Site\View Log\ReadLog_RunSpAgent.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetDiscountToAgent.sql">
+    <NotInBuild Include="Agent Site\View Log\WriteLog_RunSpCust.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetDiscountToCustomer.sql">
+    <NotInBuild Include="Agent Site\View Log\ReadLog_RunSpCust.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetPositionTakingToAgent.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetPositionTakingToCustomer.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_Authenticate.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_GetParentInfo.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_GetUplineInfo.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\DBA_Agent_GetPTToAgent.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\DBA_Agent_GetPTToCustomer.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Message\Dot_Msg_GetNotSpecialMessage.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Message\Dot_Msg_GetSpecialMessage.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Message\Age_CustomerUpdMessagesRead.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Unit Test\AgentK.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Unit Test\AgentN.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Unit Test\DirectMember.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Unit Test\InDirectMember.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Unit Test\MainShareHolder.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Function\f_Bet_GetNameByType.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Message\Age_Msg_GetByCustomer.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Message\Age_Msg_UpdateRead.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\View Log\ReadLog_RunSpAgent.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\View Log\WriteLog_RunSpCust.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\View Log\ReadLog_RunSpCust.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\View Log\WriteLog_RunSpAgent.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Write Log\Task_CheckWriteLogFailed.sql">
+    <NotInBuild Include="Agent Site\View Log\WriteLog_RunSpAgent.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="DBA\BalanceDebitCredit\Dot_BalanceUpdCredit.sql">
@@ -1118,25 +689,16 @@
     <NotInBuild Include="DBA\BalanceDebitCredit\Task_BalanceUpdDebit.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetByUserName.sql">
+    <NotInBuild Include="CSD Site\Admin\Log\DBA_ViewLogByID.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Log\DBA_ViewLogByID.sql">
+    <NotInBuild Include="CSD Site\Admin\Log\f_GEN_Tsql.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Log\f_GEN_Tsql.sql">
+    <NotInBuild Include="CSD Site\Admin\Log\NAP_GetLogRunSPByID.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Log\NAP_GetLogRunSPByID.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Log\NAP_LogRunSp_Insert.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Apl_ExecRep_00.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Acc_Apl_ExecRep_01.sql">
+    <NotInBuild Include="CSD Site\Admin\Log\NAP_LogRunSp_Insert.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="DBA\Move bet - Balance Up\Balance Up\Balance_Insert_Bettrans.sql">
@@ -1226,112 +788,91 @@
     <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\Task_DailySummary_ProdDB_Delete.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Report\Result\Age_Result_MatchSelBySport.sql">
+    <NotInBuild Include="Agent Site\Report\Result\Age_Result_MatchSelBySport.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Wagers\Age_Wagers_SelLeague.sql">
+    <NotInBuild Include="Agent Site\Wagers\Age_Wagers_SelLeague.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\View Log\ReadLog_Login.sql">
+    <NotInBuild Include="Agent Site\View Log\ReadLog_Login.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\View Log\WriteLog_AgentLog_Login.sql">
+    <NotInBuild Include="Agent Site\View Log\WriteLog_AgentLog_Login.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Wagers\Age_Wagers_SC_1_3_5.sql">
+    <NotInBuild Include="Agent Site\Wagers\Age_Wagers_SC_1_3_5.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Wagers\Age_Wagers_SC_7_8_15.sql">
+    <NotInBuild Include="Agent Site\Wagers\Age_Wagers_SC_7_8_15.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Wagers\Age_Wagers_SC_4_30_16.sql">
+    <NotInBuild Include="Agent Site\Wagers\Age_Wagers_SC_4_30_16.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Wagers\Age_Wagers_SC_2_12_6.sql">
+    <NotInBuild Include="Agent Site\Wagers\Age_Wagers_SC_2_12_6.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Wagers\Age_Wagers_BK_1_2_3.sql">
+    <NotInBuild Include="Agent Site\Wagers\Age_Wagers_BK_1_2_3.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Wagers\Age_Wagers_BK_Special.sql">
+    <NotInBuild Include="Agent Site\Wagers\Age_Wagers_BK_Special.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Wagers\Age_Wagers_BK_7_8_12.sql">
+    <NotInBuild Include="Agent Site\Wagers\Age_Wagers_BK_7_8_12.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Wagers\Age_Wagers_SC_9_29.sql">
+    <NotInBuild Include="Agent Site\Wagers\Age_Wagers_SC_9_29.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Wagers\Age_Wagers_BK_9_29.sql">
+    <NotInBuild Include="Agent Site\Wagers\Age_Wagers_BK_9_29.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Wagers\Age_Wagers_SC_Special.sql">
+    <NotInBuild Include="Agent Site\Wagers\Age_Wagers_SC_Special.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Wagers\Age_Wagers_SelDateBySports.sql">
+    <NotInBuild Include="Agent Site\Wagers\Age_Wagers_SelDateBySports.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelWagers.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelWagers.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_AgentViewAgent.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus_AgentViewAgent.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_AgentViewCust.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus_AgentViewCust.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_SuperViewAgent.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus_SuperViewAgent.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_SuperViewCust.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus_SuperViewCust.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_SuperViewSuper.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus_SuperViewSuper.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelWinloss_AgentViewCust.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelWinloss_AgentViewCust.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelWinloss_SuperViewCust.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelWinloss_SuperViewCust.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Wagers\Age_Wagers_Outright.sql">
+    <NotInBuild Include="Agent Site\Wagers\Age_Wagers_Outright.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Function\NAP_Functions_GenerateNAPFunction.sql">
+    <NotInBuild Include="CSD Site\Admin\Function\NAP_Functions_GenerateNAPFunction.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_ChangeUserSiteStatus.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_ChangeUserSiteStatus.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Wagers\Age_Wagers_RunningBall.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Auto Settlement\Admin_AutoSettlement_GenerateCommand.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Auto Settlement\Task_AutoSettlement.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Auto Settlement\Task_AutoSettlement_CleanUp.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Auto Settlement\Task_AutoSettlement_Loop.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Auto Settlement\Admin_AutoSettlement_UpdateFlag.sql">
+    <NotInBuild Include="Agent Site\Wagers\Age_Wagers_RunningBall.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\Task_BalanceCheck.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Auto Settlement\Admin_AutoSettlement_GetFlag.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="DBA\Task\Task_Sync_CustomerLog.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Auto Settlement\Admin_AutoSettlement_ClearFailAction.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\IBC\ExecRep_APL_01.sql">
@@ -1358,48 +899,6 @@
     <NotInBuild Include="DBA\Task\DBA_ReIndex.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Acc_Apl_ExecRep_02.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Acc_Set_ConfirmedActionOutright.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Admin_AutoSettlement_GenerateCommandOutright.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Admin_Calculate_10.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Dot_Admin_SettleOutright_Event.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Dot_Admin_SettleOutright_Trans.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\IBC\Dot_Admin_SettleOutright_Event.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\IBC\Dot_Admin_SettleOutright_Trans.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\IBC\table outright_log.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Acc_Set_OutrightSel.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Acc_Set_OutrightSelDetail.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Admin_AutoSettlement_ClearFailActionOutright.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Admin_AutoSettlement_UpdateFlagOutright.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Write Log\WriteLog_Settlement_SettleOutright.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="DBA\Task\DBA_GetSQLErrorLogEvents.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1415,9 +914,6 @@
     <NotInBuild Include="DBA\Task\TASK_CheckFreeSpace.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Acc_Set_LeagueSelOutright.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="DBA\Task\Task_BackupFull_RepDB.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -1430,118 +926,49 @@
     <NotInBuild Include="DBA\Task\Task_BackupFull_LogDB.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Acc_Set_GetConfirmedActionOutright.sql">
+    <NotInBuild Include="Agent Site\Admin\AccountInfo\Age_Agent_GetAgentDownline.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Outright\Acc_Set_OutrightSelInfo.sql">
+    <NotInBuild Include="Agent Site\Admin\AccountInfo\Age_Agent_GetAgentDownlinePath.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Early Kickoff\Acc_BettransDelSpecialDel_EarlyKO.sql">
+    <NotInBuild Include="Agent Site\Admin\AccountInfo\Age_Agent_GetAllInfo.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\Early Kickoff\Acc_BettransSelSpecialDel_EarlyKO.sql">
+    <NotInBuild Include="Agent Site\Admin\AccountInfo\Age_Agent_GetAllMainShareHolder.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Admin\AccountInfo\Age_Agent_GetAgentDownline.sql">
+    <NotInBuild Include="Agent Site\Admin\AccountInfo\Age_Agent_GetByUsername.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Admin\AccountInfo\Age_Agent_GetAgentDownlinePath.sql">
+    <NotInBuild Include="Agent Site\Admin\AccountInfo\Age_Agent_GetCustomerDownlinePath.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Admin\AccountInfo\Age_Agent_GetAllInfo.sql">
+    <NotInBuild Include="Agent Site\Admin\AccountInfo\Age_Agent_GetMainShareHolderByMember.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Admin\AccountInfo\Age_Agent_GetAllMainShareHolder.sql">
+    <NotInBuild Include="Agent Site\Admin\AccountInfo\Age_Agent_GetMemberDownline.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Admin\AccountInfo\Age_Agent_GetByUsername.sql">
+    <NotInBuild Include="Agent Site\Admin\AccountInfo\Age_Agent_SuggestByUsername.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Admin\AccountInfo\Age_Agent_GetCustomerDownlinePath.sql">
+    <NotInBuild Include="Agent Site\Admin\AccountInfo\Age_Customer_GetAllInfo.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Admin\AccountInfo\Age_Agent_GetMainShareHolderByMember.sql">
+    <NotInBuild Include="Agent Site\Admin\AccountInfo\Age_Customer_GetByUsername.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Admin\AccountInfo\Age_Agent_GetMemberDownline.sql">
+    <NotInBuild Include="Agent Site\Report\Winloss\Age_Rpt_WinLoss_AgentViewAgent.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Admin\AccountInfo\Age_Agent_SuggestByUsername.sql">
+    <NotInBuild Include="Agent Site\Report\Winloss\Age_Rpt_WinLoss_AgentViewCust.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Admin\AccountInfo\Age_Customer_GetAllInfo.sql">
+    <NotInBuild Include="Agent Site\Report\Winloss\Age_Rpt_WinLoss_SuperViewAgent.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Admin\AccountInfo\Age_Customer_GetByUsername.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Report\Winloss\Age_Rpt_WinLoss_AgentViewAgent.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Report\Winloss\Age_Rpt_WinLoss_AgentViewCust.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Report\Winloss\Age_Rpt_WinLoss_SuperViewAgent.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Report\LineSportCredits\Age_Rpt_LineSportCredits.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_CheckBelongToUplines.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_QueryUplineAgent.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_UpdateBetLimitMultiple.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_UpdateDiscountMultiple.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_UpdatePositionTakingMultiple.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_UpdateSettingMultiple.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\DBA_CheckDataIntegrity.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="App Log\ReadLog_AppLog_GetAllCategory.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="App Log\ReadLog_AppLog_GetAllMachine.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="App Log\ReadLog_AppLog_GetLog.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="App Log\ReadLog_AppLog_GetMachineByID.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="App Log\ReadLog_AppLog_GetMachineByType.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="App Log\RemoveLog_AppLog_Log.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="App Log\UpdateLog_AppLog_Machine.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="App Log\UpdateLog_AppLog_MonitorLog.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="App Log\WriteLog_AppLog.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="App Log\WriteLog_AppLog_Category.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="App Log\WriteLog_AppLog_CategoryLog.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="App Log\WriteLog_AppLog_Machine.sql">
+    <NotInBuild Include="Agent Site\Report\LineSportCredits\Age_Rpt_LineSportCredits.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Maintenance\DBA_GrantPermissions.sql">
@@ -1610,88 +1037,31 @@
     <NotInBuild Include="Maintenance\Mail_UpdateMailStatus.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Report\02a. Match Win Loss\Acc_Rpt_MatchWinloss2_New.sql">
+    <NotInBuild Include="CSD Site\Exchange\Acc_ExchangeIns.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Report\02a. Match Win Loss\Acc_Rpt_MatchWinLoss2_New14.sql">
+    <NotInBuild Include="CSD Site\Exchange\Acc_ExchangeSelAccount.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Report\02a. Match Win Loss\Acc_Rpt_WinlossByBettype.sql">
+    <NotInBuild Include="CSD Site\Exchange\Acc_ExchangeSelByID.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Report\02a. Match Win Loss\Acc_Rpt_WinlossByBettype14.sql">
+    <NotInBuild Include="CSD Site\Exchange\Acc_ExchangeUpd.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Details.sql">
+    <NotInBuild Include="Agent Site\BetList\BK\--Age_BetList_AgentDetail_Winloss.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Details14.sql">
+    <NotInBuild Include="Agent Site\BetList\BK\--Age_BetList_AgentDetail_Winloss_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_OtherSport.sql">
+    <NotInBuild Include="Agent Site\BetList\BK\--Age_BetList_SelWinloss_AgentViewAgent.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_OtherSport_Bettype.sql">
+    <NotInBuild Include="Agent Site\BetList\BK\--Age_BetList_SelWinloss_SuperViewAgent.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_OtherSport_Bettype14.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_OtherSport14.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Result.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Soccer_Bettype.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Soccer_Bettype14.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Sporttype.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Sporttype14.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Exchange\Acc_ExchangeIns.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Exchange\Acc_ExchangeSelAccount.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Exchange\Acc_ExchangeSelByID.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Exchange\Acc_ExchangeUpd.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\BK\--Age_BetList_AgentDetail_Winloss.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\BK\--Age_BetList_AgentDetail_Winloss_Old.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\BK\--Age_BetList_SelWinloss_AgentViewAgent.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\BK\--Age_BetList_SelWinloss_SuperViewAgent.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\BK\--Age_BetList_SelWinloss_SuperViewSuper.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_Parlay_Advance.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_DailyMixParlayWinloss.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_DailyMixParlayWinloss14.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Report\Daily Mix Parlay Winloss\Acc_Rpt_Parlay_Advance14.sql">
+    <NotInBuild Include="Agent Site\BetList\BK\--Age_BetList_SelWinloss_SuperViewSuper.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="DBA\Task\Task_Sync_NAPLOG.sql">
@@ -1700,103 +1070,67 @@
     <NotInBuild Include="API\Mem_API_GetFundTransBySGSTransId.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_Insert.sql">
+    <NotInBuild Include="CSD Site\Admin\MailingList\NAP_MailingList_Insert.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_Update.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdatePositionTakingAllMember.sql">
+    <NotInBuild Include="CSD Site\Admin\MailingList\NAP_MailingList_Update.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="API\Mem_API_GetExchange.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Report\Result\BK\Age_Result_MatchSelByLeague.sql">
+    <NotInBuild Include="Agent Site\Report\Result\BK\Age_Result_MatchSelByLeague.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Report\Result\BK\Age_Result_MatchSelGoalHistory.sql">
+    <NotInBuild Include="Agent Site\Report\Result\BK\Age_Result_MatchSelGoalHistory.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Report\Result\BK\Age_Result_MatchSelNumberGameByLeague.sql">
+    <NotInBuild Include="Agent Site\Report\Result\BK\Age_Result_MatchSelNumberGameByLeague.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Report\Result\BK\Age_Result_LeagueSelByDate.sql">
+    <NotInBuild Include="Agent Site\Report\Result\BK\Age_Result_LeagueSelByDate.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_CheckBelongToUplinesForAgent.sql">
+    <NotInBuild Include="CSD Site\Admin\User\NAP_User_CheckPermission.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Admin\User\NAP_User_CheckPermission.sql">
+    <NotInBuild Include="Agent Site\BetList\BK\Age_BetList_SelWinloss_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\BK\Age_BetList_SelWinloss_Old.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\BK\Age_BetList_AgentDetail_Old.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdatePositionTaking_xtest3.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdateDirectMemberPositionTaking.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdatePositionTaking_xtest5.sql">
+    <NotInBuild Include="Agent Site\BetList\BK\Age_BetList_AgentDetail_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\Task_SummaryReport_GenData.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\DeleteBetID\Acc_BettransDelBet.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelWinloss_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Special Delete\DeleteBetID\Acc_BetsSelBetList_ByTransID.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_GetPositionTakingForUpdateDirectMember.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_AgentDetail_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdateDirectMemberPositionTaking_xtest.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus_SuperViewCust_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdatePositionTaking_xtest6.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus_SuperViewSuper_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Customer_Insert_xtest.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus_SuperViewAgent_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_CheckDirectMember.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus_AgentViewCust_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelWinloss_Old.sql">
+    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus_AgentViewAgent_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_Old.sql">
+    <NotInBuild Include="Agent Site\BetList\TotalBets\Age_BetList_TotalBets_SelRunningByBettype.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_AgentDetail_Old.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_SuperViewCust_Old.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_SuperViewSuper_Old.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_SuperViewAgent_Old.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_AgentViewCust_Old.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\Age_BetList_SelByDateMemStatus_AgentViewAgent_Old.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\TotalBets\Age_BetList_TotalBets_SelRunningByBettype.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\BetList\TotalBets\Age_BetList_TotalBets_SelRunningByBettypeMatch.sql">
+    <NotInBuild Include="Agent Site\BetList\TotalBets\Age_BetList_TotalBets_SelRunningByBettypeMatch.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="OWA\OAS_SelCurrency.sql">
@@ -1821,24 +1155,6 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="DBA\Task\Task_BackupFull_SummaryDB.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Function_GetAll.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_GetParentInfoWithAgentUser.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_AgentUser_AssignFunction.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_AgentUser_GetByAgent.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_AgentUser_GetFunctionPolicy.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_AgentUser_GetUserFunctionPolicy.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="OWA\Task_PrepareStaging_ALL.sql">
@@ -1877,28 +1193,28 @@
     <NotInBuild Include="API\DeleteAccount\Age_AgentUser_Archive.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_GetByFunctionKeyAndSite.sql">
+    <NotInBuild Include="CSD Site\Admin\MailingList\NAP_MailingList_GetByFunctionKeyAndSite.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_GetById.sql">
+    <NotInBuild Include="CSD Site\Admin\MailingList\NAP_MailingList_GetById.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_GetByKey.sql">
+    <NotInBuild Include="CSD Site\Admin\MailingList\NAP_MailingList_GetByKey.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_GetByName.sql">
+    <NotInBuild Include="CSD Site\Admin\MailingList\NAP_MailingList_GetByName.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_GetByUserAndSiteIncludeGroup.sql">
+    <NotInBuild Include="CSD Site\Admin\MailingList\NAP_MailingList_GetByUserAndSiteIncludeGroup.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_UpdateIsInternal.sql">
+    <NotInBuild Include="CSD Site\Admin\MailingList\NAP_MailingList_UpdateIsInternal.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Admin\MailingList\NAP_MailingList_UpdateStatus.sql">
+    <NotInBuild Include="CSD Site\Admin\MailingList\NAP_MailingList_UpdateStatus.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Admin\Function\NAP_Function_GetByParentKeyAndSite.sql">
+    <NotInBuild Include="CSD Site\Admin\Function\NAP_Function_GetByParentKeyAndSite.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="OWA\Task_CheckSumdata.sql">
@@ -1910,131 +1226,843 @@
     <NotInBuild Include="DBA\Task\Task_MoveCustArchive.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Message\Acc_Msg_DeleteMessage.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Message\Acc_Msg_GetAllSite.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Message\Acc_Msg_GetListMessage.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Message\Acc_Msg_GetRecipientInfo.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Message\Acc_Msg_GetUplineById.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Message\Acc_Msg_InsertMessage.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="CSD\Message\Acc_Msg_UpdateMessage.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdatePositionTaking_xtest7.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_UpdatePositionTaking_xtest8.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="DBA\ExecRep\Acc_ExecRep_00.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\View Log\ReadLog_RunSpAgent_xtest.sql">
+    <NotInBuild Include="Agent Site\View Log\ReadLog_RunSpAgent_xtest.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\View Log\ReadLog_RunSpCust_xtest.sql">
+    <NotInBuild Include="Agent Site\View Log\ReadLog_RunSpCust_xtest.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\CheckBet\Acc_Rpt_CheckBet_Normal.sql">
+    <NotInBuild Include="CSD Site\CheckBet\Acc_Rpt_CheckBet_Normal.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\CheckBet\Acc_Rpt_CheckBet_Reject.sql">
+    <NotInBuild Include="CSD Site\CheckBet\Acc_Rpt_CheckBet_Reject.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\CheckBet\Acc_Rpt_CheckBet.sql">
+    <NotInBuild Include="CSD Site\CheckBet\Acc_Rpt_CheckBet.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\CheckBet\Task_Bets_Trans.sql">
+    <NotInBuild Include="CSD Site\CheckBet\Task_Bets_Trans.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\CheckBet\Task_Bets_TransReject.sql">
+    <NotInBuild Include="CSD Site\CheckBet\Task_Bets_TransReject.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\CheckBet\Task_ClearOldBet.sql">
+    <NotInBuild Include="CSD Site\CheckBet\Task_ClearOldBet.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Customer Management\Acc_Agent_GetAgentByParentId.sql">
+    <NotInBuild Include="Agent Site\Function\f_GetAgentUplineBetStatusById.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Customer Management\Acc_Agent_GetAgentUplinePath.sql">
+    <NotInBuild Include="Agent Site\Function\f_GetAgentUplineStatusById.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Customer Management\Acc_Agent_GetHierarchyById.sql">
+    <NotInBuild Include="Maintenance\App Log\ReadLog_AppLog_GetAllCategory.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Customer Management\Acc_Customer_GetCustomerByAgentId.sql">
+    <NotInBuild Include="Maintenance\App Log\ReadLog_AppLog_GetAllMachine.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Customer Management\Age_Agent_GetAgentDownline.sql">
+    <NotInBuild Include="Maintenance\App Log\ReadLog_AppLog_GetLog.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Customer Management\Age_Agent_GetByAgent.sql">
+    <NotInBuild Include="Maintenance\App Log\ReadLog_AppLog_GetMachineByID.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Customer Management\Age_Agent_GetInfo.sql">
+    <NotInBuild Include="Maintenance\App Log\ReadLog_AppLog_GetMachineByType.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Customer Management\Age_Agent_GetStatus.sql">
+    <NotInBuild Include="Maintenance\App Log\RemoveLog_AppLog_Log.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Customer Management\Age_Agent_SuggestByUsername.sql">
+    <NotInBuild Include="Maintenance\App Log\UpdateLog_AppLog_Machine.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Customer Management\Age_Customer_GetByAgent.sql">
+    <NotInBuild Include="Maintenance\App Log\UpdateLog_AppLog_MonitorLog.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Customer Management\Age_Customer_GetByUsername.sql">
+    <NotInBuild Include="Maintenance\App Log\WriteLog_AppLog.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Customer Management\Age_Customer_GetInfo.sql">
+    <NotInBuild Include="Maintenance\App Log\WriteLog_AppLog_Category.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Function\f_Agent_GetSportCreditById.sql">
+    <NotInBuild Include="Maintenance\App Log\WriteLog_AppLog_CategoryLog.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Function\f_Customer_GetSportCreditById.sql">
+    <NotInBuild Include="Maintenance\App Log\WriteLog_AppLog_Machine.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Function\f_GetAgentUplineBetStatusById.sql">
+    <NotInBuild Include="Customer Setting\Age_Function_GetAll.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Function\f_GetAgentUplineStatusById.sql">
+    <NotInBuild Include="Customer Setting\Agent_GetByUserName.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent\Customer Setting\Age_Agent_ResetDefaultBetLimit.sql">
+    <NotInBuild Include="Customer Setting\Agent_Login.sql">
+      <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="CSD\Settlement\Admin_Settlement_CloseMatch.sql">
+    <NotInBuild Include="Customer Setting\BK\Test\SophiaTest_InsMember.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\BK\Test\Test_ExecutePerformance.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\BK\Test\Test_ExecuteReport.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\BK\Test\Test_ReportPerformance.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\BK\Test\zzz_BetTransCorrection.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\BK\Test\zzz_BetTransCorrection_xtest.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\BK\Test\zzz_GenerateDepthFirstDownline.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\BK\Test\zzz_GenerateDirectDownlines.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\BK\Test\zzz_GenerateDirectPlayer.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\BK\Test\zzz_RandomFloat.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\BK\Test\zzz_RandomInteger.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\BK\Unit Test\AgentK.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\BK\Unit Test\AgentN.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\BK\Unit Test\DirectMember.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\BK\Unit Test\InDirectMember.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\BK\Unit Test\MainShareHolder.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Update\Age_Agent_ResetDefaultBetLimit.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Update\Age_Agent_UpdateBetLimit.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Update\Age_Agent_UpdateDirectMemberPositionTaking.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Update\Age_Agent_UpdateDirectMemberPositionTaking_xtest.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Update\Age_Agent_UpdateDiscount.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Update\Age_Agent_UpdatePositionTaking.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Update\Age_Agent_UpdatePositionTaking_xtest3.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Update\Age_Agent_UpdatePositionTaking_xtest5.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Update\Age_Agent_UpdatePositionTaking_xtest6.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Update\Age_Agent_UpdatePositionTaking_xtest7.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Update\Age_Agent_UpdatePositionTaking_xtest8.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Update\Age_Agent_UpdatePositionTakingAllMember.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Update\Age_Agent_UpdateSetting.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Update\Age_Agent_UpdateStatus.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Insert\Age_Agent_Insert.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Update\Age_Customer_UpdateStatus.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Update\Age_Customer_UpdateBetLimit.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Update\Age_Customer_UpdateBetLimitMultiple.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Update\Age_Customer_UpdateDiscount.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Update\Age_Customer_UpdateDiscountMultiple.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Update\Age_Customer_UpdatePositionTaking.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Update\Age_Customer_UpdatePositionTakingMultiple.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Update\Age_Customer_UpdateSetting.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Update\Age_Customer_UpdateSettingMultiple.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Insert\Age_Customer_Insert.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Insert\Age_Customer_Insert_xtest.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent User\Insert\Age_AgentUser_Insert.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent User\Update\Age_AgentUser_UpdateStatus.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent User\Update\Age_AgentUser_AssignFunction.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Customer Setting\DBA_Agent_GetPT.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Customer Setting\DBA_Agent_GetPTToAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Customer Setting\DBA_Agent_GetPTToCustomer.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Customer Setting\DBA_CheckDataIntegrity.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Customer Setting\DBA_Customer_GetPT.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\Agent Site\Age_Agent_CheckBelongToUplines.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\Agent Site\Age_Agent_GetStatus.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\Agent Site\Age_Agent_CheckBelongToUplinesForAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\Agent Site\Age_Agent_CheckDirectMember.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <Build Include="Customer Setting\Agent\Select\Agent Site\Age_Agent_CheckDownlineBelongToAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </Build>
+    <NotInBuild Include="Customer Setting\Agent\Select\Agent Site\Age_Agent_CheckUpdatePermission.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\Agent Site\Age_Agent_GetBetLimit.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\Agent Site\Age_Agent_GetBetLimitForUpdate.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\Agent Site\Age_Agent_GetByAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\Agent Site\Age_Agent_GetByUserName.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\Agent Site\Age_Agent_GetDiscount.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\Agent Site\Age_Agent_GetDiscountForUpdate.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\Agent Site\Age_Agent_GetDiscountToAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\Agent Site\Age_Agent_GetDiscountToCustomer.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\Agent Site\Age_Agent_GetInfo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\Agent Site\Age_Agent_GetParentInfo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\Agent Site\Age_Agent_GetParentInfoWithAgentUser.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\Agent Site\Age_Agent_GetPositionTaking.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\Agent Site\Age_Agent_GetPositionTakingForUpdate.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\Agent Site\Age_Agent_GetPositionTakingToAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\Agent Site\Age_Agent_GetPositionTakingToCustomer.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent User\Select\Agent Site\Age_AgentUser_GetByAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent User\Select\Agent Site\Age_AgentUser_GetUserFunctionPolicy.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent User\Select\Agent Site\Age_AgentUser_GetFunctionPolicy.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent User\Select\Agent Site\Age_AgentUser_GetInfo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Select\Agent Site\Age_Customer_GetBetLimit.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Select\Agent Site\Age_Customer_SearchByUsername.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Select\Agent Site\Age_Customer_GetBetLimitForUpdate.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Select\Agent Site\Age_Customer_GetByAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Select\Agent Site\Age_Customer_GetDiscount.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Select\Agent Site\Age_Customer_GetDiscountForUpdate.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Select\Agent Site\Age_Customer_GetInfo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Select\Agent Site\Age_Customer_GetParentInfo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Select\Agent Site\Age_Customer_GetPositionTaking.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Select\Agent Site\Age_Customer_GetPositionTakingForUpdate.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Select\Agent Site\Age_Customer_GetPositionTakingForUpdateDirectMember.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Select\Agent Site\Age_Customer_GetUplineInfo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Select\Agent Site\Age_Customer_QueryUplineAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\CSD site\Acc_Agent_GetAgentByParentId.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\CSD site\Acc_Agent_SuggestByUsername.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\CSD site\Acc_Agent_GetAgentDownline.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\CSD site\Acc_Agent_GetAgentUplinePath.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\CSD site\Acc_Agent_GetByAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\CSD site\Acc_Agent_GetHierarchyById.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\CSD site\Acc_Agent_GetInfo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Agent\Select\CSD site\Acc_Agent_GetStatus.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Select\CSD Site\Acc_Customer_GetByAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Select\CSD Site\Acc_Customer_GetInfo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Select\CSD Site\Acc_Customer_GetByUsername.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Customer Setting\Customer\Select\CSD Site\Acc_Customer_GetCustomerByAgentId.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Task\Task_DailySummary.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Function\f_GetAgentUplineBetStatusById.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Function\f_GetAgentUplineStatusById.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Message\Acc_Msg_DeleteMessage.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Message\Acc_Msg_GetAllSite.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Message\Acc_Msg_GetListMessage.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Message\Acc_Msg_GetMessageById.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Message\Acc_Msg_GetRecipientInfo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Message\Acc_Msg_GetUplineById.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Message\Acc_Msg_InsertMessage.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Message\Acc_Msg_UpdateMessage.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Message\Dot_Msg_DelMessage.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Message\Dot_Msg_GetMessage.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Message\Dot_Msg_SetMessage.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Message\Dot_Msg_SetUsrMessage.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Others\Acc_SelRefNo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Report\02a. Match Win Loss\Acc_Rpt_MatchWinloss2_New.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Report\02a. Match Win Loss\Acc_Rpt_MatchWinLoss2_New14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Report\02a. Match Win Loss\Acc_Rpt_WinlossByBettype.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Report\02a. Match Win Loss\Acc_Rpt_WinlossByBettype14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Details.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Details14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_OtherSport.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_OtherSport_Bettype.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_OtherSport_Bettype14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_OtherSport14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Result.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Soccer_Bettype.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Soccer_Bettype14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Sporttype.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Report\02h. Daily Winloss\Acc_Rpt_DailyWLDirect_Sporttype14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Report\Daily Mix Parlay Winloss\Acc_Rpt_DailyMixParlayWinloss.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Report\Daily Mix Parlay Winloss\Acc_Rpt_DailyMixParlayWinloss14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Report\Daily Mix Parlay Winloss\Acc_Rpt_Parlay_Advance.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Report\Daily Mix Parlay Winloss\Acc_Rpt_Parlay_Advance14.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Auto Settlement\Admin_AutoSettlement_ClearFailAction.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Auto Settlement\Admin_AutoSettlement_GenerateCommand.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Auto Settlement\Admin_AutoSettlement_GetFlag.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Auto Settlement\Admin_AutoSettlement_UpdateFlag.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Auto Settlement\Task_AutoSettlement.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Auto Settlement\Task_AutoSettlement_CleanUp.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Auto Settlement\Task_AutoSettlement_Loop.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Outright\IBC\Dot_Admin_SettleOutright_Event.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Outright\IBC\Dot_Admin_SettleOutright_Trans.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Outright\IBC\table outright_log.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Outright\Acc_Apl_ExecRep_02.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Outright\Acc_Set_ConfirmedActionOutright.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Outright\Acc_Set_GetConfirmedActionOutright.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Outright\Acc_Set_LeagueSelOutright.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Outright\Acc_Set_OutrightSel.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Outright\Acc_Set_OutrightSelDetail.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Outright\Acc_Set_OutrightSelInfo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Outright\Admin_AutoSettlement_ClearFailActionOutright.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Outright\Admin_AutoSettlement_GenerateCommandOutright.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Outright\Admin_AutoSettlement_UpdateFlagOutright.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Outright\Admin_Calculate_10.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Outright\Dot_Admin_SettleOutright_Event.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Outright\Dot_Admin_SettleOutright_Trans.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Acc_Apl_ExecRep_00.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Acc_Apl_ExecRep_01.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Acc_SelSports.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Acc_Set_ConfirmedAction.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Acc_Set_ConfirmedActionParlay.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Acc_Set_GetConfirmedAction.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Acc_Set_GetMatchLogDetail.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Acc_Set_LeagueSel.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Acc_Set_MatchGetResult.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Acc_Set_MatchSel.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Acc_Set_MatchSelCompleted.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Acc_Set_MatchSelCompletedHT.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Acc_Set_MatchSelDetail.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Acc_Set_MatchSelInfo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Acc_Set_MatchSelNumberGame.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Acc_Set_MatchSelNumberGameDetail.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Acc_UserLog_Settle_MatchSelByCode.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Acc_UserLog_Settle_MatchSelByID.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_1.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_13.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_2.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_22.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_24.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_25.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_26.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_27.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_28.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_29.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_29_PreCal.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_3.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_4.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_5.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_6.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_7.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_8.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_9.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_9m.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_RefundAll.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_RefundFGLG.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_RefundFT.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_RefundHT.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Calculate_Undo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_HedgeMatch_Update.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Match_Update.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Match_UpdateMatchRemark.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Settlement_1.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Settlement_2.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Settlement_3.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Settlement_Checking.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Settlement_CloseMatch.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Settlement_FGLG.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Settlement_Parlay.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Settlement_Refund_All.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Settlement_Refund_FGLG.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Settlement_RefundFT.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Settlement\Admin_Settlement_RefundHT.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\DeleteBetID\Acc_BetsSelBetList_ByTransID.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\DeleteBetID\Acc_BettransDelBet.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\Early Kickoff\Acc_BettransDelSpecialDel_EarlyKO.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\Early Kickoff\Acc_BettransSelSpecialDel_EarlyKO.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\Number Game\Acc_BettransDelSpecial_NumberGame.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\Number Game\Acc_BettransSelSpecialDel_NumberGame.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\Parlay\Acc_BettransDelSpecialDel_MixParlay.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\Parlay\Acc_BettransSelDelSpecial_MixParlay.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\Parlay\Acc_BettransSelSpecialDel_MixParlay.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\RecoverBets\Acc_BettransRecoverBet_NumberGame.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\RecoverBets\Acc_BettransRecoverSpecialBets.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\RecoverBets\Acc_BettransSelRecoverBet_NumberGame.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\RecoverBets\Acc_BettransSelRecoverSpecialBets.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\Tickets Listing\Acc_Rpt_TicketsListing.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\Tickets Listing\Acc_Rpt_TicketsListingDetail.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\Acc_BettransDelSpecial.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\Acc_BettransDelSpecial_LeagueSelOutright.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\Acc_BettransDelSpecial_OutrightSel.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\Acc_BettransSelBet_BatchMsg.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\Acc_BettransSelDelSpecial_Outright.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\Acc_BettransSelSpecialDel.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\Acc_BetTypeSel.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\Acc_ExchangeCurrencySel.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\Acc_MatchSelByID.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Special Delete\Acc_SpecialDel_CheckMatchIdWithRefNo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Write Log\Task_CheckWriteLogFailed.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Write Log\WriteLog_ExchangeRate.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Write Log\WriteLog_RunSpAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Write Log\WriteLog_RunSpCust.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Write Log\WriteLog_Settlement_Checking.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Write Log\WriteLog_Settlement_Settle.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Write Log\WriteLog_Settlement_SettleOutright.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Write Log\WriteLog_UserLog_P.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\Write Log\WriteLog_UserLog_T.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
   <ItemGroup>
-    <Build Include="Agent\Forecast\Age_ScoreMap_SelMatch.sql">
+    <Build Include="Agent Site\Forecast\Age_ScoreMap_SelMatch.sql">
       <SubType>Code</SubType>
     </Build>
-    <Build Include="Agent\Message\Age_CustomerSelMessages.sql">
+    <Build Include="Agent Site\Message\Age_CustomerSelMessages.sql">
       <SubType>Code</SubType>
     </Build>
-    <Build Include="Agent\Message\Acc_Msg_GetTopPubMessage.sql">
+    <Build Include="Agent Site\Message\Acc_Msg_GetTopPubMessage.sql">
       <SubType>Code</SubType>
     </Build>
-    <Build Include="Agent\Message\Dot_Msg_HasPriMessage24.sql">
+    <Build Include="Agent Site\Message\Dot_Msg_HasPriMessage24.sql">
       <SubType>Code</SubType>
     </Build>
-    <Build Include="Agent\Message\Dot_Msg_SetPriMsgRead.sql">
-      <SubType>Code</SubType>
-    </Build>
-    <Build Include="Agent\Customer Setting\Age_Agent_CheckDownlineBelongToAgent.sql">
+    <Build Include="Agent Site\Message\Dot_Msg_SetPriMsgRead.sql">
       <SubType>Code</SubType>
     </Build>
   </ItemGroup>
