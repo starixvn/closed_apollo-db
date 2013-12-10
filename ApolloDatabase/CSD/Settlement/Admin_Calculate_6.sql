@@ -13,51 +13,80 @@ IF @betcount = 0 AND @@SERVERNAME NOT LIKE N'DBIOM%' RETURN
 	DB: SVRTXN/TransDB
 	
 	Revisions:
-		
+		- 20131125@Dan: use temp variable instead of temp tables to prevent problem when executing via replication
 */
-IF @@SERVERNAME IN ('DB04', 'DB042', 'DB043', 'DB044') RETURN
+--IF @@SERVERNAME IN ('DB04', 'DB042', 'DB043', 'DB044') RETURN
 
-Declare @modds smallmoney, @commWinRate smallmoney, @commLostRate smallmoney, @DownlinePT smallmoney
+DECLARE @modds SMALLMONEY, @commWinRate SMALLMONEY, @commLostRate SMALLMONEY
 
-IF OBJECT_ID('tempdb..#ba') IS NOT NULL
-BEGIN
-	DROP TABLE #ba
-END
+DECLARE @ba table (
+	transid bigint , 
+	AgentId int, 
+	DoubleCommLosing bit, 
+	odds smallmoney, 
+	Stake money, 
+	Actual_Stake money,
+	AWinLost money,
+	AComm money,
+	APositionTaking smallmoney, 
+	ADiscount decimal(9,8), 
+	downlinePT smallmoney, 
+	hdp1 smallmoney, 
+	hdp2 smallmoney,	
+	livehomescore smallint, 	
+	liveawayscore smallint, 
+	betteam varchar(10), 
+	bettype smallint, 
+	Status varchar(10), 
+	StatusId tinyint
+	)
 
 --get the needed data to settle for agent
-SELECT ba.transid, ba.[AgentId], [AgentLevel], b.[DoubleCommLosing], b.odds, b.[Stake], b.[Actual_Stake],
-	AWinLost,AComm,APositionTaking, ADiscount, cast(0 as smallmoney) as DownlinePT, 
-	hdp1, hdp2,	livehomescore, 	liveawayscore, betteam, ba.bettype, ba.Status, ba.StatusId
-INTO #ba 
+INSERT INTO @ba (
+	transid , 
+	AgentId , 
+	DoubleCommLosing , 
+	odds , 
+	Stake, 
+	Actual_Stake ,
+	AWinLost ,
+	AComm ,
+	APositionTaking , 
+	ADiscount , 
+	downlinePT, 
+	hdp1 , 
+	hdp2 ,	
+	livehomescore , 	
+	liveawayscore , 
+	betteam , 
+	bettype, 
+	Status , 
+	StatusId
+	)
+
+SELECT ba.transid, 
+	ba.[AgentId], 		
+	b.[DoubleCommLosing], 
+	b.odds, 
+	b.[Stake], 
+	b.[Actual_Stake],
+	AWinLost,AComm,APositionTaking, ADiscount, 
+	sum(ba.APositionTaking) OVER (PARTITION BY ba.transid
+					ORDER BY agentlevel DESC
+					ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS downlinePT, 
+	hdp1, hdp2,	livehomescore, 	liveawayscore, betteam, b.bettype, b.Status, b.StatusId	
 FROM BetTrans B WITH (NOLOCK) JOIN BetTrans_Agent ba WITH (NOLOCK) ON 
 	b.TransId=ba.TransId and ba.matchid=b.matchid AND ba.bettype=b.bettype 
 	JOIN AgentInfo a WITH (NOLOCK) ON a.AgentID=ba.AgentID
 WHERE
 	b.matchid=@matchid AND
-	b.bettype=@bettype AND
-			
+	b.bettype=@bettype AND		
 	--[status] NOT IN (N'VOID', N'REJECT')
 	b.statusID NOT IN (101,102)
-		
---create index		
-CREATE CLUSTERED INDEX IX_tmp on #ba (transid,AgentLevel desc)	
---try again
-IF @@ERROR>0
-	CREATE CLUSTERED INDEX IX_tmp on #ba (transid,AgentLevel desc)	
-		
-DECLARE @prevtransid BIGINT =0 
 	
 -- settle for agent in temporary table
-UPDATE #ba 
+UPDATE @ba 
 SET 
-	@DownlinePT= case when @prevtransid <> transid 
-						then APositionTaking
-						else APositionTaking + @DownlinePT -- accumulated PT for upper agent --> for calculating agent commision
-						end,		
-
-	DownlinePT = @DownlinePT,		
-	@prevtransid = transid,			
-
 	@modds = CASE 
 		WHEN bettype = 1206 AND betteam = cast(cast(@totalgoal as tinyint) as varchar(5)) THEN 1
 		WHEN betteam = '0-1' AND @totalgoal <= 1 THEN 1
@@ -85,11 +114,11 @@ SET
 		END,
 					
 	aComm = CASE
-		WHEN @modds >  0.25 	THEN @commWinRate * adiscount * stake * (1-@DownlinePT)
-		WHEN @modds =  0.25 	THEN @commWinRate * adiscount * stake * (1-@DownlinePT) * 0.5
+		WHEN @modds >  0.25 	THEN @commWinRate * adiscount * stake * (1-DownlinePT)
+		WHEN @modds =  0.25 	THEN @commWinRate * adiscount * stake * (1-DownlinePT) * 0.5
 		WHEN @modds =  0    	THEN 0
-		WHEN @modds = -0.25 	THEN @commLostRate * adiscount * stake * (1-@DownlinePT) * 0.5
-		WHEN @modds < -0.25 	THEN @commLostRate * adiscount * stake * (1-@DownlinePT)
+		WHEN @modds = -0.25 	THEN @commLostRate * adiscount * stake * (1-DownlinePT) * 0.5
+		WHEN @modds < -0.25 	THEN @commLostRate * adiscount * stake * (1-DownlinePT)
 		END,
 		
 	Status = CASE
@@ -102,16 +131,15 @@ SET
 		WHEN @modds = 0 THEN 111 --DRAW
 		WHEN @modds < 0 THEN 113 --LOSE
 		END			
-OPTION (MAXDOP 1) --should use this for quirky update to avoid parallelism problem	
 		
 --settle for BetTrans_Agent
 UPDATE BetTrans_Agent with (ROWLOCK, UPDLOCK)
-SET aWinLost = #ba.AWinLost,
-	aComm = #ba.aComm,			
-	Status = #BA.Status,
-	StatusID = #ba.StatusId			
+SET aWinLost = tmp_ba.AWinLost,
+	aComm = tmp_ba.aComm,			
+	Status = tmp_ba.Status,
+	StatusID = tmp_ba.StatusId			
 FROM BetTrans_Agent 
-		join #ba ON BetTrans_Agent.TransId = #ba.TransId AND BetTrans_Agent.AgentId = #ba.AgentId
+		INNER JOIN @ba tmp_ba ON BetTrans_Agent.TransId = tmp_ba.TransId AND BetTrans_Agent.AgentId = tmp_ba.AgentId
 WHERE BetTrans_Agent.matchid=@matchid AND
 	BetTrans_Agent.bettype=@bettype AND
 	BetTrans_Agent.statusID NOT IN (101,102)
@@ -172,9 +200,9 @@ SET
 			WHEN @modds = -0.25 	THEN @commLostRate * Tdiscount * stake * (1-[TPositionTaking]) * 0.5
 			WHEN @modds < -0.25 	THEN @commLostRate * Tdiscount * stake * (1-[TPositionTaking])
 			END
-from 
-	(SELECT TransId, sum(AWinLost) aWinlost
-		FROM #ba 
+FROM 
+	(	SELECT TransId, sum(AWinLost) aWinlost
+		FROM @ba 
 		GROUP BY TransId) AgentWinlost 
 WHERE
 	AgentWinlost.TransID=BetTrans.TransId AND
@@ -183,6 +211,5 @@ WHERE
 	--[status] NOT IN (N'VOID', N'REJECT')
 	BetTrans.statusID NOT IN (101,102)
 
-DROP TABLE #ba 
 GO
 GRANT EXECUTE ON [dbo].[Admin_Calculate_6] TO [aplweb]
