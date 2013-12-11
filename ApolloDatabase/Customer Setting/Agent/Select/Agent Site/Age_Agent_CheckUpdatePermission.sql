@@ -1,11 +1,3 @@
-ï»¿USE [RepDB]
-GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_CheckUpdatePermission]    Script Date: 6/29/2013 1:37:13 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
 ALTER PROCEDURE [dbo].[Age_Agent_CheckUpdatePermission]
 	@ActorAgentId		INT,
 	@ObjectId			INT,
@@ -19,10 +11,10 @@ AS
  * Task			: Check permission update of agent
  * DB			: SVRCUST.CustDB
  * Revisions	:
- *	â€¢ 
+ *	• 
  * Parameters:
- *	â€¢
- *	â€¢
+ *	•
+ *	•
  *  
  */
 
@@ -66,3 +58,4 @@ BEGIN
 			RETURN
 		END
 END
+
