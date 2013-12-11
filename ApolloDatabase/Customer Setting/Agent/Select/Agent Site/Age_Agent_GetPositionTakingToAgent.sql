@@ -1,12 +1,4 @@
-﻿USE [RepDB]
-GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_GetPositionTakingToAgent]    Script Date: 7/15/2013 2:00:15 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-ALTER PROCEDURE [dbo].[Age_Agent_GetPositionTakingToAgent]
+﻿ALTER PROCEDURE [dbo].[Age_Agent_GetPositionTakingToAgent]
 	@ActorAgentId	INT,
 	@AgentId		INT				= -1,
 	@Username		NVARCHAR(50)	= '',
@@ -19,13 +11,18 @@ AS
  * Created by	: Edward
  * Date			: 20130417
  * Task			: Get agent position taking from current login agent to agent
- * DB			: SVRAGE.RepDB
+ * DB			: SVRCUST.CustDB
  * Revisions	:
- *	•	07122013@Edward : Get the same structure in DB	
+ 	•	07122013@Edward : Get the same structure in DB	
+	•	11192013@Dan : optimize performance 
+
  * Parameters:
- *	•
- *	•
- *  
+ 	@ActorAgentId: parent agent, the agent is currently login
+ 	@AgentId: child agent which parent is viewing
+	@Username: : username of child agent that parent agent is viewing 
+	@SportType: sporttype		
+	@BetType: bettype		
+	@IsLive:is live or nonlive		
  */
 
 BEGIN
@@ -35,46 +32,72 @@ BEGIN
 	DECLARE 
 		@agentHId			HIERARCHYID,
 		@isCheck			BIT,
-		@actorAgentLevel	SMALLINT	
-	
-	SELECT @agentHId = AgentHId
-	FROM AgentInfo WITH (NOLOCK)
-	WHERE AgentId = @AgentId OR Username = @Username	
-
-	SELECT @actorAgentLevel = AgentLevel
+		@actorAgentLevel	SMALLINT,
+		@actorAgentHId		HIERARCHYID	
+		
+	--search by username
+	IF ISNULL(@Username,'') <> ''
+		SELECT @agentHId = AgentHId
+		FROM AgentInfo WITH (NOLOCK)
+		WHERE Username = @Username	
+	ELSE
+		--search by agentid
+		SELECT @agentHId = AgentHId
+		FROM AgentInfo WITH (NOLOCK)
+		WHERE AgentId = @AgentId 
+		
+	SELECT @actorAgentLevel = AgentLevel, @actorAgentHId=AgentHId
 	FROM AgentInfo WITH (NOLOCK)
 	WHERE AgentId = @ActorAgentId
 	
-	SET @isCheck = 1
-
-	IF NOT EXISTS (	SELECT 1
-					FROM AgentInfo WITH (NOLOCK)
-					WHERE 
-						@agentHId.IsDescendantOf(AgentHId) = 1
-						AND AgentId = @ActorAgentId	)
-		BEGIN
-			SET @isCheck = 0	
+	IF NOT(@agentHId.IsDescendantOf(@actorAgentHId) = 1)
+		BEGIN		
+			--no data
+			SELECT NULL AS AgentId,
+				NULL AS AgentLevel,
+				NULL AS Username,
+				NULL AS MaxUpperPositionTaking,
+				NULL AS MaxGivenPositionTaking,
+				NULL AS MinGivenPositionTaking
+			WHERE 0=1
+			RETURN;			
 		END
+
+	;WITH Agent_CTE(agentid, Parentid, AgentLevel, username) as 
+	(
+		SELECT ai.AgentId as agentid, 
+				Parentid, 
+				AgentLevel,
+				username
+		FROM AgentInfo ai  WITH (NOLOCK)
+		WHERE AgentID = @AgentId
+		UNION ALL
+		SELECT ai.AgentId as agentid,
+			   ai.Parentid as Parentid,
+			   ai.AgentLevel,
+				ai.username
+		FROM AgentInfo ai  WITH (NOLOCK) 
+			INNER JOIN Agent_CTE ac ON ac.Parentid = ai.AgentId
+		WHERE ai.AgentLevel >= @actorAgentLevel
+	)
 
 	SELECT 
 		apt.AgentId,
-		ai.AgentLevel,
-		ai.Username,
+		AgentLevel,
+		Username,
 		apt.MaxUpperPositionTaking,
 		apt.MaxGivenPositionTaking,
 		apt.MinGivenPositionTaking
 	FROM 
 		AgentPositionTaking AS apt WITH (NOLOCK)
-		INNER JOIN AgentInfo AS ai WITH (NOLOCK) ON apt.AgentId = ai.AgentId
+		JOIN Agent_CTE ap on ap.agentid=apt.AgentId		
 	WHERE 
 		apt.SportType	= @SportType
 		AND apt.BetType	= @BetType
-		AND apt.IsLive	= @IsLive
-		AND ai.AgentLevel >= @actorAgentLevel
-		AND @isCheck = 1
-		AND @agentHId.IsDescendantOf(ai.AgentHId) = 1
-	ORDER BY ai.AgentLevel
+		AND apt.IsLive	= @IsLive				
+	ORDER BY AgentLevel
+	
+	
 	
 END
 
-GRANT EXECUTE ON [dbo].[Age_Agent_GetPositionTakingToAgent] TO [aplweb] AS [dbo]

@@ -1,12 +1,4 @@
-﻿USE [RepDB]
-GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_GetPositionTakingForUpdate_xtest]    Script Date: 8/20/2013 10:52:05 AM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-ALTER PROCEDURE [dbo].[Age_Agent_GetPositionTakingForUpdate]
+﻿ALTER PROCEDURE [dbo].[Age_Agent_GetPositionTakingForUpdate]
 	@AgentId	INT
 AS
 
@@ -14,13 +6,14 @@ AS
  * Created by	: Kos
  * Date			: 20130227
  * Task			: Get agent and its parent position taking and position taking 3rd
- * DB			: SVRAGE.RepDB
+ * DB			: SVRCUST.CUSTDB
  * Revisions	:
- *	•	20132802@Edward : Implement
- *	•	20130820@Edward : Refacter duplicate code LEFT JOIN AgentPositionTaking
+ 	•	20132802@Edward : Implement
+ 	•	20130820@Edward : Refacter duplicate code LEFT JOIN AgentPositionTaking
+ 	•	20131120@Dan : Optimize performance
  * Parameters:
- *	•
- *	•
+ 	•
+ 	•
  *  
  */
 
@@ -78,11 +71,7 @@ BEGIN
 				capt.IsLive,
 				MAX(capt.MaxUpperPositionTaking + capt.MaxGivenPositionTaking) AS MaxOfMaxUpperAndGiven
 			FROM AgentPositionTaking AS capt WITH (NOLOCK)
-			WHERE 
-				capt.AgentId <> @AgentId
-				AND EXISTS (	SELECT 1 
-								FROM AgentInfo WITH (NOLOCK) 
-								WHERE AgentId = capt.AgentId	AND AgentHId.IsDescendantOf(@agentHId) = 1 )
+			WHERE capt.AgentId IN (select AgentID FROM AgentInfo WITH (NOLOCK) WHERE ParentId=@AgentId)
 			GROUP BY 
 				capt.SportType,
 				capt.BetType,
@@ -94,3 +83,5 @@ BEGIN
 	WHERE apt.AgentId = @AgentId 
 
 END
+
+

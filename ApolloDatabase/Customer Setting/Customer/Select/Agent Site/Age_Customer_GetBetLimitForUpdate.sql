@@ -7,13 +7,14 @@ AS
  * Created by	: Kos
  * Date			: 20130302
  * Task			: Get customer and its parent bet limit
- * DB			: SVRAGE.RepDB
+ * DB			: SVRCUST.CustDB
  * Revisions	: 
- *	•	20131111@Sophia: Get @MaxBetLimit
+ 	•	20131111@Sophia: Get @MaxBetLimit
+	•	20131120@Dan: optimize performance
  * Parameters:
- *	•
- *	•
- *  
+ 	•
+ 	•
+   
  */
 
 BEGIN
@@ -22,23 +23,36 @@ BEGIN
 	DECLARE @CurrencyId	tinyint 
 
 	DECLARE 
-		@agentHId	HIERARCHYID,
+		@agentId	Int,
 		@SUPERLEVEL	INT
 
 	SET @SUPERLEVEL = 0
 
 	-- Get agent hierarchy ID
-	SELECT @agentHId = ai.AgentHId,
+	SELECT @agentId = AgentId,
 		@CurrencyId=ci.Currency
 	FROM 
-		CustInfo AS ci WITH (NOLOCK)
-		INNER JOIN AgentInfo AS ai WITH (NOLOCK) ON ci.AgentId = ai.AgentId
+		CustInfo AS ci WITH (NOLOCK)		
 	WHERE ci.CustId = @CustId
 	
 	SELECT @MaxBetLimit = MinMaxBet
 	FROM   Exchange WITH (NOLOCK)
 	WHERE  ExchangeId = @CurrencyId
 
+	;WITH Agent_CTE(agentid, Parentid, AgentLevel) as 
+	(
+		SELECT ai.AgentId as agentid, 
+				Parentid,
+				AgentLevel				
+		FROM AgentInfo ai  WITH (NOLOCK)
+		WHERE AgentID = @AgentId
+		UNION ALL
+		SELECT ai.AgentId as agentid,
+			   ai.Parentid as Parentid,
+			   ai.AgentLevel as AgentLevel
+		FROM AgentInfo ai  WITH (NOLOCK) INNER JOIN Agent_CTE ac 
+			ON ac.Parentid = ai.AgentId		
+	)
 	SELECT 
 		cbl.SportType,
 		cbl.BetType,
@@ -60,9 +74,8 @@ BEGIN
 					MIN(MaxPerMatch)AS MinMaxPerMatch
 				FROM AgentBetLimit WITH (NOLOCK)
 				WHERE AgentId IN (	SELECT AgentId 
-									FROM AgentInfo WITH (NOLOCK)
-									WHERE @AgentHId.IsDescendantOf(AgentHId) = 1
-									AND AgentLevel	<> @SUPERLEVEL)
+									FROM Agent_CTE
+									WHERE AgentLevel	<> @SUPERLEVEL)
 				GROUP BY 
 					SportType, 
 					BetType
