@@ -157,6 +157,7 @@
     <Folder Include="CSD Site\Special Delete\RecoverBets" />
     <Folder Include="CSD Site\Special Delete\Tickets Listing" />
     <Folder Include="CSD Site\Write Log" />
+    <Folder Include="Log In" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -2046,6 +2047,18 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="CSD Site\Write Log\WriteLog_UserLog_T.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Log In\Age_Admin_CheckIn.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Log In\Age_Admin_Logout.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Log In\Age_Admin_ReCheckIn.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Log In\ClearLogin.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
