@@ -56,7 +56,7 @@ BEGIN
 		@ActualRate FLOAT, 
 		@Now		Datetime
 
-	SELECT	@Username = C.Username, @Currency = C.Currency, @CurrencyName = E.Currency , @ActualRate = E.ActualRate
+	SELECT	@Username = C.Username, @Currency = C.Currency, @CurrencyName = E.Currency , @ActualRate = E.ActualRate, @agentId = agentId
 	FROM	CustInfo C WITH (NOLOCK)
 	INNER JOIN  Exchange E WITH (NOLOCK)  
 			ON C.Currency = E.ExchangeId
@@ -66,7 +66,7 @@ BEGIN
 	SELECT   @startRun = @Now
 
 	
-	IF EXISTS (	 SELECT 1 FROM SVRTXN.TransDB.dbo.bettrans WITH (NOLOCK) WHERE custid = @CustId And bettype NOT IN (19999,20000))
+	IF EXISTS (	 SELECT 1 FROM SVRTXN.TransDB.dbo.bettrans WITH (NOLOCK) WHERE custid = @CustId And bettype NOT IN (20000, 22001, 22002))
 	BEGIN
 		SELECT @ErrMsg = @Username +':'+ 'There is active transactions. Please re-check!!', @ErrCode = 5215
 		RETURN

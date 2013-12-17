@@ -27,27 +27,28 @@ DECLARE @refNo		BIGINT,
 			INNER JOIN BetTrans_Agent BA WITH (NOLOCK) ON A.AgentId = BA.AgentId AND BP.TransId = BA.TransId										
 			WHERE	BP.AgentID = @AgentID
 					AND BP.BETTYPE<20000			 				
-					AND BA.BETTYPE<20000		
-										
+					AND BA.BETTYPE<20000											
 			GROUP BY BP.AgentId 
-			UNION ALL				
+
+			UNION ALL						
 			-- get winlost for direct member
 			SELECT	BP.AgentId, 
 					SUM(BP.AWinlost + BP.AComm  - B.PlayerComm) as Amount
 			FROM BetTrans_Agent BP  WITH (NOLOCK)
 			INNER JOIN bettrans B WITH (NOLOCK) ON B.TransId = BP.TransId	
-			INNER  JOIN CustInfo c WITH (NOLOCK) ON c.AgentId = BP.AgentId	and c.CustId=b.CustId		
-			WHERE BP.AgentID = @AgentID					
+			WHERE	BP.AgentID = @AgentID					
+					AND BP.BETTYPE<20000
+					AND B.BETTYPE<20000
 			GROUP BY BP.AgentId 	
 				
 			UNION ALL
 			-- for balance record
 			SELECT	BP.AgentId, 
 					SUM(BP.AWinlost) as Amount
-				FROM BetTrans_Agent BP  WITH (NOLOCK) 			
-				WHERE	BP.AgentID = @AgentID		
-						AND BP.bettype >= 20000  --BALANCE 								
-				GROUP BY BP.AgentId 	
+			FROM BetTrans_Agent BP  WITH (NOLOCK) 			
+			WHERE	BP.AgentID = @AgentID		
+					AND BP.bettype >= 20000  --BALANCE 								
+			GROUP BY BP.AgentId 	
 			) T
  
 		
