@@ -13,13 +13,10 @@ AS
 * Task			: Get upline for cust & agent by id
 * DB			: SVRCSD/RepDB
 * Parameters:
-* Test string:
-	exec dbo.Acc_Msg_GetUplineById 1, 3
-	exec dbo.Acc_Msg_GetUplineById 0, 72
 * Revisions	:
-
-select * from [dbo].[AdminInfo] where username = 'sa'
-
+	20131216@Patrick	: Only get upline exclude this id
+* Test string:
+	exec dbo.Acc_Msg_GetUplineById 1, 100
 */
 BEGIN
 	SET NOCOUNT ON
@@ -34,35 +31,25 @@ BEGIN
 	END
 	
 	--++get upline
-	;WITH SelfAndAncestor(AgentId)
+	;WITH SelfAndAncestor(TargetId, TargetName, ParentId)
 	AS
 	(
-		SELECT AgentId
+		SELECT AgentId, Username, ParentId--, AgentLevel
 		FROM dbo.AgentInfo WITH (NOLOCK)
 		WHERE AgentId = @AgentId
 
 		UNION ALL
 
-		SELECT a.ParentId
-		FROM dbo.AgentInfo AS a WITH (NOLOCK)
-		INNER JOIN SelfAndAncestor AS b ON a.AgentId = b.AgentId
+		SELECT a.AgentId, a.Username, a.ParentId--, a.AgentLevel
+		FROM SelfAndAncestor AS b
+		INNER JOIN dbo.AgentInfo AS a WITH (NOLOCK) ON b.ParentId = a.AgentId
 	)
 
 	--++
-	SELECT *
-	FROM
-	(
-		--++for cust
-		SELECT @Id AS 'TargetId', Username AS 'TargetName'--, null
-		FROM dbo.CustInfo WITH(NOLOCK)
-		WHERE 0 = @IsAgent AND CustId = @Id
-
-		UNION ALL
-
-		SELECT b.AgentId AS 'TargetId', b.Username AS 'TargetName'--, b.AgentLevel
-		FROM SelfAndAncestor a
-		JOIN dbo.AgentInfo b ON a.AgentId = b.AgentId
-	)a
+	SELECT TargetId, TargetName
+	FROM SelfAndAncestor
+	WHERE TargetId <> @AgentId
+	
 END
 GO
 GRANT EXECUTE ON [dbo].[Acc_Msg_GetUplineById] TO [aplweb]

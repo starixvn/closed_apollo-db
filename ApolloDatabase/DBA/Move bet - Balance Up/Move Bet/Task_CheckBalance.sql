@@ -74,10 +74,11 @@ BEGIN
 	DELETE FROM dbo.Task_Cust_CheckBalance
 
 	INSERT INTO dbo.Task_Cust_CheckBalance (custid, FromBettrans)
-	SELECT c.custid, SUM(winlost-actual_stake+playercomm)
+	SELECT b.custid, SUM(winlost-actual_stake+playercomm)
 	FROM dbo.bettrans b with (nolock)
-		INNER JOIN SVRCUST.CustDB.dbo.custinfo c with (nolock) ON b.custid = c.custid  
-	GROUP BY c.custid
+		--INNER JOIN SVRCUST.CustDB.dbo.custinfo c with (nolock) ON b.custid = c.custid  
+	WHERE b.custid>0
+	GROUP BY b.custid
 END
 ELSE IF @Step = 2 -- 1st round : check BalanceBettrans -vs- BalanceTable , Then save list to verify
 BEGIN
@@ -87,7 +88,7 @@ BEGIN
 		dbo.Task_Cust_CheckBalance cb
 		INNER JOIN dbo.BalanceCredit cd with (nolock) ON cb.custid = cd.custid
 		INNER JOIN dbo.BalanceDebit  db with (nolock) ON cb.custid = db.custid
-
+	
 	DELETE FROM dbo.Task_Cust_CheckBalanceVerify
 
 	INSERT INTO dbo.Task_Cust_CheckBalanceVerify (custid)
@@ -167,7 +168,7 @@ ELSE IF @Step = 5 -- Finishing
 BEGIN
 	UPDATE bp
 	SET username = c.username
-	FROM SVRCUST.CustDB.dbo.custinfo c with (nolock)
+	FROM dbo.custinfo c with (nolock)
 		INNER JOIN dbo.Task_Cust_BalanceProblem bp ON c.custid = bp.custid AND bp.username IS NULL
 
 	UPDATE bp

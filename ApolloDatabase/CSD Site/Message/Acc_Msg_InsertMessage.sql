@@ -25,28 +25,22 @@ AS
 * Parameters:
 	@Recipient:
 		<ROOT>
-			<Recipient TargetId="1" TargetName="super" IsAgent="1"></Recipient>
-			<Recipient TargetId="3" TargetName="799" IsAgent="1"></Recipient>
+			<Recipient TargetId="1" TargetName="super" IsAgent="0" AgentLevel="1"></Recipient>
+			<Recipient TargetId="3" TargetName="799" IsAgent="1" AgentLevel="-1"></Recipient>
+			<Recipient TargetId="4" TargetName="799" IsAgent="1"></Recipient>
 		</ROOT>
+* Revisions	:
+	20131126@Patrick	: Set default value for language except english language
+	20131213@Patrick	: Public msg containt of agent level
 * Test string:
-	--++for private message
-	declare @Recipient nvarchar(max)
-	set @Recipient = '<ROOT>
-						<Recipient TargetId="1" TargetName="super" IsAgent="1"></Recipient>
-						<Recipient TargetId="3" TargetName="799" IsAgent="1"></Recipient>
-					   </ROOT>'
-	exec dbo.Acc_Msg_InsertMessage 1, 0, 1, 'sa', @Recipient, 'Test upload message'
-
 	--++for public message
 	declare @Recipient nvarchar(max)
 	set @Recipient = '<ROOT>
-						<Recipient TargetId="3000000" TargetName="Agent Site" IsAgent="0"></Recipient>
-						<Recipient TargetId="4100000" TargetName="Member Site" IsAgent="0"></Recipient>
+						<Recipient TargetId="3000000" TargetName="Agent Site" IsAgent="0" AgentLevel="0"></Recipient>
+						<Recipient TargetId="3000000" TargetName="Agent Site" IsAgent="0" AgentLevel="1"></Recipient>
 					   </ROOT>'
-	exec dbo.Acc_Msg_InsertMessage 3, 1, 1, 'sa', @Recipient, 'Test public + special upload message'
-
-* Revisions	:
-
+	exec dbo.Acc_Msg_InsertMessage_xtest 3, 0, 1, 'sa', @Recipient, 'Test upload public msg with agent level'
+	
 */
 BEGIN
 	SET NOCOUNT ON
@@ -69,29 +63,29 @@ BEGIN
 		, Content_th, Content_jp, Content_ko, Content_vn)
 	VALUES(@CurrentDate, @IsSpecialMsg, @IsPublic, @UserLoginId, @UserLoginName, @MsgType
 		, @UserLoginId, @UserLoginName, 0, 0, 0, 0
-		, @CurrentDate, @CurrentDate, 0, @ContentEn, @ContentCh, @ContentCs
-		, @ContentTh, @ContentJp, @ContentKo, @ContentVn)
+		, @CurrentDate, @CurrentDate, 0, @ContentEn, ISNULL(@ContentCh, @ContentEn), ISNULL(@ContentCs, @ContentEn)
+		, ISNULL(@ContentTh, @ContentEn), ISNULL(@ContentJp, @ContentEn), ISNULL(@ContentKo, @ContentEn), ISNULL(@ContentVn, @ContentEn))
 
 	SET @MsgId = SCOPE_IDENTITY()
 
-	DECLARE @TableRecipient AS TABLE(TargetId INT, TargetName NVARCHAR(50), IsAgent BIT)
+	DECLARE @TableRecipient AS TABLE(TargetId INT, TargetName NVARCHAR(50), IsAgent BIT, AgentLevel SMALLINT)
 	DECLARE @DocHandler INT
 	-- begin read xml					
 	EXEC sp_xml_preparedocument @DocHandler OUTPUT, @Recipient
 
-	INSERT INTO @TableRecipient(TargetId, TargetName, IsAgent)
+	INSERT INTO @TableRecipient(TargetId, TargetName, IsAgent, AgentLevel)
 	(
-		SELECT Data.TargetId, Data.TargetName, Data.IsAgent
+		SELECT Data.TargetId, Data.TargetName, Data.IsAgent, Data.AgentLevel
 		FROM OPENXML (@DocHandler, '/ROOT/Recipient', 1) 
-		WITH (TargetId INT, TargetName NVARCHAR(50), IsAgent BIT) AS Data
+		WITH (TargetId INT, TargetName NVARCHAR(50), IsAgent BIT, AgentLevel SMALLINT) AS Data
 	)
 	EXEC sp_xml_removedocument @DocHandler
 	--++end read xml
 	
 	--++insert target msg
-	INSERT INTO dbo.MsgTarget(MessageId, TargetId, TargetName, IsRead, isDeleted, IsAgent)
+	INSERT INTO dbo.MsgTarget(MessageId, TargetId, TargetName, IsRead, isDeleted, IsAgent, AgentLevel)
 	(
-		SELECT DISTINCT @MsgId, ISNULL(TargetId, 0), TargetName, 0, 0, ISNULL(IsAgent, 0)
+		SELECT DISTINCT @MsgId, ISNULL(TargetId, 0), TargetName, 0, 0, ISNULL(IsAgent, 0), IIF(AgentLevel = -1, null, AgentLevel)
 		FROM @TableRecipient
 	)
 

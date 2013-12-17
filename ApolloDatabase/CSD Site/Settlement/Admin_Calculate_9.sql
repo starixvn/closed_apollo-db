@@ -15,7 +15,7 @@ DB: SVRTXN/TransDB
 Original: 
 
 Revisions:
-	
+	- 20131125@Dan: use temp variable instead of temp tables to prevent problem when executing via replication
 Param's Explanation:
 	- @matchid: matchid of match to be settled
 	- @matchdate match date
@@ -171,38 +171,56 @@ BEGIN
 END
 --------/ 20121105@Viet : bring modds value from DBTrans to replicated servers.---
 
-Declare @statusID tinyint, @odds money, @DownlinePT smallmoney
+Declare @statusID tinyint, @odds money
 Declare @oldstatusID tinyint, @oldwinlost money, @winlost money
-
-IF OBJECT_ID('tempdb..#baP') IS NOT NULL
-BEGIN
-	DROP TABLE #baP
-END
+	
+DECLARE @ba table (
+	transid				bigint , 
+	AgentId				int, 
+	DoubleCommLosing	bit, 
+	Stake				money, 	
+	AWinLost			money,
+	AComm				money,
+	APositionTaking		smallmoney, 
+	ADiscount			decimal(9,8), 
+	DownlinePT			smallmoney, 	
+	Status				varchar(10), 
+	StatusId			tinyint,
+	RefNo				bigint,
+	WinLostDate			date,
+	IsUpdated			bit
+	)
 
 --get the needed data to settle for agent
-SELECT ba.transid, ba.[AgentId], [AgentLevel], b.[DoubleCommLosing], b.[Stake],
-	AWinLost,ba.AComm,APositionTaking, ADiscount, cast(0 as smallmoney) as DownlinePT, 
-	ba.Status, ba.StatusId, b.RefNo, b.WinLostDate, cast(0 as bit) as IsUpdated 
-INTO #baP 
+INSERT INTO @ba (
+	transid , 
+	AgentId , 
+	DoubleCommLosing , 
+	Stake, 
+	AWinLost ,
+	AComm ,
+	APositionTaking , 
+	ADiscount , 
+	downlinePT, 	
+	Status , 
+	StatusId,
+	RefNo,
+	WinLostDate,
+	IsUpdated
+	)
+
+SELECT ba.transid, ba.[AgentId], b.[DoubleCommLosing], b.[Stake],
+	AWinLost,ba.AComm,APositionTaking, ADiscount, 
+	SUM(ba.APositionTaking) OVER (PARTITION BY ba.transid
+					ORDER BY agentlevel DESC
+					ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS downlinePT, 
+	ba.Status, ba.StatusId, b.RefNo, b.WinLostDate, 0 as IsUpdated	
 FROM #tmp_bettrans B WITH (NOLOCK) JOIN BetTrans_Agent ba WITH (ROWLOCK) ON 
 	b.TransId=ba.TransId JOIN AgentInfo a WITH (NOLOCK) ON a.AgentID=ba.AgentID	
-		
---create index		
-CREATE CLUSTERED INDEX IX_tmp on #baP (transid,AgentLevel desc)		
-		
-DECLARE @prevtransid BIGINT =0 
-	
--- settle for agent in temporary table
-UPDATE #baP 
-SET 
-	@DownlinePT= case when @prevtransid <> transid 
-						then APositionTaking
-						else APositionTaking + @DownlinePT -- accumulated PT for upper agent --> for calculating agent commision
-						end,		
 
-	DownlinePT = @DownlinePT,		
-	@prevtransid = transid,
-		
+-- settle for agent in temporary table
+UPDATE ba
+SET 
 	@oldstatusID = statusID,
 	@oldwinlost = awinlost,
 	@statusID = statusID = CASE
@@ -248,15 +266,14 @@ SET
 		END,
 
 	acomm	= CASE @statusID
-			WHEN 112 THEN @commWinRate  * adiscount*stake*(1-@DownlinePT)
-			WHEN 113 THEN @commLostRate * adiscount*stake*(1-@DownlinePT)
+			WHEN 112 THEN @commWinRate  * adiscount*stake*(1-DownlinePT)
+			WHEN 113 THEN @commLostRate * adiscount*stake*(1-DownlinePT)
 			ELSE 0 END,
 	IsUpdated = CASE
 		WHEN (@oldstatusID <> @statusID) OR (@oldwinlost <> @winlost) THEN 1
 		ELSE 0 END
 			
-FROM #baP INNER JOIN @modds m ON #baP.refno = m.m_refno
-OPTION (MAXDOP 1) --should use this for quirky update to avoid parallelism problem	
+FROM @ba ba INNER JOIN @modds m ON ba.refno = m.m_refno
 		
 UPDATE T
 SET
@@ -323,8 +340,8 @@ SET
 
 FROM #tmp_bettrans T 
 		INNER JOIN @modds m ON T.refno = m.m_refno
-		INNER JOIN (SELECT TransId, sum(AWinLost) aWinlost
-					FROM #baP 
+		INNER JOIN (SELECT TransId, SUM(AWinLost) aWinlost
+					FROM @ba 
 					GROUP BY TransId) AgentWinlost ON T.TransID=AgentWinlost.TransId 
 -------------------------------------------------------------------------------------  
 
@@ -361,24 +378,24 @@ SET @subStart = CURRENT_TIMESTAMP
 					THEN 0
 					ELSE 1
 		END,		
-		winlostdate = 	case when #baP.statusID = 0 then #baP.winlostdate --max_matchdate
-							when @ruben = 0 and #baP.statusID <> 0 then @matchdate
+		winlostdate = 	case when tmp_ba.statusID = 0 then tmp_ba.winlostdate --max_matchdate
+							when @ruben = 0 and tmp_ba.statusID <> 0 then @matchdate
 						else BetTrans_Agent.winlostdate
 						end,
 
-		aWinLost = #baP.AWinLost,
-		aComm = #baP.aComm,			
-		Status = #baP.Status,
-		StatusID = #baP.StatusId			
+		aWinLost = tmp_ba.AWinLost,
+		aComm = tmp_ba.aComm,			
+		Status = tmp_ba.Status,
+		StatusID = tmp_ba.StatusId			
 	FROM BetTrans_Agent 
-			join #baP ON BetTrans_Agent.TransId = #baP.TransId AND BetTrans_Agent.AgentId = #baP.AgentId
-	WHERE #baP.IsUpdated = 1
+			JOIN @ba tmp_ba ON BetTrans_Agent.TransId = tmp_ba.TransId AND BetTrans_Agent.AgentId = tmp_ba.AgentId
+	WHERE tmp_ba.IsUpdated = 1
 
 SET @updTime = @updTime + DATEDIFF(millisecond, @subStart, CURRENT_TIMESTAMP)
 
 drop table #tmp_bettrans
 drop table #parlay
-drop table #baP
+
 ---------------------------------------------------------------  
 GO
 GRANT EXECUTE ON [dbo].[Admin_Calculate_9] TO [aplweb]  as dbo

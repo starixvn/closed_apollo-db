@@ -1,12 +1,12 @@
 ﻿USE [OnlineDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Admin_ReCheckIn]    Script Date: 12/12/2013 10:01:25 AM ******/
+
+/****** Object:  StoredProcedure [dbo].[Age_Admin_ReCheckIn]    Script Date: 12/12/2013 2:41:31 AM ******/
 SET ANSI_NULLS ON
 GO
+
 SET QUOTED_IDENTIFIER ON
 GO
-
-
 
 ALTER PROCEDURE [dbo].[Age_Admin_ReCheckIn]	
 	@OnUserId			INT 
@@ -16,7 +16,7 @@ AS
 /*  
  * Created: 20120823@Edward
  * Task : User recheckin
- * DB: bodb_NAP
+ * DB: SVRONUSER/OnlineDB
  *  
  * Revisions:   
  *			20130415@Edward : Check user has permission on current site  
@@ -26,11 +26,11 @@ AS
 BEGIN
 	SET NOCOUNT ON	
 
-	DECLARE @userId	INT
+	--DECLARE @userId	INT
 
-	SELECT @userId 	= UserId
-	FROM OnAgent WITH (NOLOCK)
-	WHERE Id = @OnUserId
+	--SELECT @userId 	= UserId
+	--FROM OnAgent WITH (NOLOCK)
+	--WHERE Id = @OnUserId
 	
 	IF EXISTS (	SELECT 1 
 				FROM OnAgent WITH (NOLOCK) 
@@ -50,5 +50,12 @@ BEGIN
 				SELECT @IsKickedOut = 1    
 		END
 END
+
+
+
+GO
+
+GRANT EXECUTE ON [dbo].[Age_Admin_ReCheckIn] TO [aplweb] AS [dbo]
+GO
 
 

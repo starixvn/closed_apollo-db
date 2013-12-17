@@ -25,8 +25,17 @@ AS
 
 BEGIN
 	SET NOCOUNT ON
+
 	DECLARE @Level SMALLINT
-	IF @AgentId IS NULL
+	IF @AgentId IS NULL AND @Username IS NULL--incase searched empty --> get only super & main share holder
+	BEGIN
+		SELECT TOP(1) @AgentId = AgentId, @Level = AgentLevel FROM dbo.AgentInfo WITH(NOLOCK) WHERE AgentLevel = 1/*main shareholder*/
+		IF @AgentId IS NULL--if not found any main share holder --> get super
+		BEGIN
+			SELECT TOP(1) @AgentId = AgentId, @Level = AgentLevel FROM dbo.AgentInfo WITH(NOLOCK) WHERE AgentLevel = 0/*super*/	
+		END
+	END
+	ELSE IF @AgentId IS NULL
 	BEGIN
 		SELECT @AgentId = AgentId, @Level = AgentLevel FROM dbo.AgentInfo WITH(NOLOCK) WHERE Username = @Username
 	END
@@ -48,7 +57,7 @@ BEGIN
 			, IIF(EXISTS (SELECT 1 FROM dbo.AgentInfo WITH (NOLOCK) WHERE ParentId = a.AgentId), CAST(1 AS BIT), CAST(0 AS BIT)) AS HasAgentDownline       
 		FROM UplinePath AS b
 		INNER JOIN dbo.AgentInfo AS a WITH (NOLOCK) ON b.ParentId = a.AgentId
-	)   
+	)
 
 	SELECT AgentId, Username, ParentId, AgentLevel, HasAgentDownline
 	FROM

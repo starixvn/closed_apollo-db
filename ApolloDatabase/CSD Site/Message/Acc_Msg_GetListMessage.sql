@@ -15,24 +15,33 @@ AS
 * Date			: 20131111
 * Task			: Get list mesg
 * DB			: SVRMSG/MsgDB
+* Revisions	:
+	20131213@Patrick	: Public msg containt of agent level
 * Test string:
 	declare @FromDate datetime, @ToDate datetime
 	set @FromDate = '2012-03-01'
 	set @ToDate = '2012-03-28'
-	exec dbo.Acc_Msg_GetListMessage 2, null, null, @FromDate, @ToDate
-
-* Revisions	:	
+	exec dbo.Acc_Msg_GetListMessage 2, null, null, @FromDate, @ToDate	
 */
 BEGIN
 	SET NOCOUNT ON
-	SELECT *
+	SELECT a.PostTime, a.Content_ch, a.Content_cs, a.Content_en, a.Content_jp
+			, a.Content_ko, a.Content_th, a.Content_vn
+			, a.MsgType, IsSpecial, a.CreatorName, a.TargetId
+			, Recipient, a.MessageId, MsgTargetId
 	FROM
 	(
 		SELECT  ROW_NUMBER() OVER(ORDER BY a.PostTime DESC) AS RowNumber
 			, a.PostTime, a.Content_ch, a.Content_cs, a.Content_en, a.Content_jp
 			, a.Content_ko, a.Content_th, a.Content_vn
 			, a.MsgType, a.IsSticky AS 'IsSpecial', a.CreatorName, b.TargetId
-			, b.TargetName AS 'Recipient', a.MessageId
+			, CASE WHEN AgentLevel IS NULL THEN b.TargetName
+					WHEN AgentLevel = 0 THEN 'Super'
+					WHEN AgentLevel = 1 THEN 'Main Shareholder'
+					WHEN AgentLevel = 2 THEN 'Shareholder'
+					WHEN AgentLevel = 3 THEN 'Main Agent'
+			END AS 'Recipient'
+			, a.MessageId, MsgTargetId
 		FROM dbo.Msg a WITH(NOLOCK) 
 		INNER JOIN dbo.MsgTarget b WITH(NOLOCK) ON a.MessageId = b.MessageId
 		WHERE a.PostTime >= @FromDate AND a.PostTime <= @ToDate
