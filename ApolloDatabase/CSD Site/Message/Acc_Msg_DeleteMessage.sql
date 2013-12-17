@@ -3,9 +3,9 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE type = 'P' AND name = 'Acc_Msg_
 GO
 CREATE PROC dbo.Acc_Msg_DeleteMessage
 (
-	 @MsgId INT
-	 , @TargetId INT
-	 , @UserLoginId INT
+	@MsgId INT
+	, @MsgTargetId INT
+	, @UserLoginId INT
 )
 AS
 /*
@@ -27,7 +27,7 @@ BEGIN
 			
 	UPDATE dbo.MsgTarget WITH(ROWLOCK, UPDLOCK)
 	SET isDeleted = 1
-	WHERE MessageId = @MsgId AND TargetId = @TargetId
+	WHERE MsgTargetId = @MsgTargetId
 	
 	--++for write log
 	DECLARE @LogContent VARCHAR(50)
@@ -39,8 +39,6 @@ BEGIN
 
 	INSERT INTO dbo.MsgLog([Site], OpratorID, MessageId, LogContent, ActionType, Method, LogDate)
 	VALUES(1, @UserLoginId, @MsgId, @LogContent, 'D', 'Acc_Msg_DeleteMessage', GETDATE())
-
-END
 GO
 GRANT EXECUTE ON [dbo].[Acc_Msg_DeleteMessage] TO [aplweb]
 GO
