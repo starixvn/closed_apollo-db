@@ -36,6 +36,7 @@ DECLARE @refNo		BIGINT,
 					SUM(BP.AWinlost + BP.AComm  - B.PlayerComm) as Amount
 			FROM BetTrans_Agent BP  WITH (NOLOCK)
 			INNER JOIN bettrans B WITH (NOLOCK) ON B.TransId = BP.TransId	
+			INNER JOIN CustInfo C WITH (NOLOCK)  ON B.CustID = C.CustID AND C.AgentID = BP.AgentID 
 			WHERE	BP.AgentID = @AgentID					
 					AND BP.BETTYPE<20000
 					AND B.BETTYPE<20000
