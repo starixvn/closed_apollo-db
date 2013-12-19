@@ -49,7 +49,7 @@ DECLARE @refNo		BIGINT,
 			INNER JOIN CustInfo C WITH (NOLOCK) ON B.CustID = C.CustID AND C.AgentID = BP.AgentID 
 			WHERE	BP.AgentID = @AgentID					
 					AND BP.BETTYPE < 20000
-					AND BP.matchID > 0	
+					AND BP.matchID >= 0	
 				
 			 UNION ALL
 			-- for balance record
