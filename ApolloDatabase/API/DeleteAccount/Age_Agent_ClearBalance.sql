@@ -7,7 +7,18 @@
 	@ErrCode INT = 0 OUTPUT,
 	@ErrMsg VARCHAR(1000) = '' OUTPUT
 AS
-
+/**
+ * Created by	: Sophia
+ * Date			: 20131201
+ * Task			: Balance to 0 for Agent
+ * DB			: SVRTXN.TransDB
+ * Revisions	:
+ *	•  
+ * Parameters:
+ *	•
+ *	•
+ *  
+ */
 DECLARE @refNo		BIGINT,
 		@Now		Datetime,
 		@Balance	MONEY,
@@ -20,36 +31,33 @@ DECLARE @refNo		BIGINT,
 		FROM
 			(
 			-- get winlost for direct child agent
-			SELECT	BP.AgentId, 						
-					SUM(BP.AWinlost + BP.AComm  - BA.AComm) as Amount						
-			FROM BetTrans_Agent BP WITH (NOLOCK) 		
+			SELECT	SUM(BP.AWinlost + BP.AComm  - BA.AComm) as Amount						
+			FROM BetTrans_Agent BP WITH (NOLOCK, index = CIX_MatchId_BetType) 		
 			INNER JOIN AgentInfo A WITH (NOLOCK) ON A.ParentID = BP.AgentId
-			INNER JOIN BetTrans_Agent BA WITH (NOLOCK) ON A.AgentId = BA.AgentId AND BP.TransId = BA.TransId										
+			INNER JOIN BetTrans_Agent BA WITH (NOLOCK, index = CIX_MatchId_BetType) ON A.AgentId = BA.AgentId AND BP.TransId = BA.TransId										
 			WHERE	BP.AgentID = @AgentID
-					AND BP.BETTYPE<20000			 				
-					AND BA.BETTYPE<20000											
-			GROUP BY BP.AgentId 
-
-			UNION ALL						
+					AND BP.BETTYPE < 20000	
+					AND BP.matchID >= 0 								
+					AND BA.BETTYPE < 20000															
+					AND BA.matchID >= 0 
+			
+			 UNION ALL						
 			-- get winlost for direct member
-			SELECT	BP.AgentId, 
-					SUM(BP.AWinlost + BP.AComm  - B.PlayerComm) as Amount
-			FROM BetTrans_Agent BP  WITH (NOLOCK)
+			SELECT	SUM(BP.AWinlost + BP.AComm  - B.PlayerComm) as Amount
+			FROM BetTrans_Agent BP  WITH (NOLOCK, index = CIX_MatchId_BetType)
 			INNER JOIN bettrans B WITH (NOLOCK) ON B.TransId = BP.TransId	
-			INNER JOIN CustInfo C WITH (NOLOCK)  ON B.CustID = C.CustID AND C.AgentID = BP.AgentID 
+			INNER JOIN CustInfo C WITH (NOLOCK) ON B.CustID = C.CustID AND C.AgentID = BP.AgentID 
 			WHERE	BP.AgentID = @AgentID					
-					AND BP.BETTYPE<20000
-					AND B.BETTYPE<20000
-			GROUP BY BP.AgentId 	
+					AND BP.BETTYPE < 20000
+					AND BP.matchID > 0	
 				
-			UNION ALL
+			 UNION ALL
 			-- for balance record
-			SELECT	BP.AgentId, 
-					SUM(BP.AWinlost) as Amount
+			SELECT SUM(BP.AWinlost) as Amount
 			FROM BetTrans_Agent BP  WITH (NOLOCK) 			
 			WHERE	BP.AgentID = @AgentID		
-					AND BP.bettype >= 20000  --BALANCE 								
-			GROUP BY BP.AgentId 	
+					AND BP.bettype >= 20000  --BALANCE 		
+					AND BP.matchID = 0
 			) T
  
 		

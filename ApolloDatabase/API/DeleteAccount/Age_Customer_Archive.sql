@@ -18,7 +18,7 @@ AS
  * Task			: Archive agent data
  * DB			: SVRCUST.CustDB
  * Revisions	:
- *	• 
+*	• 20131218@Sophia: revise
  * Parameters:
  *	•
  *	•

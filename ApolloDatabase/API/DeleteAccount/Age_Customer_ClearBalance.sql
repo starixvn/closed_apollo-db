@@ -7,7 +7,18 @@
 	@ErrCode INT = 0 OUTPUT,
 	@ErrMsg VARCHAR(1000) = '' OUTPUT
 AS
-
+/**
+ * Created by	: Sophia
+ * Date			: 20131201
+ * Task			: Balance to 0 for Customer
+ * DB			: SVRTXN.TransDB
+ * Revisions	:
+ *	•  
+ * Parameters:
+ *	•
+ *	•
+ *  
+ */
 DECLARE @refNo		BIGINT,
 		@Now		Datetime,
 		@Balance	MONEY 
