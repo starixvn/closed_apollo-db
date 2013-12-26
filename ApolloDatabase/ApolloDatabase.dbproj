@@ -1605,6 +1605,9 @@
     <NotInBuild Include="Customer Setting\Customer\Select\CSD Site\Acc_Customer_GetCustomerByAgentId.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="DBA\Task\Task_DailySummary.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
     <NotInBuild Include="CSD Site\Function\f_GetAgentUplineBetStatusById.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
@@ -2056,6 +2059,15 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent Site\Log In\ClearLogin.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\Report\Winloss\Age_Rpt_CustCount.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\Report\Winloss\Age_Rpt_CustCount_AgentViewAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\Report\Winloss\Age_Rpt_CustCount_AgentViewCust.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
