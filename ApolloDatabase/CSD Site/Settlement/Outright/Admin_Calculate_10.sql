@@ -19,7 +19,7 @@ Param's Explanation:
 */
 SET NOCOUNT ON
 
-Declare @commWinRate smallmoney, @commLostRate smallmoney, @DownlinePT smallmoney
+DECLARE @commWinRate SMALLMONEY, @commLostRate SMALLMONEY
 -- @deadheat = fraction of deadheat to divide (1,2,3  etc)
 
 if @winlostdate IS NULL
@@ -27,59 +27,100 @@ BEGIN
 	select @winlostdate = convert(char(10),getdate(),111)
 END
 
+	
+DECLARE @ba table (
+	transid bigint , 
+	AgentId int, 
+	DoubleCommLosing bit, 
+	odds smallmoney, 
+	Stake money, 
+	Actual_Stake money,
+	AWinLost money,
+	AComm money,
+	APositionTaking smallmoney, 
+	ADiscount decimal(9,8), 
+	downlinePT smallmoney, 
+	hdp1 smallmoney, 
+	hdp2 smallmoney,	
+	livehomescore smallint, 	
+	liveawayscore smallint, 
+	betteam varchar(10), 
+	bettype smallint, 
+	Status varchar(10), 
+	StatusId tinyint
+	)
+
 IF (@status in ('won','lose'))
 BEGIN
 	
 	--get the needed data to settle for agent
-	SELECT ba.transid, ba.[AgentId], [AgentLevel], b.[DoubleCommLosing], b.odds, b.[Stake], b.[Actual_Stake],
-		AWinLost,AComm,APositionTaking, ADiscount, cast(0 as smallmoney) as DownlinePT, 
-		ba.bettype, ba.Status, ba.StatusId
-	INTO #ba 
+	INSERT INTO @ba (
+		transid , 
+		AgentId , 
+		DoubleCommLosing , 
+		odds , 
+		Stake, 
+		Actual_Stake ,
+		AWinLost ,
+		AComm ,
+		APositionTaking , 
+		ADiscount , 
+		downlinePT, 
+		hdp1 , 
+		hdp2 ,	
+		livehomescore , 	
+		liveawayscore , 
+		betteam , 
+		bettype, 
+		Status , 
+		StatusId
+		)
+
+	SELECT ba.transid, 
+		ba.[AgentId], 		
+		b.[DoubleCommLosing], 
+		b.odds, 
+		b.[Stake], 
+		b.[Actual_Stake],
+		AWinLost,AComm,APositionTaking, ADiscount, 
+		SUM(ba.APositionTaking) OVER (PARTITION BY ba.transid
+						ORDER BY agentlevel DESC
+						ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS downlinePT, 
+		hdp1, hdp2,	livehomescore, 	liveawayscore, betteam, b.bettype, b.Status, b.StatusId	
 	FROM BetTrans B WITH (NOLOCK) JOIN BetTrans_Agent ba WITH (NOLOCK) ON 
 		b.TransId=ba.TransId and ba.matchid=b.matchid AND ba.bettype=b.bettype 
 		JOIN AgentInfo a WITH (NOLOCK) ON a.AgentID=ba.AgentID
 	WHERE
 		b.matchid=@matchid AND
-		b.bettype=10 AND			
+		b.bettype=10 AND		
 		--[status] NOT IN (N'VOID', N'REJECT')
-		b.statusID NOT IN (101,102)
-		
-	--create index		
-	CREATE CLUSTERED INDEX IX_tmp on #ba (transid,AgentLevel desc)		
-		
-	DECLARE @prevtransid BIGINT =0 
+		b.statusID NOT IN (101,102)	
 END
 
 if (@status='won')
 begin
 	-- settle for agent in temporary table
-	UPDATE #ba 
-	SET 
-		@DownlinePT=DownlinePT = case when @prevtransid <> transid 
-						then APositionTaking
-						else APositionTaking + @DownlinePT -- accumulated PT for upper agent --> for calculating agent commision
-						end,
-		@prevtransid = transid,							
-			
+	UPDATE @ba
+	SET 			
 		@commWinRate = CASE [DoubleCommLosing]  -- 0 : pay normal, both win/lost -- 1 : pay 'double' ONLY on lost
-		WHEN 0 THEN 1
-		WHEN 1 THEN 0 
-		ELSE 1 END,						
+							WHEN 0 THEN 1
+							WHEN 1 THEN 0 
+							ELSE 1 
+						END,						
 		aWinLost = -(odds-1) * apositiontaking * stake / @deadheat,					
-		aComm = @commWinRate * (1-@DownlinePT) * adiscount * stake,				
+		aComm = @commWinRate * (1-DownlinePT) * adiscount * stake,				
 		[status] = 'WON',			
-		statusID = 112			
-	OPTION (MAXDOP 1) --should use this for quirky update to avoid parallelism problem	
-		
+		statusID = 112				
+			
 	--settle for BetTrans_Agent
 	UPDATE BetTrans_Agent with (ROWLOCK, UPDLOCK)
-	SET aWinLost = #ba.AWinLost,
-		aComm = #ba.aComm,			
-		Status = #BA.Status,
-		StatusID = #ba.StatusId,
-		winlostdate = @winlostdate	
+	SET aWinLost = tmp_ba.AWinLost,
+		aComm = tmp_ba.aComm,			
+		Status = tmp_ba.Status,
+		StatusID = tmp_ba.StatusId,		
+		winlostdate = @winlostdate			
 	FROM BetTrans_Agent 
-			join #ba ON BetTrans_Agent.TransId = #ba.TransId AND BetTrans_Agent.AgentId = #ba.AgentId
+			INNER JOIN @ba tmp_ba ON BetTrans_Agent.TransId = tmp_ba.TransId AND BetTrans_Agent.AgentId = tmp_ba.AgentId
 	WHERE BetTrans_Agent.matchid=@matchid AND
 		BetTrans_Agent.bettype=10 AND
 		BetTrans_Agent.statusID NOT IN (101,102)
@@ -88,10 +129,10 @@ begin
 	UPDATE BetTrans with (ROWLOCK, UPDLOCK)
 	SET										
 		@commWinRate = CASE [DoubleCommLosing]  -- 0 : pay normal, both win/lost -- 1 : pay 'double' ONLY on lost
-		WHEN 0 THEN 1
-		WHEN 1 THEN 0 
-		ELSE 1 END,
-				
+							WHEN 0 THEN 1
+							WHEN 1 THEN 0 
+							ELSE 1 
+						END,				
 		WinLost = (((odds-1)/@deadheat)+1) * stake ,			
 		PlayerComm = @commWinRate * playerdiscount * stake,				
 		Status = 'WON',
@@ -101,9 +142,9 @@ begin
 		statuswinlost = 2,
 		[TWinLost] = AgentWinlost.AWinlost,
 		[TComm] =  @commWinRate * Tdiscount * stake * (1-[TPositionTaking])				
-	from 
-		(SELECT TransId, sum(AWinLost) aWinlost
-			FROM #ba 
+	FROM 
+		(	SELECT TransId, sum(AWinLost) aWinlost
+			FROM @ba 
 			GROUP BY TransId) AgentWinlost 
 	WHERE
 		AgentWinlost.TransID=BetTrans.TransId AND
@@ -115,35 +156,27 @@ end
 else if (@status='lose')
 begin		
 	-- settle for agent in temporary table
-	UPDATE #ba 
-	SET 
-		@DownlinePT=DownlinePT = case when @prevtransid <> transid 
-						then APositionTaking
-						else APositionTaking + @DownlinePT -- accumulated PT for upper agent --> for calculating agent commision
-						end,
-		@prevtransid = transid,							
-			
+	UPDATE @ba 
+	SET 		
 		@commLostRate = CASE [DoubleCommLosing]
-		WHEN 0 THEN 1
-		WHEN 1 THEN 2 
-		ELSE 1 END,--'s','m'					
-		
+							WHEN 0 THEN 1
+							WHEN 1 THEN 2 
+							ELSE 1 
+						END,--'s','m'							
 		awinlost = apositiontaking * stake,			
-		aComm = @commLostRate * adiscount * stake * (1-@DownlinePT),		
-
+		aComm = @commLostRate * adiscount * stake * (1-DownlinePT),		
 		[status] = 'LOSE',			
-		statusID = 113			
-	OPTION (MAXDOP 1) --should use this for quirky update to avoid parallelism problem	
-		
+		statusID = 113	
+			
 	--settle for BetTrans_Agent
 	UPDATE BetTrans_Agent with (ROWLOCK, UPDLOCK)
-	SET aWinLost = #ba.AWinLost,
-		aComm = #ba.aComm,			
-		Status = #BA.Status,
-		StatusID = #ba.StatusId,
-		winlostdate = @winlostdate	
+	SET aWinLost = tmp_ba.AWinLost,
+		aComm = tmp_ba.aComm,			
+		Status = tmp_ba.Status,
+		StatusID = tmp_ba.StatusId,		
+		winlostdate = @winlostdate				
 	FROM BetTrans_Agent 
-			join #ba ON BetTrans_Agent.TransId = #ba.TransId AND BetTrans_Agent.AgentId = #ba.AgentId
+			INNER JOIN @ba tmp_ba ON BetTrans_Agent.TransId = tmp_ba.TransId AND BetTrans_Agent.AgentId = tmp_ba.AgentId
 	WHERE BetTrans_Agent.matchid=@matchid AND
 		BetTrans_Agent.bettype=10 AND
 		BetTrans_Agent.statusID NOT IN (101,102)
@@ -165,9 +198,9 @@ begin
 		statuswinlost = 4,
 		[TWinLost] = AgentWinlost.AWinlost,
 		[TComm] =  @commLostRate * Tdiscount * stake * (1-[TPositionTaking])					
-	from 
-		(SELECT TransId, sum(AWinLost) aWinlost
-			FROM #ba 
+	FROM 
+		(	SELECT TransId, sum(AWinLost) aWinlost
+			FROM @ba 
 			GROUP BY TransId) AgentWinlost 
 	WHERE
 		AgentWinlost.TransID=BetTrans.TransId AND

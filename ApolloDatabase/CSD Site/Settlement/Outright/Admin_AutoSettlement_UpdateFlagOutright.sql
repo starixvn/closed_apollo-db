@@ -22,10 +22,10 @@ BEGIN
 SET NOCOUNT ON
 
 DECLARE @LogData nvarchar(200), @previousStatus bit, @totalOutright int
-DECLARE @outright table(orid INT, DisabledAutoSettle BIT NULL)
+DECLARE @outright table(orid INT, DisabledAutoSettle BIT NULL, orid_ex INT)
 
-INSERT @outright(orid, DisabledAutoSettle)
-SELECT o.orid, orex.DisabledAutoSettle
+INSERT @outright(orid, DisabledAutoSettle, orid_ex)
+SELECT o.orid, orex.DisabledAutoSettle, orex.orid_ex
 FROM SVRPRO.ProdDB.dbo.outright o WITH(NOLOCK) 
 	LEFT JOIN SVRPRO.ProdDB.dbo.outright_ex orex WITH(NOLOCK) ON o.orid= orex.orid_ex	
 WHERE o.leagueID = @LeagueID
@@ -71,7 +71,7 @@ BEGIN TRY
 		INSERT SVRPRO.ProdDB.dbo.outright_ex (orid_ex, DisabledAutoSettle)		
 		SELECT orid, 1 
 		FROM @outright
-		WHERE DisabledAutoSettle is null
+		WHERE DisabledAutoSettle is null and orid_ex IS NULL
 END TRY
 BEGIN CATCH
 	Select @ErrMsg = 'Data updating process failed!!'
