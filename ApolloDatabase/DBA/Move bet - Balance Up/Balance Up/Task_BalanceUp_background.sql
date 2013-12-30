@@ -19,6 +19,7 @@ DB: SVRTXN.TransDB
 Original:
 
 Revisions: 
+	- 20131230@Sophia: Not insert Balance ticket (bettype 20000) for deleted AgentID (AgentID not have data in AgentInfo)
 	
 Param's Explanation: 
 
@@ -192,6 +193,13 @@ BEGIN
 			) T
 		GROUP BY AgentId  
  
+		----- Delete AgentID not have data in AgentInfo (Deleted AgentID)
+		DELETE	B
+		FROM	BalanceTable_Agent B
+		LEFT JOIN AgentInfo  A 
+			ON	A.AgentId = B.AgentId
+		WHERE	A.AgentID IS NULL
+
 	 
 		UPDATE b
 		SET	currency  = c.currency,

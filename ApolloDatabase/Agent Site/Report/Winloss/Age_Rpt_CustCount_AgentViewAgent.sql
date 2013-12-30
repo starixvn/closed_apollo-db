@@ -38,9 +38,11 @@ BEGIN
 					ON C.TransID = A.TransID						
 			WHERE	AP.ParentID = @AgentId 
 					AND A.WinLostDate BETWEEN @FromDate AND @ToDate 
-					AND A.Bettype <=19000  			 							 
+					AND A.Bettype <=19000 
+					AND A.StatusID NOT IN (0,1) 			 							 
 					AND C.WinLostDate BETWEEN @FromDate AND @ToDate 
-					AND C.Bettype <=19000  					
+					AND C.Bettype <=19000  		
+					AND C.StatusID NOT IN (0,1) 					
 			GROUP BY A.AgentId, C.CustID	
 	END
 
@@ -62,9 +64,11 @@ BEGIN
 			WHERE	AP.ParentID = @AgentId 
 					AND A.WinLostDate BETWEEN @FromDate AND @ToDate 
 					AND A.Bettype <=19000 AND A.bettype NOT IN (9,29,10)	
+					AND A.StatusID NOT IN (0,1) 		
 					AND (@Sporttypes = '0' OR EXISTS ( SELECT 1 FROM Match (NOLOCK) WHERE Matchid = A.Matchid AND sporttype IN (SELECT sporttype FROM #SportsList)) )								 
 					AND C.WinLostDate BETWEEN @FromDate AND @ToDate 
-					AND C.Bettype <=19000 AND C.bettype NOT IN (9,29,10)	
+					AND C.Bettype <=19000 AND C.bettype NOT IN (9,29,10)
+					AND C.StatusID NOT IN (0,1) 			
 					AND (@Sporttypes = '0' OR EXISTS ( SELECT 1 FROM Match (NOLOCK) WHERE Matchid = C.Matchid AND sporttype IN (SELECT sporttype FROM #SportsList)) )					
 			GROUP BY A.AgentId, C.CustID	
 		END
@@ -82,10 +86,12 @@ BEGIN
 			WHERE	AP.ParentID = @AgentId 
 					AND A.WinLostDate BETWEEN @FromDate AND @ToDate 
 					AND (@Sporttypes = '0' OR EXISTS ( SELECT 1 FROM Match (NOLOCK) WHERE Matchid = A.Matchid AND sporttype IN (SELECT sporttype FROM #SportsList)) )	 
-					AND (A.Bettype IN (Select bettype FROM #BettypeList))			 
+					AND A.Bettype IN (Select bettype FROM #BettypeList) 	
+					AND A.StatusID NOT IN (0,1) 				 
 					AND C.WinLostDate BETWEEN @FromDate AND @ToDate 
 					AND (@Sporttypes = '0' OR EXISTS ( SELECT 1 FROM Match (NOLOCK) WHERE Matchid = C.Matchid AND sporttype IN (SELECT sporttype FROM #SportsList)) )	 
-					AND (C.Bettype IN (Select bettype FROM #BettypeList))	
+					AND C.Bettype IN (Select bettype FROM #BettypeList)
+					AND C.StatusID NOT IN (0,1) 		
 			GROUP BY A.AgentId, C.CustID
 		END 			
 	END
@@ -104,9 +110,10 @@ BEGIN
 					ON C.TransID = A.TransID						
 			WHERE	AP.ParentID = @AgentId 
 					AND A.WinLostDate BETWEEN @FromDate AND @ToDate 
-					AND A.Bettype IN (9,29)			 
-					AND (@Bettypes = '0' OR A.Bettype IN (SELECT bettype FROM #BettypeList))
-					AND C.WinLostDate BETWEEN @FromDate AND @ToDate 					 
+					AND A.StatusID NOT IN (0,1) 	
+					AND A.Bettype IN (9,29)	AND (@Bettypes = '0' OR A.Bettype IN (SELECT bettype FROM #BettypeList))
+					AND C.WinLostDate BETWEEN @FromDate AND @ToDate 
+					AND C.StatusID NOT IN (0,1) 						 
 					AND C.Bettype IN (9,29)			 
 					AND (@Bettypes = '0' OR C.Bettype IN (SELECT bettype FROM #BettypeList))
 			GROUP BY A.AgentId, C.CustID
@@ -126,7 +133,8 @@ BEGIN
 			INNER JOIN BetTrans C WITH (NOLOCK)
 					ON C.TransID = A.TransID						
 		WHERE	AP.ParentID = @AgentId 
-				AND A.Winlostdate BETWEEN @FromDate AND @ToDate 			 
+				AND A.Winlostdate BETWEEN @FromDate AND @ToDate
+				AND A.StatusID NOT IN (0,1) 	 			 
 				AND A.Bettype =10
 				AND (@Bettypes = '0' OR A.Bettype IN (Select bettype FROM #BettypeList))					
 				AND (@Sporttypes = '0' 
@@ -138,7 +146,8 @@ BEGIN
 									WHERE	m.orid = A.MatchID
 									)				
 						)
-				AND C.Winlostdate BETWEEN @FromDate AND @ToDate 			 
+				AND C.Winlostdate BETWEEN @FromDate AND @ToDate 	
+				AND C.StatusID NOT IN (0,1) 			 
 				AND C.Bettype =10
 				AND (@Bettypes = '0' OR C.Bettype IN (Select bettype FROM #BettypeList))					
 				AND (@Sporttypes = '0' 

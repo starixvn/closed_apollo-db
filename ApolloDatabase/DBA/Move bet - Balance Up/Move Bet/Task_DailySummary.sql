@@ -1,8 +1,4 @@
-﻿SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-ALTER PROCEDURE [dbo].[Task_DailySummary]
+﻿ALTER PROCEDURE [dbo].[Task_DailySummary]
 	@WinLostDate date,
 	@TestMode tinyint = 0
 AS
@@ -16,6 +12,7 @@ DB: SVRTXN.TransDB
 Revisions:	
 	- 20130923@Sophia: Exclude Parlay and outright in ActualTO
 	- 20131004@Dan: update summary winlost report section
+	- 20131230@Sophia: Modify Auto void ticket
 
  */
 
@@ -237,100 +234,64 @@ END
 -- =====================
 -- AUTO VOID TEST TICKET
 -- =====================
--- currency 20
+ 
 	DECLARE @custs TABLE (custid int)
 
-	IF EXISTS (
-		SELECT 1 FROM dbo.bettrans WITH (NOLOCK)
-		WHERE currency = 20 AND winlostdate = @winlostdate AND bettype <=19000
-		AND statusID in(0,1)
-	)
-	BEGIN		
-		
-		UPDATE dbo.bettrans with (ROWLOCK, UPDLOCK)  
-		SET winlost=actual_stake, 
-			playercomm = 0,
-			Twinlost = 0,
-			Tcomm = 0, 
-			ruben=1, 
-			statuswinlost=6, 
-			status = 'Void',
-			statusid = 102,
-			transdesc = '[AutoVoid]' + transdesc
-		OUTPUT deleted.custid INTO @custs
-		where currency = 20 AND winlostdate = @winlostdate AND bettype <=19000
-		AND statusID IN (0,1)
+	
+	---- currency 20
+	DECLARE @TransIDs TABLE (TransID int)
 
-		UPDATE dbo.BetTrans_Agent with (ROWLOCK, UPDLOCK)  
-		SET AWinLost=0, 
-			AComm = 0,
-			status = 'Void',
-			statusid = 102,
-			transdesc = '[AutoVoid]' + transdesc
-		where currency = 20 AND winlostdate = @winlostdate AND bettype <=19000
-		AND statusID IN (0,1)
+	INSERT INTO @TransIDs (TransID)
+	SELECT	TransID
+	FROM	bettrans WITH (NOLOCK)
+	WHERE	currency = 20 
+			AND winlostdate = @winlostdate 
+			AND bettype <=19000
+			AND statusID in(0,1)
 
-		
-		INSERT INTO dbo.Task_Cust_CheckBalanceVerify (custid)
-		SELECT DISTINCT custid
-		FROM @custs
-		
-		EXEC dbo.[Task_CheckBalance] @step = 33, @Action = 'JustFix'
-
-		DELETE FROM @custs
-	END
-
-
-----line test Suntest
-	IF EXISTS (
-		SELECT	1
-					FROM	dbo.Bettrans_Agent WITH (NOLOCK)
-					WHERE	winlostdate <= @winlostdate	 
-							AND statusID in (0,1)  
-							AND bettype <=19000
-							AND AgentID = 53288 -----line test Suntest
-	)
-	BEGIN
-		UPDATE dbo.bettrans with (ROWLOCK, UPDLOCK)  
-		SET winlost=actual_stake, 
-			playercomm = 0,
-			Twinlost = 0,
-			Tcomm = 0, 
-			ruben=1, 
-			statuswinlost=6, 
-			status = 'Void',
-			statusid = 102,
-			transdesc = '[AutoVoid]' + transdesc
-		OUTPUT deleted.custid INTO @custs
-		where winlostdate = @winlostdate AND bettype <=19000
-		AND statusID IN (0,1)
-		AND transid IN (
-					SELECT	TransID 
-					FROM	dbo.Bettrans_Agent WITH (NOLOCK)
-					WHERE	winlostdate = @winlostdate	 
-							AND statusID in (0,1)  
-							AND bettype <=19000
-							AND AgentID = 53288 -----line test Suntest
-					)
-
-		UPDATE dbo.BetTrans_Agent with (ROWLOCK, UPDLOCK)  
-		SET AWinLost=0, 
-			AComm = 0,
-			status = 'Void',
-			statusid = 102,
-			transdesc = '[AutoVoid]' + transdesc
-		where 
-			winlostdate = @winlostdate	 
+	-----line test Suntest
+	INSERT INTO @TransIDs (TransID)
+	SELECT	TransID
+	FROM	Bettrans_Agent WITH (NOLOCK)
+	WHERE	winlostdate <= @winlostdate	 
 			AND statusID in (0,1)  
 			AND bettype <=19000
 			AND AgentID = 53288 -----line test Suntest
+	 
+
+	IF EXISTS (SELECT 1 FROM @TransIDs) 
+	BEGIN			
+		UPDATE dbo.bettrans with (ROWLOCK, UPDLOCK)  
+		SET winlost=actual_stake, 
+			playercomm = 0,
+			Twinlost = 0,
+			Tcomm = 0, 
+			ruben=1, 
+			statuswinlost=6, 
+			status = 'Void',
+			statusid = 102,
+			transdesc = '[AutoVoid]' + transdesc
+		OUTPUT deleted.custid INTO @custs
+		WHERE TransID IN (SELECT TransID FROM @TransIDs)
+
+		UPDATE dbo.BetTrans_Agent with (ROWLOCK, UPDLOCK)  
+		SET AWinLost=0, 
+			AComm = 0,
+			status = 'Void',
+			statusid = 102,
+			transdesc = '[AutoVoid]' + transdesc
+		WHERE TransID IN (SELECT TransID FROM @TransIDs)
+
 		
 		INSERT INTO dbo.Task_Cust_CheckBalanceVerify (custid)
 		SELECT DISTINCT custid
 		FROM @custs
 		
 		EXEC dbo.[Task_CheckBalance] @step = 33, @Action = 'JustFix'
+
+		--DELETE FROM @custs
 	END
+
 
 IF @TestMode <> 0 -- @TestMode = 2
 BEGIN
@@ -600,3 +561,4 @@ SET @Doing = 'Task_DailySummary : End (with Finish)'
 EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing  
 
 PRINT CONVERT(varchar(10), @winlostdate, 120)
+

@@ -66,11 +66,38 @@ BEGIN
 	SELECT   @startRun = @Now
 
 	
-	IF EXISTS (	 SELECT 1 FROM SVRTXN.TransDB.dbo.bettrans WITH (NOLOCK) WHERE custid = @CustId And bettype NOT IN (20000, 22001, 22002))
+	IF EXISTS (	SELECT 1 FROM SVRTXN.TransDB.dbo.bettrans WITH (NOLOCK) WHERE custid = @CustId And bettype <=19000 AND StatusID NOT IN (0, 1, 101, 102)) -----   running, waiting, void, rejected 
+			OR EXISTS ( SELECT 1 FROM SVRTXN.TransDB.dbo.bettrans14 WITH (NOLOCK) WHERE custid = @CustId And bettype <=19000 AND StatusID NOT IN (101,102))
 	BEGIN
-		SELECT @ErrMsg = @Username +':'+ 'There is active transactions. Please re-check!!', @ErrCode = 5215
+		SELECT @ErrMsg = @Username +':'+ 'There is active transactions for test account. Please re-check!!', @ErrCode = 5215
 		RETURN
 	END
+
+	
+	----------------
+
+	DECLARE @AgentHId HIERARCHYID, @ParentAgentHId HIERARCHYID
+
+	SELECT	@AgentHId = AgentHId
+	FROM	AgentInfo A WITH (NOLOCK)
+	WHERE	AgentID = @agentId
+
+	SELECT	@ParentAgentHId = AgentHId
+	FROM	AgentInfo A WITH (NOLOCK)
+	WHERE	AgentID = 53288
+
+	IF EXISTS (	SELECT	1 
+				FROM	SVRSUM.SummaryDB.dbo.Sum_WinLoss_Cust_Old C WITH (NOLOCK) 
+				WHERE	Custid = @CustId  			 
+						AND DATEDIFF( MONTH, Winlostdate, CURRENT_TIMESTAMP ) > 7
+						AND ( @AgentHId.IsDescendantOf(@ParentAgentHId) = 1)
+				)		
+	BEGIN
+		SELECT @ErrMsg = @Username +':'+ 'There is active transactions for real account. Please re-check!!', @ErrCode = 5215
+		RETURN
+	END
+
+		 
 
 	--########## Step 2: Archive #########--
 
