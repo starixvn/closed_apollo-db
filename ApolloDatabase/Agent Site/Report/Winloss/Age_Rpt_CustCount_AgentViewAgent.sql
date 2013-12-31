@@ -24,36 +24,36 @@ SET NOCOUNT ON
 
 IF @Todate > @MoveBetDay
 BEGIN   
-	-----All Bettype and All Sport
-	IF @Bettypes = '0' AND  @Sporttypes = '0'
-	BEGIN				 
-			INSERT INTO #CustCountAgent 
-			SELECT	A.AgentId, C.CustID						 
-			FROM	bettrans_agent A WITH(NOLOCK)
-			INNER JOIN AgentInfo AP  WITH(NOLOCK)
-					ON AP.AgentId = A.AgentId
-			INNER JOIN AgentInfo AC  WITH(NOLOCK)
-					ON AC.AgentHId.IsDescendantOf(AP.AgentHId ) =1	 
-			INNER JOIN bettrans C WITH (NOLOCK)
-					ON C.TransID = A.TransID						
-			WHERE	AP.ParentID = @AgentId 
-					AND A.WinLostDate BETWEEN @FromDate AND @ToDate 
-					AND A.Bettype <=19000 
-					AND A.StatusID NOT IN (0,1) 			 							 
-					AND C.WinLostDate BETWEEN @FromDate AND @ToDate 
-					AND C.Bettype <=19000  		
-					AND C.StatusID NOT IN (0,1) 					
-			GROUP BY A.AgentId, C.CustID	
-	END
-
-
+-------All Bettype and All Sport
+IF @Bettypes = '0' AND  @Sporttypes = '0'
+BEGIN				 
+		INSERT INTO #CustCountAgent 
+		SELECT	DISTINCT A.AgentId, C.CustID						 
+		FROM	bettrans_agent A WITH(NOLOCK)
+		INNER JOIN AgentInfo AP  WITH(NOLOCK)
+				ON AP.AgentId = A.AgentId
+		INNER JOIN AgentInfo AC  WITH(NOLOCK)
+				ON AC.AgentHId.IsDescendantOf(AP.AgentHId ) =1	 
+		INNER JOIN bettrans C WITH (NOLOCK)
+				ON C.TransID = A.TransID						
+		WHERE	AP.ParentID = @AgentId 
+				AND A.WinLostDate BETWEEN @FromDate AND @ToDate 
+				AND A.Bettype <=19000 
+				AND A.StatusID NOT IN (0,1) 			 							 
+				AND C.WinLostDate BETWEEN @FromDate AND @ToDate 
+				AND C.Bettype <=19000  		
+				AND C.StatusID NOT IN (0,1) 					
+		GROUP BY A.AgentId, C.CustID	
+END
+ELSE
+BEGIN  
 	------Sportsbook
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')	 AND  @Sporttypes <> '0'
+	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0') 
 	BEGIN		
 		IF (@Bettypes = '0')
 		BEGIN				
 			INSERT INTO #CustCountAgent 
-			SELECT	A.AgentId, C.CustID						 
+			SELECT	DISTINCT A.AgentId, C.CustID						 
 			FROM	bettrans_agent A WITH(NOLOCK)
 			INNER JOIN AgentInfo AP  WITH(NOLOCK)
 					ON AP.AgentId = A.AgentId
@@ -75,7 +75,7 @@ BEGIN
 		ELSE 
 		BEGIN 
 			INSERT INTO #CustCountAgent 
-			SELECT	A.AgentId, C.CustID						 
+			SELECT	DISTINCT A.AgentId, C.CustID						 
 			FROM	bettrans_agent A WITH(NOLOCK)
 			INNER JOIN AgentInfo AP  WITH(NOLOCK)
 					ON AP.AgentId = A.AgentId
@@ -97,10 +97,10 @@ BEGIN
 	END
 
 	-----Parlay	
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0') AND  @Sporttypes <> '0'
+	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')  
 	BEGIN 
 			INSERT INTO #CustCountAgent 
-			SELECT	A.AgentId,C.CustID						 
+			SELECT	DISTINCT A.AgentId,C.CustID						 
 			FROM	bettrans_agent A WITH(NOLOCK)
 			INNER JOIN AgentInfo AP  WITH(NOLOCK)
 					ON AP.AgentId = A.AgentId
@@ -121,10 +121,10 @@ BEGIN
 
 	
 	-----Outright
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (10) OR @Bettypes = '0') AND  @Sporttypes <> '0'
+	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (10) OR @Bettypes = '0') 
 	BEGIN
 		INSERT INTO #CustCountAgent 
-		SELECT	A.AgentId, C.CustID						 
+		SELECT	DISTINCT A.AgentId, C.CustID						 
 		FROM	BetTrans_Agent A WITH(NOLOCK)
 			INNER JOIN AgentInfo AP  WITH(NOLOCK)
 					ON AP.AgentId = A.AgentId
@@ -161,7 +161,7 @@ BEGIN
 						)
 		GROUP BY A.AgentId, C.CustID
 	END
-
+END 
 END 
 ------------------------------------------------DATA [14] ----------------------------------------------
 
