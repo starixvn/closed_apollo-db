@@ -84,13 +84,14 @@ BEGIN
 
 	SELECT	@ParentAgentHId = AgentHId
 	FROM	AgentInfo A WITH (NOLOCK)
-	WHERE	AgentID = 53288
+	WHERE	AgentID = 53288 ---- line suntest
 
 	IF EXISTS (	SELECT	1 
 				FROM	SVRSUM.SummaryDB.dbo.Sum_WinLoss_Cust_Old C WITH (NOLOCK) 
 				WHERE	Custid = @CustId  			 
 						AND DATEDIFF( MONTH, Winlostdate, CURRENT_TIMESTAMP ) > 7
-						AND ( @AgentHId.IsDescendantOf(@ParentAgentHId) = 1)
+						AND CASE WHEN ( @AgentHId.IsDescendantOf(@ParentAgentHId) = 1) THEN 0 ELSE 1 END = 1   --- not line suntest
+						AND @Currency <> 20																	   --- not line sbtest	
 				)		
 	BEGIN
 		SELECT @ErrMsg = @Username +':'+ 'There is active transactions for real account. Please re-check!!', @ErrCode = 5215
