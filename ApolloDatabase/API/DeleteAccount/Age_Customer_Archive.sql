@@ -69,7 +69,7 @@ BEGIN
 	IF EXISTS (	SELECT 1 FROM SVRTXN.TransDB.dbo.bettrans WITH (NOLOCK) WHERE custid = @CustId And bettype <=19000 AND StatusID NOT IN (0, 1, 101, 102)) -----   running, waiting, void, rejected 
 			OR EXISTS ( SELECT 1 FROM SVRTXN.TransDB.dbo.bettrans14 WITH (NOLOCK) WHERE custid = @CustId And bettype <=19000 AND StatusID NOT IN (101,102))
 	BEGIN
-		SELECT @ErrMsg = @Username +':'+ 'There is active transactions for test account. Please re-check!!', @ErrCode = 5215
+		SELECT @ErrMsg = @Username +':'+ 'There is active transactions. Please re-check!!', @ErrCode = 5215
 		RETURN
 	END
 
@@ -94,7 +94,7 @@ BEGIN
 						AND @Currency <> 20																	   --- not line sbtest	
 				)		
 	BEGIN
-		SELECT @ErrMsg = @Username +':'+ 'There is active transactions for real account. Please re-check!!', @ErrCode = 5215
+		SELECT @ErrMsg = @Username +':'+ 'There is active transactions for real account. Please re-check!!', @ErrCode = 5216
 		RETURN
 	END
 
