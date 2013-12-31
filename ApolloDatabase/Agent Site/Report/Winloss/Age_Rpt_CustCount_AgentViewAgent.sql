@@ -28,7 +28,7 @@ BEGIN
 	IF @Bettypes = '0' AND  @Sporttypes = '0'
 	BEGIN				 
 			INSERT INTO #CustCountAgent 
-			SELECT	DISTINCT A.AgentId, C.CustID						 
+			SELECT	A.AgentId, C.CustID						 
 			FROM	bettrans_agent A WITH(NOLOCK)
 			INNER JOIN AgentInfo AP  WITH(NOLOCK)
 					ON AP.AgentId = A.AgentId
@@ -51,7 +51,7 @@ BEGIN
 			IF (@Bettypes = '0')
 			BEGIN				
 				INSERT INTO #CustCountAgent 
-				SELECT	DISTINCT A.AgentId, C.CustID						 
+				SELECT	A.AgentId, C.CustID						 
 				FROM	bettrans_agent A WITH(NOLOCK)
 				INNER JOIN AgentInfo AP  WITH(NOLOCK)
 						ON AP.AgentId = A.AgentId
@@ -71,7 +71,7 @@ BEGIN
 			ELSE 
 			BEGIN 
 				INSERT INTO #CustCountAgent 
-				SELECT	DISTINCT A.AgentId, C.CustID						 
+				SELECT	A.AgentId, C.CustID						 
 				FROM	bettrans_agent A WITH(NOLOCK)
 				INNER JOIN AgentInfo AP  WITH(NOLOCK)
 						ON AP.AgentId = A.AgentId	 
@@ -94,7 +94,7 @@ BEGIN
 		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')  
 		BEGIN 
 				INSERT INTO #CustCountAgent 
-				SELECT	DISTINCT A.AgentId,C.CustID						 
+				SELECT	A.AgentId,C.CustID						 
 				FROM	bettrans_agent A WITH(NOLOCK)
 				INNER JOIN AgentInfo AP  WITH(NOLOCK)
 						ON AP.AgentId = A.AgentId	 
@@ -116,7 +116,7 @@ BEGIN
 		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (10) OR @Bettypes = '0') 
 		BEGIN
 			INSERT INTO #CustCountAgent 
-			SELECT	DISTINCT A.AgentId, C.CustID						 
+			SELECT	A.AgentId, C.CustID						 
 			FROM	BetTrans_Agent A WITH(NOLOCK)
 				INNER JOIN AgentInfo AP  WITH(NOLOCK)
 						ON AP.AgentId = A.AgentId	 
