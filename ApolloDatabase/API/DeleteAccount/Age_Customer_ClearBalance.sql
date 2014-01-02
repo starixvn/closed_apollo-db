@@ -7,12 +7,76 @@
 	@ErrCode INT = 0 OUTPUT,
 	@ErrMsg VARCHAR(1000) = '' OUTPUT
 AS
-
+/**
+ * Created by	: Sophia
+ * Date			: 20131201
+ * Task			: Balance to 0 for Customer
+ * DB			: SVRTXN.TransDB
+ * Revisions	:
+ *	•  20131230@Sophia: Auto void test ticket
+ * Parameters:
+ *	•
+ *	•
+ *  
+ */
 DECLARE @refNo		BIGINT,
 		@Now		Datetime,
 		@Balance	MONEY 
 
 		SELECT @Now = CURRENT_TIMESTAMP
+		 
+
+		-- =====================
+		-- AUTO VOID TEST TICKET
+		-- =====================
+		---- currency 20
+			DECLARE @TransIDs TABLE (TransID int)
+
+			INSERT INTO @TransIDs (TransID)
+			SELECT	TransID
+			FROM	bettrans WITH (NOLOCK)
+			WHERE	currency = 20 AND bettype <=19000 AND StatusID IN (0,1) AND CustID = @CustID
+
+		---- line test Suntest
+			INSERT INTO @TransIDs (TransID)
+			SELECT	B.TransID		
+			FROM	Bettrans B WITH (NOLOCK)
+			INNER JOIN Bettrans_Agent BA WITH (NOLOCK)
+					ON B.TransID = BA.TransID				
+			WHERE	B.StatusID in (0,1)  
+					AND B.bettype <=19000
+					AND B.CustID = @CustId
+					AND BA.StatusID in (0,1)  
+					AND BA.bettype <=19000
+					AND BA.AgentID = 53288 -----line test Suntest
+
+			IF EXISTS (SELECT 1 FROM @TransIDs)
+			BEGIN
+				UPDATE dbo.bettrans with (ROWLOCK, UPDLOCK)  
+				SET winlost=actual_stake, 
+					playercomm = 0,
+					Twinlost = 0,
+					Tcomm = 0, 
+					ruben=1, 
+					statuswinlost=6, 
+					status = 'Void',
+					statusid = 102,
+					transdesc = '[AutoVoid]' + transdesc				 
+				WHERE TransID IN (SELECT TransID FROM @TransIDs)
+
+				UPDATE dbo.BetTrans_Agent with (ROWLOCK, UPDLOCK)  
+				SET AWinLost=0, 
+					AComm = 0,
+					status = 'Void',
+					statusid = 102,
+					transdesc = '[AutoVoid]' + transdesc
+				WHERE TransID IN (SELECT TransID FROM @TransIDs)		 
+				 
+			END
+
+		-- =====================
+		-- END OF AUTO VOID TEST TICKET
+		-- =====================
 
 		----- Clear balance tables first, so that member can not place bet
 		DELETE BalanceCredit WHERE CustID = @CustID
@@ -32,7 +96,26 @@ DECLARE @refNo		BIGINT,
 					@ErrMsg = 'Failed to clear table balance of customer [CustId = ' + COALESCE(CAST(@CustId AS VARCHAR(10)), SPACE(1)) + ']'						 
 				RETURN
 			END	
+		
+		DELETE BalancePendingCredit WHERE CustID = @CustID
+			IF @@ERROR > 0
+			BEGIN
+				SELECT 
+					@ErrCode = 5209, 
+					@ErrMsg = 'Failed to clear balance of customer [CustId = ' + COALESCE(CAST(@CustId AS VARCHAR(10)), SPACE(1)) + ']'						 
+				RETURN
+			END	
 
+		DELETE BalancePendingDebit WHERE CustID = @CustID
+			IF @@ERROR > 0
+			BEGIN
+				SELECT 
+					@ErrCode = 5210, 
+					@ErrMsg = 'Failed to clear table balance of customer [CustId = ' + COALESCE(CAST(@CustId AS VARCHAR(10)), SPACE(1)) + ']'						 
+				RETURN
+			END	
+
+	
 		----
 		
 		SELECT	@Balance = ISNULL(SUM (Winlost - Actual_stake + PlayerComm),0)

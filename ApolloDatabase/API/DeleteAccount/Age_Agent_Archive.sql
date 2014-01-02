@@ -18,7 +18,7 @@ AS
  * Task			: Archive agent data
  * DB			: SVRCUST.CustDB
  * Revisions	:
- *	• 
+ *	• 20131218@Sophia: revise
  * Parameters:
  *	•
  *	•
@@ -85,7 +85,7 @@ BEGIN
 	--########## Step 2: Archive data #########--
 
 	-- Archive AgentInfo
-	IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentInfo WHERE AgentID = @AgentId)
+	IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentInfo WITH (NOLOCK)  WHERE AgentID = @AgentId)
 	INSERT INTO CustArchiveDB.dbo.AgentInfo (
 		AgentId,
 		AgentHId,
@@ -133,7 +133,14 @@ BEGIN
 
 	
 	-- Archive AgentUser (master and shadow)
-	IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentUser WHERE AgentID = @AgentId)
+	DECLARE @ArchivedAgentUser AS TABLE (AgentUserID INT)
+
+	INSERT INTO	@ArchivedAgentUser 
+	SELECT	AgentUserID 	
+	FROM	CustArchiveDB.dbo.AgentUser WITH (NOLOCK) 
+	WHERE	AgentID = @AgentId	
+
+	------IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentUser WITH (NOLOCK) WHERE AgentID = @AgentId)
 	INSERT INTO CustArchiveDB.dbo.AgentUser (
 		AgentUserId,
 		AgentId,
@@ -157,8 +164,9 @@ BEGIN
 		LoginCount,
 		Status,
 		GETDATE()
-	FROM AgentUser WITH (NOLOCK)
-	WHERE AgentId = @AgentId
+	FROM AgentUser A WITH (NOLOCK)
+	WHERE AgentId = @AgentId 
+		  AND AgentUserId NOT IN (SELECT AgentUserId FROM @ArchivedAgentUser)
 
 	-- Check error
 	IF @@ERROR > 0
@@ -169,8 +177,17 @@ BEGIN
 			RETURN
 		END	
 
+
 	-- Archive agent user permission (master and shadow)
-	IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentUserFunction WHERE AgentID = @AgentId)
+
+	DECLARE @ArchivedAgentUserFunction AS TABLE (AgentUserID INT)
+
+	INSERT INTO	@ArchivedAgentUserFunction
+	SELECT	AgentUserID 
+	FROM	CustArchiveDB.dbo.AgentUserFunction WITH (NOLOCK) 
+	WHERE	AgentID = @AgentId	
+
+	-----IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentUserFunction WITH (NOLOCK) WHERE AgentID = @AgentId)
 	INSERT INTO CustArchiveDB.dbo.AgentUserFunction (
 		AgentUserId,
 		FunctionId,
@@ -186,6 +203,7 @@ BEGIN
 		GETDATE()
 	FROM AgentUserFunction WITH (NOLOCK)
 	WHERE AgentId = @AgentId
+		AND AgentUserId NOT IN (Select AgentUserId from @ArchivedAgentUserFunction)
 
 	-- Check error
 	IF @@ERROR > 0
@@ -196,8 +214,9 @@ BEGIN
 			RETURN
 		END	
 
+
 	-- Archive agent bet limit
-	IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentBetLimit WHERE AgentID = @AgentId)
+	IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentBetLimit WITH (NOLOCK) WHERE AgentID = @AgentId)
 	INSERT INTO CustArchiveDB.dbo.AgentBetLimit (
 		AgentId,
 		SportType,
@@ -227,7 +246,7 @@ BEGIN
 		END	
 
 	-- Archive agent discount
-	IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentDiscount WHERE AgentID = @AgentId)
+	IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentDiscount WITH (NOLOCK) WHERE AgentID = @AgentId)
 	INSERT INTO CustArchiveDB.dbo.AgentDiscount (
 		AgentId,
 		SportType,
@@ -259,7 +278,7 @@ BEGIN
 		END	
 
 	-- Archive agent position taking
-	IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentPositionTaking WHERE AgentID = @AgentId)
+	IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentPositionTaking WITH (NOLOCK) WHERE AgentID = @AgentId)
 	INSERT INTO CustArchiveDB.dbo.AgentPositionTaking (
 		AgentId,
 		SportType,
@@ -291,7 +310,7 @@ BEGIN
 		END	
 
 	-- Archive agent cust position taking
-	IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentCustPositionTaking WHERE AgentCustId = @AgentId)
+	IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentCustPositionTaking WITH (NOLOCK) WHERE AgentCustId = @AgentId)
 	INSERT INTO CustArchiveDB.dbo.AgentCustPositionTaking (
 		AgentCustId,
 		AgentId,
@@ -320,12 +339,12 @@ BEGIN
 			RETURN
 		END	
 
-	--########## Step 3: Clear Balance #########--
-	 EXEC	SVRTXN.TransDB.dbo.Age_Agent_ClearBalance 	
-			@AgentId = @AgentId ,	@Username = @Username, @Currency = @Currency, @CurrencyName = @CurrencyName,
-			@ActualRate = @ActualRate, @ErrCode = @ErrCode OUTPUT,	@ErrMsg = @ErrMsg OUTPUT
+	----########## Step 3: Clear Balance #########--
+	-- EXEC	SVRTXN.TransDB.dbo.Age_Agent_ClearBalance 	
+	--		@AgentId = @AgentId ,	@Username = @Username, @Currency = @Currency, @CurrencyName = @CurrencyName,
+	--		@ActualRate = @ActualRate, @ErrCode = @ErrCode OUTPUT,	@ErrMsg = @ErrMsg OUTPUT
 	
-	IF @ErrCode <> 0 RETURN
+	--IF @ErrCode <> 0 RETURN
 		
 
 	--########## Step 4: Delete data #########--
@@ -409,8 +428,6 @@ BEGIN
 				RETURN
 			END	
 
-
-	
 
 	-- Write log for archive agent
 	SET @xml = (

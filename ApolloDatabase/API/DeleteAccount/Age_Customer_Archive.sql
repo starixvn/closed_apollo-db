@@ -18,7 +18,7 @@ AS
  * Task			: Archive agent data
  * DB			: SVRCUST.CustDB
  * Revisions	:
- *	• 
+*	• 20131218@Sophia: revise
  * Parameters:
  *	•
  *	•
@@ -56,7 +56,7 @@ BEGIN
 		@ActualRate FLOAT, 
 		@Now		Datetime
 
-	SELECT	@Username = C.Username, @Currency = C.Currency, @CurrencyName = E.Currency , @ActualRate = E.ActualRate
+	SELECT	@Username = C.Username, @Currency = C.Currency, @CurrencyName = E.Currency , @ActualRate = E.ActualRate, @agentId = agentId
 	FROM	CustInfo C WITH (NOLOCK)
 	INNER JOIN  Exchange E WITH (NOLOCK)  
 			ON C.Currency = E.ExchangeId
@@ -66,11 +66,39 @@ BEGIN
 	SELECT   @startRun = @Now
 
 	
-	IF EXISTS (	 SELECT 1 FROM SVRTXN.TransDB.dbo.bettrans WITH (NOLOCK) WHERE custid = @CustId And bettype NOT IN (19999,20000))
+	IF EXISTS (	SELECT 1 FROM SVRTXN.TransDB.dbo.bettrans WITH (NOLOCK) WHERE custid = @CustId And bettype <=19000 AND StatusID NOT IN (0, 1, 101, 102)) -----   running, waiting, void, rejected 
+			OR EXISTS ( SELECT 1 FROM SVRTXN.TransDB.dbo.bettrans14 WITH (NOLOCK) WHERE custid = @CustId And bettype <=19000 AND StatusID NOT IN (101,102))
 	BEGIN
 		SELECT @ErrMsg = @Username +':'+ 'There is active transactions. Please re-check!!', @ErrCode = 5215
 		RETURN
 	END
+
+	
+	----------------
+
+	DECLARE @AgentHId HIERARCHYID, @ParentAgentHId HIERARCHYID
+
+	SELECT	@AgentHId = AgentHId
+	FROM	AgentInfo A WITH (NOLOCK)
+	WHERE	AgentID = @agentId
+
+	SELECT	@ParentAgentHId = AgentHId
+	FROM	AgentInfo A WITH (NOLOCK)
+	WHERE	AgentID = 53288 ---- line suntest
+
+	IF EXISTS (	SELECT	1 
+				FROM	SVRSUM.SummaryDB.dbo.Sum_WinLoss_Cust_Old C WITH (NOLOCK) 
+				WHERE	Custid = @CustId  			 
+						AND DATEDIFF( MONTH, Winlostdate, CURRENT_TIMESTAMP ) > 7
+						AND CASE WHEN ( @AgentHId.IsDescendantOf(@ParentAgentHId) = 1) THEN 0 ELSE 1 END = 1   --- not line suntest
+						AND @Currency <> 20																	   --- not line sbtest	
+				)		
+	BEGIN
+		SELECT @ErrMsg = @Username +':'+ 'There is active transactions for real account. Please re-check!!', @ErrCode = 5216
+		RETURN
+	END
+
+		 
 
 	--########## Step 2: Archive #########--
 
