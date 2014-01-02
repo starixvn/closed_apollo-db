@@ -40,7 +40,7 @@ SELECT TOP(1) @matchEvenStatus=LOWER(mt.eventstatus)
 	, @disabledAutoSettle=IsNull(mtex.DisabledAutoSettle, 0)
 FROM dbo.match mt with (nolock)
 LEFT JOIN dbo.match_remark_ex mtex with (nolock) ON mt.matchid=mtex.matchid
-WHERE mtex.matchid=@matchid
+WHERE mt.matchid=@matchid
 
 --check match's existing 
 IF @matchEvenStatus IS NULL
