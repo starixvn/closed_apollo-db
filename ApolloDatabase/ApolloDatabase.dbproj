@@ -1605,9 +1605,6 @@
     <NotInBuild Include="Customer Setting\Customer\Select\CSD Site\Acc_Customer_GetCustomerByAgentId.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="DBA\Task\Task_DailySummary.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="CSD Site\Function\f_GetAgentUplineBetStatusById.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
