@@ -17,6 +17,7 @@ AS
 SET NOCOUNT ON
 BEGIN 
 	IF @Date IS NULL SET @Date = GETDATE()
+		
 
 --1.AgentUserFunction
 	INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.AgentUserFunction (
@@ -31,9 +32,9 @@ BEGIN
 		FunctionId,
 		AgentId,
 		Policy,
-		ArchiveDate
+	    ArchiveDate
 	FROM AgentUserFunction WITH (NOLOCK)
-	WHERE ArchiveDate < CONVERT(DATE,@Date)
+	WHERE ArchiveDate < @Date
 	
 	-- Check error
 		IF @@ERROR > 0
@@ -43,7 +44,7 @@ BEGIN
 		END
 
 
-	DELETE AgentUserFunction WHERE ArchiveDate < CONVERT(DATE,@Date)	 
+	DELETE AgentUserFunction WHERE ArchiveDate < @Date
 	-- Check error
 		IF @@ERROR > 0
 		BEGIN 
@@ -69,7 +70,7 @@ BEGIN
 		MaxPerMatch,
 		ArchiveDate
 	FROM AgentBetLimit WITH (NOLOCK)
-	WHERE ArchiveDate <  CONVERT( DATE, @Date)
+	WHERE ArchiveDate < @Date
 		-- Check error
 		IF @@ERROR > 0
 		BEGIN 
@@ -77,7 +78,7 @@ BEGIN
 			RETURN 
 		END
 
-DELETE AgentBetLimit WHERE ArchiveDate <  CONVERT( DATE, @Date) 
+DELETE AgentBetLimit WHERE ArchiveDate < @Date
 	-- Check error
 		IF @@ERROR > 0
 		BEGIN 
@@ -105,7 +106,7 @@ INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.AgentDiscount (
 		DiscountD,
 		ArchiveDate
 	FROM AgentDiscount WITH (NOLOCK)
-	WHERE ArchiveDate < CONVERT( DATE, @Date)
+	WHERE ArchiveDate < @Date
 		-- Check error
 		IF @@ERROR > 0
 		BEGIN 
@@ -113,7 +114,7 @@ INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.AgentDiscount (
 			RETURN 
 		END
 
-DELETE AgentDiscount WHERE ArchiveDate <  CONVERT( DATE, @Date) 
+DELETE AgentDiscount WHERE ArchiveDate < @Date
 	-- Check error
 		IF @@ERROR > 0
 		BEGIN 
@@ -141,7 +142,7 @@ INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.AgentPositionTaking (
 		MinGivenPositionTaking,
 		ArchiveDate
 	FROM AgentPositionTaking WITH (NOLOCK)	
-	WHERE ArchiveDate < CONVERT( DATE, @Date) 
+	WHERE ArchiveDate < @Date
 		-- Check error
 		IF @@ERROR > 0
 		BEGIN 
@@ -149,7 +150,7 @@ INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.AgentPositionTaking (
 			RETURN 
 		END
 
-DELETE AgentPositionTaking WHERE ArchiveDate <  CONVERT( DATE, @Date) 
+DELETE AgentPositionTaking WHERE ArchiveDate < @Date
 	-- Check error
 		IF @@ERROR > 0
 		BEGIN 
@@ -175,7 +176,7 @@ INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.AgentCustPositionTaking (
 		PositionTaking,
 		ArchiveDate
 	FROM AgentCustPositionTaking WITH (NOLOCK)
-	WHERE ArchiveDate < CONVERT( DATE, @Date) 
+	WHERE ArchiveDate < @Date
 		-- Check error
 		IF @@ERROR > 0
 		BEGIN 
@@ -184,7 +185,7 @@ INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.AgentCustPositionTaking (
 		END
 
 
-DELETE AgentCustPositionTaking WHERE ArchiveDate <  CONVERT( DATE, @Date) 
+DELETE AgentCustPositionTaking WHERE ArchiveDate < @Date
 	-- Check error
 		IF @@ERROR > 0
 		BEGIN 
@@ -217,7 +218,7 @@ INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.AgentUser (
 		Status,
 		ArchiveDate
 	FROM AgentUser WITH (NOLOCK)
-	WHERE ArchiveDate < CONVERT( DATE, @Date) 
+	WHERE ArchiveDate < @Date
 		-- Check error
 		IF @@ERROR > 0
 		BEGIN 
@@ -226,7 +227,7 @@ INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.AgentUser (
 		END
 
 
-DELETE AgentUser WHERE ArchiveDate <  CONVERT( DATE, @Date) 
+DELETE AgentUser WHERE ArchiveDate < @Date
 	-- Check error
 		IF @@ERROR > 0
 		BEGIN 
@@ -269,7 +270,7 @@ INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.AgentInfo (
 		--UplineBetStatus,
 		ArchiveDate
 	FROM AgentInfo WITH (NOLOCK)	
-	WHERE ArchiveDate < CONVERT( DATE, @Date) 
+	WHERE ArchiveDate < @Date
 		-- Check error
 		IF @@ERROR > 0
 		BEGIN 
@@ -278,7 +279,7 @@ INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.AgentInfo (
 		END
 
 
-DELETE AgentInfo WHERE ArchiveDate <  CONVERT( DATE, @Date) 
+DELETE AgentInfo WHERE ArchiveDate < @Date
 	-- Check error
 		IF @@ERROR > 0
 		BEGIN 
@@ -304,7 +305,7 @@ INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.CustBetLimit (
 		MaxPerMatch,
 		ArchiveDate
 	FROM CustBetLimit WITH (NOLOCK)
-	WHERE ArchiveDate <  CONVERT( DATE, @Date) 
+	WHERE ArchiveDate < @Date
 		-- Check error
 		IF @@ERROR > 0
 		BEGIN 
@@ -312,7 +313,7 @@ INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.CustBetLimit (
 			RETURN 
 		END
 
-DELETE CustBetLimit  WHERE ArchiveDate <  CONVERT( DATE, @Date) 
+DELETE CustBetLimit  WHERE ArchiveDate < @Date
 	-- Check error
 		IF @@ERROR > 0
 		BEGIN 
@@ -334,7 +335,7 @@ INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.CustDiscount (
 		Discount,
 		ArchiveDate
 	FROM CustDiscount WITH (NOLOCK)
-	WHERE ArchiveDate <  CONVERT( DATE, @Date) 
+	WHERE ArchiveDate < @Date
 		-- Check error
 		IF @@ERROR > 0
 		BEGIN 
@@ -342,7 +343,7 @@ INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.CustDiscount (
 			RETURN 
 		END
 
-DELETE CustDiscount WHERE ArchiveDate <  CONVERT( DATE, @Date) 
+DELETE CustDiscount WHERE ArchiveDate < @Date
 	-- Check error
 		IF @@ERROR > 0
 		BEGIN 
@@ -395,7 +396,7 @@ INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.CustInfo (
 		IsUGroupChanged,
 		ArchiveDate
 	FROM CustInfo WITH (NOLOCK)
-	WHERE ArchiveDate <  CONVERT( DATE, @Date) 
+	WHERE ArchiveDate < @Date
 		-- Check error
 		IF @@ERROR > 0
 		BEGIN 
@@ -403,7 +404,7 @@ INSERT INTO SVRCUSTARC.CustArchiveDB.dbo.CustInfo (
 			RETURN 
 		END
 
-DELETE CustInfo WHERE ArchiveDate <  CONVERT( DATE, @Date) 
+DELETE CustInfo WHERE ArchiveDate < @Date
 	-- Check error
 		IF @@ERROR > 0
 		BEGIN 
