@@ -46,7 +46,7 @@ WHERE mt.matchid=@matchid
 IF @matchEvenStatus IS NULL
 BEGIN
 	SELECT  @ErrCode = 101,
-		@ErrMsg = 'Sorry!Operation rejected because this macth does not exist.'; 
+		@ErrMsg = 'Operation rejected because this macth does not exist.'; 
 	RETURN;
 END
 
@@ -54,7 +54,7 @@ END
 IF @matchEvenStatus <> 'closed'
 BEGIN
 	SELECT  @ErrCode = 102,
-		@ErrMsg = 'Operation failed since the corresponding match at IBC is not Closed yet.'; 
+		@ErrMsg = 'Operation failed since the corresponding match at main system is not Closed yet.'; 
 	RETURN;
 END
 
@@ -62,7 +62,7 @@ END
 IF @disabledAutoSettle=0 OR @matchEvenStatusEx <> 'running'
 BEGIN
 	SELECT  @ErrCode = 103,
-			@ErrMsg = 'Sorry!Operation rejected due to auto settlement constraint.'; 
+			@ErrMsg = 'Operation rejected due to auto settlement constraint.'; 
 	RETURN;
 END
 
@@ -71,7 +71,7 @@ IF(EXISTS(SELECT TOP(1) 1 FROM dbo.BetTrans trans with (nolock)
 			WHERE trans.matchid=@matchid))
 BEGIN
 	SELECT @ErrCode = 104,
-			@ErrMsg = 'Sorry!Operation failed because there exists bet tickets for this match.'
+			@ErrMsg = 'Operation failed since there exists bet tickets for this match.'
 	RETURN;
 END
 
