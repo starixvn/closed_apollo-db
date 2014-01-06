@@ -13,6 +13,7 @@ Original:
 
 Revisions:
 - 20131128@Sophia: Add column TCommission, TCommissionEUR, GrossWinLossCompany, GrossWinLossCompanyEUR
+- 20130107@Sophia: Get ExchangeDaily Info
     
 Param's Explanation:  
 	 @DrawType = 0: Normal
@@ -77,7 +78,13 @@ SELECT  @Str = @Str
 				AND Status IN (111,112,113,114,115) ' + char(13) 
 				+ CASE WHEN @Currency <> 0 THEN ' AND CurrencyID = '+ CONVERT(VARCHAR(5),@Currency)  ELSE ' ' END + char(13) 
 				+ CASE WHEN @ReportBy = 0 THEN ' GROUP BY CurrencyID,  Currency, EUR, rptDate ' ELSE  ' GROUP BY CurrencyID, Currency,  EUR, DATEADD(MONTH, DATEDIFF(MONTH,0, rptDate),0)'  END + char(13) 
-				+ ' ORDER BY rptDate, Currency'
+				+ ' ORDER BY rptDate, Currency
+				
+		SELECT	Exchangeid,EUR 
+		FROM	@ExchangeDaily
+		WHERE	Exchangedate = ''' +  CONVERT(varchar(10),@ToDate, 120) + '''				
+				
+				'
  		 	 
   
 --PRINT @Str
