@@ -112,38 +112,50 @@ IF @@SERVERNAME IN ('DB042', 'DB043', 'DB044') RETURN
 		INNER JOIN #temp_bettrans tb ON pd.refno = tb.refno
 		INNER JOIN @refno_maxeventdate rm ON pd.refno = rm.refno
 	GROUP BY pd.refno, pd.serial, rm.eventdate
+	
 			
+	DECLARE @ba table (
+		transid bigint , 
+		AgentId int, 
+		AgentLevel smallint,
+		DoubleCommLosing bit, 
+		APositionTaking smallmoney, 
+		ADiscount decimal(9,8), 
+		downlinePT smallmoney, 
+		refno BIGINT
+		)
+
 	--get agent PT and comm setting for tickets
-	SELECT ba.transid, ba.[AgentId], [AgentLevel], b.[DoubleCommLosing], 		
-		APositionTaking, ADiscount, cast(0 as smallmoney) as DownlinePT, b.refno		
-	INTO #temp_bettrans_Agent 
+	INSERT INTO @ba (
+		transid , 
+		AgentId , 
+		AgentLevel,
+		DoubleCommLosing , 
+		APositionTaking , 
+		ADiscount , 
+		downlinePT, 
+		refno
+		)
+
+	SELECT	ba.transid, 
+			ba.[AgentId], 		
+			a.AgentLevel,
+			b.[DoubleCommLosing], 
+			APositionTaking, ADiscount, 
+			SUM(ba.APositionTaking) OVER (PARTITION BY ba.transid
+							ORDER BY agentlevel DESC
+							ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS downlinePT, 
+			b.refno				
 	FROM #temp_bettrans B WITH (NOLOCK) INNER JOIN BetTrans_Agent ba WITH (ROWLOCK) ON b.TransId=ba.TransId 
 		INNER JOIN AgentInfo a WITH (NOLOCK) ON a.AgentID=ba.AgentID
-	
-	--create index		
-	CREATE CLUSTERED INDEX IX_tmp on #temp_bettrans_Agent (transid,AgentLevel desc)		
-
-	DECLARE @prevtransid BIGINT =0 
-	
-	-- calculate downline PT for each agent (so we can calculate commission later)
-	UPDATE #temp_bettrans_Agent 
-	SET 		
-		@DownlinePT= case when @prevtransid <> transid 
-						then APositionTaking
-						else APositionTaking + @DownlinePT -- accumulated PT for upper agent --> for calculating agent commision
-						end,		
-
-		DownlinePT = @DownlinePT,		
-		@prevtransid = transid
-	OPTION (MAXDOP 1) --should use this for quirky update to avoid parallelism problem	
-
+					
 	-- get BetParlayResult_Agent
 	SELECT ba.transid, ba.[AgentId], [AgentLevel], ba.[DoubleCommLosing], 
 		APositionTaking, ADiscount, DownlinePT, 
 		pra.[Stake], pra.AWinLost, cast(0 as money) as AComm ,		
 		pra.StatusId, pra.RefNo,Serial,  pra.WinLostDate, cast(0 as bit) as IsUpdated 
 	INTO #temp_parlayResult_Agent 
-	FROM #temp_bettrans_Agent ba 
+	FROM @ba ba 
 		INNER JOIN dbo.BetParlayResult_Agent pra WITH(ROWLOCK) ON pra.refno = ba.refno and pra.AgentId=ba.AgentId
 
 	-- calculate result for agent in sub-tickets
@@ -375,8 +387,7 @@ IF @@SERVERNAME IN ('DB042', 'DB043', 'DB044') RETURN
 		)
 	
 	DROP TABLE #temp_parlayResult
-	DROP TABLE #temp_bettrans
-	DROP TABLE  #temp_bettrans_Agent
+	DROP TABLE #temp_bettrans	
 	DROP TABLE  #temp_parlayResult_Agent
 GO
 GRANT EXECUTE ON [dbo].[Admin_Calculate_29] TO [aplweb] AS [dbo]

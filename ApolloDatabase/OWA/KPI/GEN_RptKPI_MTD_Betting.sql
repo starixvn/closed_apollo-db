@@ -1,4 +1,14 @@
-﻿ALTER PROCEDURE [dbo].[GEN_RptKPI_MTD_Betting]
+﻿USE [ReportDB]
+GO
+/****** Object:  StoredProcedure [dbo].[GEN_RptKPI_MTD_Betting]    Script Date: 1/3/2014 3:03:28 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+/****** Object:  Stored Procedure dbo.GEN_RptKPI_MTD_Betting    Script Date: 11/11/2013 9:40:55 AM ******/
+
+
+ALTER PROCEDURE [dbo].[GEN_RptKPI_MTD_Betting]
     @date	DATETIME, 
     @date2	DATETIME = null
    
@@ -48,10 +58,12 @@ CREATE TABLE #Betting
             ,SUM(CASE WHEN b.status = 111 THEN 0 ELSE b.betcount END) AS BetCountNoDraw 
             ,SUM(CASE WHEN b.status = 111 THEN 0 WHEN b.status in (114,115) THEN (0.5*b.turnover) ELSE b.turnover END) AS TurnoverNoDraw 
 			,SUM(b.turnover)/sum(b.betcount)				AS AverageBetsize
-			,SUM(CASE WHEN b.status = 111 then 0 WHEN b.status in (114,115) THEN (0.5*b.turnover) ELSE b.turnover END)/SUM(CASE WHEN b.status = 111 THEN 0 ELSE b.betcount END)	AS AverageBetsizeNoDraw
+			,IIF(SUM(CASE WHEN b.status = 111 THEN 0 ELSE b.betcount END)=0,0, --only draw ticket--> return 0
+				SUM(CASE WHEN b.status = 111 then 0 WHEN b.status in (114,115) THEN (0.5*b.turnover) ELSE b.turnover END)/SUM(CASE WHEN b.status = 111 THEN 0 ELSE b.betcount END))	AS AverageBetsizeNoDraw
 			,- SUM(Winloss + TWinLoss + TCommission) AS TotalNetWin
 			,- SUM(b.TCommission) AS TotalCommGiven
-			,- SUM(Winloss + TWinLoss + TCommission)/SUM(CASE WHEN b.status = 111 THEN 0 WHEN b.status in (114,115) THEN (0.5*b.turnover) ELSE b.turnover END) AS Margin
+			,IIF(SUM(CASE WHEN b.status = 111 THEN 0 WHEN b.status in (114,115) THEN (0.5*b.turnover) ELSE b.turnover END)=0,0, --only draw ticket--> return 0
+				- SUM(Winloss + TWinLoss + TCommission)/SUM(CASE WHEN b.status = 111 THEN 0 WHEN b.status in (114,115) THEN (0.5*b.turnover) ELSE b.turnover END)) AS Margin
 			,- SUM(Winloss + TWinLoss + TCommission) AS FinancialSportRevenue
         FROM dbo.rpt_Betting b (NOLOCK)           
         WHERE b.rptDate >= @date AND b.rptDate < @date2
@@ -79,7 +91,3 @@ CREATE TABLE #Betting
 				SELECT 28,	FinancialSportRevenue				
              
             ) f(StatID,MTD)
-
-		
-
-

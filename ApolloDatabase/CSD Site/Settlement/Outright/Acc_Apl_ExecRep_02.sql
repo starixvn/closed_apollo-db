@@ -36,7 +36,7 @@ SET NOCOUNT ON
       ,@status
       ,@deadheat      	
 
-	IF (@@SERVERNAME IN ('DB215\SQL2012', 'SDBTRANS1', 'SDBTRANS2')) -- TransDB server in Apollo system
+	IF (@@SERVERNAME IN ('DB230\SQL2012', 'SDBTRANS1', 'SDBTRANS2')) -- TransDB server in Apollo system
 		EXEC [Admin_AutoSettlement_GenerateCommandOutright]			
 			@matchid = @matchid,
 			@actionid = @actionid,
