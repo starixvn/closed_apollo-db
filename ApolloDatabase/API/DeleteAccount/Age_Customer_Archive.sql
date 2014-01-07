@@ -31,8 +31,8 @@ BEGIN
 	
 	--########## Step 1: Check condition #########--
 
-	-- Check if agent ID exists
-	IF NOT EXISTS ( SELECT 1 FROM CustInfo WITH (NOLOCK) WHERE CustId = @CustId )
+	-- Check if cust ID not exists
+	IF NOT EXISTS ( SELECT TOP 1 1 FROM CustInfo WITH (NOLOCK) WHERE CustId = @CustId )
 		BEGIN
 			SELECT 
 				@ErrCode = 5200, 
@@ -41,7 +41,6 @@ BEGIN
 		END
 	
 	
-
 	-- For write log
 	DECLARE 
 		@startRun	DATETIME,
@@ -54,7 +53,8 @@ BEGIN
 		@Currency	int,
 		@CurrencyName VARCHAR(5),
 		@ActualRate FLOAT, 
-		@Now		Datetime
+		@Now		Datetime,
+		@Winlostdate Date
 
 	SELECT	@Username = C.Username, @Currency = C.Currency, @CurrencyName = E.Currency , @ActualRate = E.ActualRate, @agentId = agentId
 	FROM	CustInfo C WITH (NOLOCK)
@@ -66,15 +66,66 @@ BEGIN
 	SELECT   @startRun = @Now
 
 	
-	IF EXISTS (	 SELECT 1 FROM SVRTXN.TransDB.dbo.bettrans WITH (NOLOCK) WHERE custid = @CustId And bettype NOT IN (20000, 22001, 22002))
+	--- declare line test
+	DECLARE @AgentHId HIERARCHYID, @ParentAgentHId HIERARCHYID
+
+	SELECT	@AgentHId = AgentHId
+	FROM	AgentInfo A WITH (NOLOCK)
+	WHERE	AgentID = @agentId
+
+	SELECT	@ParentAgentHId = AgentHId
+	FROM	AgentInfo A WITH (NOLOCK)
+	WHERE	AgentID = 53288 ---- line suntest
+
+
+	---- test acc 
+	IF	( @Currency = 20 OR @AgentHId.IsDescendantOf(@ParentAgentHId) = 1 )
 	BEGIN
-		SELECT @ErrMsg = @Username +':'+ 'There is active transactions. Please re-check!!', @ErrCode = 5215
-		RETURN
+		IF EXISTS ( SELECT TOP 1 1 FROM SVRTXN.TransDB.dbo.bettrans WITH (NOLOCK) WHERE custid = @CustId And bettype <=19000 AND StatusID NOT IN (0, 1, 101, 102))   -----   running, waiting, void, rejected 
+		BEGIN
+			SELECT @ErrMsg = @Username +':'+ 'There is active transactions for test account. Please re-check!!', @ErrCode = 5215
+			RETURN
+		END
+			  
+		IF EXISTS ( SELECT TOP 1 1 FROM SVRTXN.TransDB.dbo.bettrans14 WITH (NOLOCK) WHERE custid = @CustId And bettype <=19000 AND StatusID NOT IN (101,102))
+ 		BEGIN
+			SELECT @ErrMsg = @Username +':'+ 'There is active transactions for test account. Please re-check!!', @ErrCode = 5216
+			RETURN
+		END
 	END
+	ELSE
+	------real acc
+	BEGIN		
+		IF EXISTS ( SELECT TOP 1 1 FROM SVRTXN.TransDB.dbo.bettrans WITH (NOLOCK) WHERE custid = @CustId And bettype <=19000)
+		BEGIN
+			SELECT @ErrMsg = @Username +':'+ 'There is active transactions for real account. Please re-check!!', @ErrCode = 5217
+			RETURN
+		END
+
+		IF EXISTS ( SELECT TOP 1 1 FROM SVRTXN.TransDB.dbo.bettrans14 WITH (NOLOCK) WHERE custid = @CustId And bettype <=19000) 
+		BEGIN
+			SELECT @ErrMsg = @Username +':'+ 'There is active transactions for real account. Please re-check!!', @ErrCode = 5218
+			RETURN
+		END
+		
+
+		SELECT	 @Winlostdate = DATEADD(MONTH, DATEDIFF(MONTH, 0, DATEADD (mm, -7 , CURRENT_TIMESTAMP)), 0)  			
+		IF EXISTS (	SELECT	TOP 1 1 
+					FROM	SVRSUM.SummaryDB.dbo.Sum_WinLoss_Cust_Old C WITH (NOLOCK) 
+					WHERE	Custid = @CustId  			 
+							AND Winlostdate > @Winlostdate
+					)
+		BEGIN
+			SELECT @ErrMsg = @Username +':'+ 'There is active transactions for real account. Please re-check!!', @ErrCode = 5219
+			RETURN
+		END
+		
+	END
+		 
 
 	--########## Step 2: Archive #########--
 
-	-- Archive AgentInfo
+	-- Archive CustInfo
 	IF NOT EXISTS (SELECT TOP 1 1 FROM CustArchiveDB.dbo.CustInfo WHERE CustId = @CustId)
 	INSERT INTO CustArchiveDB.dbo.CustInfo (
 		CustId,
@@ -131,7 +182,7 @@ BEGIN
 			RETURN
 		END	
 
-	-- Archive agent bet limit
+	-- Archive Cust bet limit
 	IF NOT EXISTS (SELECT TOP 1 1 FROM CustArchiveDB.dbo.CustBetLimit WHERE CustId = @CustId)
 	INSERT INTO CustArchiveDB.dbo.CustBetLimit (
 		CustId,
@@ -161,7 +212,7 @@ BEGIN
 			RETURN
 		END	
 
-	-- Archive agent discount
+	-- Archive cust discount
 	IF NOT EXISTS (SELECT TOP 1 1 FROM CustArchiveDB.dbo.CustDiscount WHERE CustId = @CustId)
 	INSERT INTO CustArchiveDB.dbo.CustDiscount (
 		CustId,
@@ -233,7 +284,7 @@ BEGIN
 				RETURN
 			END	
 
-	-- Write log for archive agent
+	-- Write log for archive cust
 	SET @xml = (
 		SELECT	
 			@CustId		AS '@c',

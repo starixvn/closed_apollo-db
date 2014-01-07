@@ -140,7 +140,7 @@ BEGIN
 	FROM	CustArchiveDB.dbo.AgentUser WITH (NOLOCK) 
 	WHERE	AgentID = @AgentId	
 
-	----IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentUser WITH (NOLOCK) WHERE AgentID = @AgentId)
+	------IF NOT EXISTS  (SELECT TOP 1 1 FROM CustArchiveDB.dbo.AgentUser WITH (NOLOCK) WHERE AgentID = @AgentId)
 	INSERT INTO CustArchiveDB.dbo.AgentUser (
 		AgentUserId,
 		AgentId,
@@ -339,12 +339,12 @@ BEGIN
 			RETURN
 		END	
 
-	--########## Step 3: Clear Balance #########--
-	 EXEC	SVRTXN.TransDB.dbo.Age_Agent_ClearBalance 	
-			@AgentId = @AgentId ,	@Username = @Username, @Currency = @Currency, @CurrencyName = @CurrencyName,
-			@ActualRate = @ActualRate, @ErrCode = @ErrCode OUTPUT,	@ErrMsg = @ErrMsg OUTPUT
+	----########## Step 3: Clear Balance #########--
+	-- EXEC	SVRTXN.TransDB.dbo.Age_Agent_ClearBalance 	
+	--		@AgentId = @AgentId ,	@Username = @Username, @Currency = @Currency, @CurrencyName = @CurrencyName,
+	--		@ActualRate = @ActualRate, @ErrCode = @ErrCode OUTPUT,	@ErrMsg = @ErrMsg OUTPUT
 	
-	IF @ErrCode <> 0 RETURN
+	--IF @ErrCode <> 0 RETURN
 		
 
 	--########## Step 4: Delete data #########--

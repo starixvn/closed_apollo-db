@@ -1,6 +1,4 @@
-﻿-- =============================================
--- Script Template
--- =============================================
+﻿
 ALTER PROCEDURE [dbo].[Age_Rpt_CustCount]
 	@AgentID 	INT,
 	@FromDate 	DATE,
@@ -27,7 +25,7 @@ SET NOCOUNT ON
 CREATE TABLE #CustCountAgent (	AgentID INT, 
 								CustID BIGINT)
 
-CREATE TABLE #CustCountMember (CustID BIGINT)
+--CREATE TABLE #CustCountMember (CustID BIGINT)
 
 
 CREATE TABLE #BettypeList (bettype SMALLINT)
@@ -52,28 +50,28 @@ BEGIN
 	---Member winloss
 	--********************************	
 
-	EXEC Age_Rpt_CustCount_AgentViewCust @AgentID = @AgentID, @FromDate = @FromDate, @ToDate = @ToDate, 
-									     @MoveBetDay =@MoveBetDay, @BalanceUpDay = @BalanceUpDay, @Sporttypes = @Sporttypes, @Bettypes = @Bettypes
+	--EXEC Age_Rpt_CustCount_AgentViewCust @AgentID = @AgentID, @FromDate = @FromDate, @ToDate = @ToDate, 
+	--								     @MoveBetDay =@MoveBetDay, @BalanceUpDay = @BalanceUpDay, @Sporttypes = @Sporttypes, @Bettypes = @Bettypes
 
 END
 
 		 
 
 ------- Get Data  
- SELECT	A.AgentId, ---1 as IsAgent,	
+ SELECT	A.AgentId, 
 		COUNT(DISTINCT A.CustID) as CustCount
 FROM	#CustCountAgent A 
 GROUP BY A.AgentId 
-UNION ALL
-SELECT	0 AS AgentId,--- 0 as IsAgent,	
-		COUNT(DISTINCT A.CustID) as CustCount
-FROM	#CustCountMember A 
+--UNION ALL
+--SELECT	0 AS AgentId, 
+--		COUNT(DISTINCT A.CustID) as CustCount
+--FROM	#CustCountMember A 
 HAVING  COUNT(DISTINCT A.CustID) > 0
----ORDER BY AgentId 
+
 
 
 DROP TABLE #CustCountAgent
-DROP TABLE #CustCountMember
+--DROP TABLE #CustCountMember
 
 DROP TABLE #BettypeList
 DROp TABLE #SportsList
