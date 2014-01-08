@@ -793,6 +793,7 @@ BEGIN
 					LEFT JOIN Bettrans14_Agent D WITH (NOLOCK) 
 							ON D.TransID = B.TransID 
 							AND D.AgentID IN (SELECT AgentId FROM #DirectChild)
+							AND D.StatusId in (SELECT StatusId FROM #StatusId )
 							AND D.TransDate Between @FromDate AND @ToDate	
 							AND (	D.bettype < 31 
 									OR D.bettype between 121 and 999
@@ -862,7 +863,8 @@ BEGIN
 					INNER JOIN Bettrans14_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 					LEFT JOIN Bettrans14_Agent D WITH (NOLOCK) 
 							ON D.TransID = B.TransID
-							AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 							
+							AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 	
+							AND D.StatusId in (SELECT StatusId FROM #StatusId )						
 							AND D.TransDate Between @FromDate AND @ToDate
 							AND D.BetType IN (9,29) 
 							AND (@Bettypes = '0' OR D.Bettype IN (Select bettype FROM #BettypeList)) 
@@ -925,7 +927,8 @@ BEGIN
 					INNER JOIN Bettrans14_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 					LEFT JOIN Bettrans14_Agent D WITH (NOLOCK) 
 							ON D.TransID = B.TransID 
-								AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 								
+								AND D.AgentID IN (SELECT AgentId FROM #DirectChild) 
+								AND D.StatusId in (SELECT StatusId FROM #StatusId )								
 								AND D.TransDate Between @FromDate AND @ToDate
 								AND D.bettype = 10							
 					INNER JOIN Outright14 as m WITH (NOLOCK) on  B.matchid=m.orid
