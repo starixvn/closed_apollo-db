@@ -48,6 +48,7 @@ SET NOCOUNT ON
  
 DECLARE @Str  AS VARCHAR(MAX)
  
+IF @ToDate > CURRENT_TIMESTAMP SET @ToDate = CURRENT_TIMESTAMP
 
 SELECT @Str =
 	 'DECLARE @ExchangeDaily TABLE(ExchangeDate smalldatetime,ExchangeId int, EUR float,unique clustered (ExchangeDate,ExchangeId)) ' + char(13) 
