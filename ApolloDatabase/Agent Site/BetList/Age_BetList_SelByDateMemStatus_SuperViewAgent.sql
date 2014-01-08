@@ -19,7 +19,7 @@ Original:
 Revisions:
 	- 20130724@Sophia: Add @RptType
 	- 20131014@Sophia: add hthomescore,htawayscore
-	- 20131231@Sophia: Get Parlay detail
+	- 20131231@Sophia: Get Parlay detail 
 
 Param's Explanation:  
 	@RptType: = 0: Called from Account Info-Betlist
