@@ -659,6 +659,7 @@ BEGIN
 					INNER JOIN Match14 m WITH (NOLOCK) ON  B.MatchId = m.MatchId 	
 					INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId									
 				WHERE BA.AgentId =  @AgentId
+					AND BA.StatusId in (SELECT StatusId FROM #StatusId )  
 					AND BA.TransDate Between @FromDate AND @ToDate	
 					AND (	BA.bettype < 31 
 							OR BA.bettype between 121 and 999
@@ -666,6 +667,7 @@ BEGIN
 						) 			
 					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 
 				
+					AND B.StatusId in (SELECT StatusId FROM #StatusId )  
 					AND B.TransDate Between @FromDate AND @ToDate	
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
@@ -673,6 +675,7 @@ BEGIN
 						) 			
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
 				
+					AND B.StatusId in (SELECT StatusId FROM #StatusId )  
 					AND L.TransDate Between @FromDate AND @ToDate	
 					AND (	L.bettype < 31 
 							OR L.bettype between 121 and 999
@@ -740,28 +743,22 @@ BEGIN
 									) 			
 								AND (@Bettypes = '0' OR D.Bettype IN (Select bettype FROM #BettypeList))
 					INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId 
-				WHERE BA.AgentId =  @AgentId				  	
+				WHERE BA.AgentId =  @AgentId	
+					AND BA.StatusId in (SELECT StatusId FROM #StatusId )  			  	
 					AND BA.TransDate Between @FromDate AND @ToDate
 					AND BA.BetType IN (9,29) 
 					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
-										
+
+					AND B.StatusId in (SELECT StatusId FROM #StatusId )  										
 					AND B.TransDate Between @FromDate AND @ToDate
 					AND B.BetType IN (9,29) 
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
 				 	
+					AND L.StatusId in (SELECT StatusId FROM #StatusId )  
 					AND L.TransDate Between @FromDate AND @ToDate
 					AND L.BetType IN (9,29) 
 					AND (@Bettypes = '0' OR L.Bettype IN (Select bettype FROM #BettypeList))						
-												 
-					--AND (@Sporttypes = '0' 
-					--			OR EXISTS (	SELECT	1 
-					--						FROM	BettransM14 BM WITH (NOLOCK, index=IX_RefNo) 
-					--						INNER JOIN Match14 M WITH (NOLOCK) 
-					--							ON	 M.matchID = BM.MatchId 
-					--							AND (M.sporttype IN (Select sporttype FROM #SportsList))							
-					--						WHERE	BM.RefNo = B.RefNo
-					--						)				
-					--		)	
+					
 				ORDER BY B.TransID DESC
 
 			----- Outright14
@@ -822,11 +819,14 @@ BEGIN
 					INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid
 					INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId	
 				WHERE 
-					BA.AgentId = @AgentId 					  
+					BA.AgentId = @AgentId 	
+					AND BA.StatusId in (SELECT StatusId FROM #StatusId )  				  
 					AND BA.TransDate Between @FromDate AND @ToDate
-					AND BA.bettype = 10										
+					AND BA.bettype = 10	
+					AND B.StatusId in (SELECT StatusId FROM #StatusId )  									
 					AND B.TransDate Between @FromDate AND @ToDate
-					AND B.bettype = 10								 
+					AND B.bettype = 10	
+					AND L.StatusId in (SELECT StatusId FROM #StatusId )  							 
 					AND L.TransDate Between @FromDate AND @ToDate
 					AND L.bettype = 10																 
 					AND (@Sporttypes = '0' OR lg.sporttype IN (Select sporttype FROM #SportsList))

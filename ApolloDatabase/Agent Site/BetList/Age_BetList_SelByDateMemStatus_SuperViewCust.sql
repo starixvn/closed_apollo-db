@@ -696,6 +696,7 @@ BEGIN
 					INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId				
 				WHERE 
 					B.CustID = @CustId   	
+					AND B.StatusId in (SELECT StatusId FROM #StatusId )
 					AND B.TransDate Between @FromDate AND @ToDate	
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
@@ -752,7 +753,8 @@ BEGIN
 					C.UGroup
 				FROM Bettrans14 AS B  WITH (NOLOCK) 
 				INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
-				WHERE B.CustID = @CustId  					
+				WHERE B.CustID = @CustId  		
+					AND B.StatusId in (SELECT StatusId FROM #StatusId )			
 					AND B.TransDate Between @FromDate AND @ToDate
 					AND B.BetType IN (9,29)
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
@@ -819,7 +821,8 @@ BEGIN
 					INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid
 					INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId	
 				WHERE 
-					B.CustID = @CustId  				
+					B.CustID = @CustId  	
+					AND B.StatusId in (SELECT StatusId FROM #StatusId )			
 					AND B.TransDate Between @FromDate AND @ToDate
 					AND B.bettype = 10				
 					AND (@Sporttypes = '0' OR lg.sporttype IN (Select sporttype FROM #SportsList)) 	

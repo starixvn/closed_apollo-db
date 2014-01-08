@@ -801,7 +801,8 @@ BEGIN
 							AND (@Bettypes = '0' OR D.Bettype IN (Select bettype FROM #BettypeList)) 		 
 					INNER JOIN Match14 m WITH (NOLOCK) ON  B.MatchId = m.MatchId 						
 					INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
-				WHERE	B.CustID = @CustId					
+				WHERE	B.CustID = @CustId	
+					AND B.StatusId in (SELECT StatusId FROM #StatusId )						
 					AND B.TransDate Between @FromDate AND @ToDate	
 					AND (	B.bettype < 31 
 							OR B.bettype between 121 and 999
@@ -868,20 +869,11 @@ BEGIN
 					INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 				
 				WHERE   B.CustID = @CustId
+					AND B.StatusId in (SELECT StatusId FROM #StatusId )		
 					AND B.TransDate Between @FromDate AND @ToDate
 					AND B.BetType IN (9,29) 
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
-											
-					--AND (@Sporttypes = '0' 
-					--			OR EXISTS (	SELECT	1 
-					--						FROM	BettransM14 BM WITH (NOLOCK, index=IX_RefNo) 
-					--						INNER JOIN Match14 M WITH (NOLOCK) 
-					--							ON	 M.matchID = BM.MatchId 
-					--							AND (M.sporttype IN (Select sporttype FROM #SportsList))							
-					--						WHERE	BM.RefNo = B.RefNo
-					--						)				
-					--		)			
-
+				
 
 			----- Outright14
 			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype =10 ) OR @Bettypes = '0'
@@ -940,6 +932,7 @@ BEGIN
 					INNER JOIN league lg WITH (NOLOCK) on m.leagueid = lg.leagueid	
 					INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 				WHERE  B.CustID = @CustId
+					AND B.StatusId in (SELECT StatusId FROM #StatusId )		
 					AND B.TransDate Between @FromDate AND @ToDate
 					AND B.bettype = 10																
 					AND (@Sporttypes = '0' OR lg.sporttype IN (Select sporttype FROM #SportsList)) 	
