@@ -2067,6 +2067,9 @@
     <NotInBuild Include="Agent Site\Report\Winloss\Age_Rpt_CustCount_AgentViewCust.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="OWA\LA_Report_SunSportWinLoss.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent Site\Forecast\Age_ScoreMap_SelMatch.sql">
