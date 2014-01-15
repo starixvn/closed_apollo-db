@@ -1,9 +1,11 @@
 USE [RepDB]
 GO
-IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE type = 'P' AND name = 'Acc_Customer_GetInfo')
-	DROP PROC dbo.Acc_Customer_GetInfo
+/****** Object:  StoredProcedure [dbo].[Acc_Customer_GetInfo]    Script Date: 1/6/2014 3:03:39 PM ******/
+SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[Acc_Customer_GetInfo]
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[Acc_Customer_GetInfo]
 (
 	@CustId INT
 	, @Username NVARCHAR(50) = null
@@ -17,8 +19,9 @@ AS
  * DB			: SVRAGE/RepDB
  * Revisions	:
  *	• @20130412	: Add statuses
- *  • 20131119@Patrick	: change method get UplineStatus & UplineBetStatus
+ *  • 20131119@Patrick	: Change method get UplineStatus & UplineBetStatus
  *  • 20131205@Patrick	: Add more field: SportCredit
+ *	• 20140106@Patrick	: Return more field AgentStatus
  * Parameters:
  *	•
  * Test string:
@@ -47,13 +50,10 @@ BEGIN
 		, dbo.f_GetAgentUplineBetStatusById(ci.AgentId) AS 'UplineBetStatus'
 		, @SoprtCredit AS SportCredit
 		, ai.Username AS AgentUsername, AgentLevel AS AgentLevel
+		, IIF(ai.[Status] = 1, (SELECT TOP 1 [Status] FROM dbo.AgentUser WITH (NOLOCK) WHERE AgentId = ai.AgentId AND IsMaster = 1), ai.[Status]) AS [AgentStatus]
 	FROM dbo.CustInfo AS ci WITH (NOLOCK)
 	INNER JOIN dbo.AgentInfo AS ai WITH (NOLOCK) ON ci.AgentId = ai.AgentId
 	WHERE ci.CustId = @CustId
 	
 END
-
-GO
-GRANT EXECUTE ON [dbo].[Acc_Customer_GetInfo] TO [aplweb]
-GO
 
