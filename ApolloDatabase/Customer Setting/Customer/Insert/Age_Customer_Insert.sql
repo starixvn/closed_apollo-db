@@ -1,4 +1,11 @@
-﻿ALTER PROCEDURE [dbo].[Age_Customer_Insert]
+﻿USE [CustDB]
+GO
+/****** Object:  StoredProcedure [dbo].[Age_Customer_Insert]    Script Date: 1/16/2014 3:34:26 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[Age_Customer_Insert]
 	@CustId				INT,	
 	@Username			NVARCHAR(50),
 	@AgentId			INT,	
@@ -28,6 +35,7 @@ AS
  *	• 20130823@Kos		: Change default UGroup to 'b'
  *	• 20130902@Kos		: Enhance performance
  *	• 20131120@Sophia	: Don't care UplineStatus, UplineBetStatus
+ *	• 20140116@Edward	: Fix bug check MaxDownDelta > 0
  * Parameters:
  *	•
  *	•
@@ -338,7 +346,8 @@ BEGIN
 				AND tupt.BetType	= temp.BetType
 				AND tupt.IsLive		= temp.IsLive
 		WHERE tupt.AgentId <> @AgentId
-
+			AND temp.MaxDownDelta > 0
+			
 		-- Update position taking if break min rule
 		UPDATE @TableUpdatePT
 		SET PositionTaking = PositionTaking + MinGiven - SumDownline - MaxDownDelta
