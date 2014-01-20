@@ -32,4 +32,8 @@ BEGIN
 	WHERE Currency = @Currency
 
 END
+GO
+
+GO
+GRANT EXECUTE ON [dbo].[Mem_API_GetExchange] TO [apollo_srv]
 

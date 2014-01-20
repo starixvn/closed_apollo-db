@@ -1188,7 +1188,7 @@
     <NotInBuild Include="API\DeleteAccount\Age_Agent_Archive.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="API\DeleteAccount\Age_Agent_ClearBalance.sql">
+    <NotInBuild Include="API\DeleteAccount\--Age_Agent_ClearBalance.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="API\DeleteAccount\Age_AgentUser_Archive.sql">

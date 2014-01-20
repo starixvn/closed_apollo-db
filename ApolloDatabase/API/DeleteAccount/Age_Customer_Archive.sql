@@ -319,3 +319,6 @@ BEGIN
 				@OldData	= NULL
 		END CATCH	
 END
+GO
+
+GRANT EXECUTE ON [dbo].[Age_Customer_Archive]  TO [apollo_srv]

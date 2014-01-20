@@ -57,3 +57,6 @@ EXEC [dbo].[Mem_API_GetFundTrans]
 	@status = @status OUTPUT
 
 
+GO
+GRANT EXECUTE ON [dbo].[Mem_API_GetFundTransBySGSTransId] TO [apollo_srv]
+

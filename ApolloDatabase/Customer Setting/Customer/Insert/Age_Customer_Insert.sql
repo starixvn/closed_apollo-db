@@ -522,4 +522,5 @@ BEGIN
 		END CATCH
 END										
 
-
+GO
+GRANT EXECUTE ON [dbo].[Age_Customer_Insert] TO [apollo_srv]  

@@ -76,3 +76,8 @@ BEGIN
 	END	
 END
 
+GO
+GRANT EXECUTE ON [dbo].[Mem_API_GetFundTrans] TO [apollo_srv]
+
+
+

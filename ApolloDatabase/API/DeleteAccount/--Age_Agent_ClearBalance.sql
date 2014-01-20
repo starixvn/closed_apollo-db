@@ -110,3 +110,6 @@ DECLARE @refNo		BIGINT,
 		
 	END
 GO
+
+
+GRANT EXECUTE ON [dbo].[Age_Agent_ClearBalance]  TO [apollo_srv]

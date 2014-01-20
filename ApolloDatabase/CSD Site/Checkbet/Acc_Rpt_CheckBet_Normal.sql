@@ -84,7 +84,7 @@ BEGIN
 			 
 	FROM REPDB.dbo.bettrans bt WITH (NOLOCK)
 		INNER JOIN dbo.bets b WITH (NOLOCK) ON bt.transid = b.transid		
-		LEFT JOIN @Match m1 on bt.matchid = m1.matchid
+		LEFT JOIN @Match m1 on bt.matchid = m1.matchid AND m2.type = CASE WHEN b.bettype= 10 THEN 'outright' ELSE 'match' END 
 		LEFT JOIN @Match m2 on b.matchid = m2.matchid AND m2.type = CASE WHEN b.bettype= 10 THEN 'outright' ELSE 'match' END 
 	WHERE bt.transid in (SELECT transid from #tmp)		
 		  
