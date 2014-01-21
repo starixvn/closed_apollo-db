@@ -232,4 +232,4 @@ Select @LogData =
 EXEC dbo.WriteLog_UserLog_T @UserID = @custid, @Doing = @LogData
 
 GO
---GRANT EXECUTE ON [dbo].[Mem_API_BettransInsTransaction] TO [Dot_Member] AS [dbo]
+GRANT EXECUTE ON [dbo].[Mem_API_BettransInsTransaction] TO [apollo_srv]

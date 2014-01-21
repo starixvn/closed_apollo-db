@@ -44,3 +44,5 @@ SELECT
 FROM bettrans WITH (NOLOCK) 
 WHERE custid = @custid 
 
+GO
+GRANT EXECUTE ON [dbo].[Mem_API_GetCustBalance] TO [apollo_srv]
