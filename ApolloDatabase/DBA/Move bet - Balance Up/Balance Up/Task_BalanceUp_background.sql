@@ -218,7 +218,7 @@ BEGIN
 			CurrencyName = E.currency,
 			actualrate = E.ActualRate ------Later: IsNull(ed.ActualRate, e.ActualRate)
 		FROM BalanceTable_Agent B
-			INNER JOIN AgentInfo A WITH (NOLOCK) ON A.AgentId = A.AgentId
+			INNER JOIN AgentInfo A WITH (NOLOCK) ON b.AgentId = A.AgentId
 			INNER JOIN Exchange E WITH (NOLOCK) ON A.currency = e.exchangeid
 			----Later : LEFT OUTER JOIN bodb02.dbo.ExchangeDailyOanda ed ON A.currency = ed.ExchangeId AND ed.ExchangeDate = @fdate
 

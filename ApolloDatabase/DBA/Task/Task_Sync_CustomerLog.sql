@@ -1,3 +1,10 @@
+USE [LogDB]
+GO
+/****** Object:  StoredProcedure [dbo].[Task_Sync_CustomerLog]    Script Date: 1/21/2014 12:02:32 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 ALTER PROCEDURE [dbo].[Task_Sync_CustomerLog]	
 AS
 /*   
@@ -194,6 +201,37 @@ BEGIN
 		WHERE execID > @max_id				
 	END	
 	---- /AutoSettlementCommand_History ---
+	---- /Settlement_Checking ---
+	---- rmUserLog_RunSP ---
+	select @max_id = isnull(max(LogID),-1)
+	FROM dbo.rmUserLog_RunSP with(nolock)	
+	
+	--	IF @max_id <> -1
+	BEGIN			
+		SET IDENTITY_INSERT dbo.[rmUserLog_RunSP] ON
+		INSERT INTO [dbo].[rmUserLog_RunSP]
+			   ([LogID],
+				[UserID]
+			   ,[Logdate]
+			   ,[CustID]
+			   ,[ActionID]
+			   ,[TrackingValue]
+			   ,[Duration]
+			   ,[TrackingValue2])
+		SELECT [LogID]
+			  ,[UserID]
+			  ,[Logdate]
+			  ,[CustID]
+			  ,[ActionID]
+			  ,[TrackingValue]
+			  ,[Duration]
+			  ,[TrackingValue2]
+		FROM SVRLOG.LogDB.dbo.[rmUserLog_RunSP] WITH(NOLOCK)
+		WHERE LogID > @max_id				
+
+		SET IDENTITY_INSERT dbo.[rmUserLog_RunSP] OFF
+	END	
+	---- /rmUserLog_RunSP ---
 END
 SET NOCOUNT OFF
 
