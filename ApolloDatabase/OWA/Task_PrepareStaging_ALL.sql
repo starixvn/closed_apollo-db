@@ -23,7 +23,7 @@ Param's Explanation:
 */
 BEGIN
 	
-	DECLARE @today datetime, @thedaybefore datetime
+	DECLARE @today datetime, @thedaybefore datetime, @BalanceUpDay smalldatetime, @movebetdate smalldatetime
 	SELECT @today=@dateto, @thedaybefore=@datefrom
 	
     IF (NOT (@today IS NULL OR @thedaybefore IS NULL))
@@ -31,17 +31,30 @@ BEGIN
     ELSE
         SELECT @today=CONVERT(varchar(10),current_timestamp,120), @thedaybefore=DATEADD(day,-3,@today)
 
+	
+	SELECT @movebetdate=MAX(winlostdate) FROM RepDB.dbo.bettrans14 WITH (NOLOCK) 
+
+	SELECT	TOP 1 @BalanceUpDay = winlostdate
+	FROM	RepDB.dbo.Bettrans WITH(NOLOCK)
+	WHERE	bettype = 20000 and matchid = 0 
+
     ---------PROCESS OUTRIGHT DATA--------------------------------------------------------------------------------------------    
 	TRUNCATE TABLE dbo.outright    
    
-    INSERT INTO dbo.outright(matchid, leagueid)  
-    SELECT orid AS matchid, leagueid  
+	INSERT INTO dbo.outright(matchid, leagueid)  
+		SELECT orid AS matchid, leagueid  
         FROM RepDB.dbo.outright WITH (NOLOCK)  
         WHERE eventdate>=@thedaybefore AND eventdate<@today  
         UNION   
         SELECT orid AS matchid, leagueid  
         FROM RepDB.dbo.outright14 WITH (NOLOCK)  
         WHERE eventdate>=@thedaybefore AND eventdate<@today  
+
+	IF @thedaybefore < @BalanceUpDay
+	INSERT INTO dbo.outright(matchid, leagueid)  
+		SELECT	orid AS matchid, leagueid  
+        FROM	ArchiveDB.dbo.outright_Bk WITH (NOLOCK)  
+        WHERE	eventdate>=@thedaybefore AND eventdate<@today  
   
 	---------PROCESS MATCH DATA--------------------------------------------------------------------------------------------    
 	 TRUNCATE TABLE dbo.match    
@@ -55,18 +68,18 @@ BEGIN
         FROM RepDB.dbo.match14 WITH (NOLOCK)  
         WHERE eventdate>=@thedaybefore AND eventdate<@today  
      
+	 IF @thedaybefore < @BalanceUpDay
+	  INSERT INTO dbo.match(matchid, leagueid)  
+		SELECT matchid, leagueid  
+        FROM ArchiveDB.dbo.match_Bk WITH (NOLOCK)  
+        WHERE eventdate>=@thedaybefore AND eventdate<@today  
+
 	---------PROCESS BETTRANS DATA--------------------------------------------------------------------------------------------  
 	TRUNCATE TABLE dbo.[bettrans]  
 	        
-    DECLARE @count int,@movebetdate smalldatetime,@tmpDate smalldatetime, @BalanceUpDay Datetime
+    DECLARE @count int, @tmpDate smalldatetime  
 	SELECT @count=DATEDIFF(DAY,@thedaybefore,@today) - 1
 	
-	SELECT @movebetdate=MAX(winlostdate) FROM RepDB.dbo.bettrans14 WITH (NOLOCK)
-	
-	SELECT	TOP 1 @BalanceUpDay= winlostdate
-	FROM	RepDB.dbo.Bettrans WITH(NOLOCK)
-	WHERE	bettype = 20000 and matchid = 0    
-
 
 	WHILE (@count>=0)
 	BEGIN
