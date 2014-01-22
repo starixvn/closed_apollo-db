@@ -18,6 +18,7 @@ Task: Generate data into rpt_Betting
 DB: KPIReport
 
 Revisions:
+- 20140122@Sophia: Add PlayerComm
 
 Param's Explanation:
 
@@ -41,6 +42,7 @@ SET @date2 = DATEADD(day,1,@date2)
 			COUNT(DISTINCT b.custid) MemberCount,
 			SUM(stake) Turnover,
 			SUM(winlost-actual_stake) winloss,
+			SUM(PlayerComm) PlayerComm,
 			SUM(Twinlost) Twinloss,	  
 			SUM(Tcomm) Tcommission
 	INTO #TMP
@@ -78,6 +80,7 @@ INSERT INTO dbo.rpt_Betting
         ,[MemberCount]
         ,[Turnover]
         ,[WinLoss]
+		,[PlayerComm]
         ,[TWinLoss]     
         ,[TCommission]
      )
@@ -90,7 +93,8 @@ INSERT INTO dbo.rpt_Betting
 		 Betcount,
 		 MemberCount,
 		 Turnover,
-		 winloss,
+		 Winloss,
+		 PlayerComm,
 		 Twinloss,	  
 		 Tcommission
  FROM    #TMP 

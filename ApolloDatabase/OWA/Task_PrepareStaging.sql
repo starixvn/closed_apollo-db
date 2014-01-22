@@ -17,6 +17,7 @@ Task: Prepare data from RepDB to ReportDB
 DB: SVRReport.ReportDB
 
 Revisions:
+- 20140122@Sophia: Add PlayerComm
 
 Param's Explanation:
 */
@@ -76,6 +77,7 @@ BEGIN
                 ,[stake]
                 ,actual_stake
                 ,[winlost]
+				,PlayerComm
 				,[Twinlost]
                 ,Tcomm
                 ,matchid
@@ -93,6 +95,7 @@ BEGIN
 	            ABS(b.stake) stake,
 	            b.actual_stake,
 	            b.winlost,
+				b.PlayerComm,
 				b.TWinLost,
 	            b.Tcomm,
 	            b.matchid,
@@ -129,6 +132,7 @@ BEGIN
                 ,[stake]
                 ,actual_stake
                 ,[winlost]
+				,PlayerComm
 				,Twinlost
                 ,Tcomm
                 ,matchid
@@ -146,6 +150,7 @@ BEGIN
 	            ABS(b.stake) stake,
 	            b.actual_stake,
 	            b.winlost,
+				b.PlayerComm,
 				b.TWinLost,
 	            b.Tcomm,
 	            b.matchid,
