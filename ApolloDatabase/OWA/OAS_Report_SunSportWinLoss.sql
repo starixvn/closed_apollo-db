@@ -13,7 +13,7 @@ Original:
 
 Revisions:
 - 20131128@Sophia: Add column TCommission, TCommissionEUR, GrossWinLossCompany, GrossWinLossCompanyEUR
-- 20130107@Sophia: Get ExchangeDaily Info
+- 20140107@Sophia: Get ExchangeDaily Info
     
 Param's Explanation:  
 	 @DrawType = 0: Normal
