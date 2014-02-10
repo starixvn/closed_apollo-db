@@ -1,3 +1,10 @@
+USE [TransDB]
+GO
+/****** Object:  StoredProcedure [dbo].[Task_AutoSettlement]    Script Date: 2/9/2014 11:33:05 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 ALTER PROCEDURE [dbo].[Task_AutoSettlement]
 AS
 /*
@@ -19,6 +26,8 @@ AS
 */
 BEGIN
 	SET NOCOUNT ON
+	IF (EXISTS(SELECT * FROM SystemSettings WITH(NOLOCK) WHERE VName='isUM' AND VValue=1))
+		RETURN;
 
 	DECLARE @sql			NVARCHAR(MAX),
 			@execID			INT,		
