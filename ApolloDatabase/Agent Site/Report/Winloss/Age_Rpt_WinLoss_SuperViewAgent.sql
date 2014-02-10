@@ -1,4 +1,12 @@
-﻿ALTER  PROCEDURE [dbo].[Age_Rpt_WinLoss_SuperViewAgent]
+﻿USE [RepDB]
+GO
+/****** Object:  StoredProcedure [dbo].[Age_Rpt_WinLoss_SuperViewAgent]    Script Date: 1/24/2014 3:29:48 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+/****** Object:  Stored Procedure dbo.Age_Rpt_WinLoss_SuperViewAgent    Script Date: 10/17/2013 4:35:54 PM ******/
+ALTER PROCEDURE [dbo].[Age_Rpt_WinLoss_SuperViewAgent]
 	@AgentID 	INT,
 	@FromDate 	DATE,
 	@ToDate 	DATE,	
@@ -20,7 +28,7 @@ AS
 		- 20130924@Sophia: .Use link server to call table AgentPositionTaking
 						   .Change the formula of CommBase Parlay and Outright
 		- 20130925@Sophia: Change to way to get Share
-
+		- 20131002@Sophia: Use Sum_WinLoss_Agent/ Sum_WinLoss_Cust table
     */
     
 SET NOCOUNT ON
@@ -167,24 +175,25 @@ BEGIN
 									WHERE	m.orid = B.MatchID
 									)				
 						)
-		GROUP BY	C.Username, C.AgentID
+		GROUP BY	C.Username, C.AgentID 
+	
 END
 
-	
 ------------------------------------------------DATA [14] ----------------------------------------------
-IF @FromDate <= @MoveBetDay  
-BEGIN
+ 
+	IF @FromDate <= @MoveBetDay 
+	BEGIN
 		DECLARE @tmpdate DATE  
 
 		IF @FromDate < @BalanceUpDay 
 			SET @tmpdate = @BalanceUpDay
 		ELSE 
 			SET @tmpdate = @FromDate
-	 	
+
 		INSERT INTO #WinLossAgent
 	    SELECT	A.AgentUsername as Username, A.AgentId, 1 as IsAgent,		
 				SUM(BetCount) as BetCount, 
-				SUm(BetAmount) as BetAmount,		  
+				SUM(BetAmount) as BetAmount,		  
 				SUM(CommBase) as CommBase,				
 				
 				SUM(Winlost) as WinLost,
@@ -193,11 +202,12 @@ BEGIN
 
 				SUM(UplineWinlost) as AWinLost,
 				SUM(UplineComm - AComm) as AComm,
-				SUM(UplineWinlost) + SUM(UplineComm) AS ATotal,
+				SUM(UplineWinlost) + SUM(UplineComm - AComm) AS ATotal,
 				
 				SUM(DownlineEffStake) as DownlineEffStake,
 				SUM(GrossTotal) as GrossTotal,
-				0 as UplineEffStake,
+
+				0 as UplineEffStake,			 
 				0 as UplineTotal
 
 	    FROM	Sum_WinLoss_Agent A WITH(NOLOCK)		
@@ -206,11 +216,12 @@ BEGIN
 				AND (@Sporttypes = '0' OR A.sporttype IN (Select sporttype FROM #SportsList))
 				AND (@Bettypes = '0' OR A.Bettype IN (Select bettype FROM #BettypeList))		 
 	    GROUP BY AgentUsername, A.AgentId
+
+	
 END
-	 
 ------------------------------------------------DATA [BK] ----------------------------------------------
 	
-IF @FromDate < @BalanceUpDay  
+IF @FromDate < @BalanceUpDay 
  BEGIN    	
 		IF @todate >= DATEADD(dd, -1, @BalanceUpDay)
 		SELECT @ToDate = DATEADD(dd, -1, @BalanceUpDay)
@@ -218,7 +229,7 @@ IF @FromDate < @BalanceUpDay
 		INSERT INTO #WinLossAgent
 	    SELECT	A.AgentUsername as Username, A.AgentId, 1 as IsAgent,		
 				SUM(BetCount) as BetCount, 
-				SUm(BetAmount) as BetAmount,		  
+				SUM(BetAmount) as BetAmount,		  
 				SUM(CommBase) as CommBase,				
 				
 				SUM(Winlost) as WinLost,
@@ -227,7 +238,7 @@ IF @FromDate < @BalanceUpDay
 
 				SUM(UplineWinlost) as AWinLost,
 				SUM(UplineComm - AComm) as AComm,
-				SUM(UplineWinlost) + SUM(UplineComm) AS ATotal,
+				SUM(UplineWinlost) + SUM(UplineComm - AComm) AS ATotal,
 								
 				SUM(DownlineEffStake) as DownlineEffStake,
 				SUM(GrossTotal) as GrossTotal,
@@ -240,9 +251,9 @@ IF @FromDate < @BalanceUpDay
 				AND (@Bettypes = '0' OR A.Bettype IN (Select bettype FROM #BettypeList))	
 	    GROUP BY AgentUsername, A.AgentId
 
-	END 
+	END
 
 GO
 GRANT EXECUTE ON [dbo].[Age_Rpt_WinLoss_SuperViewAgent] TO [aplweb]
 GO   
- 
+
