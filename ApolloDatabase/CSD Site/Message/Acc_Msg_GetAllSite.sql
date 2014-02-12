@@ -1,7 +1,11 @@
-IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE type = 'P' AND name = 'Acc_Msg_GetAllSite')
-	DROP PROC dbo.Acc_Msg_GetAllSite
+USE [MsgDB]
 GO
-CREATE PROC dbo.Acc_Msg_GetAllSite
+/****** Object:  StoredProcedure [dbo].[Acc_Msg_GetAllSite]    Script Date: 2/12/2014 11:31:10 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROC [dbo].[Acc_Msg_GetAllSite]
 AS
 /*
 * Created by	: Patrick
@@ -12,14 +16,11 @@ AS
 * Test string:
 	exec dbo.Acc_Msg_GetAllSite
 * Revisions	:
-
+	20140212@Patrick	: Change member site to Apollo site
 */
 BEGIN
 	SET NOCOUNT ON
 	SELECT SiteId, SiteName
 	FROM dbo.MsgSite WITH(NOLOCK)
-	WHERE SiteId IN ('3000000', '4100000')
+	WHERE SiteId IN ('3000000', '4100200')
 END
-GO
-GRANT EXECUTE ON [dbo].[Acc_Msg_GetAllSite] TO [aplweb]
-GO
