@@ -15,10 +15,11 @@ Original:
 
 Revisions: 
 	- 20131205@Dan: add match_remark table
+	- 20140111@Dan: add LiveDeleteChecker for match_remark_ex
 Param's Explanation: 
 
 */
-
+BEGIN
 ----Archive 
 	INSERT INTO SVRARC.ArchiveDB.dbo.odds_ex_bk (
 		[oddsid_ex],[odds1a_adj],[odds2a_adj],[odds1b_adj],[odds2b_adj],[odds1c_adj],[odds2c_adj],[odds1e_adj],[odds2e_adj],[odds1f_adj]
@@ -85,10 +86,10 @@ Param's Explanation:
 
 	INSERT INTO SVRARC.ArchiveDB.dbo.match_remark_ex (
 			matchid, eventstatus, betstatus, finalhomescore, finalawayscore, hthomescore, htawayscore, GoalRecord, 
-			ruben, changetime, settletime, calculate, multiple, calrefund, refund, IsHTCal, DisabledAutoSettle)
+			ruben, changetime, settletime, calculate, multiple, calrefund, refund, IsHTCal, DisabledAutoSettle,LiveDeleteChecker)
 	SELECT	e.matchid, e.eventstatus, e.betstatus, e.finalhomescore, e.finalawayscore, 
 			e.hthomescore, e.htawayscore, e.GoalRecord, e.ruben, e.changetime, e.settletime, 
-			e.calculate, e.multiple, e.calrefund, e.refund, e.IsHTCal, DisabledAutoSettle
+			e.calculate, e.multiple, e.calrefund, e.refund, e.IsHTCal, DisabledAutoSettle,LiveDeleteChecker
 	FROM	Match_remark_ex e
 	WHERE	matchid in (select matchid from match14 where eventdate = @winlostdate)
 
@@ -130,3 +131,4 @@ Param's Explanation:
 	DELETE FROM match14 WHERE eventdate = @winlostdate
 	DELETE FROM outright_ex14 WHERE orid_ex in (select orid from outright14 where eventdate = @winlostdate)
 	DELETE FROM outright14 WHERE eventdate = @winlostdate 
+END
