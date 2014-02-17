@@ -10,7 +10,7 @@ DB: SVRAGE.REPDB
 Revisions: 
 - 20130709: Improve performance   
 - 20130722@Sophia: Add filter by StatusId
-
+- 20140212@Sophia: Check has ticket on bettransM for Parlay
 Parameters:
  
 */
@@ -25,7 +25,9 @@ SELECT  DISTINCT m.eventdate
 FROM	match m WITH (NOLOCK) 
 WHERE	m.eventdate > @Date
 		AND (m.sporttype IN (SELECT val FROM strSplit_Key (@Sporttypes,',')) OR @Sporttypes = '0')
-		AND EXISTS (SELECT B.matchID FROM Bettrans B WITH (NOLOCK) WHERE B.matchID = M.MatchID AND StatusID IN (0,1))
+		AND (	EXISTS (SELECT B.matchID FROM Bettrans B WITH (NOLOCK) WHERE B.matchID = M.MatchID AND StatusID IN (0,1))
+				OR EXISTS (SELECT B.matchID FROM BettransM B WITH (NOLOCK) WHERE B.matchID = M.MatchID AND StatusID IN (0,1))
+			)
 
 GO 
 GRANT EXECUTE ON [Age_Wagers_SelDateBySports] To [aplweb]

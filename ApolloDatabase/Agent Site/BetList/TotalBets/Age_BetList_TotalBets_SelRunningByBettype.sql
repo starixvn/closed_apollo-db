@@ -1,6 +1,4 @@
-﻿
-
-ALTER PROC [dbo].[Age_BetList_TotalBets_SelRunningByBettype]
+﻿ALTER PROCEDURE [dbo].[Age_BetList_TotalBets_SelRunningByBettype]
 	@LoggedId INT,
 	@AgentId INT,
 	@Bettypes VARCHAR(200) = ''
@@ -17,6 +15,7 @@ ALTER PROC [dbo].[Age_BetList_TotalBets_SelRunningByBettype]
 	- 20130510@Sophia: Change @splitter of strSplit_Key from '^', to ','
 	- 20130627@Sophia: Add UGroup for Singbet
 	- 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
+	- 20140212@Sophia: Expand Parlay detail
   Parameters:
  		@AgentId: agent ID
   		#Bettypes: string of bettypes , seperate by ,
@@ -351,13 +350,248 @@ SELECT * FROM @Betlist
 ORDER BY TransID
 
 
+------------
+---- Detail Parlay
+IF EXISTS (SELECT TOP 1 1  FROM #Bettype WHERE Bettype IN (9,29))
+BEGIN 
+DECLARE	@tmpParlay	TABLE(
+	RefNo		BIGINT,
+	transid		BIGINT,
+	sporttype	TINYINT,
+	leagueid	INT,
+	bettype		INT,
+	MatchId		INT,
+	homeid		INT,
+	awayid		INT,
+	hdp1		FLOAT,
+	hdp2		FLOAT,
+	odds		SMALLMONEY,
+	betteam		NVARCHAR(50),
+	statusid	INT,
+	livehomescore	SMALLINT,
+	liveawayscore	SMALLINT,
+	liveindicator	BIT,
+	HtHomeScore	SMALLINT,
+	HtAwayScore	SMALLINT,
+	FinalHomeScore	SMALLINT,
+	FinalAwayScore	SMALLINT,
+	betstatus	NVARCHAR(50),
+	isNeutral	BIT
+)	
+
+IF EXISTS  (SELECT 1 FROM @Betlist WHERE Bettype IN (9,29))
+BEGIN 
+
+	IF EXISTS (SELECT 1 FROM bettransm WITH (NOLOCK) WHERE refno IN (SELECT RefNo FROM @Betlist WHERE Bettype IN (9,29)))
+	BEGIN
+		INSERT INTO @tmpParlay (
+			RefNo,
+			transid,
+			sporttype,
+			leagueid,
+			bettype,
+			MatchId,
+			homeid,
+			awayid,
+			hdp1,
+			hdp2,
+			odds,
+			betteam,
+			statusid,
+			livehomescore,
+			liveawayscore,
+			liveindicator,
+			HtHomeScore,
+			HtAwayScore,
+			FinalHomeScore,
+			FinalAwayScore,
+			betstatus,
+			isNeutral
+		)
+		SELECT
+			b.RefNo,
+			b.transid,
+			m.Sporttype,
+			m.LeagueID,		
+			b.Bettype ,
+			m.MatchId,
+			m.homeID,
+			m.awayID,
+			convert(float, b.hdp1) as Hdp1, 
+			convert(float, b.hdp2) as Hdp2, 
+			b.odds,
+			b.Betteam,
+			b.statusid,
+			b.livehomescore,
+			b.liveawayscore,
+			b.liveindicator,
+			m.HtHomeScore,
+			m.HtAwayScore,
+			m.FinalHomeScore,
+			m.FinalAwayScore,
+			m.betstatus,
+			m.isNeutral
+		FROM(	SELECT	RefNo,
+						transid,
+						matchid,  
+						Bettype, 
+						hdp1, 
+						hdp2, 
+						odds, 
+						betteam, 
+						statusid,
+						livehomescore,
+						liveawayscore,
+						liveindicator
+				FROM	BettransM with (nolock)
+						WHERE refno IN (SELECT RefNo FROM @Betlist WHERE Bettype IN (9,29))         
+			) AS b		
+				inner join match as m with (nolock) on b.matchid=m.matchid
+	END
+
+
+	IF EXISTS (SELECT 1 FROM bettransm14 WITH (NOLOCK) WHERE refno IN (SELECT RefNo FROM @Betlist WHERE Bettype IN (9,29)))
+	BEGIN
+		INSERT INTO @tmpParlay (
+			RefNo,
+			transid,
+			sporttype,
+			leagueid,
+			bettype,
+			MatchId,
+			homeid,
+			awayid,
+			hdp1,
+			hdp2,
+			odds,
+			betteam,
+			statusid,
+			livehomescore,
+			liveawayscore,
+			liveindicator,
+			HtHomeScore,
+			HtAwayScore,
+			FinalHomeScore,
+			FinalAwayScore,
+			betstatus,
+			isNeutral
+		)
+		SELECT
+			b.RefNo,
+			b.transid,
+			m.Sporttype,
+			m.LeagueID,		
+			b.Bettype ,
+			m.MatchId,
+			m.homeID,
+			m.awayID,
+			convert(float, b.hdp1) as Hdp1, 
+			convert(float, b.hdp2) as Hdp2, 
+			b.odds,
+			b.Betteam,
+			b.statusid,
+			b.livehomescore,
+			b.liveawayscore,
+			b.liveindicator,
+			m.HtHomeScore,
+			m.HtAwayScore,
+			m.FinalHomeScore,
+			m.FinalAwayScore,
+			m.betstatus,
+			m.isNeutral
+		FROM(	SELECT	RefNo,
+						transid,
+						matchid,  
+						Bettype, 
+						hdp1, 
+						hdp2, 
+						odds, 
+						betteam, 
+						statusid,
+						livehomescore,
+						liveawayscore,
+						liveindicator
+				FROM	BettransM14 with (nolock)
+						WHERE refno IN (SELECT RefNo FROM @Betlist WHERE Bettype IN (9,29))             
+			) AS b		
+				inner join match14 as m with (nolock) on b.matchid=m.matchid
+	END
+
+
+	IF EXISTS (SELECT 1 FROM SVRARC.ArchiveDB.dbo.BettransM WITH (NOLOCK) WHERE refno IN (SELECT RefNo FROM @Betlist WHERE Bettype IN (9,29)))
+	BEGIN
+		INSERT INTO @tmpParlay (
+			RefNo,
+			transid,
+			sporttype,
+			leagueid,
+			bettype,
+			MatchId,
+			homeid,
+			awayid,
+			hdp1,
+			hdp2,
+			odds,
+			betteam,
+			statusid,
+			livehomescore,
+			liveawayscore,
+			liveindicator,
+			HtHomeScore,
+			HtAwayScore,
+			FinalHomeScore,
+			FinalAwayScore,
+			betstatus,
+			isNeutral
+		)
+		SELECT
+			b.RefNo,
+			b.transid,
+			m.Sporttype,
+			m.LeagueID,		
+			b.Bettype ,
+			m.MatchId,
+			m.homeID,
+			m.awayID,
+			convert(float, b.hdp1) as Hdp1, 
+			convert(float, b.hdp2) as Hdp2, 
+			b.odds,
+			b.Betteam,
+			b.statusid,
+			b.livehomescore,
+			b.liveawayscore,
+			b.liveindicator,
+			m.HtHomeScore,
+			m.HtAwayScore,
+			m.FinalHomeScore,
+			m.FinalAwayScore,
+			m.betstatus,
+			m.isNeutral
+		FROM(	SELECT  RefNo,
+						transid,
+						matchid,  
+						Bettype, 
+						hdp1, 
+						hdp2, 
+						odds, 
+						betteam, 
+						statusid,
+						livehomescore,
+						liveawayscore,
+						liveindicator
+				FROM	SVRARC.ArchiveDB.dbo.BettransM with (nolock)
+						WHERE refno IN (SELECT RefNo FROM @Betlist WHERE Bettype IN (9,29))         
+			) AS b		
+				inner join SVRARC.ArchiveDB.dbo.match_bk as m with (nolock) on b.matchid=m.matchid	
+	END 
+END
+
+ 
+SELECT DISTINCT * FROM @tmpParlay
+ORDER BY transID DESC
+END 
+-----------------
+
+
+GRANT EXECUTE ON [dbo].[Age_BetList_TotalBets_SelRunningByBettype] TO [aplweb]
 GO
-GRANT VIEW DEFINITION ON [dbo].[Age_BetList_TotalBets_SelRunningByBettype] TO [aplweb]
-
-
-
-
-
-
-
-
