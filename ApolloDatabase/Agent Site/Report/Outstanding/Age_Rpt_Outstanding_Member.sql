@@ -12,11 +12,11 @@ DB:  SVRAGE.RepDB
 Original: [Age_Rpt_Outstanding_Ag]
 Revisions:
 - 20131003@Sophia: Parlay not to care Sporttype 
+- 20140225@Sophia: Check condition of Parlay
 
 */
 SET NOCOUNT ON
 DECLARE @MemberOutstanding TABLE (Username NVARCHAR(50), CustID INT, Outstanding MONEY, Positiontaking MONEY)
-
 
 CREATE TABLE #BettypeList (bettype SMALLINT)
 INSERT INTO #BettypeList
@@ -26,10 +26,9 @@ CREATE TABLE #SportsList (Sporttype TINYINT)
 INSERT INTO #SportsList (Sporttype)
 SELECT val FROM strSplit_key (@Sporttypes, ',')
 
-
 -----Member Outstanding
 -- Sportsbook
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')
+	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10)) OR @Bettypes = '0'
 	INSERT INTO @MemberOutstanding
 	SELECT  C.Username, B.CustID, 
 			ISNULL(SUM(ABS(BA.actual_stake)),0) Outstanding,  
@@ -59,20 +58,16 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 
 
 --Parlay
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
+	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29)) OR (@Bettypes = '0' AND @Sporttypes = '0')
 	INSERT INTO @MemberOutstanding
-	SELECT  B.Username, B.CustID, 
-			ISNULL(SUM(ABS(B.actual_stake)),0) Outstanding,  
-			ISNULL(SUM(ABS(B.actual_stake) * B.APositiontaking ),0) Positiontaking
-			
-	FROM (
-			SELECT  C.Username, B.CustID, 
-					BA.bettype ,BA.actual_stake, BA.APositiontaking
-			FROM	bettrans B WITH (NOLOCK)
-			INNER JOIN BetTrans_Agent BA WITH (NOLOCK)
-				ON	BA.TransID = B.TransID AND BA.AgentId = @AgentID 
-			INNER JOIN CustInfo C WITH (NOLOCK)
-					ON B.CustID = C.CustID AND BA.AgentId = C.AgentId
+	SELECT  C.Username, B.CustID, 
+			ISNULL(SUM(ABS(BA.actual_stake)),0) Outstanding,  
+			ISNULL(SUM(ABS(BA.actual_stake) * BA.APositiontaking),0) Positiontaking
+	FROM	bettrans B WITH (NOLOCK)
+	INNER JOIN BetTrans_Agent BA WITH (NOLOCK)
+		ON	BA.TransID = B.TransID AND BA.AgentId = @AgentID  
+	INNER JOIN CustInfo C WITH (NOLOCK)
+			ON B.CustID = C.CustID AND BA.AgentId = C.AgentId
 			WHERE	BA.StatusId IN (0,1)
 					AND BA.matchID IN (9,29)
 					AND BA.Bettype IN (9,29) 	
@@ -81,29 +76,16 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 					AND B.StatusId IN (0,1)	
 					AND B.matchID IN (9,29)
 					AND B.Bettype IN (9,29) 
-					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))
-					
-					--AND (@Sporttypes = '0' 
-					--		OR EXISTS (	SELECT	1 
-					--					FROM	BettransM BM WITH (NOLOCK, index=IX_RefNo) 
-					--					INNER JOIN Match M WITH (NOLOCK) 
-					--						ON	 M.matchID = BM.MatchId 
-					--						AND (M.sporttype IN (Select sporttype FROM #SportsList))							
-					--					WHERE	BM.RefNo = B.RefNo
-					--					 )	
-					--	)	
-			
-			) B
-	GROUP BY B.Username, B.CustID
-	ORDER BY B.Username
+					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList))				 
+	GROUP BY C.Username, B.CustID
+	ORDER BY C.Username
 
 --- Outright
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype = 10 OR @Bettypes = '0')
+	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype = 10) OR @Bettypes = '0'
 	INSERT INTO @MemberOutstanding
 	SELECT  C.Username, B.CustID, 
 			ISNULL(SUM(ABS(BA.actual_stake) ),0) Outstanding,  
-			ISNULL(SUM(ABS(BA.actual_stake) * BA.APositiontaking ),0) Positiontaking
-			
+			ISNULL(SUM(ABS(BA.actual_stake) * BA.APositiontaking ),0) Positiontaking			
 	FROM	bettrans B WITH (NOLOCK)
 	INNER JOIN BetTrans_Agent BA WITH (NOLOCK)
 		ON	BA.TransID = B.TransID AND BA.AgentId = @AgentID 
