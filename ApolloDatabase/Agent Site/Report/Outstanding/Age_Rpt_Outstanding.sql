@@ -75,7 +75,7 @@ BEGIN
 				ISNULL(SUM (ABS(B.actual_stake)),0) as Outstanding,
 				ISNULL(SUM(ABS(B.actual_stake) * (1-B.TPositiontaking)),0) as Positiontaking
 	FROM (
-			SELECT  DISTINCT C.Username, C.AgentID, 1 as IsAgent,
+			SELECT  C.Username, C.AgentID, 1 as IsAgent,
 					B.bettype , B.actual_stake, B.TPositiontaking
 			FROM AgentInfo C WITH (NOLOCK)
 			INNER JOIN BetTrans_Agent BA WITH (NOLOCK) ---Main SH
@@ -98,7 +98,7 @@ BEGIN
 	--Outright
 	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype=10 OR @Bettypes = '0')
 	INSERT INTO @AgentOutstanding
-	SELECT  DISTINCT C.Username, C.AgentID, 1 as IsAgent,
+	SELECT  C.Username, C.AgentID, 1 as IsAgent,
 			ISNULL(SUM (ABS(B.actual_stake)),0) as Outstanding,
 			ISNULL(SUM(ABS(B.actual_stake) * (1-B.TPositiontaking)),0) as Positiontaking
 	FROM AgentInfo C WITH (NOLOCK)
@@ -166,7 +166,7 @@ BEGIN
 			ISNULL(SUM(ABS(B.actual_stake) * B.APositiontaking),0) as Positiontaking
 	FROM 
 	( 
-		SELECT  DISTINCT C.Username, C.AgentID,  BP.bettype, BP.actual_stake, BP.APositiontaking  
+		SELECT  C.Username, C.AgentID,  BP.bettype, BP.actual_stake, BP.APositiontaking  
 		FROM	AgentInfo C  WITH (NOLOCK)
 		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK, index =IX_StatusID_AgentID_Bettype)
 				ON BA.AgentID = C.AgentID
@@ -253,7 +253,7 @@ BEGIN
 			ISNULL(SUM (ABS(B.actual_stake)),0) as Outstanding,
 			ISNULL(SUM(ABS(B.actual_stake) * B.APositiontaking),0) as Positiontaking
 	FROM (
-			SELECT  DISTINCT C.AgentId, BA.bettype, BA.actual_stake, BA.APositiontaking
+			SELECT  C.AgentId, BA.bettype, BA.actual_stake, BA.APositiontaking
 			FROM Bettrans B WITH (NOLOCK)
 			INNER JOIN BetTrans_Agent BA WITH (NOLOCK) 
 				ON BA.TransID = B.TransID AND BA.AgentId = @AgentID 				

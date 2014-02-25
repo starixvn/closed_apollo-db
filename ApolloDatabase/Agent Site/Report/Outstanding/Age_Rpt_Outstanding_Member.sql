@@ -66,7 +66,7 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 			ISNULL(SUM(ABS(B.actual_stake) * B.APositiontaking ),0) Positiontaking
 			
 	FROM (
-			SELECT  DISTINCT C.Username, B.CustID, 
+			SELECT  C.Username, B.CustID, 
 					BA.bettype ,BA.actual_stake, BA.APositiontaking
 			FROM	bettrans B WITH (NOLOCK)
 			INNER JOIN BetTrans_Agent BA WITH (NOLOCK)
