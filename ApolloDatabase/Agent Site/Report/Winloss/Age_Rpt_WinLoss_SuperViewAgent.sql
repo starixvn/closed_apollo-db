@@ -1,6 +1,6 @@
 ﻿USE [RepDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Rpt_WinLoss_SuperViewAgent]    Script Date: 1/24/2014 3:29:48 AM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Rpt_WinLoss_SuperViewAgent]    Script Date: 2/25/2014 1:41:24 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -29,6 +29,7 @@ AS
 						   .Change the formula of CommBase Parlay and Outright
 		- 20130925@Sophia: Change to way to get Share
 		- 20131002@Sophia: Use Sum_WinLoss_Agent/ Sum_WinLoss_Cust table
+		- 20140225@Sophia: Check condition filter of parlay
     */
     
 SET NOCOUNT ON
@@ -85,7 +86,7 @@ BEGIN
 
 
 		----Parlay
-		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
+		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29)) OR (@Bettypes = '0' AND @Sporttypes = '0')
 		INSERT INTO #WinLossAgent
 		SELECT  C.Username, C.AgentID, 1 as IsAgent,			
 				COUNT(B.TransID) BetCount,		
@@ -252,6 +253,8 @@ IF @FromDate < @BalanceUpDay
 	    GROUP BY AgentUsername, A.AgentId
 
 	END
+
+
 
 GO
 GRANT EXECUTE ON [dbo].[Age_Rpt_WinLoss_SuperViewAgent] TO [aplweb]

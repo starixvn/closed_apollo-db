@@ -22,6 +22,7 @@ DB: SVRAGE.REPDB
 Revisions:   
  - 20130718@Sophia: Get APositionTaking and ADiscount
  - 20131223@Sophia: Get detail for Parlay
+ - 20140225@Sophia: Check condition filter of parlay
 	
 Parameters
 	@IsDirectMem : 1: Direct Member
@@ -118,7 +119,7 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 
 
 		--include mix parlay AND Combination mix parlay
-		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
+		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29)) OR (@Bettypes = '0' AND @Sporttypes = '0')
 		BEGIN
 			INSERT INTO #Betlist
 			SELECT 	DISTINCT		

@@ -15,7 +15,7 @@ AS
     DB		: SVRAGE.RepDB
 
     Revisions:
-     
+     - 20140225@Sophia: Check condition filter of parlay
     */
     
 SET NOCOUNT ON
@@ -91,7 +91,7 @@ BEGIN
 		END
 
 		-----Parlay	
-		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')  
+		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29)) OR (@Bettypes = '0' AND @Sporttypes = '0')
 		BEGIN 
 				INSERT INTO #CustCountAgent 
 				SELECT	A.AgentId,C.CustID						 

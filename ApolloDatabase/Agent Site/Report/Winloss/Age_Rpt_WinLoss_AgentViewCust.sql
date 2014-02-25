@@ -1,4 +1,12 @@
-﻿ALTER PROCEDURE [dbo].[Age_Rpt_WinLoss_AgentViewCust]
+﻿USE [RepDB]
+GO
+/****** Object:  StoredProcedure [dbo].[Age_Rpt_WinLoss_AgentViewCust]    Script Date: 2/25/2014 12:29:15 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+/****** Object:  Stored Procedure dbo.Age_Rpt_WinLoss_AgentViewCust    Script Date: 10/23/2013 4:33:32 PM ******/
+ALTER PROCEDURE [dbo].[Age_Rpt_WinLoss_AgentViewCust]
 	@AgentID 	INT,
 	@FromDate 	DATE,
 	@ToDate 	DATE,	
@@ -24,6 +32,7 @@ AS
 	   - 20130718@Sophia: Remove OutStanding
 	   - 20130910@Sophia: revise Outright
 	   - 20130924@Sophia: Change the formula of CommBase Parlay and Outright
+	   - 20140225@Sophia: Check condition filter of parlay
     */
     
 SET NOCOUNT ON
@@ -78,7 +87,7 @@ BEGIN
  
 
 	-----Parlay	
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
+	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29)) OR (@Bettypes = '0' AND @Sporttypes = '0')
 	INSERT INTO #WinLossMember  
 	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,			
 			COUNT(B.TransID) BetCount,	
@@ -247,9 +256,7 @@ IF @FromDate < @BalanceUpDay
 				AND (@Bettypes = '0' OR A.Bettype IN (Select bettype FROM #BettypeList))		 
  
  END
-  
- 
-  
  
 GO
 GRANT EXECUTE ON [dbo].[Age_Rpt_WinLoss_AgentViewCust] TO [aplweb]
+ GO

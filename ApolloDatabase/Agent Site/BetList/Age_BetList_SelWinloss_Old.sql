@@ -18,6 +18,7 @@ Original:
 Revisions:
 	- 20131014@Sophia: add hthomescore,htawayscore
     - 20131223@Sophia: Get detail for Parlay
+	- 20140225@Sophia: Check condition filter of parlay
 
 Param's Explanation:  
 				
@@ -53,7 +54,7 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 	---*****************************  Super View ***************************--
 	IF @LoggedId = 1 
 	BEGIN 	
-		
+			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) ) OR @Bettypes = '0'
 			INSERT INTO #Betlist
 			SELECT 	B.TransId,
 					B.RefNo,
@@ -113,6 +114,7 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 
 				
 			-----Parlay
+			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29)) OR (@Bettypes = '0' AND @Sporttypes = '0')
 			INSERT INTO #Betlist
 			SELECT DISTINCT
 					B.TransId,
@@ -165,6 +167,7 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 
 
 			----- Outright
+			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype = 10 ) OR @Bettypes = '0'
 			INSERT INTO #Betlist
 			SELECT  B.transid,
 					B.refno,
@@ -222,7 +225,7 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 	ELSE 
 	--****************** 2: Agent View******************---
 	BEGIN 
-		
+		 IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) ) OR @Bettypes = '0'
 		 INSERT INTO #Betlist
 			SELECT 	B.TransId,
 					B.RefNo,
@@ -305,6 +308,7 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 				
 			
 			---- Parlay
+			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29)) OR (@Bettypes = '0' AND @Sporttypes = '0')
 			INSERT INTO #Betlist
 			SELECT  DISTINCT B.TransId,
 					B.RefNo,
@@ -369,6 +373,7 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 					
 
 			----- Outright
+			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype = 10 ) OR @Bettypes = '0'
 			INSERT INTO #Betlist
 			SELECT 				
 					B.transid,

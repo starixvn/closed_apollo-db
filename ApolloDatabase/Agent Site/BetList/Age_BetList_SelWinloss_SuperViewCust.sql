@@ -1,4 +1,12 @@
-﻿ALTER PROCEDURE [dbo].[Age_BetList_SelWinloss_SuperViewCust]
+﻿USE [RepDB]
+GO
+/****** Object:  StoredProcedure [dbo].[Age_BetList_SelWinloss_SuperViewCust]    Script Date: 2/25/2014 12:14:04 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+/****** Object:  Stored Procedure dbo.Age_BetList_SelWinloss_SuperViewCust    Script Date: 2/14/2014 9:47:50 AM ******/
+ALTER PROCEDURE [dbo].[Age_BetList_SelWinloss_SuperViewCust]
 	@LoggedId INT,
 	@CustId INT,
 	@FromDate DATE, 
@@ -19,6 +27,7 @@ Revisions:
 	  - 20131008@Sophia: Not to check Sporttype for parlay, it mean all sports; Remove @LoggedAgentLevel
 	  - 20131014@Sophia: add hthomescore,htawayscore
 	  - 20131223@Sophia: Get detail for Parlay
+	  - 20140225@Sophia: Check condition filter of parlay
 
 Param's Explanation:  
 */  
@@ -52,7 +61,9 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 
 IF @Todate > @MoveBetsDay 
 BEGIN
-	INSERT INTO #Betlist
+		--Sportsbook
+			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) ) OR @Bettypes = '0'
+			INSERT INTO #Betlist
 			SELECT 	B.TransId,
 					B.RefNo,
 					m.MatchId,
@@ -112,6 +123,7 @@ BEGIN
 
 				
 			-----Parlay
+			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29)) OR (@Bettypes = '0' AND @Sporttypes = '0')
 			INSERT INTO #Betlist
 			SELECT DISTINCT
 					B.TransId,
@@ -168,6 +180,7 @@ BEGIN
 
 
 			----- Outright
+			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype = 10 ) OR @Bettypes = '0'
 			INSERT INTO #Betlist
 			SELECT  B.transid,
 					B.refno,
@@ -226,7 +239,8 @@ END
 
 IF @Fromdate < =  @MoveBetsDay
 BEGIN
-	INSERT INTO #Betlist
+			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) ) OR @Bettypes = '0'
+			INSERT INTO #Betlist
 			SELECT 	B.TransId,
 					B.RefNo,
 					m.MatchId,
@@ -287,6 +301,7 @@ BEGIN
 
 				
 			-----Parlay
+			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29)) OR (@Bettypes = '0' AND @Sporttypes = '0')
 			INSERT INTO #Betlist
 			SELECT 	DISTINCT 
 					B.TransId,
@@ -341,6 +356,7 @@ BEGIN
 
 
 			----- Outright
+			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype = 10 ) OR @Bettypes = '0'
 			INSERT INTO #Betlist
 			SELECT  B.transid,
 					B.refno,
@@ -643,6 +659,7 @@ DROP TABLE #Betlist
 DROP TABLE #DirectChild
 DROP TABLE #BettypeList
 DROP TABLE #SportsList
+
 
 
 GO

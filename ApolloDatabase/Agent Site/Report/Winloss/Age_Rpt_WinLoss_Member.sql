@@ -1,4 +1,12 @@
-﻿ALTER PROCEDURE [dbo].[Age_Rpt_WinLoss_Member]
+﻿USE [RepDB]
+GO
+/****** Object:  StoredProcedure [dbo].[Age_Rpt_WinLoss_Member]    Script Date: 2/25/2014 1:42:57 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+/****** Object:  Stored Procedure dbo.Age_Rpt_WinLoss_Member    Script Date: 10/21/2013 1:55:41 PM ******/
+ALTER PROCEDURE [dbo].[Age_Rpt_WinLoss_Member]
 	@AgentID 	INT,
 	@FromDate 	DATE,
 	@ToDate 	DATE,
@@ -20,6 +28,7 @@ as
 		- 20130924@Sophia: .Use link server to call table AgentCustPositionTaking
 						   .Change the formula of CommBase Parlay and Outright
 		- 20131002@Sophia: Use Sum_WinLoss_Agent/ Sum_WinLoss_Cust table
+		- 20140225@Sophia: Check condition filter of parlay
 
 	EX:  EXEC Age_Rpt_WinLoss_Member_xtest  @AgentId =3, @FromDate = '2013-01-01',  @ToDate = '2013-04-10', @MovebetDay = '2013-03-01', @BalanceUpDay = '2013-03-01', @sporttypes = '1', @bettypes = '1'
 
@@ -84,7 +93,7 @@ BEGIN
 		GROUP BY C.Username, C.CustID
 
 	----Parlay
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
+	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29)) OR (@Bettypes = '0' AND @Sporttypes = '0')
 	 INSERT INTO #WinLossMember
 	 SELECT		B.Username,
 				B.CustID,
@@ -293,7 +302,7 @@ CREATE TABLE #MemberOutstanding (Username NVARCHAR(50), CustID INT, OutstandingA
 
 
 --Parlay
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0')
+	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29)) OR (@Bettypes = '0' AND @Sporttypes = '0')
 	INSERT INTO #MemberOutstanding
 	SELECT  B.Username, B.CustID, 
 			ISNULL(SUM(ABS(B.actual_stake)),0) OutstandingAmount,  

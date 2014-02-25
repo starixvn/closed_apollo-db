@@ -15,7 +15,7 @@ AS
     DB		: SVRAGE.RepDB
 
     Revisions:
-     
+      - 20140225@Sophia: Check condition filter of parlay
     */
     
 SET NOCOUNT ON
@@ -42,9 +42,9 @@ BEGIN
 					AND B.Bettype <= 19000  
 			GROUP BY B.CustID
 	END
-
+	ELSE
 	------Sportsbook
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')	AND @Sporttypes <> '0'
+	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (9,29,10) OR @Bettypes = '0')	 
 	BEGIN		
 		IF (@Bettypes = '0')
 		BEGIN				
@@ -89,7 +89,7 @@ BEGIN
 	END
 
 	-----Parlay	
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) OR @Bettypes = '0') AND @Sporttypes <> '0'
+	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29)) OR (@Bettypes = '0' AND @Sporttypes = '0')
 	BEGIN 
 		INSERT INTO #CustCountMember 
 		SELECT	B.CustID	
@@ -111,7 +111,7 @@ BEGIN
 
 	
 	-----Outright
-	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (10) OR @Bettypes = '0') AND @Sporttypes <> '0'
+	IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (10) OR @Bettypes = '0') 
 	BEGIN
 		INSERT INTO #CustCountMember
 		SELECT	B.CustID			 

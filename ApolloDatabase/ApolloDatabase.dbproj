@@ -158,6 +158,7 @@
     <Folder Include="CSD Site\Special Delete\Tickets Listing" />
     <Folder Include="CSD Site\Write Log" />
     <Folder Include="Agent Site\Log In" />
+    <Folder Include="CSD Site\BetList" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -2071,6 +2072,27 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="OWA\LA_Report_SunSportWinLoss.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\BetList\Acc_BetList_GetByCustomer.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\BetList\Acc_BetList_GetByCustomer_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\BetList\Acc_BetList_GetByTransId.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\BetList\Acc_BetList_GetDetailByTransId.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\BetList\Acc_BetList_GetDetailByTransId_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\BetList\Acc_BetList_GetDetailSystemParlayByRefNo.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="CSD Site\BetList\Acc_BetList_GetMixParlayByRefNo.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
