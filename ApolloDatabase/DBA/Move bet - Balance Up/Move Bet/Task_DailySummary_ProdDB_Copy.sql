@@ -13,6 +13,7 @@ Task :	Call by TransDB : Task_DailySummary
 DB: SVRPRO.ProdDB
 Original:  IBC.Task_DailySummary_DB02_Copy
 Revisions:
+	-20140220@Dan: add logic to copy running outright in IBC but settle manually in Suncity
 	 
 
 */
@@ -30,7 +31,8 @@ Revisions:
       ,[com1total_ex],[comxtotal_ex],[com2total_ex],[maxbet_ex],[ht_ex],[autosuspend_ex],[stakerange2_ex],[risk2_ex],[allowance2_ex]
       ,[site2_ex],[site3_ex],[site4_ex],[hometotal_ex],[awaytotal_ex],[SecAcceptFlag_ex],[SecAccept_ex],[diffbalance_ex],[bal00_ex],[bal01_ex],[bal02_ex]
       ,[bal03_ex],[bal04_ex],[bal05_ex],[bal10_ex],[bal11_ex],[bal12_ex],[bal13_ex],[bal14_ex],[bal20_ex],[bal21_ex],[bal22_ex],[bal23_ex],[bal24_ex]
-      ,[bal30_ex],[bal31_ex],[bal32_ex],[bal33_ex],[bal34_ex],[bal40_ex],[bal41_ex],[bal42_ex],[bal43_ex],[bal44_ex],[bal50_ex])
+      ,[bal30_ex],[bal31_ex],[bal32_ex],[bal33_ex],[bal34_ex],[bal40_ex],[bal41_ex],[bal42_ex],[bal43_ex],[bal44_ex],[bal50_ex]
+	  ,oddsspreadb_adj,oddsspreadc_adj, oddsspreadd_adj)
 	select
 		[oddsid_ex],[odds1a_adj],[odds2a_adj],[odds1b_adj],[odds2b_adj],[odds1c_adj],[odds2c_adj],[odds1e_adj],[odds2e_adj],[odds1f_adj]
 		,[odds2f_adj],[odds1d_adj] ,[odds2d_adj],[odds1hka_adj] ,[odds2hka_adj] ,[odds1hkb_adj] ,[odds2hkb_adj],[odds1hkc_adj],[odds2hkc_adj]
@@ -43,6 +45,7 @@ Revisions:
       ,[site2_ex],[site3_ex],[site4_ex],[hometotal_ex],[awaytotal_ex],[SecAcceptFlag_ex],[SecAccept_ex],[diffbalance_ex],[bal00_ex],[bal01_ex],[bal02_ex]
       ,[bal03_ex],[bal04_ex],[bal05_ex],[bal10_ex],[bal11_ex],[bal12_ex],[bal13_ex],[bal14_ex],[bal20_ex],[bal21_ex],[bal22_ex],[bal23_ex],[bal24_ex]
       ,[bal30_ex],[bal31_ex],[bal32_ex],[bal33_ex],[bal34_ex],[bal40_ex],[bal41_ex],[bal42_ex],[bal43_ex],[bal44_ex],[bal50_ex]
+	  ,oddsspreadb_adj,oddsspreadc_adj, oddsspreadd_adj
 	from odds_ex
 	where oddsid_ex in (select oddsid from odds where matchid in (select matchid from match where eventdate=@winlostdate))  
 
@@ -95,6 +98,29 @@ Revisions:
 		PlaceOdds, Placing, IsFavor, IsSCR, ProgramID, FOddsStatus, SCRTime, LeaguePatternID, TeamPatternID, ProgramDate, IsDeadheat, StdDelBetCheck
 	from outright
 	where eventdate = @winlostdate AND oddsstatus = 'Completed'
+
+	-- move outright (running in IBC but settle in Suncity)
+	insert into outright_ex14
+		( [orid_ex],[oddsstatus_ex],[odds_adj],[maxbet_ex],[gapodds_ex] ,[status_ex],[bal_ex],[risk_ex],[DisplayMode_ex]      
+		,[PlaceOdds_adj],[FOddsStatus_ex],[changetime_ex],[IsDeadheat_ex] ,[StdDelBetCheck_ex], DisabledAutoSettle)
+	select
+		 [orid_ex],[oddsstatus_ex],[odds_adj],[maxbet_ex],[gapodds_ex] ,[status_ex],[bal_ex],[risk_ex],[DisplayMode_ex]      
+		,[PlaceOdds_adj],[FOddsStatus_ex],[changetime_ex],[IsDeadheat_ex] ,[StdDelBetCheck_ex], DisabledAutoSettle
+	from outright_ex
+	where orid_ex in (select orid 
+					from outright_ex oe with (nolock) join outright o with (nolock) on o.orid=oe.orid_ex
+					Where DisabledAutoSettle=1 and oddsstatus_ex='Completed' and eventdate = @winlostdate
+					)
+
+	insert into outright14
+		(orid, leagueid, teamid, eventdate, kickofftime, oddsstatus, odds, maxbet, gapodds, matchcode, groupmatch, status, creator, bal, risk, DisplayMode, 
+		 PlaceOdds, Placing, IsFavor, IsSCR, ProgramID, FOddsStatus, SCRTime, LeaguePatternID, TeamPatternID, ProgramDate, IsDeadheat, StdDelBetCheck )
+	select
+		orid, leagueid, teamid, eventdate, kickofftime, oddsstatus, odds, maxbet, gapodds, matchcode, groupmatch, status, creator, bal, risk, DisplayMode, 
+		PlaceOdds, Placing, IsFavor, IsSCR, ProgramID, FOddsStatus, SCRTime, LeaguePatternID, TeamPatternID, ProgramDate, IsDeadheat, StdDelBetCheck
+	--from outright where eventdate = @winlostdate AND oddsstatus = 'Completed'
+	from outright_ex oe with (nolock) join outright o with (nolock) on o.orid=oe.orid_ex
+	Where DisabledAutoSettle=1 and oddsstatus_ex='Completed' and eventdate = @winlostdate
 	
 END
 

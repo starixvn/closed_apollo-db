@@ -32,7 +32,8 @@ BEGIN
       ,[com1total_ex],[comxtotal_ex],[com2total_ex],[maxbet_ex],[ht_ex],[autosuspend_ex],[stakerange2_ex],[risk2_ex],[allowance2_ex]
       ,[site2_ex],[site3_ex],[site4_ex],[hometotal_ex],[awaytotal_ex],[SecAcceptFlag_ex],[SecAccept_ex],[diffbalance_ex],[bal00_ex],[bal01_ex],[bal02_ex]
       ,[bal03_ex],[bal04_ex],[bal05_ex],[bal10_ex],[bal11_ex],[bal12_ex],[bal13_ex],[bal14_ex],[bal20_ex],[bal21_ex],[bal22_ex],[bal23_ex],[bal24_ex]
-      ,[bal30_ex],[bal31_ex],[bal32_ex],[bal33_ex],[bal34_ex],[bal40_ex],[bal41_ex],[bal42_ex],[bal43_ex],[bal44_ex],[bal50_ex])
+      ,[bal30_ex],[bal31_ex],[bal32_ex],[bal33_ex],[bal34_ex],[bal40_ex],[bal41_ex],[bal42_ex],[bal43_ex],[bal44_ex],[bal50_ex]
+	  ,oddsspreadb_adj,oddsspreadc_adj, oddsspreadd_adj)
 	SELECT
 		[oddsid_ex],[odds1a_adj],[odds2a_adj],[odds1b_adj],[odds2b_adj],[odds1c_adj],[odds2c_adj],[odds1e_adj],[odds2e_adj],[odds1f_adj]
 		,[odds2f_adj],[odds1d_adj] ,[odds2d_adj],[odds1hka_adj] ,[odds2hka_adj] ,[odds1hkb_adj] ,[odds2hkb_adj],[odds1hkc_adj],[odds2hkc_adj]
@@ -45,6 +46,7 @@ BEGIN
       ,[site2_ex],[site3_ex],[site4_ex],[hometotal_ex],[awaytotal_ex],[SecAcceptFlag_ex],[SecAccept_ex],[diffbalance_ex],[bal00_ex],[bal01_ex],[bal02_ex]
       ,[bal03_ex],[bal04_ex],[bal05_ex],[bal10_ex],[bal11_ex],[bal12_ex],[bal13_ex],[bal14_ex],[bal20_ex],[bal21_ex],[bal22_ex],[bal23_ex],[bal24_ex]
       ,[bal30_ex],[bal31_ex],[bal32_ex],[bal33_ex],[bal34_ex],[bal40_ex],[bal41_ex],[bal42_ex],[bal43_ex],[bal44_ex],[bal50_ex]
+	  ,oddsspreadb_adj,oddsspreadc_adj, oddsspreadd_adj
 	FROM odds_ex14
 	WHERE oddsid_ex in (select oddsid from odds14 where matchid in (select matchid from match14 where eventdate=@winlostdate))  
 

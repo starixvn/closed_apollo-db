@@ -41,6 +41,17 @@ SET NOCOUNT ON
 	delete from outright
 	where eventdate = @winlostdate AND oddsstatus = 'Completed'
 
+	select orid 
+	into #ManualSettleOutright
+	from outright_ex oe with (nolock) join outright o with (nolock) on o.orid=oe.orid_ex
+	Where DisabledAutoSettle=1 and oddsstatus_ex='Completed' and eventdate = @winlostdate
+
+	delete from outright_ex
+	where orid_ex in (select orid from #ManualSettleOutright)
+
+	delete from outright
+	where orid in (select orid from #ManualSettleOutright)
+
 
 END
  

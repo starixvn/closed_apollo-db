@@ -1,6 +1,6 @@
 USE [LogDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Task_Sync_CustomerLog]    Script Date: 1/21/2014 12:02:32 AM ******/
+/****** Object:  StoredProcedure [dbo].[Task_Sync_CustomerLog]    Script Date: 2/17/2014 12:33:52 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -80,7 +80,7 @@ BEGIN
 		)
 		SELECT [LogId],[UserId],[SPName],[LogDate],[AgentId],[ActionId],[Duration],[Data],[OldData]
 		FROM SVRLOG.LogDB.dbo.RunSpAgent with(nolock)
-		WHERE LogDate >= @logdate
+		WHERE LogDate >= @startday--@logdate
 			and LogID > @max_id		
 		SET IDENTITY_INSERT dbo.RunSpAgent OFF
 	END	
@@ -99,7 +99,7 @@ BEGIN
 		)
 		SELECT [LogId],[UserId] ,[SPName],[LogDate],[CustId] ,[ActionId],[Duration],[Data],[OldData]
 		FROM SVRLOG.LogDB.dbo.RunSpCust with(nolock)
-		WHERE LogDate >= @logdate
+		WHERE LogDate >= @startday--@logdate
 			and LogID > @max_id		
 		SET IDENTITY_INSERT dbo.RunSpCust OFF
 	END	
