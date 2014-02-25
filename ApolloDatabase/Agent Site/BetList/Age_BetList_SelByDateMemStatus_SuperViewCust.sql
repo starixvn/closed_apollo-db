@@ -1,4 +1,12 @@
-﻿ALTER PROCEDURE [dbo].[Age_BetList_SelByDateMemStatus_SuperViewCust]
+﻿USE [RepDB]
+GO
+/****** Object:  StoredProcedure [dbo].[Age_BetList_SelByDateMemStatus_SuperViewCust]    Script Date: 2/24/2014 11:03:15 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+/****** Object:  Stored Procedure dbo.Age_BetList_SelByDateMemStatus_SuperViewCust    Script Date: 2/14/2014 9:47:50 AM ******/
+ALTER PROCEDURE [dbo].[Age_BetList_SelByDateMemStatus_SuperViewCust]
 	@LoggedId INT,
 	@AgentId INT = -1 ,
 	@CustId INT = -1,
@@ -20,6 +28,7 @@ Revisions:
 	- 20130724@Sophia: Add @RptType
 	- 20131014@Sophia: add hthomescore,htawayscore
 	- 20131231@Sophia: Get Parlay detail
+	- 20140225@Sophia: Check condition of Parlay
 
 Param's Explanation:  
 	@RptType: = 0: Called from Account Info-Betlist
@@ -129,7 +138,7 @@ BEGIN
 
 				
 		-----Parlay
-		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) ) OR @Bettypes = '0'
+		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29) ) OR (@Bettypes = '0' AND @Sporttypes = '0')
 		INSERT INTO #Betlist
 		SELECT 	DISTINCT B.TransId,
 				B.RefNo,
