@@ -83,8 +83,7 @@ BEGIN
 									)
 						)	 
 		GROUP BY	C.Username, C.AgentID
-
-
+		
 		----Parlay
 		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29)) OR (@Bettypes = '0' AND @Sporttypes = '0')
 		INSERT INTO #WinLossAgent
