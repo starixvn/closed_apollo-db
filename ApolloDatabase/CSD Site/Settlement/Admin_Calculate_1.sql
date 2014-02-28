@@ -15,7 +15,8 @@ IF @betcount = 0 AND @@SERVERNAME NOT LIKE N'DBIOM%' RETURN
 	DB: SVRTXN/TransDB
 	Orginal SP: bodb02.[Admin_Calculate_1]
 	Revisions:
-		20131125@Dan: use temp varibale instead of temp tables to prevent problem when executing via replication
+		- 20131125@Dan: use temp varibale instead of temp tables to prevent problem when executing via replication
+		- 20140226@Sophia: Calculate Comm with new formula
 		
 */
 
@@ -137,13 +138,14 @@ BEGIN
 			WHEN @modds < -0.25	THEN actual_stake * apositiontaking
 			END,
 					
-		aComm = CASE
-			WHEN @modds >  0.25 	THEN @commWinRate * adiscount * stake * (1-DownlinePT)
-			WHEN @modds =  0.25 	THEN @commWinRate * adiscount * stake * (1-DownlinePT) * 0.5
-			WHEN @modds =  0    	THEN 0
-			WHEN @modds = -0.25 	THEN @commLostRate * adiscount * stake * (1-DownlinePT) * 0.5
-			WHEN @modds < -0.25 	THEN @commLostRate * adiscount * stake * (1-DownlinePT)
-			END,
+		--aComm = CASE
+		--	WHEN @modds >  0.25 	THEN @commWinRate * adiscount * stake * (1-DownlinePT)
+		--	WHEN @modds =  0.25 	THEN @commWinRate * adiscount * stake * (1-DownlinePT) * 0.5
+		--	WHEN @modds =  0    	THEN 0
+		--	WHEN @modds = -0.25 	THEN @commLostRate * adiscount * stake * (1-DownlinePT) * 0.5
+		--	WHEN @modds < -0.25 	THEN @commLostRate * adiscount * stake * (1-DownlinePT)
+		--	END,
+		AComm = @commWinRate * adiscount * (1-DownlinePT) * dbo.[F_GetCommBase] (Stake,Odds,Bettype,@modds) ,
 		
 		Status = CASE
 			WHEN @modds > 0 THEN 'WON'
@@ -193,13 +195,16 @@ BEGIN
 			WHEN @modds < -0.25	THEN 0
 			END,
 					
-		PlayerComm = CASE
-			WHEN @modds >  0.25 	THEN @commWinRate * playerdiscount * stake
-			WHEN @modds =  0.25 	THEN @commWinRate * playerdiscount * stake * 0.5
-			WHEN @modds =  0    	THEN 0
-			WHEN @modds = -0.25 	THEN @commLostRate * playerdiscount * stake * 0.5
-			WHEN @modds < -0.25 	THEN @commLostRate * playerdiscount * stake
-			END,
+		--PlayerComm = CASE
+		--	WHEN @modds >  0.25 	THEN @commWinRate * playerdiscount * stake
+		--	WHEN @modds =  0.25 	THEN @commWinRate * playerdiscount * stake * 0.5
+		--	WHEN @modds =  0    	THEN 0
+		--	WHEN @modds = -0.25 	THEN @commLostRate * playerdiscount * stake * 0.5
+		--	WHEN @modds < -0.25 	THEN @commLostRate * playerdiscount * stake
+		--	END,
+
+		PlayerComm = @commWinRate * playerdiscount * dbo.[F_GetCommBase] (Stake,Odds,Bettype,@modds),
+
 		
 		Status = CASE
 			WHEN @modds > 0 THEN 'WON'
@@ -213,13 +218,14 @@ BEGIN
 			END,
 		ruben=1,
 		[TWinLost] = AgentWinlost.AWinlost,
-		[TComm] =  CASE
-				WHEN @modds >  0.25 	THEN @commWinRate * Tdiscount * stake * (1-[TPositionTaking])
-				WHEN @modds =  0.25 	THEN @commWinRate * Tdiscount * stake * (1-[TPositionTaking]) * 0.5
-				WHEN @modds =  0    	THEN 0
-				WHEN @modds = -0.25 	THEN @commLostRate * Tdiscount * stake * (1-[TPositionTaking]) * 0.5
-				WHEN @modds < -0.25 	THEN @commLostRate * Tdiscount * stake * (1-[TPositionTaking])
-				END
+		--[TComm] =  CASE
+		--		WHEN @modds >  0.25 	THEN @commWinRate * Tdiscount * stake * (1-[TPositionTaking])
+		--		WHEN @modds =  0.25 	THEN @commWinRate * Tdiscount * stake * (1-[TPositionTaking]) * 0.5
+		--		WHEN @modds =  0    	THEN 0
+		--		WHEN @modds = -0.25 	THEN @commLostRate * Tdiscount * stake * (1-[TPositionTaking]) * 0.5
+		--		WHEN @modds < -0.25 	THEN @commLostRate * Tdiscount * stake * (1-[TPositionTaking])
+		--		END
+		TComm = @commWinRate * Tdiscount * (1-[TPositionTaking]) * dbo.[F_GetCommBase] (Stake,Odds,Bettype,@modds)
 	from 
 		(SELECT TransId, sum(AWinLost) aWinlost
 			FROM @ba 

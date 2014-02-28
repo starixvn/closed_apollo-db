@@ -30,6 +30,7 @@ AS
 		- 20130925@Sophia: Change to way to get Share
 		- 20131002@Sophia: Use Sum_WinLoss_Agent/ Sum_WinLoss_Cust table
 		- 20140225@Sophia: Check condition filter of parlay
+		- 20140226@Sophia: Get CommBase by function
     */
     
 SET NOCOUNT ON
@@ -47,7 +48,8 @@ BEGIN
 		SELECT  C.Username, C.AgentID, 1 as IsAgent,
 				COUNT(B.TransID) BetCount,			
 		   		SUM(ABS(B.Stake)) AS BetAmount,
-				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS CommBase,				
+				---SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS CommBase,				
+				SUM (CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END) as CommBase,
 				SUM (B.WinLost - B.Actual_Stake) as Winlost,
 				SUM (B.PlayerComm) as PlayerComm,
 				SUM (B.WinLost - B.Actual_Stake+ B.PlayerComm) as MemberTotal,
@@ -90,7 +92,8 @@ BEGIN
 		SELECT  C.Username, C.AgentID, 1 as IsAgent,			
 				COUNT(B.TransID) BetCount,		
 		   		SUM(ABS(B.Stake)) AS BetAmount,
-				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,				
+				--SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,				
+				SUM (CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END) as CommBase,
 				SUM (B.WinLost - B.Actual_Stake) as Winlost,
 				SUM (B.PlayerComm) as PlayerComm,
 				SUM (B.WinLost - B.Actual_Stake+ B.PlayerComm) as MemberTotal,
@@ -138,7 +141,8 @@ BEGIN
 		SELECT  C.Username, C.AgentID, 1 as IsAgent,				
 				COUNT(B.TransID) BetCount,			
 		   		SUM(ABS(B.Stake)) AS BetAmount,
-				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,
+				--SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,
+				SUM (CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END) as CommBase,
 				SUM (B.WinLost - B.Actual_Stake) as Winlost,
 				SUM (B.PlayerComm) as PlayerComm,
 				SUM (B.WinLost - B.Actual_Stake+ B.PlayerComm) as MemberTotal,

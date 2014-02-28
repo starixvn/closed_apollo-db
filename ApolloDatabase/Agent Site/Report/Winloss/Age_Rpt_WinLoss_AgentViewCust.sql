@@ -33,6 +33,7 @@ AS
 	   - 20130910@Sophia: revise Outright
 	   - 20130924@Sophia: Change the formula of CommBase Parlay and Outright
 	   - 20140225@Sophia: Check condition filter of parlay
+	   - 20140226@Sophia: Get CommBase by function
     */
     
 SET NOCOUNT ON
@@ -50,7 +51,8 @@ BEGIN
 	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,				
 			COUNT(B.TransID) BetCount,			
 		   	SUM(ABS(B.Stake)) as BetAmount,
-			SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as CommBase,
+			--SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as CommBase,
+			SUM (CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END) as CommBase,
 
 			SUM (B.Winlost - B.Actual_Stake) as Winlost,
 			SUM (B.PlayerComm) as PlayerComm,
@@ -63,7 +65,8 @@ BEGIN
 			0 as DownlineEffStake, 
 			0 as GrossTotal,
 
-			SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END * (1-BA.APositionTaking))  as UplineEffStake,
+			--SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END * (1-BA.APositionTaking))  as UplineEffStake,
+			SUM(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END * (1-BA.APositionTaking))  as UplineEffStake,
 			-(SUM (B.Winlost - B.Actual_Stake + B.PlayerComm) + SUM(BA.AWinLost) + SUM(BA.AComm) - SUM (B.PlayerComm)) UplineTotal
 
 	FROM	Bettrans B WITH (NOLOCK)
@@ -92,8 +95,9 @@ BEGIN
 	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,			
 			COUNT(B.TransID) BetCount,	
 		   	SUM(ABS(B.Stake)) as BetAmount,
-			SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  as CommBase,
-			
+			---SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  as CommBase,
+			SUM (CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END) as CommBase,
+
 			SUM (B.Winlost - B.Actual_Stake) as Winlost,
 			SUM (B.PlayerComm) as PlayerComm,
 			SUM (B.Winlost - B.Actual_Stake + B.PlayerComm) as MemberTotal,
@@ -105,7 +109,9 @@ BEGIN
 			0 as DownlineEffStake, 
 			0 as GrossTotal,
 
-			SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END * (1-BA.APositionTaking))  as UplineEffStake,			
+			--SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END * (1-BA.APositionTaking))  as UplineEffStake,	
+			SUM(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END * (1-BA.APositionTaking))  as UplineEffStake,				
+			
 			-(SUM (B.Winlost - B.Actual_Stake ) + SUM(BA.AWinLost) + SUM(BA.AComm)) UplineTotal	
 	FROM	Bettrans B WITH (NOLOCK)
 	INNER JOIN BetTrans_Agent BA WITH (NOLOCK ) 
@@ -140,7 +146,8 @@ BEGIN
 	SELECT	'' as Username, 0 as AgentId, 0 as IsAgent,
 			COUNT(B.TransID) BetCount,			
 		   	SUM(ABS(B.Stake)) as BetAmount,
-			SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  as CommBase,
+			--SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  as CommBase,
+			SUM (CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END) as CommBase,
 			
 			SUM (B.Winlost - B.Actual_Stake) as Winlost,
 			SUM (B.PlayerComm) as PlayerComm,
@@ -153,7 +160,8 @@ BEGIN
 			0 as DownlineEffStake, 
 			0 as GrossTotal,
 
-			SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END * (1-BA.APositionTaking))  as UplineEffStake,
+			--SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END * (1-BA.APositionTaking))  as UplineEffStake,
+			SUM(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END * (1-BA.APositionTaking))  as UplineEffStake,
 			-(SUM (B.Winlost - B.Actual_Stake + B.PlayerComm) + SUM(BA.AWinLost) + SUM(BA.AComm) - SUM (B.PlayerComm)) UplineTotal
 	FROM	Bettrans B WITH (NOLOCK)
 	INNER JOIN BetTrans_Agent BA WITH (NOLOCK ) 

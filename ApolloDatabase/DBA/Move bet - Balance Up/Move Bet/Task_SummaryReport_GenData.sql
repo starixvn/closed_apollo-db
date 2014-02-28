@@ -34,8 +34,10 @@ CREATE TABLE #Tmp(
 			C.ParentID, --- k
 			SUM(ABS(B.Stake)) AS BetAmount,
 			COUNT(B.TransID) as BetCount,
-			SUM(CASE WHEN B.StatusID IN (112,113) AND (ABS(B.MOdds) <> 0.25 OR B.Bettype IN (9,29,10)) THEN ABS(B.Stake) 
-						ELSE CASE WHEN B.StatusID IN (112,113) AND ABS(B.MOdds) =0.25 AND B.Bettype NOT IN (9,29,10) THEN  ABS(B.Stake)*0.5 ELSE 0 END END)  AS CommBase,				
+			--SUM(CASE WHEN B.StatusID IN (112,113) AND (ABS(B.MOdds) <> 0.25 OR B.Bettype IN (9,29,10)) THEN ABS(B.Stake) 
+			--			ELSE CASE WHEN B.StatusID IN (112,113) AND ABS(B.MOdds) =0.25 AND B.Bettype NOT IN (9,29,10) THEN  ABS(B.Stake)*0.5 ELSE 0 END END)  AS CommBase,
+						
+			SUM (CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END) as CommBase,	
 			SUM(B.Winlost - B.Actual_Stake) AS Winlost,	
 			SUM(B.PlayerComm) as PlayerComm, 				
 			SUM(BP.AWinlost) AS UplineWinlost,	---- k winlost
@@ -85,11 +87,16 @@ CREATE TABLE #Tmp(
 				T.AWinlost, T.AComm,  
 				T.UplineWinlost, T.UplineComm,						
 					
-				(1 - SUM (BA.APositionTaking)) * MAX(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END) -- CommBase
+				--(1 - SUM (BA.APositionTaking)) * MAX(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END) -- CommBase
+				--as DownlineEffStake,					
+				(1 - SUM (BA.APositionTaking)) * MAX(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END) -- CommBase
 				as DownlineEffStake,		
 
-				SUM(BA.AWinlost) + MAX(B.Winlost - B.Actual_Stake) + MAX(BP.AComm)  AS GrossTotal,  --- money k+1 gives to k							
-				((1 - SUM (BA.APositionTaking)) - MAX(BP1.APositionTaking)) * MAX(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  -- COMMBASE
+				SUM(BA.AWinlost) + MAX(B.Winlost - B.Actual_Stake) + MAX(BP.AComm)  AS GrossTotal,  --- money k+1 gives to k	
+										
+				--((1 - SUM (BA.APositionTaking)) - MAX(BP1.APositionTaking)) * MAX(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  -- COMMBASE
+				--as UplineEffStake,	
+				((1 - SUM (BA.APositionTaking)) - MAX(BP1.APositionTaking)) * MAX(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END)  -- COMMBASE
 				as UplineEffStake,	
 								
 				T.SportType, T.BetType
@@ -141,7 +148,9 @@ CREATE TABLE #Tmp(
 			C.ParentID, --- k
 		   	SUM(ABS(B.Stake)) AS BetAmount,
 			COUNT(B.TransID) as BetCount,
-			SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,				
+			--SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,				
+			SUM(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END)  AS CommBase,
+
 			SUM(B.Winlost - B.Actual_Stake) AS Winlost,	
 			SUM(B.PlayerComm) as PlayerComm, 				
 			SUM(BP.AWinlost) AS UplineWinlost,	---- k winlost
@@ -190,11 +199,11 @@ CREATE TABLE #Tmp(
 				T.Winlost, T.PlayerComm,  
 				T.AWinlost, T.AComm,  
 				T.UplineWinlost, T.UplineComm,											
-				(1 - SUM (BA.APositionTaking)) * MAX(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END) -- CommBase
+				(1 - SUM (BA.APositionTaking)) * MAX(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END) -- CommBase
 				as DownlineEffStake,		
 
 				SUM(BA.AWinlost) + MAX(B.Winlost - B.Actual_Stake) + MAX(BP.AComm)  AS GrossTotal,  --- money k+1 gives to k							
-				((1 - SUM (BA.APositionTaking)) - MAX(BP1.APositionTaking)) * MAX(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  -- COMMBASE
+				((1 - SUM (BA.APositionTaking)) - MAX(BP1.APositionTaking)) * MAX(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END)  -- COMMBASE
 				as UplineEffStake,	
 								
 				T.SportType, T.BetType
@@ -256,7 +265,7 @@ CREATE TABLE #Tmp(
 			C.ParentID, --- k
 		   	SUM(ABS(B.Stake)) AS BetAmount,
 			COUNT(B.TransID) as BetCount,
-			SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,
+			SUM(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END)  AS CommBase,
 			SUM(B.Winlost - B.Actual_Stake) AS Winlost,	
 			SUM(B.PlayerComm) as PlayerComm, 				
 			SUM(BP.AWinlost) AS UplineWinlost,	---- k winlost
@@ -306,11 +315,11 @@ CREATE TABLE #Tmp(
 				T.Winlost, T.PlayerComm,  
 				T.AWinlost, T.AComm,  
 				T.UplineWinlost, T.UplineComm,																
-				(1 - SUM (BA.APositionTaking)) * MAX(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END) -- CommBase
+				(1 - SUM (BA.APositionTaking)) * MAX(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END) -- CommBase
 				as DownlineEffStake,		
 
 				SUM(BA.AWinlost) + MAX(B.Winlost - B.Actual_Stake) + MAX(BP.AComm)  AS GrossTotal,  --- money k+1 gives to k							
-				((1 - SUM (BA.APositionTaking)) - MAX(BP1.APositionTaking)) * MAX(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  -- COMMBASE
+				((1 - SUM (BA.APositionTaking)) - MAX(BP1.APositionTaking)) * MAX(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END)  -- COMMBASE
 				as UplineEffStake,	
 								
 				T.SportType, T.BetType
@@ -374,7 +383,7 @@ CREATE TABLE #Tmp(
 				C.AgentID, C.Username, C.ParentID,
 		   		SUM(ABS(B.Stake)) AS BetAmount,		
 				COUNT(B.TransID) as BetCount,		
-				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  AS CommBase,
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END)  AS CommBase,
 				SUM (B.WinLost - B.Actual_Stake) as Winlost,
 				SUM (B.PlayerComm) as PlayerComm,
 				SUM(BA.AWinlost)  as AWinlost, ----Main SH Winlost
@@ -382,7 +391,7 @@ CREATE TABLE #Tmp(
 				- SUM(B.Winlost - B.Actual_Stake + B.TWinlost) AS UplineWinlost,	 ---super Winlost
 				0 AS UplineComm,			---super comm				
 				(SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS GrossTotal,
-				SUM(CASE WHEN ABS(B.MOdds) <> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) =0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END * (1-B.TPositionTaking))  AS DownlineEffStake , 				
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END * (1-B.TPositionTaking))  AS DownlineEffStake , 				
 				0 AS UplineEffStake ,
 				m.sporttype, b.BetType						
 		FROM		AgentInfo C WITH (NOLOCK)
@@ -409,7 +418,7 @@ CREATE TABLE #Tmp(
 				C.AgentID, C.Username, C.ParentID,
 		   		SUM(ABS(B.Stake)) AS BetAmount,		
 				COUNT(B.TransID) as BetCount,						
-				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,			
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END)  AS CommBase,			
 				SUM (B.WinLost - B.Actual_Stake) as Winlost,
 				SUM (B.PlayerComm) as PlayerComm,
 				SUM(BA.AWinlost)  as AWinlost, ----Main SH Winlost
@@ -417,7 +426,7 @@ CREATE TABLE #Tmp(
 				- SUM(B.Winlost - B.Actual_Stake + B.TWinlost) AS UplineWinlost,	 ---super Winlost
 				0 AS UplineComm,			---super comm				
 				(SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS GrossTotal,				
-				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END * (1-B.TPositionTaking))  AS DownlineEffStake , 
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END * (1-B.TPositionTaking))  AS DownlineEffStake , 
 				0 AS UplineEffStake ,
 				0 as sporttype, b.BetType	
 		FROM		AgentInfo C WITH (NOLOCK)
@@ -442,7 +451,7 @@ CREATE TABLE #Tmp(
 				C.AgentID, C.Username, C.ParentID,
 		   		SUM(ABS(B.Stake)) AS BetAmount,		
 				COUNT(B.TransID) as BetCount,						
-				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  AS CommBase,
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END)  AS CommBase,
 				SUM (B.WinLost - B.Actual_Stake) as Winlost,
 				SUM (B.PlayerComm) as PlayerComm,
 				SUM(BA.AWinlost)  as AWinlost, ----Main SH Winlost
@@ -450,7 +459,7 @@ CREATE TABLE #Tmp(
 				- SUM(B.Winlost - B.Actual_Stake + B.TWinlost) AS UplineWinlost,	 ---super Winlost
 				0 AS UplineComm,			---super comm				
 				(SUM(B.Winlost - B.Actual_Stake + B.TWinlost) + SUM (B.TComm)) AS GrossTotal,				
-				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END * (1-B.TPositionTaking))  AS DownlineEffStake , 
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END * (1-B.TPositionTaking))  AS DownlineEffStake , 
 				0 AS UplineEffStake ,
 				l.sporttype, b.BetType						
 		FROM		AgentInfo C WITH (NOLOCK)
@@ -480,12 +489,12 @@ CREATE TABLE #Tmp(
 		SELECT  @WinlostDate, C.CustID, C.Username, C.AgentID, 						
 		   		SUM(ABS(B.Stake)) AS BetAmount,
 				COUNT(B.TransID) as BetCount, 	
-				SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END)  as CommBase,
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END)  as CommBase,
 				SUM(B.WinLost - B.Actual_Stake) AS WinLost,				
 				SUM(B.PlayerComm) AS PlayerComm,				
 				SUM(BA.AWinLost) AS UplineWinlost,	
 				SUM(BA.AComm)  AS UplineComm,
-				SUM(CASE WHEN ABS(B.MOdds)<> 0.25 AND B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE CASE WHEN ABS(B.MOdds) = 0.25 AND B.StatusID IN (112,113) THEN  ABS(B.Stake)*0.5  ELSE 0 END END * (1-BA.APositionTaking))   as UplineEffStake,			
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END * (1-BA.APositionTaking))   as UplineEffStake,			
 				m.sporttype, b.BetType
 		FROM		Bettrans14 B WITH (NOLOCK)
 		INNER JOIN	BetTrans14_Agent BA WITH (NOLOCK, INDEX(IX_bettrans14_Agent))
@@ -508,12 +517,12 @@ CREATE TABLE #Tmp(
 		SELECT  @WinlostDate, C.CustID, C.Username, C.AgentID, 						
 		   		SUM(ABS(B.Stake)) AS BetAmount,
 				COUNT(B.TransID) as BetCount, 					
-				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  as CommBase,
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END)  as CommBase,
 				SUM(B.WinLost - B.Actual_Stake) AS WinLost,				
 				SUM(B.PlayerComm) AS PlayerComm,				
 				SUM(BA.AWinLost) AS UplineWinlost,	
 				SUM(BA.AComm)  AS UplineComm,				
-				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END * (1-BA.APositionTaking))  as UplineEffStake,
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END * (1-BA.APositionTaking))  as UplineEffStake,
 				0 AS sporttype, b.BetType
 		FROM		Bettrans14 B WITH (NOLOCK)
 		INNER JOIN	BetTrans14_Agent BA WITH (NOLOCK, INDEX(IX_bettrans14_Agent))
@@ -538,12 +547,12 @@ CREATE TABLE #Tmp(
 		SELECT  @WinlostDate, C.CustID, C.Username, C.AgentID, 						
 		   		SUM(ABS(B.Stake)) AS BetAmount,
 				COUNT(B.TransID) as BetCount, 					
-				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END)  as CommBase,
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END)  as CommBase,
 				SUM(B.WinLost - B.Actual_Stake) AS WinLost,				
 				SUM(B.PlayerComm) AS PlayerComm,				
 				SUM(BA.AWinLost) AS UplineWinlost,	
 				SUM(BA.AComm)  AS UplineComm,				
-				SUM(CASE WHEN B.StatusID IN (112,113) THEN ABS(B.Stake) ELSE 0 END * (1-BA.APositionTaking))  as UplineEffStake,
+				SUM(CASE WHEN B.StatusID IN (112,113) THEN dbo.[F_GetCommBase] (B.Stake, B.Odds, B.Bettype, B.MOdds) ELSE 0 END * (1-BA.APositionTaking))  as UplineEffStake,
 				sporttype, b.BetType
 		FROM		Bettrans14 B WITH (NOLOCK)
 		INNER JOIN	BetTrans14_Agent BA WITH (NOLOCK, INDEX(IX_bettrans14_Agent))
