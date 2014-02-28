@@ -16,6 +16,7 @@ Original:
 
 Revisions:
 	- 20131125@Dan: use temp variable instead of temp tables to prevent problem when executing via replication
+	- 20140226@Sophia: Calculate Comm with new formula
 Param's Explanation:
 	- @matchid: matchid of match to be settled
 	- @matchdate match date
@@ -265,10 +266,17 @@ SET
 		ELSE 0
 		END,
 
+	--acomm	= CASE @statusID
+	--		WHEN 112 THEN @commWinRate  * adiscount*stake*(1-DownlinePT)
+	--		WHEN 113 THEN @commLostRate * adiscount*stake*(1-DownlinePT)
+	--		ELSE 0 END,
+
+			
 	acomm	= CASE @statusID
-			WHEN 112 THEN @commWinRate  * adiscount*stake*(1-DownlinePT)
-			WHEN 113 THEN @commLostRate * adiscount*stake*(1-DownlinePT)
+			WHEN 112 THEN @commWinRate  * adiscount*(1-DownlinePT) * dbo.[F_GetCommBase] (Stake,0,9,0)
+			WHEN 113 THEN @commLostRate * adiscount*(1-DownlinePT) * dbo.[F_GetCommBase] (Stake,0,9,0)
 			ELSE 0 END,
+
 	IsUpdated = CASE
 		WHEN (@oldstatusID <> @statusID) OR (@oldwinlost <> @winlost) THEN 1
 		ELSE 0 END
@@ -324,18 +332,27 @@ SET
 		ELSE stake*@odds
 		END,
 	
+	--playercomm	= CASE @statusID 
+	--			WHEN 112 THEN @commWinRate  * stake*playerdiscount
+	--			WHEN 113 THEN @commLostRate * stake*playerdiscount
+	--			ELSE 0 END,	
+
 	playercomm	= CASE @statusID 
-				WHEN 112 THEN @commWinRate  * stake*playerdiscount
-				WHEN 113 THEN @commLostRate * stake*playerdiscount
+				WHEN 112 THEN @commWinRate * playerdiscount * dbo.[F_GetCommBase] (Stake,0,9,0)
+				WHEN 113 THEN @commLostRate * playerdiscount * dbo.[F_GetCommBase] (Stake,0,9,0)
 				ELSE 0 END,	
 				
 	IsUpdated = CASE
 		WHEN (@oldstatusID <> @statusID) OR (@oldwinlost <> @winlost) THEN 1
 		ELSE 0 END,
 	[TWinLost] = AgentWinlost.AWinlost,
+	--[TComm] =  CASE @statusID
+	--		WHEN 112 THEN @commWinRate  * Tdiscount*stake*(1-[TPositionTaking])
+	--		WHEN 113 THEN @commLostRate * Tdiscount*stake*(1-[TPositionTaking])
+	--		ELSE 0 END
 	[TComm] =  CASE @statusID
-			WHEN 112 THEN @commWinRate  * Tdiscount*stake*(1-[TPositionTaking])
-			WHEN 113 THEN @commLostRate * Tdiscount*stake*(1-[TPositionTaking])
+			WHEN 112 THEN @commWinRate  * Tdiscount * (1-[TPositionTaking])* dbo.[F_GetCommBase] (Stake,0,9,0)
+			WHEN 113 THEN @commLostRate * Tdiscount * (1-[TPositionTaking])* dbo.[F_GetCommBase] (Stake,0,9,0)
 			ELSE 0 END
 
 FROM #tmp_bettrans T 

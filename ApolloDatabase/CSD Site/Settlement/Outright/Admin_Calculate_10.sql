@@ -14,6 +14,7 @@ Original:
 
 Revisions:	
 	- 20131125@Dan: add undo action
+	- 20140226@Sophia: Calculate Comm with new formula
 Param's Explanation:
 
 */
@@ -108,7 +109,7 @@ begin
 							ELSE 1 
 						END,						
 		aWinLost = -(odds-1) * apositiontaking * stake / @deadheat,					
-		aComm = @commWinRate * (1-DownlinePT) * adiscount * stake,				
+		aComm = @commWinRate * (1-DownlinePT) * adiscount * dbo.[F_GetCommBase] (Stake,0,10,0),				
 		[status] = 'WON',			
 		statusID = 112				
 			
@@ -134,14 +135,14 @@ begin
 							ELSE 1 
 						END,				
 		WinLost = (((odds-1)/@deadheat)+1) * stake ,			
-		PlayerComm = @commWinRate * playerdiscount * stake,				
+		PlayerComm = @commWinRate * playerdiscount * dbo.[F_GetCommBase] (Stake,0,10,0),				
 		Status = 'WON',
 		StatusID = 112,			
 		ruben=1,
 		winlostdate = @winlostdate, --convert(char(10),getdate(),111),
 		statuswinlost = 2,
 		[TWinLost] = AgentWinlost.AWinlost,
-		[TComm] =  @commWinRate * Tdiscount * stake * (1-[TPositionTaking])				
+		[TComm] =  @commWinRate * Tdiscount * (1-[TPositionTaking])* dbo.[F_GetCommBase] (Stake,0,10,0)				
 	FROM 
 		(	SELECT TransId, sum(AWinLost) aWinlost
 			FROM @ba 
@@ -164,7 +165,7 @@ begin
 							ELSE 1 
 						END,--'s','m'							
 		awinlost = apositiontaking * stake,			
-		aComm = @commLostRate * adiscount * stake * (1-DownlinePT),		
+		aComm = @commLostRate * adiscount * (1-DownlinePT)* dbo.[F_GetCommBase] (Stake,0,10,0),		
 		[status] = 'LOSE',			
 		statusID = 113	
 			
@@ -190,14 +191,14 @@ begin
 		ELSE 1 END,--'s','m'	
 				
 		WinLost = 0,		
-		PlayerComm = @commLostRate * playerdiscount * stake,		
+		PlayerComm = @commLostRate * playerdiscount * dbo.[F_GetCommBase] (Stake,0,10,0),		
 		Status = 'LOSE',
 		StatusID = 113,			
 		ruben=1,
 		winlostdate = @winlostdate, --convert(char(10),getdate(),111),
 		statuswinlost = 4,
 		[TWinLost] = AgentWinlost.AWinlost,
-		[TComm] =  @commLostRate * Tdiscount * stake * (1-[TPositionTaking])					
+		[TComm] =  @commLostRate * Tdiscount * (1-[TPositionTaking]) * dbo.[F_GetCommBase] (Stake,0,10,0)
 	FROM 
 		(	SELECT TransId, sum(AWinLost) aWinlost
 			FROM @ba 

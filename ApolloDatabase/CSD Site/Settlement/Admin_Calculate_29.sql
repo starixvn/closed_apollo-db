@@ -11,6 +11,7 @@ AS
 	Original: 
 
 	Revisions:
+	- 20140226@Sophia: Calculate Comm with new formula
 		
 	Param's Explanation:
 		+ @matchid: matchid of match to be settled
@@ -199,10 +200,17 @@ IF @@SERVERNAME IN ('DB042', 'DB043', 'DB044') RETURN
 			ELSE 0
 			END,
 				
+		--acomm = CASE @statusID
+		--			WHEN 112 THEN @commWinRate  * PRA.stake * adiscount*(1-DownlinePT)
+		--			WHEN 113 THEN @commLostRate * PRA.stake * adiscount*(1-DownlinePT)
+		--			ELSE 0 END,		
+		
 		acomm = CASE @statusID
-					WHEN 112 THEN @commWinRate  * PRA.stake * adiscount*(1-DownlinePT)
-					WHEN 113 THEN @commLostRate * PRA.stake * adiscount*(1-DownlinePT)
-					ELSE 0 END,							
+					WHEN 112 THEN @commWinRate  * adiscount * (1-DownlinePT) * dbo.[F_GetCommBase] (Stake,0,29,0)
+					WHEN 113 THEN @commLostRate * adiscount * (1-DownlinePT) * dbo.[F_GetCommBase] (Stake,0,29,0)
+					ELSE 0 END,		
+		
+							
 		--NoRefund = m.NoRefund,
 		--runningCnt = m.runningCnt,
 		IsUpdated = CASE
@@ -254,10 +262,16 @@ IF @@SERVERNAME IN ('DB042', 'DB043', 'DB044') RETURN
 			ELSE PR.stake*@odds
 			END,		
 
+		--playercomm	= CASE @statusID 
+		--			WHEN 112 THEN @commWinRate  * PR.stake * playerdiscount
+		--			WHEN 113 THEN @commLostRate * PR.stake * playerdiscount
+		--			ELSE 0 END,	
+					
 		playercomm	= CASE @statusID 
-					WHEN 112 THEN @commWinRate  * PR.stake * playerdiscount
-					WHEN 113 THEN @commLostRate * PR.stake * playerdiscount
-					ELSE 0 END,							
+					WHEN 112 THEN @commWinRate  * playerdiscount * dbo.[F_GetCommBase] (Stake,0,29,0)
+					WHEN 113 THEN @commLostRate * playerdiscount * dbo.[F_GetCommBase] (Stake,0,29,0)
+					ELSE 0 END,				
+											
 		--NoRefund = m.NoRefund,
 		--runningCnt = m.runningCnt,
 		IsUpdated = CASE
