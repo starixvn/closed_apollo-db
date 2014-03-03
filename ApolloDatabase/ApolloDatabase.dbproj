@@ -2095,6 +2095,9 @@
     <NotInBuild Include="CSD Site\BetList\Acc_BetList_GetMixParlayByRefNo.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="CSD Site\Function\f_GetCommBase.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent Site\Forecast\Age_ScoreMap_SelMatch.sql">
