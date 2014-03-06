@@ -159,6 +159,7 @@
     <Folder Include="CSD Site\Write Log" />
     <Folder Include="Agent Site\Log In" />
     <Folder Include="CSD Site\BetList" />
+    <Folder Include="Oanda Exchange service" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -2096,6 +2097,15 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="CSD Site\Function\f_GetCommBase.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Oanda Exchange service\Acc_ExchangeCodeSel.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Oanda Exchange service\Acc_ExchangeDaily_ActualRateUpd.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Oanda Exchange service\Acc_ExchangeDailyIns.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
