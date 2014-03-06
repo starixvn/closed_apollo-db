@@ -123,7 +123,7 @@ BEGIN
 				AND BA.AgentId = @AgentID
 				AND BA.Winlostdate BETWEEN @FromDate AND @ToDate 
 				AND BA.StatusID NOT IN (0,1)	
-				AND BA.bettype =10
+				AND BA.bettype IN (9,29)
 				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList))
 		INNER JOIN	CustInfo C WITH (NOLOCK)
 				ON	B.CustID = C.CustID AND  C.AgentId = @AgentID	
