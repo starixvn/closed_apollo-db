@@ -1,23 +1,15 @@
-﻿USE [CustDB]
-GO
-/****** Object:  UserDefinedFunction [dbo].[f_Sport_GetNameByType]    Script Date: 5/6/2013 9:51:55 AM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-ALTER FUNCTION [dbo].[f_Sport_GetNameByType] (
-	@Sporttype	TINYINT,
-	@Language	VARCHAR(5)	= 'en-US'
+﻿ALTER FUNCTION [dbo].[f_Msg_GetContentById] (
+	@MsgId		INT,
+	@Language	NVARCHAR(5)	= 'en-US' 
 )
-RETURNS NVARCHAR(100) 
+RETURNS NVARCHAR(4000) 
 AS
 
 /**
- * Created by	: Edward
- * Date			: 20130320
- * Task			: Get the sport name from sporttype by language
- * DB			: SVRCUST.CustDB
+ * Created by	: Kos
+ * Date			: 20130425
+ * Task			: Get message content by message ID
+ * DB			: APL.CustDB
  * Revisions	:
  *	• 
  * Parameters:
@@ -31,34 +23,31 @@ AS
  *	•	es-ES	: Spanish - Spain 
  *	•	vi-VN	: Vietnamese - Vietnam
  *	•
- *  
  */
 
 BEGIN
-	-- Declare the return variable here
-	DECLARE	@sportName	NVARCHAR(100)
-
-	SELECT @sportName =	CASE @Language	
-							WHEN 'en-US' THEN SportName 
-							WHEN 'zh-CN' THEN SportNameCs
-							WHEN 'zh-TW' THEN SportNameCh
-							WHEN 'th-TH' THEN SportNameTh
-							WHEN 'ja-JP' THEN SportNameJp
-							WHEN 'ko-KR' THEN SportNameKo
-							WHEN 'es-ES' THEN SportNameES
-							WHEN 'vi-VN' THEN SportNameVN
-							ELSE SportName 
-						END
-	FROM SVRAGE.RepDB.dbo.Sports WITH (NOLOCK)
-	WHERE SportType = @Sporttype
 	
-	IF (@sportName IS NULL OR @sportName = '')
-		SELECT	@sportName = SportName 
-		FROM	SVRAGE.RepDB.dbo.Sports WITH (NOLOCK)
-		WHERE	SportType = @Sporttype
+	DECLARE	@Content NVARCHAR(4000)
+
+	SELECT @Content =	CASE @Language	
+							WHEN 'en-US' THEN ContentEN 
+							WHEN 'zh-CN' THEN ContentCS
+							WHEN 'zh-TW' THEN ContentCT
+							WHEN 'th-TH' THEN ContentTH
+							WHEN 'ja-JP' THEN ContentJP
+							WHEN 'ko-KR' THEN ContentKO
+							WHEN 'es-ES' THEN ContentES
+							WHEN 'vi-VN' THEN ContentVI
+							ELSE ContentEN 
+						END
+	FROM MsgError WITH (NOLOCK)
+	WHERE MsgId = @MsgId
 
 	-- Return the result of the function
-	RETURN	@sportName
+	RETURN	@Content
 
 END
+
+GO
+
 
