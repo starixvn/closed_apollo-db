@@ -11,7 +11,7 @@ AS
 	* Created by	: Sophia
 	* Date			: 20140225
 	* Task			: Get CommBase
-	* DB			: SVRAGE.REPDB/ SVRTXN.TransDB
+	* DB			: SVRAGE.REPDB/SVRCSD.REPDB/SVRTXN.TransDB
 	* Parameters:
  
 	* Revisions	:
@@ -20,7 +20,7 @@ AS
 BEGIN
 	DECLARE @CommBase MONEY 
 
-	---Malay Odds
+	---Malay, HK, Dec Odds (the same with Malay)
 	IF @Bettype IN (1,2,3,7,8,12)
 	BEGIN 
 		IF @Odds > 0 
