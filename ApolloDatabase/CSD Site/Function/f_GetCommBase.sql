@@ -51,6 +51,7 @@ BEGIN
 			SELECT @CommBase = 0
 		END		
 	END
+	ELSE
 	-----Decimal always
 	--ELSE IF @Bettype IN (5,15,13,24,25,26,27,28,121,122,123) 
 	--BEGIN 
@@ -63,7 +64,7 @@ BEGIN
 	--							END
 
 	--END
-	--ELSE 
+	 
 
 	--Parlay, outright
 	IF @Bettype IN (9,29,10) 
