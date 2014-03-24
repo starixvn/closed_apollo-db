@@ -70,18 +70,17 @@ BEGIN
 	BEGIN
 		SELECT @CommBase = @Stake --not care modds (1/2 won,lose)
 	END
-
-	--ELSE
-	--BEGIN
-	-----Others
-	--	SELECT @CommBase =	CASE
-	--								WHEN @modds >  0.25 	THEN @Stake 
-	--								WHEN @modds =  0.25 	THEN @Stake * 0.5
-	--								WHEN @modds =  0    	THEN 0
-	--								WHEN @modds = -0.25 	THEN @Stake * 0.5
-	--								WHEN @modds < -0.25 	THEN @Stake
-	--							END
-	--END		 
+	ELSE
+	BEGIN
+	---Others
+		SELECT @CommBase =	CASE
+									WHEN @modds >  0.25 	THEN @Stake 
+									WHEN @modds =  0.25 	THEN @Stake * 0.5
+									WHEN @modds =  0    	THEN 0
+									WHEN @modds = -0.25 	THEN @Stake * 0.5
+									WHEN @modds < -0.25 	THEN @Stake
+								END
+	END		 
 
 	RETURN @CommBase
 END
