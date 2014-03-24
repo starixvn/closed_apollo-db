@@ -15,6 +15,7 @@ AS
 	* Parameters:
  
 	* Revisions	:
+		- 20140224@Sophia: Only use formula for bettype in (1,2,3,7,8,12)
 
 */
 BEGIN
@@ -50,35 +51,37 @@ BEGIN
 			SELECT @CommBase = 0
 		END		
 	END
-	---Decimal always
-	ELSE IF @Bettype IN (5,15,13,24,25,26,27,28,121,122,123) 
-	BEGIN 
-		SELECT @CommBase =	CASE
-									WHEN @modds >  0.25 	THEN @Stake * (@Odds -1)
-									WHEN @modds =  0.25 	THEN @Stake * (@Odds -1) * 0.5
-									WHEN @modds =  0    	THEN 0
-									WHEN @modds = -0.25 	THEN @Stake * 0.5
-									WHEN @modds < -0.25 	THEN @Stake
-								END
+	-----Decimal always
+	--ELSE IF @Bettype IN (5,15,13,24,25,26,27,28,121,122,123) 
+	--BEGIN 
+	--	SELECT @CommBase =	CASE
+	--								WHEN @modds >  0.25 	THEN @Stake * (@Odds -1)
+	--								WHEN @modds =  0.25 	THEN @Stake * (@Odds -1) * 0.5
+	--								WHEN @modds =  0    	THEN 0
+	--								WHEN @modds = -0.25 	THEN @Stake * 0.5
+	--								WHEN @modds < -0.25 	THEN @Stake
+	--							END
 
-	END
-	ELSE 
+	--END
+	--ELSE 
+
 	--Parlay, outright
 	IF @Bettype IN (9,29,10) 
 	BEGIN
 		SELECT @CommBase = @Stake --not care modds (1/2 won,lose)
 	END
-	ELSE
-	BEGIN
-	---Others
-		SELECT @CommBase =	CASE
-									WHEN @modds >  0.25 	THEN @Stake 
-									WHEN @modds =  0.25 	THEN @Stake * 0.5
-									WHEN @modds =  0    	THEN 0
-									WHEN @modds = -0.25 	THEN @Stake * 0.5
-									WHEN @modds < -0.25 	THEN @Stake
-								END
-	END		 
+
+	--ELSE
+	--BEGIN
+	-----Others
+	--	SELECT @CommBase =	CASE
+	--								WHEN @modds >  0.25 	THEN @Stake 
+	--								WHEN @modds =  0.25 	THEN @Stake * 0.5
+	--								WHEN @modds =  0    	THEN 0
+	--								WHEN @modds = -0.25 	THEN @Stake * 0.5
+	--								WHEN @modds < -0.25 	THEN @Stake
+	--							END
+	--END		 
 
 	RETURN @CommBase
 END
