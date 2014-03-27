@@ -2108,6 +2108,12 @@
     <NotInBuild Include="Oanda Exchange service\Acc_ExchangeDailyIns.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="DBA\Task\Task_BackupUserLog on ProdDB.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="DBA\Task\Task_BackupUserLog on TransDB.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent Site\Forecast\Age_ScoreMap_SelMatch.sql">
