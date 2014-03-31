@@ -19,3 +19,4 @@ D:\GitProject\Apollo\apollo-db\ApolloDatabase\obj\Debug\ApolloDatabase.dbschema
 D:\GIT\apollo-db\apollo-db\ApolloDatabase\obj\Debug\ApolloDatabase.dbschema
 D:\GIT\apollo-db\ApolloDatabase\obj\Debug\ApolloDatabase.dbschema
 D:\working\Git\apollo-db\ApolloDatabase\obj\Debug\ApolloDatabase.dbschema
+D:\GIT\Apollo\apollo-db\ApolloDatabase\obj\Debug\ApolloDatabase.dbschema
