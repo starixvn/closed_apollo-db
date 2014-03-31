@@ -26,3 +26,5 @@ GO
 GRANT EXECUTE ON [dbo].[Acc_ExchangeCodeSel] TO [bodbAdminNet] AS [dbo]
 GO
 GRANT VIEW DEFINITION ON [dbo].[Acc_ExchangeCodeSel] TO [vnteam] AS [dbo]
+GO
+GRANT EXECUTE ON [dbo].[Acc_ExchangeCodeSel] TO [aplweb] AS [dbo]

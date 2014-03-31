@@ -144,3 +144,6 @@ GO
 GRANT EXECUTE ON [dbo].[Acc_ExchangeDailyIns] TO [bodbAdminNet] AS [dbo]
 GO
 GRANT VIEW DEFINITION ON [dbo].[Acc_ExchangeDailyIns] TO [vnteam] AS [dbo]
+
+GO
+GRANT EXECUTE ON [dbo].[Acc_ExchangeDailyIns] TO [aplweb] AS [dbo]

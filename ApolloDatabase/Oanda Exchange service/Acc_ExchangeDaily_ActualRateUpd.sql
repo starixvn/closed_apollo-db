@@ -90,4 +90,7 @@ FROM ExchangeDailyOanda e WITH (ROWLOCK,UPDLOCK)
 GO
 GRANT EXECUTE ON [dbo].[Acc_ExchangeDaily_ActualRateUpd] TO [bodbAdminNet] AS [dbo]
 GO
-GRANT VIEW DEFINITION ON [dbo].[Acc_ExchangeDaily_ActualRateUpd] TO [vnteam] AS [dbo]
+GRANT VIEW DEFINITION ON [dbo].[Acc_ExchangeDaily_ActualRateUpd] TO [aplweb] AS [dbo]
+
+GO
+GRANT EXECUTE ON [dbo].[Acc_ExchangeDaily_ActualRateUpd] TO [bodbAdminNet] AS [dbo]
