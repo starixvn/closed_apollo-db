@@ -88,9 +88,13 @@ FROM ExchangeDailyOanda e WITH (ROWLOCK,UPDLOCK)
 	INNER JOIN @tmpTable b ON e.ExchangeId = b.currency AND e.ExchangeDate = DATEADD(dd,-2,@date)
 
 GO
-GRANT EXECUTE ON [dbo].[Acc_ExchangeDaily_ActualRateUpd] TO [bodbAdminNet] AS [dbo]
-GO
-GRANT VIEW DEFINITION ON [dbo].[Acc_ExchangeDaily_ActualRateUpd] TO [aplweb] AS [dbo]
 
+
+GRANT EXECUTE ON [dbo].[Acc_ExchangeDaily_ActualRateUpd] TO [aplweb] AS [dbo]
 GO
+
 GRANT EXECUTE ON [dbo].[Acc_ExchangeDaily_ActualRateUpd] TO [bodbAdminNet] AS [dbo]
+GO
+
+GRANT VIEW DEFINITION ON [dbo].[Acc_ExchangeDaily_ActualRateUpd] TO [vnteam] AS [dbo]
+GO
