@@ -102,7 +102,7 @@
     <Folder Include="CSD Site\Admin\MailingList" />
     <Folder Include="Agent Site\Report\Result\BK" />
     <Folder Include="Agent Site\BetList\TotalBets" />
-    <Folder Include="Agent Site\BetList\TicketCancel" />
+    <Folder Include="Agent Site\BetList\CancelledTickets" />
     <Folder Include="Agent Site\BetList\OutStanding" />
     <Folder Include="Agent Site\BetList\AccInfo" />
     <Folder Include="Agent Site\BetList\Transaction" />
@@ -160,6 +160,7 @@
     <Folder Include="Agent Site\Log In" />
     <Folder Include="CSD Site\BetList" />
     <Folder Include="Oanda Exchange service" />
+    <Folder Include="Agent Site\BetList\Wagers" />
   </ItemGroup>
   <ItemGroup>
     <PropertiesFile Include="Properties\Database.sqlsettings">
@@ -605,16 +606,7 @@
     <NotInBuild Include="Agent Site\BetList\Age_BetList_GetId.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="Agent Site\BetList\Age_BetList_SelMatchResult.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelTransaction.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelWinloss.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent Site\Message\Dot_Msg_GetPrivateMessage.sql">
@@ -834,30 +826,6 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent Site\Wagers\Age_Wagers_SelDateBySports.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelWagers.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus_AgentViewAgent.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus_AgentViewCust.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus_SuperViewAgent.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus_SuperViewCust.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus_SuperViewSuper.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelWinloss_AgentViewCust.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelWinloss_SuperViewCust.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent Site\Wagers\Age_Wagers_Outright.sql">
@@ -1097,37 +1065,16 @@
     <NotInBuild Include="CSD Site\Admin\User\NAP_User_CheckPermission.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent Site\BetList\BK\Age_BetList_SelWinloss_Old.sql">
+    <NotInBuild Include="Agent Site\BetList\BK\--Age_BetList_SelWinloss_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent Site\BetList\BK\Age_BetList_AgentDetail_Old.sql">
+    <NotInBuild Include="Agent Site\BetList\BK\--Age_BetList_AgentDetail_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="DBA\Move bet - Balance Up\Move Bet\Task_SummaryReport_GenData.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
-    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelWinloss_Old.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus_Old.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
     <NotInBuild Include="Agent Site\BetList\Age_BetList_AgentDetail_Old.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus_SuperViewCust_Old.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus_SuperViewSuper_Old.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus_SuperViewAgent_Old.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus_AgentViewCust_Old.sql">
-      <SubType>NotInBuild</SubType>
-    </NotInBuild>
-    <NotInBuild Include="Agent Site\BetList\Age_BetList_SelByDateMemStatus_AgentViewAgent_Old.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="Agent Site\BetList\TotalBets\Age_BetList_TotalBets_SelRunningByBettype.sql">
@@ -2112,6 +2059,102 @@
       <SubType>NotInBuild</SubType>
     </NotInBuild>
     <NotInBuild Include="DBA\Task\Task_BackupUserLog on TransDB.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\OutStanding\Age_BetList_SelRunning.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\CancelledTickets\Age_BetList_SelCancelled_SuperViewAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\CancelledTickets\Age_BetList_SelCancelled.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\CancelledTickets\Age_BetList_SelCancelled_AgentViewAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\CancelledTickets\Age_BetList_SelCancelled_SuperViewCust.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\CancelledTickets\Age_BetList_SelCancelled_SuperViewSuper.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\CancelledTickets\Age_BetList_SelCancelled_AgentViewCust.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\AccInfo\Age_BetList_SelByMem.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\Transaction\Age_BetList_SelTransaction.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\Transaction\Age_BetList_SelTransaction_AgentViewAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\Transaction\Age_BetList_SelTransaction_AgentViewCust.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\Transaction\Age_BetList_SelTransaction_SuperViewAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\Transaction\Age_BetList_SelTransaction_SuperViewCust.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\Transaction\Age_BetList_SelTransaction_SuperViewSuper.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\BK\Age_BetList_SelByDateMemStatus.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\BK\Age_BetList_SelByDateMemStatus_SuperViewSuper_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\BK\Age_BetList_SelByDateMemStatus_AgentViewAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\BK\Age_BetList_SelByDateMemStatus_AgentViewAgent_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\BK\Age_BetList_SelByDateMemStatus_AgentViewCust.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\BK\Age_BetList_SelByDateMemStatus_AgentViewCust_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\BK\Age_BetList_SelByDateMemStatus_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\BK\Age_BetList_SelByDateMemStatus_SuperViewAgent.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\BK\Age_BetList_SelByDateMemStatus_SuperViewAgent_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\BK\Age_BetList_SelByDateMemStatus_SuperViewCust.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\BK\Age_BetList_SelByDateMemStatus_SuperViewCust_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\BK\Age_BetList_SelByDateMemStatus_SuperViewSuper.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\BK\Age_BetList_SelTransaction.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\Winloss\Age_BetList_SelWinloss.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\Winloss\Age_BetList_SelWinloss_SuperViewCust.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\Winloss\Age_BetList_SelWinloss_AgentViewCust.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\Winloss\Age_BetList_SelWinloss_Old.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\BetList\Wagers\Age_BetList_SelWagers.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
   </ItemGroup>
