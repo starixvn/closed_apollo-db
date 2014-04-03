@@ -300,23 +300,23 @@ BEGIN
 					B.Oddstype,		
 					B.DoubleCommLosing,
 					C.UGroup
- 				FROM 	
-					dbo.Bettrans14 AS B  WITH (NOLOCK) 
-					INNER JOIN dbo.Bettrans14_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId  
-					INNER JOIN dbo.Match14 m WITH (NOLOCK) ON  B.MatchId = m.MatchId					
-					INNER JOIN dbo.CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
-				WHERE 
-					BA.AgentId = @AgentId  
+ 			FROM 	
+				dbo.Bettrans14 AS B  WITH (NOLOCK) 
+				INNER JOIN dbo.Bettrans14_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId  
+				INNER JOIN dbo.Match14 m WITH (NOLOCK) ON  B.MatchId = m.MatchId					
+				INNER JOIN dbo.CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
+			WHERE 
+				BA.AgentId = @AgentId  
 		
-					AND B.TransDate Between @FromDate AND @ToDate	
-					AND (	B.bettype < 31 
-							OR B.bettype between 121 and 999
-							OR B.bettype between 1301 and 1334 							 				
-						)
-					AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 
+				AND B.TransDate Between @FromDate AND @ToDate	
+				AND (	B.bettype < 31 
+						OR B.bettype between 121 and 999
+						OR B.bettype between 1301 and 1334 							 				
+					)
+				AND (@Bettypes = '0' OR BA.Bettype IN (Select bettype FROM #BettypeList)) 
 					 
-					AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList)) 		
-					
+				AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList)) 		
+			ORDER BY B.TransID DESC	
 
 			---Parlay
 			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29)) OR (@Bettypes = '0' AND @Sporttypes = '0')
@@ -371,7 +371,7 @@ BEGIN
 				AND B.TransDate Between @FromDate AND @ToDate
 				AND B.BetType IN (9,29) 
 				AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
-				 
+			ORDER BY B.TransID DESC		 
 		
 		----- Outright14
 		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype =10 ) OR @Bettypes = '0'
@@ -429,7 +429,7 @@ BEGIN
 				AND B.bettype = 10
 					
 				AND (@Sporttypes = '0' OR lg.sporttype IN (Select sporttype FROM #SportsList))				
-	
+			ORDER BY B.TransID DESC	
 	END
 	
 	----====================================================================================================----

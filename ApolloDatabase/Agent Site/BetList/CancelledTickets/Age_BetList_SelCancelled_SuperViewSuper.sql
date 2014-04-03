@@ -1,6 +1,5 @@
 ﻿ALTER PROCEDURE [dbo].[Age_BetList_SelCancelled_SuperViewSuper]
-	@LoggedId INT,
-	@AgentId INT , 
+	@LoggedId INT, 
 	@FromDate SMALLDATETIME, 
 	@Todate SMALLDATETIME,	
 	@Sporttypes VARCHAR(1000) ='0',

@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[Age_BetList_SelTransaction_Xtest1]
+﻿ALTER PROCEDURE [dbo].[Age_BetList_SelTransaction]
 	@LoggedId INT,
 	@AgentId INT = -1 ,
 	@CustId INT = -1,

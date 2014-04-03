@@ -31,7 +31,7 @@ BEGIN
 	----- 1: Super View by Super	
 	BEGIN 		
 		EXEC Age_BetList_SelCancelled_SuperViewSuper 
-			@LoggedId = 1, @AgentId = 1 ,
+			@LoggedId = 1, 
 			@FromDate = @FromDate, @Todate = @Todate,  
 			@Sporttypes = @Sporttypes, @Bettypes = @Bettypes 
 		RETURN				

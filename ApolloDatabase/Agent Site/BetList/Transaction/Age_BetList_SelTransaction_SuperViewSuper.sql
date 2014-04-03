@@ -118,8 +118,7 @@ BEGIN
 		----- Parlay
 		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype IN (9,29)) OR (@Bettypes = '0' AND @Sporttypes = '0')
 		INSERT INTO #Betlist
-		SELECT 	DISTINCT 
-				B.TransId,
+		SELECT 	B.TransId,
 				B.RefNo,
 				0 as matchid,
 				'' matchcode,
@@ -295,8 +294,8 @@ END
 							OR B.bettype between 1301 and 1334 										
 					)
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
-					AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList)) 		 		
-					
+					AND (@Sporttypes = '0' OR m.sporttype IN (Select sporttype FROM #SportsList)) 	
+			ORDER BY B.TransId DESC					
 
 
 			----- Parlay
@@ -349,7 +348,7 @@ END
 			WHERE   B.TransDate Between @FromDate AND @ToDate
 					AND B.BetType IN (9,29)
 					AND (@Bettypes = '0' OR B.Bettype IN (Select bettype FROM #BettypeList)) 
-					
+			ORDER BY B.TransId DESC	
 
 			----- Outright14
 			IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype =10 ) OR @Bettypes = '0'
@@ -403,6 +402,7 @@ END
 			WHERE 	B.TransDate Between @FromDate AND @ToDate
 					AND B.bettype = 10			
 					AND (@Sporttypes = '0' OR lg.sporttype IN (Select sporttype FROM #SportsList))
+			ORDER BY B.TransId DESC
 	END
 
 	----====================================================================================================----
