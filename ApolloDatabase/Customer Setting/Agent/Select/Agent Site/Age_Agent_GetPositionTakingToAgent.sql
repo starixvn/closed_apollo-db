@@ -13,8 +13,9 @@ AS
  * Task			: Get agent position taking from current login agent to agent
  * DB			: SVRCUST.CustDB
  * Revisions	:
- 	•	07122013@Edward : Get the same structure in DB	
-	•	11192013@Dan : optimize performance 
+ 	•	20130712@Edward : Get the same structure in DB	
+	•	20131119@Dan : optimize performance 
+	•	20140404@Sophia: Get AgentId by username
 
  * Parameters:
  	@ActorAgentId: parent agent, the agent is currently login
@@ -37,7 +38,7 @@ BEGIN
 		
 	--search by username
 	IF ISNULL(@Username,'') <> ''
-		SELECT @agentHId = AgentHId
+		SELECT @agentHId = AgentHId, @AgentId = AgentId
 		FROM AgentInfo WITH (NOLOCK)
 		WHERE Username = @Username	
 	ELSE
@@ -100,4 +101,5 @@ BEGIN
 	
 	
 END
+
 
