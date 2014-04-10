@@ -2157,6 +2157,24 @@
     <NotInBuild Include="Agent Site\BetList\Wagers\Age_BetList_SelWagers.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="Agent Site\Message\Age_Msg_GetListAnnouncement.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\Message\Age_Msg_GetTopPriMessage24.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\Message\Age_Msg_SearchAnnouncement.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\Message\Age_Msg_GetTopPubLevelMessage.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\Message\Age_Msg_GetTopPubMessage.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
+    <NotInBuild Include="Agent Site\Message\Age_Msg_HasPriMessage24.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent Site\Forecast\Age_ScoreMap_SelMatch.sql">
