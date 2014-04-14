@@ -1,12 +1,5 @@
 USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Customer_UpdateSettingMultiple]    Script Date: 8/9/2013 11:13:31 AM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
 ALTER PROCEDURE [dbo].[Age_Customer_UpdateSettingMultiple]
 	@ActorAgentId		INT				= NULL,
 	@AdminId			INT				= NULL,
@@ -17,19 +10,18 @@ ALTER PROCEDURE [dbo].[Age_Customer_UpdateSettingMultiple]
 	@Discount			VARCHAR(MAX)	= '',
 	@PositionTaking		VARCHAR(MAX)	= '',
 	@Language			VARCHAR(5)		= 'en-US',
+	@AllowUpdateMinBet	BIT				= 0,
 	@ErrCode			INT				= 0			OUTPUT,
-	@ErrMsgBetLimit		NVARCHAR(MAX)	= ''		OUTPUT,
-	@ErrMsgDiscount		NVARCHAR(MAX)	= ''		OUTPUT,
-	@ErrMsgPositionTaking	NVARCHAR(MAX)	= ''		OUTPUT
+	@ErrMsg				NVARCHAR(MAX)	= ''		OUTPUT	
 AS
 
 /**
  * Created by	: Edward
  * Date			: 20130809
  * Task			: Update customer setting multiple
- * DB			: SVRCUST.CustDB
+ * DB			: SVRCUST/CustDB
  * Revisions	:
- *	•  
+ *	• 20140224@Patrick	: Add more param: Allow update min bet when called from CSD site
  * Parameters:
  *	•	@BetLimit :
  *			<ROOT>
@@ -48,9 +40,59 @@ AS
 BEGIN	  	
 	SET NOCOUNT ON	   
 	
-	EXEC Age_Customer_UpdateBetLimitMultiple @ActorAgentId, @AdminId, @CustIds, @BetLimit, @Language, @ErrCode OUTPUT, @ErrMsgBetLimit OUTPUT
+	DECLARE @TempMsg NVARCHAR(MAX)
 
-	EXEC Age_Customer_UpdateDiscountMultiple @ActorAgentId, @AdminId, @CustIds, @UGroup, @Discount, @Language, @ErrCode OUTPUT, @ErrMsgDiscount OUTPUT	
+	EXEC Age_Customer_UpdateDiscountMultiple 
+		@ActorAgentId = @ActorAgentId
+		, @AdminId = @AdminId
+		, @CustIds = @CustIds
+		, @UGroup = @UGroup
+		, @Discount = @Discount
+		, @Language = @Language
+		, @ErrCode = @ErrCode OUTPUT
+		, @ErrMsg = @TempMsg OUTPUT		
+	
+	IF @TempMsg IS NOT NULL	
+	BEGIN	
+		SET @ErrMsg  = @TempMsg
+		SET @TempMsg = NULL 
+	END	
+	
+	EXEC Age_Customer_UpdateBetLimitMultiple_xtest 
+		@ActorAgentId = @ActorAgentId
+		, @AdminId = @AdminId
+		, @CustIds = @CustIds
+		, @BetLimit = @BetLimit
+		, @Language = @Language
+		, @ErrCode = @ErrCode OUTPUT
+		, @ErrMsg = @TempMsg OUTPUT
 
-	EXEC Age_Customer_UpdatePositionTakingMultiple @ActorAgentId, @AdminId, @AgentId, @CustIds, @PositionTaking, @Language, @ErrCode OUTPUT, @ErrMsgPositionTaking OUTPUT	
+	IF @TempMsg IS NOT NULL
+	BEGIN
+		SET @ErrMsg  = @ErrMsg +'^^'+ @TempMsg
+		SET @TempMsg = NULL 
+	END
+
+	EXEC Age_Customer_UpdatePositionTakingMultiple 
+		@ActorAgentId = @ActorAgentId
+		, @AdminId = @AdminId
+		, @AgentId = @AgentId
+		, @CustIds = @CustIds
+		, @PositionTaking = @PositionTaking
+		, @Language = @Language
+		, @ErrCode = @ErrCode OUTPUT
+		, @ErrMsg = @TempMsg OUTPUT	
+
+	IF @TempMsg IS NOT NULL
+	BEGIN
+		SET @ErrMsg  = @ErrMsg +'^^'+ @TempMsg
+		SET @TempMsg = NULL 
+	END
 END
+
+GO
+
+GRANT EXECUTE ON [dbo].[Age_Customer_UpdateSettingMultiple] TO [aplweb] AS [dbo]
+GO
+
+
