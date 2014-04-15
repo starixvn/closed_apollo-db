@@ -16,6 +16,7 @@ Revisions:
 	  - 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
 	  - 20130924@Sophia: get EventStatus to show recommendation popup when recover bet
 	  - 20131021@Sophia: Get data to send mail
+	  - 20140414@Sophia: Get EventStatus at match_remark_ex table
 Param's Explanation:
 
 */
@@ -96,15 +97,15 @@ BEGIN
 		 	
     IF @bettype = 10  
     BEGIN
-        SELECT	@EventStatus = OddsStatus 
-        FROM      Outright WITH (NOLOCK)
-        WHERE     Outright.orid = @matchID
+        SELECT	@EventStatus = oddsstatus_ex 
+        FROM    SVRPRO.ProdDB.dbo.Outright_Ex o WITH (NOLOCK)
+        WHERE   o.orid_ex = @matchID
     END  
     ELSE
     BEGIN
         SELECT	@EventStatus = EventStatus 
-        FROM	MATCH WITH (NOLOCK)
-        WHERE   MATCH.matchid = @matchID
+        FROM	dbo.Match_Remark_Ex m WITH (NOLOCK)
+        WHERE   m.matchid = @matchID
     END
 
 	IF @EventStatus = 'completed' and @Bettype NOT IN (9,29)

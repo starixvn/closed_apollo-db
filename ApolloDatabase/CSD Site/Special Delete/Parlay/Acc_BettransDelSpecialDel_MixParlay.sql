@@ -32,6 +32,7 @@ AS
 	Revisions:
 	  - 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
 	  - 20131017@Sophia: Get data to mail
+	  - 20140414@Sophia: Get EventStatus at match_remark_ex table
 	Param's Explanation: 
 	
 	
@@ -54,7 +55,7 @@ BEGIN
 		RETURN
 	END
 			
-	IF EXISTS(	SELECT 1 FROM dbo.match m WITH(NOLOCK)
+	IF EXISTS(	SELECT 1 FROM dbo.Match_Remark_Ex m WITH(NOLOCK)
 				WHERE m.matchid=@matchid AND m.eventstatus='completed')
 	BEGIN
 		SELECT @ErrCode = 100, @ErrMsg = 'You can not delete completed match.'
