@@ -1,4 +1,6 @@
-﻿ALTER PROCEDURE [dbo].[Age_Customer_UpdateSetting]
+﻿USE [CustDB]
+GO
+ALTER PROCEDURE [dbo].[Age_Customer_UpdateSetting]
 	@ActorAgentId		INT				= NULL,
 	@AdminId			INT				= NULL,
 	@AgentId			INT,
@@ -8,6 +10,7 @@
 	@Discount			VARCHAR(MAX)	= '',
 	@PositionTaking		VARCHAR(MAX)	= '',
 	@Language			VARCHAR(5)		= 'en-US',
+	@AllowUpdateMinBet	BIT				= 0,
 	@ErrCode			INT				= 0			OUTPUT,
 	@ErrMsg				NVARCHAR(1000)	= ''		OUTPUT
 AS
@@ -16,9 +19,9 @@ AS
  * Created by	: Kos
  * Date			: 20130302
  * Task			: Update customer setting
- * DB			: SVRCUST.CustDB
+ * DB			: SVRCUST/CustDB
  * Revisions	:
- *	•  
+ *	•  20140224@Patrick	: Add more param: allow update min bet when called from CSD site
  * Parameters:
  *	•	@BetLimit :
  *			<ROOT>
@@ -56,16 +59,39 @@ BEGIN
 			RETURN
 		END	
 
-	EXEC Age_Customer_UpdateBetLimit @ActorAgentId, @AdminId, @CustId, @BetLimit, @Language, @ErrCode OUTPUT, @ErrMsg OUTPUT
+	EXEC Age_Customer_UpdateBetLimit_xtest
+		@ActorAgentId = @ActorAgentId
+		, @AdminId = @AdminId
+		, @CustId = @CustId
+		, @BetLimit = @BetLimit
+		, @Language = @Language
+		, @AllowUpdateMinBet= @AllowUpdateMinBet
+		, @ErrCode = @ErrCode OUTPUT
+		, @ErrMsg = @ErrMsg OUTPUT
 	
 	IF @ErrCode > 0
 		RETURN
 
-	EXEC Age_Customer_UpdateDiscount @ActorAgentId, @AdminId, @CustId, @UGroup, @Discount, @Language, @ErrCode OUTPUT, @ErrMsg OUTPUT	
+	EXEC Age_Customer_UpdateDiscount 
+		@ActorAgentId = @ActorAgentId
+		, @AdminId = @AdminId
+		, @CustId = @CustId
+		, @UGroup = @UGroup
+		, @Discount = @Discount
+		, @Language = @Language
+		, @ErrCode = @ErrCode OUTPUT
+		, @ErrMsg = @ErrMsg OUTPUT	
 
 	IF @ErrCode > 0
 		RETURN
 
 	
 END
+
+
+GO
+
+GRANT EXECUTE ON [dbo].[Age_Customer_UpdateSetting] TO [aplweb] AS [dbo]
+GO
+
 

@@ -1,19 +1,12 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateBetLimit]    Script Date: 11/27/2013 3:34:04 PM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
 ALTER PROCEDURE [dbo].[Age_Agent_UpdateBetLimit]
 	@ActorAgentId	INT				= NULL,
 	@AdminId		INT				= NULL,
 	@AgentId		INT,
 	@BetLimit		VARCHAR(MAX)	= '',
 	@Language		VARCHAR(5)		= 'en-US',
+	@AllowUpdateMinBet		BIT		= 0,
 	@ErrCode		INT				= 0			OUTPUT,
 	@ErrMsg			NVARCHAR(1000)	= ''		OUTPUT
 AS
@@ -26,7 +19,8 @@ AS
  * Revisions	:
  *	• 20132702@Edward	: Implement
  *	• 20131707@Edward	: Add parameter @AdminId for write log
- *	• 20131126@Sophia	: not to update Minbet
+ *	• 20131126@Sophia	: Not to update Minbet
+ *	• 20140224@Patrick	: Change method get check upline, add more param: allow update Minbet when called from CSD site
  * Parameters:
  *	• @BetLimit : 
 		<ROOT>
@@ -79,24 +73,17 @@ BEGIN
 					,@lblMember = [dbo].f_Msg_GetContentById (3009, @Language)
 
 			SET @SUPERLEVEL = 0
-
+			
 			-- Get agent hierarchy ID
-			SELECT @agentHId		= AgentHId					
-			FROM AgentInfo WITH (NOLOCK)
+			SELECT @agentHId = AgentHId					
+			FROM dbo.AgentInfo WITH (NOLOCK)
 			WHERE AgentId = @AgentId
 
-			DECLARE @TableAgent TABLE (
-				AgentId		INT, 
-				AgentLevel	SMALLINT, 
-				Username	NVARCHAR(50) 
-			)
+			DECLARE @TableAgent TABLE (AgentId INT, AgentLevel	SMALLINT, Username	NVARCHAR(50))
 
 			INSERT INTO @TableAgent
-			SELECT 
-				AgentId,
-				AgentLevel,
-				Username 
-			FROM AgentInfo WITH (NOLOCK) 
+			SELECT AgentId, AgentLevel, Username 
+			FROM dbo.AgentInfo WITH (NOLOCK) 
 			WHERE AgentHId.IsDescendantOf(@agentHId) = 1									
 
 			DECLARE @BetLimitTable TABLE (
@@ -157,17 +144,13 @@ BEGIN
 
 			EXEC sp_xml_removedocument @DocHandler
 			-- end read xml
-
-			IF EXISTS (	SELECT TOP(1) *
-						FROM 
-							AgentBetLimit AS abt WITH (NOLOCK)
+			
+			IF EXISTS (	SELECT TOP(1) 1
+						FROM dbo.AgentBetLimit AS abt WITH (NOLOCK)
 							INNER JOIN @BetLimitTable AS blt
-							ON abt.SportType = blt.SportType
-							AND abt.BetType = blt.BetType
-						WHERE 
-							abt.AgentId = @AgentId
-							AND (abt.MaxBet <> blt.MaxBet
-							OR abt.MaxPerMatch <> blt.MaxPerMatch) )
+								ON abt.SportType = blt.SportType AND abt.BetType = blt.BetType
+						WHERE abt.AgentId = @AgentId
+							AND (abt.MaxBet <> blt.MaxBet OR abt.MaxPerMatch <> blt.MaxPerMatch OR (@AllowUpdateMinBet = 1 AND abt.MinBet <> blt.MinBet)))
 				BEGIN
 
 					DECLARE 
@@ -299,36 +282,28 @@ BEGIN
 							RETURN
 						END	
 
+					;WITH UplineTable(AgentId, ParentId)
+					AS(
+						SELECT AgentId, ParentId FROM dbo.AgentInfo WITH(NOLOCK) WHERE AgentId = @AgentId
+						UNION ALL
+						SELECT ai.AgentId, ai.ParentId
+						FROM UplineTable a
+						INNER JOIN dbo.AgentInfo ai WITH(NOLOCK) ON a.ParentId = ai.AgentId
+						WHERE AgentLevel <> @SUPERLEVEL
+					)
+					
 					-- Get validate data
-					INSERT INTO @BetLimitCompareTable(
-						SportType,
-						BetType,
-						MaxMinBet,
-						MinMaxBet,
-						MinMaxPerMatch)
-					SELECT 
-						SportType,
-						BetType,
-						MAX(MinBet),
-						MIN(MaxBet),
-						MIN(MaxPerMatch)
-					FROM AgentBetLimit WITH (NOLOCK)
-					WHERE AgentId IN (	SELECT AgentId 
-										FROM AgentInfo WITH (NOLOCK)
-										WHERE 
-											@AgentHId.IsDescendantOf(AgentHId) = 1 
-											AND AgentId		<> @AgentId
-											AND AgentLevel	<> @SUPERLEVEL )
-					GROUP BY 
-						SportType, 
-						BetType
+					INSERT INTO @BetLimitCompareTable(SportType, BetType, MaxMinBet, MinMaxBet,	MinMaxPerMatch)
+					SELECT SportType, BetType, MAX(MinBet),	MIN(MaxBet), MIN(MaxPerMatch)
+					FROM dbo.AgentBetLimit WITH (NOLOCK)
+					WHERE AgentId IN (SELECT AgentId FROM UplineTable WHERE AgentId <> @AgentId)
+					GROUP BY SportType, BetType
 
 					-- Check validate min bet must be equal to or greater than parent
 					SELECT TOP(1)
 						@sportType	= btct.SportType,
 						@betType	= btct.BetType
-					FROM 
-						@BetLimitCompareTable AS btct
+					FROM @BetLimitCompareTable AS btct
 						INNER JOIN @BetLimitTable AS btt 
 						ON	btct.SportType = btt.SportType 
 							AND btct.BetType = btt.BetType	
@@ -356,13 +331,9 @@ BEGIN
 					SELECT TOP(1) 
 						@sportType	= btct.SportType,
 						@betType	= btct.BetType
-					FROM 
-						@BetLimitCompareTable AS btct
+					FROM @BetLimitCompareTable AS btct
 						INNER JOIN @BetLimitTable AS btt 
-						ON 
-							btct.SportType = btt.SportType 
-							AND btct.BetType = btt.BetType
-							AND btt.MaxBet > btct.MinMaxBet
+						ON btct.SportType = btt.SportType AND btct.BetType = btt.BetType AND btt.MaxBet > btct.MinMaxBet
 
 					IF @sportType IS NOT NULL 
 						BEGIN
@@ -386,13 +357,9 @@ BEGIN
 					SELECT TOP(1) 
 						@sportType	= btct.SportType,
 						@betType	= btct.BetType
-					FROM 
-						@BetLimitCompareTable AS btct
+					FROM @BetLimitCompareTable AS btct
 						INNER JOIN @BetLimitTable AS btt 
-						ON 
-							btct.SportType = btt.SportType 
-							AND btct.BetType = btt.BetType	
-							AND btt.MaxPerMatch > btct.MinMaxPerMatch
+							ON btct.SportType = btt.SportType AND btct.BetType = btt.BetType AND btt.MaxPerMatch > btct.MinMaxPerMatch
 
 					IF @sportType IS NOT NULL 
 						BEGIN
@@ -420,8 +387,7 @@ BEGIN
 							,abl.MinBet			AS '@mib'
 							,abl.MaxBet			AS '@mab'
 							,abl.MaxPerMatch	AS '@mam'
-						FROM 
-							AgentBetLimit AS abl WITH (NOLOCK)							
+						FROM dbo.AgentBetLimit AS abl WITH (NOLOCK)							
 						WHERE abl.AgentId = @AgentId
 						FOR XML PATH('z'),ROOT('r')
 					)
@@ -431,32 +397,16 @@ BEGIN
 					-- end write log
 
 					---- Get agent downline break rule
-					INSERT INTO @BetLimitCustUpdateTable(
-						CustId
-						,SportType
-						,BetType
-						,MinBet
-						,MaxBet
-						,MaxPerMatch
-					)
-					SELECT
-						cbt.CustId
-						,cbt.SportType
-						,cbt.BetType
+					INSERT INTO @BetLimitCustUpdateTable(CustId, SportType, BetType, MinBet, MaxBet, MaxPerMatch)
+					SELECT cbt.CustId, cbt.SportType, cbt.BetType
 						,CASE WHEN cbt.MinBet < but.MinBet THEN but.MinBet ELSE cbt.MinBet END
 						,CASE WHEN cbt.MaxBet > but.MaxBet THEN but.MaxBet ELSE cbt.MaxBet END
 						,CASE WHEN cbt.MaxPerMatch > but.MaxPerMatch THEN but.MaxPerMatch ELSE cbt.MaxPerMatch END
-					FROM CustBetLimit AS cbt WITH (ROWLOCK, UPDLOCK)
-						INNER JOIN CustInfo AS ci WITH (NOLOCK)
-							ON cbt.CustId	= ci.CustId
-						INNER JOIN @BetLimitTable AS but
-							ON cbt.SportType	= but.SportType
-							AND cbt.BetType		= but.BetType
-					WHERE (cbt.MinBet			< but.MinBet
-							OR cbt.MaxBet		> but.MaxBet
-							OR cbt.MaxPerMatch	> but.MaxPerMatch)
+					FROM dbo.CustBetLimit AS cbt WITH (ROWLOCK, UPDLOCK)
+						INNER JOIN dbo.CustInfo AS ci WITH (NOLOCK)	ON cbt.CustId = ci.CustId
+						INNER JOIN @BetLimitTable AS but ON cbt.SportType = but.SportType AND cbt.BetType = but.BetType
+					WHERE (cbt.MinBet < but.MinBet OR cbt.MaxBet > but.MaxBet OR cbt.MaxPerMatch > but.MaxPerMatch)
 						AND	ci.AgentId = @AgentId					
-
 
 					-- Min Bet > Max Bet
 					SELECT TOP(1) 
@@ -464,7 +414,7 @@ BEGIN
 						@sportType	= SportType,
 						@betType	= BetType 
 					FROM @BetLimitCustUpdateTable AS bt
-						INNER JOIN CustInfo AS ci WITH (NOLOCK) ON bt.CustId = ci.CustId 
+						INNER JOIN dbo.CustInfo AS ci WITH (NOLOCK) ON bt.CustId = ci.CustId 
 					WHERE MinBet > MaxBet
 	
 					IF @sportType IS NOT NULL 
@@ -491,7 +441,7 @@ BEGIN
 						@sportType	= SportType,
 						@betType	= BetType
 					FROM @BetLimitCustUpdateTable AS bt 
-						INNER JOIN CustInfo AS ci WITH (NOLOCK) ON bt.CustId = ci.CustId 
+						INNER JOIN dbo.CustInfo AS ci WITH (NOLOCK) ON bt.CustId = ci.CustId 
 					WHERE MinBet > MaxPerMatch
 	
 					IF @sportType IS NOT NULL 
@@ -519,7 +469,7 @@ BEGIN
 						@sportType	= SportType,
 						@betType	= BetType 
 					FROM @BetLimitCustUpdateTable AS bt 
-						INNER JOIN CustInfo AS ci WITH (NOLOCK) ON bt.CustId = ci.CustId 
+						INNER JOIN dbo.CustInfo AS ci WITH (NOLOCK) ON bt.CustId = ci.CustId 
 					WHERE MaxBet > MaxPerMatch
 	
 					IF @sportType IS NOT NULL 
@@ -541,30 +491,15 @@ BEGIN
 						END	
 
 					---- Get agent downline break rule
-					INSERT INTO @BetLimitAgentUpdateTable(
-						AgentId
-						,SportType
-						,BetType
-						,MinBet
-						,MaxBet
-						,MaxPerMatch
-					)
-					SELECT 
-						abt.AgentId
-						,abt.SportType
-						,abt.BetType
-						,CASE WHEN abt.MinBet < bt.MinBet THEN bt.MinBet ELSE abt.MinBet END
-						,CASE WHEN abt.MaxBet > bt.MaxBet THEN bt.MaxBet ELSE abt.MaxBet END
-						,CASE WHEN abt.MaxPerMatch > bt.MaxPerMatch THEN bt.MaxPerMatch ELSE abt.MaxPerMatch END
-					FROM AgentBetLimit AS abt WITH (NOLOCK)
-						INNER JOIN @TableAgent AS ta 
-							ON abt.AgentId		= ta.AgentId
-						INNER JOIN @BetLimitTable AS bt
-							ON abt.SportType	= bt.SportType
-							AND abt.BetType		= bt.BetType
-					WHERE (abt.MinBet		< bt.MinBet
-						OR abt.MaxBet		> bt.MaxBet
-						OR abt.MaxPerMatch	> bt.MaxPerMatch)
+					INSERT INTO @BetLimitAgentUpdateTable(AgentId, SportType, BetType, MinBet, MaxBet, MaxPerMatch)
+					SELECT abt.AgentId, abt.SportType, abt.BetType
+						, CASE WHEN abt.MinBet < bt.MinBet THEN bt.MinBet ELSE abt.MinBet END
+						, CASE WHEN abt.MaxBet > bt.MaxBet THEN bt.MaxBet ELSE abt.MaxBet END
+						, CASE WHEN abt.MaxPerMatch > bt.MaxPerMatch THEN bt.MaxPerMatch ELSE abt.MaxPerMatch END
+					FROM dbo.AgentBetLimit AS abt WITH (NOLOCK)
+						INNER JOIN @TableAgent AS ta ON abt.AgentId	= ta.AgentId
+						INNER JOIN @BetLimitTable AS bt	ON abt.SportType = bt.SportType AND abt.BetType	= bt.BetType
+					WHERE (abt.MinBet < bt.MinBet OR abt.MaxBet > bt.MaxBet OR abt.MaxPerMatch > bt.MaxPerMatch)
 						AND abt.AgentId <> @AgentId
 					
 					-- Min Bet > Max Bet
@@ -573,7 +508,7 @@ BEGIN
 						@sportType	= SportType,
 						@betType	= BetType 
 					FROM @BetLimitAgentUpdateTable AS bt
-						INNER JOIN AgentInfo AS ai WITH (NOLOCK) ON bt.AgentId = ai.AgentId
+						INNER JOIN dbo.AgentInfo AS ai WITH (NOLOCK) ON bt.AgentId = ai.AgentId
 					WHERE MinBet > MaxBet
 					
 					IF @sportType IS NOT NULL 
@@ -600,7 +535,7 @@ BEGIN
 						@sportType	= SportType,
 						@betType	= BetType
 					FROM @BetLimitAgentUpdateTable AS bt 
-						INNER JOIN AgentInfo AS ai WITH (NOLOCK) ON bt.AgentId = ai.AgentId
+						INNER JOIN dbo.AgentInfo AS ai WITH (NOLOCK) ON bt.AgentId = ai.AgentId
 					WHERE MinBet > MaxPerMatch
 	
 					IF @sportType IS NOT NULL 
@@ -628,7 +563,7 @@ BEGIN
 						@sportType	= SportType,
 						@betType	= BetType 
 					FROM @BetLimitAgentUpdateTable AS bt
-						INNER JOIN AgentInfo AS ai WITH (NOLOCK) ON bt.AgentId = ai.AgentId
+						INNER JOIN dbo.AgentInfo AS ai WITH (NOLOCK) ON bt.AgentId = ai.AgentId
 					WHERE MaxBet > MaxPerMatch
 	
 					IF @sportType IS NOT NULL 
@@ -649,30 +584,16 @@ BEGIN
 							RETURN
 						END	
 
-					INSERT INTO @BetLimitCustUpdateTable(
-						CustId
-						,SportType
-						,BetType
-						,MinBet
-						,MaxBet
-						,MaxPerMatch
-					)
-					SELECT cbt.CustId
-						,cbt.SportType
-						,cbt.BetType
-						,CASE WHEN cbt.MinBet < but.MinBet THEN but.MinBet ELSE cbt.MinBet END
-						,CASE WHEN cbt.MaxBet > but.MaxBet THEN but.MaxBet ELSE cbt.MaxBet END
-						,CASE WHEN cbt.MaxPerMatch > but.MaxPerMatch THEN but.MaxPerMatch ELSE cbt.MaxPerMatch END
-					FROM CustBetLimit AS cbt WITH (ROWLOCK, UPDLOCK)
-						INNER JOIN CustInfo AS ci WITH (NOLOCK)
-							ON cbt.CustId	= ci.CustId
-						INNER JOIN @BetLimitAgentUpdateTable AS but
-							ON ci.AgentId		= but.AgentId
-							AND cbt.SportType	= but.SportType
-							AND cbt.BetType		= but.BetType
-					WHERE cbt.MinBet		< but.MinBet
-						OR cbt.MaxBet		> but.MaxBet
-						OR cbt.MaxPerMatch	> but.MaxPerMatch
+					INSERT INTO @BetLimitCustUpdateTable(CustId, SportType, BetType, MinBet, MaxBet, MaxPerMatch)
+					SELECT cbt.CustId, cbt.SportType, cbt.BetType
+						, CASE WHEN cbt.MinBet < but.MinBet THEN but.MinBet ELSE cbt.MinBet END
+						, CASE WHEN cbt.MaxBet > but.MaxBet THEN but.MaxBet ELSE cbt.MaxBet END
+						, CASE WHEN cbt.MaxPerMatch > but.MaxPerMatch THEN but.MaxPerMatch ELSE cbt.MaxPerMatch END
+					FROM dbo.CustBetLimit AS cbt WITH (ROWLOCK, UPDLOCK)
+						INNER JOIN CustInfo AS ci WITH (NOLOCK)	ON cbt.CustId	= ci.CustId
+						INNER JOIN @BetLimitAgentUpdateTable AS but	
+							ON ci.AgentId = but.AgentId	AND cbt.SportType = but.SportType AND cbt.BetType = but.BetType
+					WHERE cbt.MinBet < but.MinBet OR cbt.MaxBet > but.MaxBet OR cbt.MaxPerMatch	> but.MaxPerMatch
 					
 					-- Min Bet > Max Bet
 					SELECT TOP(1) 
@@ -680,7 +601,7 @@ BEGIN
 						@sportType	= SportType,
 						@betType	= BetType 
 					FROM @BetLimitCustUpdateTable AS bt
-						INNER JOIN CustInfo AS ci WITH (NOLOCK) ON bt.CustId = ci.CustId 
+						INNER JOIN dbo.CustInfo AS ci WITH (NOLOCK) ON bt.CustId = ci.CustId 
 					WHERE MinBet > MaxBet
 	
 					IF @sportType IS NOT NULL 
@@ -735,7 +656,7 @@ BEGIN
 						@sportType	= SportType,
 						@betType	= BetType 
 					FROM @BetLimitCustUpdateTable AS bt 
-						INNER JOIN CustInfo AS ci WITH (NOLOCK) ON bt.CustId = ci.CustId 
+						INNER JOIN dbo.CustInfo AS ci WITH (NOLOCK) ON bt.CustId = ci.CustId 
 					WHERE MaxBet > MaxPerMatch
 	
 					IF @sportType IS NOT NULL 
@@ -757,41 +678,70 @@ BEGIN
 						END	
 
 					---- Update for current agent, not effect for all line
-					UPDATE abt 
-					SET 
-						--abt.MinBet		= blt.MinBet,
-						abt.MaxBet		= blt.MaxBet,
-						abt.MaxPerMatch	= blt.MaxPerMatch
-					FROM 
-						AgentBetLimit AS abt WITH (ROWLOCK, UPDLOCK)
-						INNER JOIN @BetLimitTable AS blt 
-							ON blt.SportType	= abt.SportType 
-							AND blt.BetType		= abt.BetType
-					WHERE AgentId = @AgentId
+					IF @AllowUpdateMinBet = 1 --allow update minbet when called from csd site
+					BEGIN
+						
+						UPDATE abt 
+						SET abt.MinBet		= blt.MinBet,
+							abt.MaxBet		= blt.MaxBet,
+							abt.MaxPerMatch	= blt.MaxPerMatch
+						FROM dbo.AgentBetLimit AS abt WITH (ROWLOCK, UPDLOCK)
+							INNER JOIN @BetLimitTable AS blt
+								ON blt.SportType = abt.SportType AND blt.BetType = abt.BetType
+						WHERE AgentId = @AgentId
 					
-					UPDATE abt 
-					SET 
-						--abt.MinBet		= blt.MinBet,
-						abt.MaxBet		= blt.MaxBet,
-						abt.MaxPerMatch	= blt.MaxPerMatch
-					FROM 
-						AgentBetLimit AS abt WITH (ROWLOCK, UPDLOCK)
-						INNER JOIN @BetLimitAgentUpdateTable AS blt 
-							ON blt.SportType	= abt.SportType 
-							AND blt.BetType		= abt.BetType
-							AND blt.AgentId		= abt.AgentId
+						UPDATE abt 
+						SET abt.MinBet		= blt.MinBet,
+							abt.MaxBet		= blt.MaxBet,
+							abt.MaxPerMatch	= blt.MaxPerMatch
+						FROM dbo.AgentBetLimit AS abt WITH (ROWLOCK, UPDLOCK)
+							INNER JOIN @BetLimitAgentUpdateTable AS blt 
+								ON blt.SportType	= abt.SportType 
+								AND blt.BetType		= abt.BetType
+								AND blt.AgentId		= abt.AgentId
 					
-					UPDATE cbt 
-					SET 
-						--cbt.MinBet		= blt.MinBet,
-						cbt.MaxBet		= blt.MaxBet,
-						cbt.MaxPerMatch	= blt.MaxPerMatch
-					FROM 
-						CustBetLimit AS cbt WITH (ROWLOCK, UPDLOCK)
-						INNER JOIN @BetLimitCustUpdateTable AS blt 
-							ON blt.SportType	= cbt.SportType 
-							AND blt.BetType		= cbt.BetType
-							AND blt.CustId		= cbt.CustId
+						UPDATE cbt 
+						SET cbt.MinBet		= blt.MinBet,
+							cbt.MaxBet		= blt.MaxBet,
+							cbt.MaxPerMatch	= blt.MaxPerMatch
+						FROM dbo.CustBetLimit AS cbt WITH (ROWLOCK, UPDLOCK)
+							INNER JOIN @BetLimitCustUpdateTable AS blt 
+								ON blt.SportType	= cbt.SportType 
+								AND blt.BetType		= cbt.BetType
+								AND blt.CustId		= cbt.CustId
+					END
+					ELSE
+					BEGIN
+						UPDATE abt 
+						SET --abt.MinBet		= blt.MinBet,
+							abt.MaxBet		= blt.MaxBet,
+							abt.MaxPerMatch	= blt.MaxPerMatch
+						FROM dbo.AgentBetLimit AS abt WITH (ROWLOCK, UPDLOCK)
+							INNER JOIN @BetLimitTable AS blt
+								ON blt.SportType = abt.SportType AND blt.BetType = abt.BetType
+						WHERE AgentId = @AgentId
+					
+						UPDATE abt 
+						SET --abt.MinBet		= blt.MinBet,
+							abt.MaxBet		= blt.MaxBet,
+							abt.MaxPerMatch	= blt.MaxPerMatch
+						FROM dbo.AgentBetLimit AS abt WITH (ROWLOCK, UPDLOCK)
+							INNER JOIN @BetLimitAgentUpdateTable AS blt 
+								ON blt.SportType	= abt.SportType 
+								AND blt.BetType		= abt.BetType
+								AND blt.AgentId		= abt.AgentId
+					
+						UPDATE cbt 
+						SET --cbt.MinBet		= blt.MinBet,
+							cbt.MaxBet		= blt.MaxBet,
+							cbt.MaxPerMatch	= blt.MaxPerMatch
+						FROM dbo.CustBetLimit AS cbt WITH (ROWLOCK, UPDLOCK)
+							INNER JOIN @BetLimitCustUpdateTable AS blt 
+								ON blt.SportType	= cbt.SportType 
+								AND blt.BetType		= cbt.BetType
+								AND blt.CustId		= cbt.CustId
+					END
+					
 					-- write log after update
 									
 					SET @xml = (
@@ -801,8 +751,7 @@ BEGIN
 							,abl.MinBet			AS '@mib'
 							,abl.MaxBet			AS '@mab'
 							,abl.MaxPerMatch	AS '@mam'
-						FROM 
-							AgentBetLimit AS abl WITH (NOLOCK)							
+						FROM dbo.AgentBetLimit AS abl WITH (NOLOCK)							
 						WHERE abl.AgentId = @AgentId
 						FOR XML PATH('z'),ROOT('r')
 					)
@@ -842,10 +791,10 @@ BEGIN
 END
 
 
+
 GO
 
 GRANT EXECUTE ON [dbo].[Age_Agent_UpdateBetLimit] TO [aplweb] AS [dbo]
 GO
-
 
 
