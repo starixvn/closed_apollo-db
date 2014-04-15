@@ -33,6 +33,7 @@ AS
 	  - 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
 	  - 20131017@Sophia: Get data to mail
 	  - 20140414@Sophia: Get EventStatus at match_remark_ex table
+	  - 20140415@Sophia: Get TransId of Bettrans table Instead of TransId of BettransM to push message
 	Param's Explanation: 
 	
 	
@@ -422,15 +423,17 @@ BEGIN
 
 		 
 	---- List data to put Message
-	SELECT  B.TransId, A.AgentID as TargetID, I.Username as TargetName, 1 as IsAgent
+	SELECT  A.TransId, A.AgentID as TargetID, I.Username as TargetName, 1 as IsAgent
 	FROM	#Ref B
 	INNER JOIN Bettrans_Agent A WITH (NOLOCK)
 			ON A.RefNo = B.RefNo
 	INNER JOIN AgentInfo I WITH (NOLOCK)
 			ON I.AgentId = A.AgentId
 	UNION ALL
-	SELECT  B.TransId, B.CustId as TargetID, C.Username as TargetName, 0 as IsAgent
+	SELECT  A.TransId, B.CustId as TargetID, C.Username as TargetName, 0 as IsAgent
 	FROM	#Ref B
+	INNER JOIN Bettrans A WITH (NOLOCK)
+			ON A.RefNo = B.RefNo
 	INNER JOIN CustInfo C WITH (NOLOCK)
 			ON C.CustID = B.CustID
 
