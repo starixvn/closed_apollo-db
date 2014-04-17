@@ -29,6 +29,7 @@ AS
 	Revisions:		
 		- 20130725@Sophia: Change username nvarchar(50)
 		- 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
+		- 20140414@Sophia: Get EventStatus at match_remark_ex table
 
 	Explanation's Param:
 	    - @SAFilter: 
@@ -62,7 +63,7 @@ SET NOCOUNT ON
 		RETURN
 	END
 			
-	IF EXISTS(SELECT 1 FROM dbo.match WITH(NOLOCK) WHERE matchid=@matchid AND eventstatus='completed')
+	IF EXISTS(SELECT 1 FROM dbo.Match_Remark_Ex WITH(NOLOCK) WHERE matchid=@matchid AND eventstatus='completed')
 	BEGIN
 		SELECT @ErrCode = 100, @ErrMsg = 'You can not delete completed match.'
 		RETURN
