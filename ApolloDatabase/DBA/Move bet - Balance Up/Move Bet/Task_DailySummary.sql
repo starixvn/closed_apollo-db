@@ -49,6 +49,58 @@ INNER JOIN dbo.match m WITH (NOLOCK) ON b.matchid = m.matchid
 WHERE b.winlostdate <> m.eventdate
 
  
+ 
+--for sandbox only
+-- =====================
+-- AUTO VOID TEST TICKET
+-- =====================
+ IF (@@SERVERNAME = 'SANDBOX-TRANS') --void all running tickets
+ BEGIN
+	DECLARE @custsAll TABLE (custid int)
+		
+	DECLARE @TransIDsAll TABLE (TransID int)
+
+	INSERT INTO @TransIDsAll (TransID)
+	SELECT	TransID
+	FROM	bettrans WITH (NOLOCK)
+	WHERE	--currency = 20 AND 
+			winlostdate = @winlostdate 
+			AND bettype <=19000
+			AND statusID in(0,1)
+
+	IF EXISTS (SELECT 1 FROM @TransIDsAll) 
+	BEGIN			
+		UPDATE dbo.bettrans with (ROWLOCK, UPDLOCK)  
+		SET winlost=actual_stake, 
+			playercomm = 0,
+			Twinlost = 0,
+			Tcomm = 0, 
+			ruben=1, 
+			statuswinlost=6, 
+			status = 'Void',
+			statusid = 102,
+			transdesc = '[AutoVoid]' + transdesc
+		OUTPUT deleted.custid INTO @custsAll
+		WHERE TransID IN (SELECT TransID FROM @TransIDsAll)
+
+		UPDATE dbo.BetTrans_Agent with (ROWLOCK, UPDLOCK)  
+		SET AWinLost=0, 
+			AComm = 0,
+			status = 'Void',
+			statusid = 102,
+			transdesc = '[AutoVoid]' + transdesc
+		WHERE TransID IN (SELECT TransID FROM @TransIDsAll)
+
+		
+		INSERT INTO dbo.Task_Cust_CheckBalanceVerify (custid)
+		SELECT DISTINCT custid
+		FROM @custsAll
+		
+		EXEC dbo.[Task_CheckBalance] @step = 33, @Action = 'JustFix'
+
+		--DELETE FROM @custs
+	END
+END
 -- ====================
 -- DATA VERIFICATION
 -- ====================
