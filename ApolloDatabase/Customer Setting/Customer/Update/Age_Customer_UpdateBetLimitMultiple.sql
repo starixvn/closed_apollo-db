@@ -50,7 +50,7 @@ BEGIN
 						,@TempUsername	= Username
 			FROM @TableCust
 
-			EXEC Age_Customer_UpdateBetLimit_xtest
+			EXEC Age_Customer_UpdateBetLimit
 				@ActorAgentId = @ActorAgentId
 				, @AdminId = @AdminId
 				, @CustId = @TempCustId

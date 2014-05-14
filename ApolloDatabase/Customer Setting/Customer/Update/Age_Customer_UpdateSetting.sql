@@ -59,7 +59,7 @@ BEGIN
 			RETURN
 		END	
 
-	EXEC Age_Customer_UpdateBetLimit_xtest
+	EXEC Age_Customer_UpdateBetLimit
 		@ActorAgentId = @ActorAgentId
 		, @AdminId = @AdminId
 		, @CustId = @CustId
