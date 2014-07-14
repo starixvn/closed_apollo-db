@@ -1,4 +1,6 @@
-﻿/****** Object:  StoredProcedure [dbo].[Task_DailySummary_DB02_Copy]    Script Date: 05/07/2013 02:37:44 ******/
+﻿USE [ProdDB]
+GO
+/****** Object:  StoredProcedure [dbo].[Task_DailySummary_ProdDB_Copy]    Script Date: 7/14/2014 2:20:44 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -110,7 +112,8 @@ Revisions:
 	where orid_ex in (select orid 
 					from outright_ex oe with (nolock) join outright o with (nolock) on o.orid=oe.orid_ex
 					Where DisabledAutoSettle=1 and oddsstatus_ex='Completed' and eventdate = @winlostdate
-					)
+						AND o.oddsstatus <> 'Completed'
+					)	
 
 	insert into outright14
 		(orid, leagueid, teamid, eventdate, kickofftime, oddsstatus, odds, maxbet, gapodds, matchcode, groupmatch, status, creator, bal, risk, DisplayMode, 
@@ -121,6 +124,7 @@ Revisions:
 	--from outright where eventdate = @winlostdate AND oddsstatus = 'Completed'
 	from outright_ex oe with (nolock) join outright o with (nolock) on o.orid=oe.orid_ex
 	Where DisabledAutoSettle=1 and oddsstatus_ex='Completed' and eventdate = @winlostdate
+		AND o.oddsstatus <> 'Completed'
 	
 END
 

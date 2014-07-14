@@ -20,7 +20,7 @@ AS
 	DB: SVRTXN/TransDB
 	Original SP: Admin_Settlement_1
 	History:
-		
+		- 20140514@Dan: Add 1H Total Goal and 1H FGLG bettypes (126, 127)
 		
 	Param's Explanation:
 		+ @betstatus: Used for score table, FGLG status, refund status
@@ -152,7 +152,7 @@ BEGIN
 	INSERT INTO #BalanceBefore
 	SELECT custid, SUM(winlost-actual_stake+playercomm)
 	FROM dbo.bettrans with (rowlock)
-	WHERE matchid = @matchid AND bettype <> 14
+	WHERE matchid = @matchid AND bettype NOT IN (14, 127)
 	GROUP BY custid
 
 	SET @TotalAccount = @@ROWCOUNT
@@ -162,7 +162,7 @@ BEGIN
 	INSERT INTO #BalanceBefore
 	SELECT custid, SUM(winlost-actual_stake+playercomm)
 	FROM dbo.bettrans with (rowlock)
-	WHERE matchid = @matchid AND bettype IN (7,8,12,15,21,30,125)
+	WHERE matchid = @matchid AND bettype IN (7,8,12,15,21,30,125,126)
 	GROUP BY custid
 
 	SET @TotalAccount = @@ROWCOUNT
@@ -198,12 +198,12 @@ BEGIN
 	Declare @status TABLE (FTBet bit, BetCount int, InRunning int)
 	INSERT INTO @status
 	SELECT
-		CASE WHEN bettype IN (7,8,12,15,21,30,125) THEN 0 ELSE 1 END,
+		CASE WHEN bettype IN (7,8,12,15,21,30,125,126) THEN 0 ELSE 1 END,
 		SUM(CASE WHEN [statusID] IN (101,102) THEN 0 ELSE 1 END), --SUM(CASE WHEN [status] IN (N'VOID',N'REJECT') THEN 0 ELSE 1 END),
 		SUM(CASE WHEN [statusID] = 0 THEN 1 ELSE 0 END) ----SUM(CASE WHEN [status] = N'running' THEN 1 ELSE 0 END)
 	FROM dbo.bettrans with (nolock)
 	WHERE matchid = @matchid
-	GROUP BY CASE WHEN bettype IN (7,8,12,15,21,30,125) THEN 0 ELSE 1 END
+	GROUP BY CASE WHEN bettype IN (7,8,12,15,21,30,125,126) THEN 0 ELSE 1 END
 
 	IF NOT EXISTS(SELECT * FROM @status WHERE FTBet = 0) INSERT INTO @status VALUES (0,0,0)
 	IF NOT EXISTS(SELECT * FROM @status WHERE FTBet = 1) INSERT INTO @status VALUES (1,0,0)
@@ -259,14 +259,33 @@ BEGIN
 				EXEC dbo.Admin_Settlement_FGLG
 					@creator = @creator,
 					@matchid = @matchid,	
+					@action  = 'CAL-FT',
 					@betstatus = @betstatus,
 					@IncludeLG = 1,
 					@goalrecord = @goalrecord,
 					@IP = @IP,
-					@IsLoopTempTable = 1 ---Not check concurrency by TempVariableNumber table		
-	
-
+					@IsLoopTempTable = 1 ---Not check concurrency by TempVariableNumber table			
 	END
+
+	--Check and calc 1H FGLG
+	IF @action IN('CAL', 'CAL-HT') 	
+	BEGIN
+		IF EXISTS (select 1 from bettrans with (nolock) where bettype = 127 and matchid = @matchid)
+			OR EXISTS (select 1 from bettransm with (nolock) where bettype = 127 and matchid = @matchid)	
+				IF CHARINDEX('1FL:', @betstatus) > 0
+				BEGIN
+					EXEC dbo.Admin_Settlement_FGLG
+						@creator = @creator,
+						@matchid = @matchid,	
+						@action = 'CAL-HT',
+						@betstatus = @betstatus,
+						@IncludeLG = 1,
+						@goalrecord = @goalrecord,
+						@IP = @IP,
+						@IsLoopTempTable = 1 ---Not check concurrency by TempVariableNumber table		
+				END
+	END
+
 
 	IF @eventstatus = 'completed'
 		EXEC SVRPRO.ProdDB.dbo.[Admin_Match_UpdateMatchRemark] @matchid, 'C'
@@ -290,7 +309,7 @@ BEGIN
 	INSERT INTO #BalanceAfter
 	SELECT custid, SUM(winlost-actual_stake+playercomm)
 	FROM dbo.bettrans with (rowlock)
-	WHERE matchid = @matchid AND bettype <> 14
+	WHERE matchid = @matchid AND bettype NOT IN (14,127)
 	GROUP BY custid
 END
 ELSE IF @Action = 'CAL-HT'
@@ -298,7 +317,7 @@ BEGIN
 	INSERT INTO #BalanceAfter
 	SELECT custid, SUM(winlost-actual_stake+playercomm)
 	FROM dbo.bettrans with (rowlock)
-	WHERE matchid = @matchid AND bettype IN (7,8,12,15,21,30,125)
+	WHERE matchid = @matchid AND bettype IN (7,8,12,15,21,30,125,126)
 	GROUP BY custid
 END
 ELSE IF @Action = 'UNDO'

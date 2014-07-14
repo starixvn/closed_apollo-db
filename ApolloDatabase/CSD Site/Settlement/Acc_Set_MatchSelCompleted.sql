@@ -12,7 +12,7 @@ AS
  * Task			: List FT-completed matches for billing
  * DB			: SVRTXN/TransDB
  * Revisions	:
- *	•
+ 	-20140523@Dan: Get 1H FGLG ticket info 
  * Parameters:
  *  @FromDate: From  date,
 	@ToDate: To date ,
@@ -130,14 +130,16 @@ FROM
 		ISNULL(tm.IsHTCal,0) as IsHTCal,  
 		ISNULL(tm.calculate,0) as calculate,  
 		CAST(CASE WHEN tm.hthomescore IS NOT NULL AND tm.htawayscore IS NOT NULL AND tm.finalhomescore IS NOT NULL AND tm.finalawayscore IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS IsKeyscore ,		
-		c.isExistFGLG,
+		CASE WHEN c.cntFGLG = 0 THEN 0 ELSE 1 END as isExistFGLG,
+		CASE WHEN c.cntHTFGLG = 0 THEN 0 ELSE 1 END as isExistHTFGLG,
 		tm.FailedActionID ,
 		DisabledAutoSettle 
 	FROM SVRPRO.ProdDB.dbo.match m with (nolock)  
 		INNER JOIN @m tm ON m.matchid = tm.matchid  
 		INNER JOIN (  
-					SELECT b.matchid, count(b.matchid) AS BetCount 
-							,SUM(CASE WHEN bettype = 14 THEN 1 ELSE 0 END) AS isExistFGLG 
+					SELECT b.matchid, count(b.matchid) AS BetCount 							
+							,SUM(CASE WHEN bettype = 14 THEN 1 ELSE 0 END) AS cntFGLG
+							,SUM(CASE WHEN bettype = 127 THEN 1 ELSE 0 END) AS cntHTFGLG
 					FROM bettrans b with (nolock)  
 					INNER JOIN @m stm ON b.matchid = stm.matchid  
 					GROUP BY b.matchid  

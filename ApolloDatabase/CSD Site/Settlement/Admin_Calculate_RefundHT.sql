@@ -6,7 +6,7 @@ AS
 	Task: Refund HT 
 	DB: SVRTXN/TransDB
 	Revisions:
-			
+		- 20140515@Dan: Add new bettype 126 [Redmine:#14718]
 	Param's Explanation:
 				
 */
@@ -26,7 +26,7 @@ SET NOCOUNT ON
 			matchid=@matchid
 			--AND [status] not in (N'Void', N'Reject')
 			AND statusID not in (103,101,102)
-			AND bettype IN (7, 8, 15, 12,21,30, 125) 
+			AND bettype IN (7, 8, 15, 12,21,30, 125,126) 
 			
 		IF @@ROWCOUNT < 10000 BREAK
 	END
@@ -43,7 +43,7 @@ SET NOCOUNT ON
 			matchid=@matchid
 			--AND [status] not in (N'Void', N'Reject')
 			AND statusID not in (103,101,102)
-			AND bettype IN (7, 8, 15, 12,21,30, 125) 
+			AND bettype IN (7, 8, 15, 12,21,30, 125,126) 
 		
 		IF @@ROWCOUNT < 10000 BREAK	
 	END

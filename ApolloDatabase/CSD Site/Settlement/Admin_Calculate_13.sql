@@ -1,32 +1,35 @@
-ALTER PROCEDURE [dbo].[Admin_Calculate_22]
+USE [TransDB]
+GO
+/****** Object:  StoredProcedure [dbo].[Admin_Calculate_13]    Script Date: 5/15/2014 1:48:22 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+/****** Object:  Stored Procedure dbo.Admin_Calculate_13    Script Date: 3/27/2014 12:45:54 PM ******/
+ALTER PROCEDURE [dbo].[Admin_Calculate_13]
 	@matchid int,
 	@bettype smallint,
-	@ResultString nvarchar(50),
+	@fth smallmoney,
+	@fta smallmoney,
 	@betcount int = 0
 AS
 IF @betcount = 0 AND @@SERVERNAME NOT LIKE N'DBIOM%' RETURN
 
 /*
-Created by: Dan
-Date: 2013-03-15
-Task : Settlement for Next Goal Bettype  
-DB: SVRTXN/TransDB
-Revisions:    
-	- 20131125@Dan: use temp variable instead of temp tables to prevent problem when executing via replication
-	- 20140226@Sophia: Calculate Comm with new formula
-
-Param's Explanation:
-• @ResultString: + get from match.GoalRecord,
-                 + uses nvarchar to avoid problem compare with varchar from betteam
-
+	Created by: Dan
+	Date: 2013-03-15
+	Task: Settlement 
+	DB: SVRTXN/TransDB
+	
+	Revisions:		
+		- 20131125@Dan: use temp variable instead of temp tables to prevent problem when executing via replication
+		- 20140226@Sophia: Calculate Comm with new formula
 */
 --IF @@SERVERNAME IN ('DB04', 'DB042', 'DB043', 'DB044') RETURN
 
+SET NOCOUNT ON
 DECLARE @modds SMALLMONEY, @commWinRate SMALLMONEY, @commLostRate SMALLMONEY
 
-DECLARE @hdp SMALLMONEY
-
-	
 DECLARE @ba table (
 	transid bigint , 
 	AgentId int, 
@@ -90,21 +93,18 @@ WHERE
 	b.matchid=@matchid AND
 	b.bettype=@bettype AND		
 	--[status] NOT IN (N'VOID', N'REJECT')
-	b.statusID NOT IN (101,102)	
-
+	b.statusID NOT IN (101,102)
+	
 -- settle for agent in temporary table
 UPDATE @ba 
-SET 
-	@hdp = CASE betteam
-		    WHEN N'h' THEN hdp2-hdp1 
-		    WHEN N'a' THEN hdp1-hdp2
-		    END,
-
-	@modds = CASE SUBSTRING(@ResultString, livehomescore + liveawayscore + 1, 1)
-		WHEN N'' THEN @hdp 
-		WHEN betteam THEN 1 + @hdp
-		ELSE -1 + @hdp
-	END,
+SET 	
+	@modds = CASE
+		WHEN betteam = 'hy' AND @fta = 0 THEN 1
+		WHEN betteam = 'hn' AND @fta > 0 THEN 1
+		WHEN betteam = 'ay' AND @fth = 0 THEN 1
+		WHEN betteam = 'an' AND @fth > 0 THEN 1
+		ELSE -1
+		END,
 			
 	@commWinRate = CASE [DoubleCommLosing]  -- 0 : pay normal, both win/lost -- 1 : pay 'double' ONLY on lost
 	WHEN 0 THEN 1
@@ -116,22 +116,22 @@ SET
 	ELSE 1 END,--'s','m'
 				
 	aWinLost = CASE
-		WHEN @modds >  0.25	THEN stake * (case when odds<0 then 1 else (case when bettype in (4,5,6) then odds-1 else odds end) end) * -apositiontaking
-		WHEN @modds =  0.25	THEN stake * (case when odds<0 then 1 else (case when bettype in (4,5,6) then odds-1 else odds end) end) * -apositiontaking * 0.5
+		WHEN @modds >  0.25	THEN stake * (case when odds<0 then 1 else (case when bettype in (4,5,6,13,15,16,24,25,26,27,28) then odds-1 else odds end) end) * -apositiontaking
+		WHEN @modds =  0.25	THEN stake * (case when odds<0 then 1 else (case when bettype in (4,5,6,13,15,16,24,25,26,27,28) then odds-1 else odds end) end) * -apositiontaking * 0.5
 		WHEN @modds =  0	THEN 0
 		WHEN @modds = -0.25	THEN actual_stake * apositiontaking * 0.5
 		WHEN @modds < -0.25	THEN actual_stake * apositiontaking
 		END,
 					
 	aComm = CASE
-		WHEN @modds >  0.25 	THEN @commWinRate * adiscount * (1-DownlinePT) * dbo.[F_GetCommBase] (Stake, Odds, Bettype, @MOdds)
-		WHEN @modds =  0.25 	THEN @commWinRate * adiscount * (1-DownlinePT) * dbo.[F_GetCommBase] (Stake, Odds, Bettype, @MOdds)
+		WHEN @modds >  0.25 	THEN @commWinRate * adiscount * (1-DownlinePT) * dbo.[F_GetCommBase] (Stake,Odds,Bettype, @MOdds)
+		WHEN @modds =  0.25 	THEN @commWinRate * adiscount * (1-DownlinePT) * dbo.[F_GetCommBase] (Stake,Odds,Bettype, @MOdds)
 		WHEN @modds =  0    	THEN 0
-		WHEN @modds = -0.25 	THEN @commLostRate * adiscount * (1-DownlinePT) * dbo.[F_GetCommBase] (Stake, Odds, Bettype, @MOdds)
-		WHEN @modds < -0.25 	THEN @commLostRate * adiscount * (1-DownlinePT) * dbo.[F_GetCommBase] (Stake, Odds, Bettype, @MOdds)
+		WHEN @modds = -0.25 	THEN @commLostRate * adiscount * (1-DownlinePT) * dbo.[F_GetCommBase] (Stake,Odds,Bettype, @MOdds)
+		WHEN @modds < -0.25 	THEN @commLostRate * adiscount *  (1-DownlinePT) * dbo.[F_GetCommBase] (Stake,Odds,Bettype, @MOdds)
 		END,
-	
-		
+
+			
 	Status = CASE
 		WHEN @modds > 0 THEN 'WON'
 		WHEN @modds = 0 THEN 'DRAW'
@@ -141,8 +141,7 @@ SET
 		WHEN @modds > 0 THEN 112 --WON
 		WHEN @modds = 0 THEN 111 --DRAW
 		WHEN @modds < 0 THEN 113 --LOSE
-		END			
-	
+		END	
 		
 --settle for BetTrans_Agent
 UPDATE BetTrans_Agent with (ROWLOCK, UPDLOCK)
@@ -158,16 +157,14 @@ WHERE BetTrans_Agent.matchid=@matchid AND
 
 --settle for BetTrans
 UPDATE BetTrans with (ROWLOCK, UPDLOCK)
-SET							
-	@hdp = CASE betteam
-		    WHEN N'h' THEN hdp2-hdp1 
-		    WHEN N'a' THEN hdp1-hdp2
-		    END,
-	@modds = modds = CASE SUBSTRING(@ResultString, livehomescore + liveawayscore + 1, 1)
-		WHEN N'' THEN @hdp 
-		WHEN betteam THEN 1 + @hdp
-		ELSE -1 + @hdp
-	END,
+SET						
+	@modds = modds = CASE
+		WHEN betteam = 'hy' AND @fta = 0 THEN 1
+		WHEN betteam = 'hn' AND @fta > 0 THEN 1
+		WHEN betteam = 'ay' AND @fth = 0 THEN 1
+		WHEN betteam = 'an' AND @fth > 0 THEN 1
+		ELSE -1
+		END,
 			
 	@commWinRate = CASE [DoubleCommLosing]  -- 0 : pay normal, both win/lost -- 1 : pay 'double' ONLY on lost
 	WHEN 0 THEN 1
@@ -179,20 +176,21 @@ SET
 	ELSE 1 END,--'s','m'
 				
 	WinLost = CASE
-		WHEN @modds >  0.25	THEN actual_stake + stake * (case when odds<0 then 1 else (case when bettype in (4,5,6) then odds-1 else odds end) end)
-		WHEN @modds =  0.25	THEN actual_stake + stake * (case when odds<0 then 1 else (case when bettype in (4,5,6) then odds-1 else odds end) end) * 0.5
+		WHEN @modds >  0.25	THEN actual_stake + stake * (case when odds<0 then 1 else (case when bettype in (4,5,6,13,15,16,24,25,26,27,28) then odds-1 else odds end) end)
+		WHEN @modds =  0.25	THEN actual_stake + stake * (case when odds<0 then 1 else (case when bettype in (4,5,6,13,15,16,24,25,26,27,28) then odds-1 else odds end) end) * 0.5
 		WHEN @modds =  0	THEN actual_stake
 		WHEN @modds = -0.25	THEN actual_stake * 0.5
 		WHEN @modds < -0.25	THEN 0
 		END,
 					
 	PlayerComm = CASE
-		WHEN @modds >  0.25 	THEN @commWinRate * playerdiscount * dbo.[F_GetCommBase] (Stake, Odds, Bettype, @MOdds)
-		WHEN @modds =  0.25 	THEN @commWinRate * playerdiscount * dbo.[F_GetCommBase] (Stake, Odds, Bettype, @MOdds)
+		WHEN @modds >  0.25 	THEN @commWinRate * playerdiscount * dbo.[F_GetCommBase] (Stake,Odds,Bettype, @MOdds)
+		WHEN @modds =  0.25 	THEN @commWinRate * playerdiscount * dbo.[F_GetCommBase] (Stake,Odds,Bettype, @MOdds)
 		WHEN @modds =  0    	THEN 0
-		WHEN @modds = -0.25 	THEN @commLostRate * playerdiscount * dbo.[F_GetCommBase] (Stake, Odds, Bettype, @MOdds)
-		WHEN @modds < -0.25 	THEN @commLostRate * playerdiscount * dbo.[F_GetCommBase] (Stake, Odds, Bettype, @MOdds)
-		END, 
+		WHEN @modds = -0.25 	THEN @commLostRate * playerdiscount * dbo.[F_GetCommBase] (Stake,Odds,Bettype, @MOdds)
+		WHEN @modds < -0.25 	THEN @commLostRate * playerdiscount * dbo.[F_GetCommBase] (Stake,Odds,Bettype, @MOdds)
+		END,
+		 
 		
 	Status = CASE
 		WHEN @modds > 0 THEN 'WON'
@@ -207,13 +205,12 @@ SET
 	ruben=1,
 	[TWinLost] = AgentWinlost.AWinlost,
 	[TComm] =  CASE
-			WHEN @modds >  0.25 	THEN @commWinRate * Tdiscount * (1-[TPositionTaking]) * dbo.[F_GetCommBase] (Stake, Odds, Bettype, @MOdds)
-			WHEN @modds =  0.25 	THEN @commWinRate * Tdiscount * (1-[TPositionTaking]) * dbo.[F_GetCommBase] (Stake, Odds, Bettype, @MOdds)
+			WHEN @modds >  0.25 	THEN @commWinRate * Tdiscount * (1-[TPositionTaking]) * dbo.[F_GetCommBase] (Stake,Odds,Bettype, @MOdds)
+			WHEN @modds =  0.25 	THEN @commWinRate * Tdiscount * (1-[TPositionTaking]) * dbo.[F_GetCommBase] (Stake,Odds,Bettype, @MOdds)
 			WHEN @modds =  0    	THEN 0
-			WHEN @modds = -0.25 	THEN @commLostRate * Tdiscount * (1-[TPositionTaking]) * dbo.[F_GetCommBase] (Stake, Odds, Bettype, @MOdds)
-			WHEN @modds < -0.25 	THEN @commLostRate * Tdiscount * (1-[TPositionTaking]) * dbo.[F_GetCommBase] (Stake, Odds, Bettype, @MOdds)
-			END
-	 
+			WHEN @modds = -0.25 	THEN @commLostRate * Tdiscount * (1-[TPositionTaking]) * dbo.[F_GetCommBase] (Stake,Odds,Bettype, @MOdds)
+			WHEN @modds < -0.25 	THEN @commLostRate * Tdiscount * (1-[TPositionTaking]) * dbo.[F_GetCommBase] (Stake,Odds,Bettype, @MOdds)
+			END 
 FROM 
 	(	SELECT TransId, sum(AWinLost) aWinlost
 		FROM @ba 
@@ -224,7 +221,6 @@ WHERE
 	BetTrans.bettype=@bettype AND
 	--[status] NOT IN (N'VOID', N'REJECT')
 	BetTrans.statusID NOT IN (101,102)
-
 
 GO
 GRANT EXECUTE ON [dbo].[Admin_Calculate_22] TO [aplweb]

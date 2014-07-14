@@ -12,7 +12,7 @@ AS
  * Task			: List HT-completed matches for billing
  * DB			: SVRTXN/TransDB
  * Revisions	:
- *	•
+ 	-20140523@Dan: Get 1H FGLG ticket info 
  * Parameters:
  *  @FromDate: From  date,
 	@ToDate: To date ,
@@ -68,6 +68,7 @@ FROM
 			c.betcount,
 			m.goalrecord,
 			CASE WHEN c.cntFGLG = 0 THEN 0 ELSE 1 END AS isExistFGLG,
+			CASE WHEN c.cntHTFGLG = 0 THEN 0 ELSE 1 END AS isExistHTFGLG,
 			m.FailedActionID,
 			m.DisabledAutoSettle
 	FROM		
@@ -142,8 +143,9 @@ FROM
 		) AS m
 		INNER JOIN  
 		(SELECT   bettrans.matchid,  
-			 COUNT(bettrans.matchid)  betcount,
-			 SUM(CASE WHEN bettype = 14 THEN 1 ELSE 0 END) AS cntFGLG  
+				COUNT(bettrans.matchid)  betcount,
+				SUM(CASE WHEN bettype = 14 THEN 1 ELSE 0 END) AS cntFGLG,
+				SUM(CASE WHEN bettype = 127 THEN 1 ELSE 0 END) AS cntHTFGLG
 		  FROM     bettrans WITH (NOLOCK) 
 			 JOIN match WITH (NOLOCK)  ON match.matchid = bettrans.matchid  
 			 LEFT JOIN dbo.match_remark_ex mr1 WITH (NOLOCK) on match.matchid = mr1.matchid                    

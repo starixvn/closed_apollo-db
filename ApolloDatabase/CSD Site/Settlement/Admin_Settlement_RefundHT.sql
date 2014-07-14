@@ -14,7 +14,7 @@ DB: SVRTXN/TransDB
 Original: 
 
 Revisions:
-		
+	- 20140515@Dan: Add new bettype 126		
 Param's Explanation:
 • @matchid: matchid of match to Refund HT
 
@@ -29,7 +29,11 @@ BEGIN
 	RETURN
 END
 
-DECLARE @Remark VARCHAR(500)
+DECLARE  @Remark	VARCHAR(500)
+		,@ActionID	INT
+
+SELECT	@ActionID = 110 
+
 INSERT INTO dbo.TempVariableNumber (KeyID, KeyValue) VALUES (1, @matchid)
 IF (@@Error = 0)
 BEGIN
@@ -38,7 +42,7 @@ BEGIN
 			@UserID = @adminID,
 			@Matchid = @matchid, 
 			@KeyID = 1,
-			@ActionID = 110, 
+			@ActionID = @ActionID, 
 			@Remark = 'ADD SUCCESS'
 	END TRY
 	BEGIN CATCH
@@ -47,7 +51,7 @@ BEGIN
 			@UserID = @adminID,
 			@Matchid = @matchid, 
 			@KeyID = 1,
-			@ActionID = 110, 
+			@ActionID = @ActionID, 
 			@Remark = @Remark
 	END CATCH
 END	
@@ -72,7 +76,7 @@ CREATE INDEX IX_Balance_Increased ON #Balance (Increased)
 INSERT INTO #BalanceBefore
 SELECT custid, SUM(winlost-actual_stake+playercomm)
 FROM dbo.bettrans with (rowlock)
-WHERE matchid = @matchid AND bettype IN (7,8,12,15,21,30,125)
+WHERE matchid = @matchid AND bettype IN (7,8,12,15,21,30,125,126)
 GROUP BY custid
 
 --Check if match already Refund FT => refund whole match
@@ -89,7 +93,7 @@ BEGIN
 				@UserID = @adminID,
 				@Matchid = @matchid, 
 				@KeyID = 1,
-				@ActionID = 110, 
+				@ActionID = @ActionID, 
 				@Remark = 'DEL SUCCESS'
 		END TRY
 		BEGIN CATCH
@@ -98,7 +102,7 @@ BEGIN
 				@UserID = @adminID,
 				@Matchid = @matchid, 
 				@KeyID = 1,
-				@ActionID = 110, 
+				@ActionID = @ActionID, 
 				@Remark = @Remark
 		END CATCH
 	END
@@ -109,7 +113,7 @@ BEGIN
 				@UserID = @adminID,
 				@Matchid = @matchid, 
 				@KeyID = 1,
-				@ActionID = 110, 
+				@ActionID = @ActionID, 
 				@Remark = 'DEL FAILED'
 		END TRY
 		BEGIN CATCH
@@ -118,7 +122,7 @@ BEGIN
 				@UserID = @adminID,
 				@Matchid = @matchid, 
 				@KeyID = 1,
-				@ActionID = 110, 
+				@ActionID = @ActionID, 
 				@Remark = @Remark
 		END CATCH
 	END
@@ -151,7 +155,7 @@ END
 INSERT INTO #BalanceAfter
 SELECT custid, SUM(winlost-actual_stake+playercomm)
 FROM dbo.bettrans with (rowlock)
-WHERE matchid = @matchid AND bettype IN (7,8,12,15,21,30,125)
+WHERE matchid = @matchid AND bettype IN (7,8,12,15,21,30,125,126)
 GROUP BY custid
 
 
@@ -207,7 +211,7 @@ BEGIN
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Settle
 			@UserID = @adminid,
 			@Matchid = @matchid,
-			@ActionID = 110,
+			@ActionID = @ActionID,
 			@finalhomescore = @finalhomescore,
 			@finalawayscore = @finalawayscore,  
 			@hthomescore = 0,
@@ -222,7 +226,7 @@ BEGIN
 		EXEC LogDB.dbo.WriteLog_Settlement_Settle
 			@UserID = @adminid,
 			@Matchid = @matchid,
-			@ActionID = 110,
+			@ActionID = @ActionID,
 			@finalhomescore = @finalhomescore,
 			@finalawayscore = @finalawayscore,  
 			@hthomescore = 0,
@@ -245,7 +249,7 @@ BEGIN
 			@UserID = @adminID,
 			@Matchid = @matchid, 
 			@KeyID = 1,
-			@ActionID = 110, 
+			@ActionID = @ActionID, 
 			@Remark = 'DEL SUCCESS'
 	END TRY
 	BEGIN CATCH
@@ -254,7 +258,7 @@ BEGIN
 			@UserID = @adminID,
 			@Matchid = @matchid, 
 			@KeyID = 1,
-			@ActionID = 110, 
+			@ActionID = @ActionID, 
 			@Remark = @Remark
 	END CATCH
 END
@@ -265,7 +269,7 @@ BEGIN
 			@UserID = @adminID,
 			@Matchid = @matchid, 
 			@KeyID = 1,
-			@ActionID = 110, 
+			@ActionID = @ActionID, 
 			@Remark = 'DEL FAILED'
 	END TRY
 	BEGIN CATCH
@@ -274,7 +278,7 @@ BEGIN
 			@UserID = @adminID,
 			@Matchid = @matchid, 
 			@KeyID = 1,
-			@ActionID = 110, 
+			@ActionID = @ActionID, 
 			@Remark = @Remark
 	END CATCH
 END

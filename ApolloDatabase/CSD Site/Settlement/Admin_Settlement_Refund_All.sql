@@ -15,7 +15,7 @@ Original: refund
 DB: SVRTXN/TransDB
 
 Revisions: 
-	
+	- 20140514@Dan: Add 1H FGLG bettypes (127)
 Param's Explanation:
 • @matchid: matchid need to refund
 BetDaq account: 
@@ -33,7 +33,12 @@ BEGIN
 			@ErrMsg = 'This match is being calculated, please wait a few seconds until the on-going process is completed and try again.'
 	RETURN
 END
-DECLARE @Remark VARCHAR(500)
+
+DECLARE  @Remark	VARCHAR(500)
+		,@ActionID	INT
+		
+SELECT	@ActionID = 109 
+
 INSERT INTO dbo.TempVariableNumber (KeyID, KeyValue) VALUES (1, @matchid)
 IF (@@Error = 0)
 BEGIN
@@ -42,7 +47,7 @@ BEGIN
 			@UserID = @creator, 
 			@Matchid = @matchid, 
 			@KeyID = 1,
-			@ActionID = 109, 
+			@ActionID = @ActionID, 
 			@Remark = 'ADD SUCCESS'
 	END TRY
 	BEGIN CATCH
@@ -51,7 +56,7 @@ BEGIN
 			@UserID = @creator, 
 			@Matchid = @matchid, 
 			@KeyID = 1,
-			@ActionID = 109, 
+			@ActionID = @ActionID, 
 			@Remark = @Remark
 	END CATCH
 END 
@@ -78,7 +83,7 @@ INSERT INTO #BalanceBefore
 SELECT	custid, SUM(winlost-actual_stake+playercomm)
 FROM	dbo.bettrans with (rowlock)
 WHERE	matchid = @matchid 
-		AND bettype <> 14
+		AND bettype not IN (14, 127)
 GROUP BY custid
 
 EXEC SVRPRO.ProdDB.dbo.Admin_Match_Update @Command = 'Admin_Settlement_Refund_All', @MatchID = @matchid, @creator = @creator , @betstatus = @betstatus
@@ -91,7 +96,7 @@ INSERT INTO #BalanceAfter
 SELECT	custid, SUM(winlost-actual_stake+playercomm)
 FROM	dbo.bettrans with (rowlock)
 WHERE	matchid = @matchid 
-		AND bettype <> 14
+		AND bettype not IN (14, 127)
 GROUP BY custid
 
 
@@ -128,7 +133,7 @@ BEGIN TRY
 	EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Settle
 		@UserID = @creator,
 		@Matchid = @matchid,
-		@ActionID = 109,
+		@ActionID = @ActionID,
 		@finalhomescore = 0,
 		@finalawayscore = 0,  
 		@hthomescore = 0,
@@ -143,7 +148,7 @@ BEGIN CATCH
 	EXEC LogDB.dbo.WriteLog_Settlement_Settle
 		@UserID = @creator,
 		@Matchid = @matchid,
-		@ActionID = 109,
+		@ActionID = @ActionID,
 		@finalhomescore = 0,
 		@finalawayscore = 0,  
 		@hthomescore = 0,
@@ -165,7 +170,7 @@ BEGIN
 			@UserID = @creator, 
 			@Matchid = @matchid, 
 			@KeyID = 1,
-			@ActionID = 109, 
+			@ActionID = @ActionID, 
 			@Remark = 'DEL SUCCESS'
 	END TRY
 	BEGIN CATCH
@@ -174,7 +179,7 @@ BEGIN
 			@UserID = @creator, 
 			@Matchid = @matchid, 
 			@KeyID = 1,
-			@ActionID = 109, 
+			@ActionID = @ActionID, 
 			@Remark = @Remark
 	END CATCH
 END
@@ -185,7 +190,7 @@ BEGIN
 			@UserID = @creator, 
 			@Matchid = @matchid, 
 			@KeyID = 1,
-			@ActionID = 109, 
+			@ActionID = @ActionID, 
 			@Remark = 'DEL FAILED'
 	END TRY
 	BEGIN CATCH		
@@ -194,7 +199,7 @@ BEGIN
 			@UserID = @creator, 
 			@Matchid = @matchid, 
 			@KeyID = 1,
-			@ActionID = 109, 
+			@ActionID = @ActionID, 
 			@Remark = @Remark
 	END CATCH
 END

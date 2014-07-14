@@ -11,11 +11,11 @@ WITH RECOMPILE
 AS
 /*	Creator: Dan
 	Date: 2013-03-21
-	Task: Main SP for Mix parly settlement
+	Task: Main SP for Mix parlay settlement
 	DB: SVRTXN/TransDB
 
 	History:		
-						   
+		- 20140514@Dan: allow to execute undo action without score   						   
 	Param's Explanation:
 		+ @betstatus: Used for score table, FGLG status, refund status
 		
@@ -99,8 +99,8 @@ BEGIN
 			FROM SVRPRO.ProdDB.dbo.match m 
 				LEFT JOIN SVRPRO.ProdDB.dbo.match_remark_ex mr with (rowlock) ON m.matchid=mr.matchid
 			WHERE m.matchid IN (SELECT val FROM dbo.strSplit(@matchids,','))
-
-	IF EXISTS (SELECT 1 FROM @match	WHERE fth is null or fta is null or hth is null or hta is null)
+	
+	IF EXISTS (SELECT 1 FROM @match	WHERE fth is null or fta is null or hth is null or hta is null) AND @action <> 'UNDO'
 	BEGIN			
 		SELECT @NotKeyScoreList  = COALESCE(@NotKeyScoreList + ',' + matchcode,matchcode)
 		FROM @match

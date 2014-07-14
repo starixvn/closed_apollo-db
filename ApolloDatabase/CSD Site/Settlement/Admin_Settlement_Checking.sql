@@ -10,7 +10,7 @@ Task : Settlement checking
 DB: SVRTXN/TransDB 
 
 Revisions:    
-	
+	- 20140515@Dan: Add 2 new bettypes - 1H total goal, 1H FGLG  (126,127) 
 Param's Explanation:
 	- @matchid: The ID of match want to settlement
 	- @action: indicate action performed
@@ -60,21 +60,21 @@ BEGIN
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
 		isnull(sum(case statusid when 1 then 1 else 0 end),0)
 	from bettrans with(nolock) 
-	where matchid = @matchid and bettype IN(7,8,12,15,21,30,125)
+	where matchid = @matchid and bettype IN(7,8,12,15,21,30,125,126,127)
 	UNION ALL
 	select 'DB052', 
 		count(transid), 
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
 		isnull(sum(case statusid when 1 then 1 else 0 end),0)
 	from SVRAGE.RepDB.dbo.bettrans with(nolock) 
-	where matchid = @matchid and bettype IN(7,8,12,15,21,30,125)	
+	where matchid = @matchid and bettype IN(7,8,12,15,21,30,125,126,127)	
 	UNION ALL
 	select 'DB06', 
 		count(transid), 
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
 		isnull(sum(case statusid when 1 then 1 else 0 end),0)
 	from SVRCSD.RepDB.dbo.bettrans with(nolock) 
-	where matchid = @matchid and bettype IN(7,8,12,15,21,30,125)	
+	where matchid = @matchid and bettype IN(7,8,12,15,21,30,125,126,127)	
 END
 ELSE IF (@action = 'CAL-FT')
 BEGIN
@@ -84,7 +84,7 @@ BEGIN
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
 		isnull(sum(case statusid when 1 then 1 else 0 end),0)
 	from bettrans with(nolock) 
-	where matchid = @matchid and bettype NOT IN(7,8,12,15,21,30,125) 
+	where matchid = @matchid and bettype NOT IN(7,8,12,15,21,30,125,126,127) 
 		and bettype not between 1301 and 1334 -- exclude sporting solution product
 	UNION ALL
 	select 'DB052', 
@@ -92,7 +92,7 @@ BEGIN
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
 		isnull(sum(case statusid when 1 then 1 else 0 end),0)	
 	from SVRAGE.RepDB.dbo.bettrans with(nolock) 
-	where matchid = @matchid and bettype NOT IN(7,8,12,15,21,30,125)
+	where matchid = @matchid and bettype NOT IN(7,8,12,15,21,30,125,126,127)
 		and bettype not between 1301 and 1334 -- exclude sporting solution product	
 	UNION ALL
 	select 'DB06', 
@@ -100,7 +100,7 @@ BEGIN
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
 		isnull(sum(case statusid when 1 then 1 else 0 end),0)
 	from SVRCSD.RepDB.dbo.bettrans with(nolock) 
-	where matchid = @matchid and bettype NOT IN(7,8,12,15,21,30,125)	
+	where matchid = @matchid and bettype NOT IN(7,8,12,15,21,30,125,126,127)	
 		and bettype not between 1301 and 1334 -- exclude sporting solution product
 END
 ELSE IF (@action = 'CAL')
@@ -153,21 +153,21 @@ BEGIN
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
 		isnull(sum(case statusid when 1 then 1 else 0 end),0)
 	from BetTrans_Agent with(nolock) 
-	where matchid = @matchid and bettype IN(7,8,12,15,21,30,125)
+	where matchid = @matchid and bettype IN(7,8,12,15,21,30,125,126,127)
 	UNION ALL
 	select 'DB052', 
 		count(transid), 
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
 		isnull(sum(case statusid when 1 then 1 else 0 end),0)
 	from SVRAGE.RepDB.dbo.BetTrans_Agent with(nolock) 
-	where matchid = @matchid and bettype IN(7,8,12,15,21,30,125)	
+	where matchid = @matchid and bettype IN(7,8,12,15,21,30,125,126,127)	
 	UNION ALL
 	select 'DB06', 
 		count(transid), 
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
 		isnull(sum(case statusid when 1 then 1 else 0 end),0)
 	from SVRCSD.RepDB.dbo.BetTrans_Agent with(nolock) 
-	where matchid = @matchid and bettype IN(7,8,12,15,21,30,125)	
+	where matchid = @matchid and bettype IN(7,8,12,15,21,30,125,126,127)	
 END
 ELSE IF (@action = 'CAL-FT')
 BEGIN
@@ -177,7 +177,7 @@ BEGIN
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
 		isnull(sum(case statusid when 1 then 1 else 0 end),0)
 	from BetTrans_Agent with(nolock) 
-	where matchid = @matchid and bettype NOT IN(7,8,12,15,21,30,125) 
+	where matchid = @matchid and bettype NOT IN(7,8,12,15,21,30,125,126,127) 
 		and bettype not between 1301 and 1334 -- exclude sporting solution product
 	UNION ALL
 	select 'DB052', 
@@ -185,7 +185,7 @@ BEGIN
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
 		isnull(sum(case statusid when 1 then 1 else 0 end),0)	
 	from SVRAGE.RepDB.dbo.BetTrans_Agent with(nolock) 
-	where matchid = @matchid and bettype NOT IN(7,8,12,15,21,30,125)
+	where matchid = @matchid and bettype NOT IN(7,8,12,15,21,30,125,126,127)
 		and bettype not between 1301 and 1334 -- exclude sporting solution product	
 	UNION ALL
 	select 'DB06', 
@@ -193,7 +193,7 @@ BEGIN
 		isnull(sum(case statusid when 0 then 1 else 0 end),0),
 		isnull(sum(case statusid when 1 then 1 else 0 end),0)
 	from SVRCSD.RepDB.dbo.BetTrans_Agent with(nolock) 
-	where matchid = @matchid and bettype NOT IN(7,8,12,15,21,30,125)	
+	where matchid = @matchid and bettype NOT IN(7,8,12,15,21,30,125,126,127)	
 		and bettype not between 1301 and 1334 -- exclude sporting solution product
 END
 ELSE IF (@action = 'CAL')

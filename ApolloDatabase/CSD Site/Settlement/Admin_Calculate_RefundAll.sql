@@ -6,7 +6,7 @@ AS
 	Task: Refund All
 	DB: SVRTXN/TransDB
 	Revisions:
-	
+		- 20140515@Dan: Add 1H FGLG bettypes (127)
 */
 SET NOCOUNT ON 
 
@@ -26,7 +26,7 @@ BEGIN
 			matchid=@matchid
 			--and [status] not in ('Void', 'Reject')
 			AND statusID not in (103,101,102)
-			AND bettype <> 14
+			AND bettype NOT IN (14, 127)
 			and bettype not between 1301 and 1334 -- exclude sporting solution product
 		IF @@ROWCOUNT < 10000 BREAK
 	END
@@ -43,7 +43,7 @@ BEGIN
 			matchid=@matchid
 			--AND [status] not in ('Void', 'Reject')
 			AND statusID not in (103,101,102)
-			AND bettype <> 14			
+			AND bettype NOT IN (14, 127)	
 			and bettype not between 1301 and 1334 -- exclude sporting solution product
     
 		IF @@ROWCOUNT < 10000 BREAK

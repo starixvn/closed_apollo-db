@@ -1,12 +1,13 @@
-﻿ 
-/****** Object:  StoredProcedure [dbo].[Task_DailySummary_DB02_Delete]    Script Date: 05/07/2013 02:38:13 ******/
+﻿USE [ProdDB]
+GO
+/****** Object:  StoredProcedure [dbo].[Task_DailySummary_ProdDB_Delete]    Script Date: 7/14/2014 2:21:39 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE PROCEDURE [dbo].[Task_DailySummary_ProdDB_Delete]
+ALTER PROCEDURE [dbo].[Task_DailySummary_ProdDB_Delete]
 	@winlostdate datetime
 AS
 
@@ -45,6 +46,7 @@ SET NOCOUNT ON
 	into #ManualSettleOutright
 	from outright_ex oe with (nolock) join outright o with (nolock) on o.orid=oe.orid_ex
 	Where DisabledAutoSettle=1 and oddsstatus_ex='Completed' and eventdate = @winlostdate
+			AND o.oddsstatus <> 'Completed'
 
 	delete from outright_ex
 	where orid_ex in (select orid from #ManualSettleOutright)

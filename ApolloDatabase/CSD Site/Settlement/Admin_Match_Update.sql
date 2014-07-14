@@ -23,7 +23,8 @@ AS
 	Original: bodb02.[Admin_Match_Update]
 
 	Revisions:
-		-2013-12-05@bobby: Allow user to change match's event status to "Closed" manually
+		- 20131205@bobby: Allow user to change match's event status to "Closed" manually
+		- 20140515@Dan: Modify betstatus value (Offer 1H FGLG) 
 */
 BEGIN
 	SET @betstatus = ISNULL(@betstatus, N'')
@@ -79,7 +80,11 @@ BEGIN
 	BEGIN				
 		UPDATE match_remark_ex WITH(ROWLOCK,UPDLOCK) 
 		SET eventstatus='Completed', ruben=1, finalhomescore=0, finalawayscore=0, hthomescore=0, htawayscore=0
-			,betstatus= 'Refund' + CASE WHEN CHARINDEX('FL:',ISNULL(betstatus,'')) = 0 THEN '' ELSE ';' + SUBSTRING(ISNULL(betstatus,''),CHARINDEX('FL:',ISNULL(betstatus,'')),6) END	
+			--,betstatus= 'Refund' + CASE WHEN CHARINDEX('FL:',ISNULL(betstatus,'')) = 0 THEN '' ELSE ';' + SUBSTRING(ISNULL(betstatus,''),CHARINDEX('FL:',ISNULL(betstatus,'')),6) END	
+			,betstatus = 'Refund' + CASE when CHARINDEX('FL:',ISNULL(betstatus,'')) = 0  THEN ''
+										 when CHARINDEX('1FL:',ISNULL(betstatus,'')) = 0 AND CHARINDEX('FL:',ISNULL(betstatus,'')) <> 0 THEN ';' + SUBSTRING(betstatus,CHARINDEX('FL:', betstatus),LEN(betstatus))
+										 ELSE ';' + SUBSTRING(betstatus,CHARINDEX('1FL', betstatus),LEN(betstatus))
+									END 
 			,GoalRecord =''
 			,changetime = GETDATE(), settleTime = GETDATE()
 		WHERE matchid=@MatchID

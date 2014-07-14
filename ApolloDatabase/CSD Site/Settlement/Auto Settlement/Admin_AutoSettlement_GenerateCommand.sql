@@ -11,11 +11,11 @@ ALTER PROCEDURE  [dbo].[Admin_AutoSettlement_GenerateCommand]
 AS	
 /*	Creator: Dan
 	Date: 2013-06-29
-	Task: create command for 
+	Task: create command for auto settlement
 	DB: SVRTXN/TransDB
-	Original SP: Admin_Settlement_1
+	Original SP: 
 	History:
-		
+		- 20140530@Dan: add new bettype 126, 127
 	Param's Explanation:					
 */
 
@@ -91,11 +91,18 @@ BEGIN
 		' @ErrMsg = @ErrMsg OUTPUT '
 
 END
-ELSE IF @actionID IN (1) -- Calculate FG/NG
+ELSE IF @actionID IN (1,23) -- Calculate FG/NG FT, Calculate FG/NG HT
 BEGIN	
+
+	SELECT @action = CASE @actionID 			
+			WHEN 23 THEN 'CAL-HT'
+			WHEN 1 THEN 'CAL-FT'			
+			END
+
 	SELECT @SQLCommand = 'EXEC [dbo].[Admin_Settlement_FGLG] ' +
 		' @creator = 0 ' + ' ,' +
 		' @matchid = ' + CAST(@matchid AS varchar(50)) + ' ,' +		
+		' @action = ''' + @action + ''' ,' + 
 		' @goalrecord = ' + CASE WHEN @goalrecord IS NULL THEN 'NULL' ELSE '''' + CAST(@goalrecord AS varchar(50)) + '''' END + ',' + 		
 		' @betstatus = ' + + CASE WHEN @betstatus IS NULL THEN 'NULL' ELSE 'N''' + CAST(@betstatus AS nvarchar(50)) + '''' END + ',' + 
 		' @IncludeLG = 0,' + 
@@ -132,22 +139,36 @@ BEGIN
 		' @ErrMsg = @ErrMsg OUTPUT '
 		, @SPName='Admin_Settlement_Refund_All'
 END
-ELSE IF @actionID IN (17) -- Refund All FGLG
+ELSE IF @actionID IN (17,19, 20 ) -- Refund FT FGLG, Refund HT FGLG, Refund All FGLG
 BEGIN	
+	SELECT @action = CASE @actionID 			
+			WHEN 19 THEN 'CAL-HT'
+			WHEN 17 THEN 'CAL-FT'			
+			WHEN 20 THEN 'CAL'			
+			END			
+
 	SELECT @SQLCommand = 'EXEC [dbo].[Admin_Settlement_Refund_FGLG] ' +
 		' @adminid = 0 ' + ' ,' +
-		' @matchid = ' + CAST(@matchid AS varchar(50)) + ' ,' +				
+		' @matchid = ' + CAST(@matchid AS varchar(50)) + ' ,' +
+		' @action = ''' + @action + ''' ,' + 	
 		' @LGOnly = 0,' + 
 		' @ErrCode = @ErrCode OUTPUT , ' +
 		' @ErrMsg = @ErrMsg OUTPUT '
 		, @SPName='Admin_Settlement_Refund_FGLG'
 END
 ---confirm action 18
-ELSE IF @actionID IN (18) -- Refund Last Goal Only
+ELSE IF @actionID IN (18,21,22 ) -- Refund FT LG,  	Refund HT LG,  	Refund All LG
 BEGIN	
+	SELECT @action = CASE @actionID 			
+				WHEN 21 THEN 'CAL-HT'
+				WHEN 18 THEN 'CAL-FT'			
+				WHEN 22 THEN 'CAL'			
+				END
+								
 	SELECT @SQLCommand = 'EXEC [dbo].[Admin_Settlement_Refund_FGLG] ' +
 		' @adminid = 0 ' + ' ,' +
 		' @matchid = ' + CAST(@matchid AS varchar(50)) + ' ,' +				
+		' @action = ''' + @action + ''' ,' + 	
 		' @LGOnly = 1,' + 
 		' @ErrCode = @ErrCode OUTPUT , ' +
 		' @ErrMsg = @ErrMsg OUTPUT '

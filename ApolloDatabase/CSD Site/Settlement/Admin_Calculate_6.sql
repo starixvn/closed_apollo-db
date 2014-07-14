@@ -15,6 +15,7 @@ IF @betcount = 0 AND @@SERVERNAME NOT LIKE N'DBIOM%' RETURN
 	Revisions:
 		- 20131125@Dan: use temp variable instead of temp tables to prevent problem when executing via replication
 		- 20140226@Sophia: Calculate Comm with new formula
+		- 20140514@Dan: Add new bettype 126
 */
 --IF @@SERVERNAME IN ('DB04', 'DB042', 'DB043', 'DB044') RETURN
 
@@ -93,6 +94,7 @@ SET
 		WHEN betteam = '0-1' AND @totalgoal <= 1 THEN 1
 		WHEN betteam = '2-3' AND @totalgoal IN (2,3) THEN 1
 		WHEN betteam = '4-6' AND @totalgoal IN (4,5,6) THEN 1
+		WHEN betteam = '4-over' AND @totalgoal >= 4 THEN 1
 		WHEN betteam = '7-over' AND @totalgoal >= 7 THEN 1
 		ELSE -1
 		END,
@@ -107,8 +109,8 @@ SET
 	ELSE 1 END,--'s','m'
 				
 	aWinLost = CASE
-		WHEN @modds >  0.25	THEN stake * (case when odds<0 then 1 else (case when bettype in (4,5,6,1206) then odds-1 else odds end) end) * -apositiontaking
-		WHEN @modds =  0.25	THEN stake * (case when odds<0 then 1 else (case when bettype in (4,5,6,1206) then odds-1 else odds end) end) * -apositiontaking * 0.5
+		WHEN @modds >  0.25	THEN stake * (case when odds<0 then 1 else (case when bettype in (4,5,6,126,1206) then odds-1 else odds end) end) * -apositiontaking
+		WHEN @modds =  0.25	THEN stake * (case when odds<0 then 1 else (case when bettype in (4,5,6,126,1206) then odds-1 else odds end) end) * -apositiontaking * 0.5
 		WHEN @modds =  0	THEN 0
 		WHEN @modds = -0.25	THEN actual_stake * apositiontaking * 0.5
 		WHEN @modds < -0.25	THEN actual_stake * apositiontaking
@@ -153,6 +155,7 @@ SET
 		WHEN betteam = '0-1' AND @totalgoal <= 1 THEN 1
 		WHEN betteam = '2-3' AND @totalgoal IN (2,3) THEN 1
 		WHEN betteam = '4-6' AND @totalgoal IN (4,5,6) THEN 1
+		WHEN betteam = '4-over' AND @totalgoal >= 4 THEN 1
 		WHEN betteam = '7-over' AND @totalgoal >= 7 THEN 1
 		ELSE -1
 		END,
@@ -167,8 +170,8 @@ SET
 	ELSE 1 END,--'s','m'
 				
 	WinLost = CASE		
-		WHEN @modds >  0.25	THEN actual_stake + stake * (case when odds<0 then 1 else (case when bettype in (4,5,6,1206) then odds-1 else odds end) end)
-		WHEN @modds =  0.25	THEN actual_stake + stake * (case when odds<0 then 1 else (case when bettype in (4,5,6,1206) then odds-1 else odds end) end) * 0.5
+		WHEN @modds >  0.25	THEN actual_stake + stake * (case when odds<0 then 1 else (case when bettype in (4,5,6,126,1206) then odds-1 else odds end) end)
+		WHEN @modds =  0.25	THEN actual_stake + stake * (case when odds<0 then 1 else (case when bettype in (4,5,6,126,1206) then odds-1 else odds end) end) * 0.5
 		WHEN @modds =  0	THEN actual_stake
 		WHEN @modds = -0.25	THEN actual_stake * 0.5
 		WHEN @modds < -0.25	THEN 0
