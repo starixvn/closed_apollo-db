@@ -7,7 +7,7 @@ AS
 	DB: SVRTXN/TransDB
 	
 	Revisions:
-		
+		- 20140515@Dan: Add 2 new bettypes - 1H total goal, 1H FGLG  (126,127) 
 	Note: For settlement SPs should hardcode the custid of betdaq customer to avoid replication problem
 */
 SET NOCOUNT ON
@@ -26,7 +26,7 @@ SET NOCOUNT ON
 			matchid=@matchid
 			--AND  [status] not in (N'Void', N'Reject')
 			AND statusID not in (103,101,102)
-			AND bettype NOT IN (7, 8, 15, 12, 21, 30, 14, 125) 			
+			AND bettype NOT IN (7, 8, 15, 12, 21, 30, 14, 125,126,127) 			
 			and bettype not between 1301 and 1334 -- exclude sporting solution product
 		IF @@ROWCOUNT < 10000 BREAK	
 	END
@@ -43,7 +43,7 @@ SET NOCOUNT ON
 			matchid=@matchid
 			--AND  [status] not in (N'Void', N'Reject')
 			AND statusID not in (103,101,102)
-			AND bettype NOT IN (7, 8, 15, 12, 21, 30, 14, 125) 			
+			AND bettype NOT IN (7, 8, 15, 12, 21, 30, 14, 125,126,127) 			
 			and bettype not between 1301 and 1334 -- exclude sporting solution product
 		IF @@ROWCOUNT < 10000 BREAK	
 	END

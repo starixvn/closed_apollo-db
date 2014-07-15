@@ -10,7 +10,7 @@ Task : Covered SP for settlement
 DB: SVRTXN/TransDB
 Original SP: bodb02.[Admin_Settlement_3]
 Revisions:
-
+	 - 20140514@Dan: Add new bettype 126
 • @Mode:
     CAL : All BetTypes
     CAL-HT : HT Only
@@ -201,18 +201,19 @@ Revisions:
 
 	IF @Mode IN ('CAL-HT', 'CAL') 
 	BEGIN
-	    DECLARE @betcount_7 int, @betcount_8 int, @betcount_12 int, @betcount_15 int, @betcount_21 int, @betcount_30 int, @betcount_125 int
+	    DECLARE @betcount_7 int, @betcount_8 int, @betcount_12 int, @betcount_15 int, @betcount_21 int, @betcount_30 int, @betcount_125 int, @betcount_126 int
 	    SELECT 
-			@betcount_7 = ISNULL(SUM(case bettype when 7 then 1 else 0 end), 0),
-			@betcount_8 = ISNULL(SUM(case bettype when 8 then 1 else 0 end), 0),
-			@betcount_12 = ISNULL(SUM(case bettype when 12 then 1 else 0 end), 0),
-			@betcount_15 = ISNULL(SUM(case bettype when 15 then 1 else 0 end), 0),
-			@betcount_21 = ISNULL(SUM(case bettype when 21 then 1 else 0 end), 0),
-			@betcount_30 = ISNULL(SUM(case bettype when 30 then 1 else 0 end), 0),
-			@betcount_125 = ISNULL(SUM(case bettype when 125 then 1 else 0 end), 0)
+			  @betcount_7 = ISNULL(SUM(case bettype when 7 then 1 else 0 end), 0)
+			, @betcount_8 = ISNULL(SUM(case bettype when 8 then 1 else 0 end), 0)
+			, @betcount_12 = ISNULL(SUM(case bettype when 12 then 1 else 0 end), 0)
+			, @betcount_15 = ISNULL(SUM(case bettype when 15 then 1 else 0 end), 0)
+			, @betcount_21 = ISNULL(SUM(case bettype when 21 then 1 else 0 end), 0)
+			, @betcount_30 = ISNULL(SUM(case bettype when 30 then 1 else 0 end), 0)
+			, @betcount_125 = ISNULL(SUM(case bettype when 125 then 1 else 0 end), 0)
+			, @betcount_126 = ISNULL(SUM(case bettype when 126 then 1 else 0 end), 0)
 		FROM bettrans WITH(NOLOCK) 
 		WHERE  matchid = @matchid
-			   and bettype in (7,8,12,15,21,30,125)
+			   and bettype in (7,8,12,15,21,30,125,126)
 
 		-- exec in all cases, both 'FT' and 'HT'
 		-- bettype 7 : 1st Handicap
@@ -241,6 +242,9 @@ Revisions:
 		-- bettype 30: 1st Correct Score (Reuse with bettype 4)
 		-- IF @betcount_30 > 0
 			EXEC dbo.Admin_Calculate_4 @matchid, 30, @correctscore_ht, @scorediff_ht, NULL, @betcount_30	
+		 
+		 --bettype 126 : 1H Total Goal
+			EXEC dbo.Admin_Calculate_6 @matchid, 126, @totalht, @betcount_126
 	END
 
 GO

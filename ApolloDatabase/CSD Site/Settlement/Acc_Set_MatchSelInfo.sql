@@ -85,6 +85,7 @@ SELECT m.matchid, m.leagueid ,
 		ISNULL(mr.IsHTCal,0) AS IsHTCal,  		
 		CAST(CASE WHEN mr.hthomescore IS NOT NULL AND mr.htawayscore IS NOT NULL AND mr.finalhomescore IS NOT NULL AND mr.finalawayscore IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS IsKeyscore
 		,0 AS IsFGLG
+		,0 AS IsHTFGLG 
 		,FailedActionID
 		,DisabledAutoSettle
 FROM dbo.match m WITH(NOLOCK) 

@@ -14,7 +14,7 @@ AS
  * Task			: Match results for calculating settlement 
  * DB			: SVRTXN/TransDB
  * Revisions	:
- *	•
+ 	- 20140519@Dan: Get 1H FGLG ticket info 
  * Parameters:
  *  @FromDate: From  date,
 	@ToDate: To date ,
@@ -87,6 +87,7 @@ CREATE TABLE #matchList
 		IsHTCal BIT,	
 		IsKeyscore BIT,
 		IsFGLG BIT,
+		IsHTFGLG BIT, 
 		FailedActionID TINYINT,
 		DisabledAutoSettle BIT
 	)
@@ -111,8 +112,17 @@ EXEC SVRPro.ProdDB.dbo.[Acc_Set_MatchSelInfo]
 			AND bettype = 14
 		GROUP BY matchid 
 	)
+,rs1 AS
+	(
+		SELECT matchid, COUNT(1) AS cnt
+		FROM bettrans WITH(NOLOCK)
+		WHERE matchid IN (SELECT matchid FROM #matchList)
+			AND bettype = 127
+		GROUP BY matchid 
+	)
 UPDATE m
 SET IsFGLG = CASE WHEN rs.cnt = 0 OR rs.cnt IS NULL THEN 0 ELSE 1 END
+	, IsHTFGLG = CASE WHEN rs1.cnt = 0 OR rs1.cnt IS NULL THEN 0 ELSE 1 END
 FROM #matchList m
 	LEFT JOIN rs ON m.matchid = rs.matchid
 

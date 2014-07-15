@@ -15,7 +15,7 @@ DB: SVRTXN/TransDB
 Original: 
 	
 Revisions:	
-
+	- 20140515@Dan: Add 2 new bettypes - 1H total goal, 1H FGLG  (126,127) 
 Param's Explanation:
 • @matchid: matchid of match to Refund HT
 
@@ -23,6 +23,10 @@ Param's Explanation:
 Check if match MUST already settled 1st Half
 */
 SET NOCOUNT ON 
+
+DECLARE  @Remark	VARCHAR(500)
+		,@ActionID	INT
+SELECT	@ActionID = 111 
 
 -- check and not allow attempt to settlement same game while it's still not finish
 IF EXISTS (SELECT 1 FROM dbo.TempVariableNumber WHERE KeyID = 1 AND KeyValue = @matchid)
@@ -32,7 +36,6 @@ BEGIN
 	RETURN
 END
 
-DECLARE @Remark VARCHAR(500)
 INSERT INTO dbo.TempVariableNumber (KeyID, KeyValue) VALUES (1, @matchid)
 IF (@@Error = 0)
 BEGIN
@@ -41,7 +44,7 @@ BEGIN
 			@UserID = @adminID,
 			@Matchid = @matchid, 
 			@KeyID = 1,
-			@ActionID = 111, 
+			@ActionID = @ActionID, 
 			@Remark = 'ADD SUCCESS'
 	END TRY
 	BEGIN CATCH
@@ -50,7 +53,7 @@ BEGIN
 			@UserID = @adminID,
 			@Matchid = @matchid, 
 			@KeyID = 1,
-			@ActionID = 111, 
+			@ActionID = @ActionID, 
 			@Remark = @Remark
 	END CATCH
 END
@@ -77,19 +80,19 @@ END
 	SELECT	custid, SUM(winlost-actual_stake+playercomm)
 	FROM	dbo.bettrans with (rowlock)
 	WHERE	matchid = @matchid 
-			AND bettype <> 14
+			AND bettype NOT IN (14, 127)
 	GROUP BY custid
 
 	Declare @status TABLE (FTBet bit, BetCount int, InRunning int)
 	INSERT INTO @status
 	SELECT
-		CASE WHEN bettype IN (7,8,12,15,21,30,125) THEN 0 ELSE 1 END,
+		CASE WHEN bettype IN (7,8,12,15,21,30,125,126) THEN 0 ELSE 1 END,
 		SUM(CASE WHEN statusID IN (101,102) THEN 0 ELSE 1 END),
 		SUM(CASE WHEN statusID = 0 THEN 1 ELSE 0 END)
 		
 	FROM dbo.bettrans with (nolock)
 	WHERE matchid = @matchid
-	GROUP BY CASE WHEN bettype IN (7,8,12,15,21,30,125) THEN 0 ELSE 1 END
+	GROUP BY CASE WHEN bettype IN (7,8,12,15,21,30,125,126) THEN 0 ELSE 1 END
 
 	IF NOT EXISTS(SELECT * FROM @status WHERE FTBet = 0) INSERT INTO @status VALUES (0,0,0)
 	IF NOT EXISTS(SELECT * FROM @status WHERE FTBet = 1) INSERT INTO @status VALUES (1,0,0)
@@ -113,7 +116,7 @@ BEGIN
 				@UserID = @adminID,
 				@Matchid = @matchid, 
 				@KeyID = 1,
-				@ActionID = 111, 
+				@ActionID = @ActionID, 
 				@Remark = 'DEL SUCCESS'
 		END TRY
 		BEGIN CATCH
@@ -122,7 +125,7 @@ BEGIN
 				@UserID = @adminID,
 				@Matchid = @matchid, 
 				@KeyID = 1,
-				@ActionID = 111, 
+				@ActionID = @ActionID, 
 				@Remark = @Remark
 		END CATCH
 	END		
@@ -133,7 +136,7 @@ BEGIN
 				@UserID = @adminID,
 				@Matchid = @matchid, 
 				@KeyID = 1,
-				@ActionID = 111, 
+				@ActionID = @ActionID, 
 				@Remark = 'DEL FAILED'
 		END TRY
 		BEGIN CATCH
@@ -142,7 +145,7 @@ BEGIN
 				@UserID = @adminID,
 				@Matchid = @matchid, 
 				@KeyID = 1,
-				@ActionID = 111, 
+				@ActionID = @ActionID, 
 				@Remark = @Remark
 		END CATCH
 	END		
@@ -176,7 +179,7 @@ INSERT INTO #BalanceAfter
 SELECT	custid, SUM(winlost-actual_stake+playercomm)
 FROM	dbo.bettrans with (rowlock)
 WHERE	matchid = @matchid 
-		AND bettype <> 14
+		AND bettype NOT IN (14, 127)
 GROUP BY custid
 
 
@@ -227,7 +230,7 @@ BEGIN
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Settle
 			@UserID = @adminid,
 			@Matchid = @matchid,
-			@ActionID = 111,
+			@ActionID = @ActionID,
 			@finalhomescore = 0,
 			@finalawayscore = 0,  
 			@hthomescore = @hthomescore,
@@ -242,7 +245,7 @@ BEGIN
 		EXEC LogDB.dbo.WriteLog_Settlement_Settle
 			@UserID = @adminid,
 			@Matchid = @matchid,
-			@ActionID = 111,
+			@ActionID = @ActionID,
 			@finalhomescore = 0,
 			@finalawayscore = 0,  
 			@hthomescore = @hthomescore,
@@ -265,7 +268,7 @@ BEGIN
 			@UserID = @adminID,
 			@Matchid = @matchid, 
 			@KeyID = 1,
-			@ActionID = 111, 
+			@ActionID = @ActionID, 
 			@Remark = 'DEL SUCCESS'
 	END TRY
 	BEGIN CATCH
@@ -274,7 +277,7 @@ BEGIN
 			@UserID = @adminID,
 			@Matchid = @matchid, 
 			@KeyID = 1,
-			@ActionID = 111, 
+			@ActionID = @ActionID, 
 			@Remark = @Remark
 	END CATCH
 END		
@@ -285,7 +288,7 @@ BEGIN
 			@UserID = @adminID,
 			@Matchid = @matchid, 
 			@KeyID = 1,
-			@ActionID = 111, 
+			@ActionID = @ActionID, 
 			@Remark = 'DEL FAILED'
 	END TRY
 	BEGIN CATCH
@@ -294,7 +297,7 @@ BEGIN
 			@UserID = @adminID,
 			@Matchid = @matchid, 
 			@KeyID = 1,
-			@ActionID = 111, 
+			@ActionID = @ActionID, 
 			@Remark = @Remark
 	END CATCH
 END

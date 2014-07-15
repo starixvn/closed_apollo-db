@@ -58,7 +58,7 @@ BEGIN
 		SET @TempMsg = NULL 
 	END	
 	
-	EXEC Age_Customer_UpdateBetLimitMultiple_xtest 
+	EXEC Age_Customer_UpdateBetLimitMultiple
 		@ActorAgentId = @ActorAgentId
 		, @AdminId = @AdminId
 		, @CustIds = @CustIds

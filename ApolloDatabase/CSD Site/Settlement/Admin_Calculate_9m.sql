@@ -16,7 +16,7 @@ AS
 	DB: SVRTXN/TransDB
 	
 	Revision:
-		
+		- 20140514@Dan: Add 1H FGLG bettypes (127)
 */
 
 IF @@SERVERNAME IN ('DB042', 'DB043', 'DB044') RETURN
@@ -41,13 +41,13 @@ BEGIN
 	UPDATE dbo.bettransm
 	SET winlostdate=@matchdate,[status]='Refund',statuswinlost=0,ruben=1, statusID = 103
 	WHERE matchid=@matchid
-		AND bettype <> 14
+		AND bettype NOT IN (14, 127)
 		AND statusID NOT IN (101,102)
 	
 	UPDATE dbo.BetParlayDetail
 	SET winlostdate=@matchdate,statuswinlost=0, statusID = 103
 	WHERE matchid=@matchid 
-		AND bettype <> 14
+		AND bettype NOT IN (14, 127)
 		AND statusID NOT IN (101,102)
 END
 -- ===================================================
@@ -55,12 +55,12 @@ ELSE IF @action = 'REFUND-FT'
 BEGIN
 	UPDATE dbo.bettransm
 	SET winlostdate=@matchdate,[status]='Refund',statuswinlost=0,ruben=1, statusID = 103
-	WHERE matchid=@matchid AND bettype NOT IN (7,8,12,15,21,30,14)
+	WHERE matchid=@matchid AND bettype NOT IN (7,8,12,15,21,30,14,126,127)
 		AND statusID NOT IN (101,102)
 	
 	UPDATE dbo.BetParlayDetail
 	SET winlostdate=@matchdate,statuswinlost=0, statusID = 103
-	WHERE matchid=@matchid AND bettype NOT IN (7,8,12,15,21,30,14)
+	WHERE matchid=@matchid AND bettype NOT IN (7,8,12,15,21,30,14,126,127)
 		AND statusID NOT IN (101,102)
 END
 	
@@ -68,12 +68,12 @@ ELSE IF @action = 'REFUND-HT'
 BEGIN
 	UPDATE dbo.bettransm
 	SET winlostdate=@matchdate,[status]='Refund',statuswinlost=0,ruben=1, statusID = 103
-	WHERE matchid=@matchid AND bettype IN (7,8,12,15,21,30)
+	WHERE matchid=@matchid AND bettype IN (7,8,12,15,21,30,126)
 		AND statusID NOT IN (101,102)
 
 	UPDATE dbo.BetParlayDetail
 	SET winlostdate=@matchdate,statuswinlost=0, statusID = 103
-	WHERE matchid=@matchid AND bettype IN (7,8,12,15,21,30)
+	WHERE matchid=@matchid AND bettype IN (7,8,12,15,21,30,126)
 		AND statusID NOT IN (101,102)
 END
 -- ===================================================
@@ -202,6 +202,14 @@ BEGIN
 							)  
 					then 1 else -1 end
 
+				WHEN 126 THEN -- 1H total goal
+					CASE WHEN (
+								CASE WHEN @TennisTotal IS NULL THEN @hth + @hta ELSE @TennisTotal END >= CAST(LEFT(betteam,1) AS int) AND
+								CASE WHEN @TennisTotal IS NULL then @hth + @hta ELSE @TennisTotal END <= (
+									CASE when RIGHT(betteam,1)= 'r' then 999 ELSE CAST(RIGHT(betteam,1)AS int) END 
+									)
+							) then 1 ELSE -1 END 
+
 				when 13 then -- Clean Sheet
 					CASE
 						WHEN betteam = 'hy' AND @fta = 0 THEN 1
@@ -306,7 +314,7 @@ BEGIN
 	FROM dbo.bettransm with (INDEX=IX_matchid)
 	WHERE 
 		matchid = @matchid
-		AND bettype <> 14
+		AND bettype NOT IN (14, 127)
 		AND statusID NOT IN (101,102)
 	
 	-- BetParlayDetail
@@ -391,6 +399,16 @@ BEGIN
 					case when (
 							case when @TennisTotal IS NULL then @fth+@fta else @TennisTotal end >= cast(left(betteam,1)as int) and
 							case when @TennisTotal IS NULL then @fth+@fta else @TennisTotal end <= (
+									case when right(betteam,1) = 'r' then 999 else 
+									cast(right(betteam,1) as int) end
+									)
+							)  
+					then 1 else -1 end
+
+				when 126 then -- 1H Total Goal
+					case when (
+							case when @TennisTotal IS NULL then @hth+@hta else @TennisTotal end >= cast(left(betteam,1)as int) and
+							case when @TennisTotal IS NULL then @hth+@hta else @TennisTotal end <= (
 									case when right(betteam,1) = 'r' then 999 else 
 									cast(right(betteam,1) as int) end
 									)
@@ -491,7 +509,7 @@ BEGIN
 			end
 	-- ========================
 	FROM dbo.BetParlayDetail pd with (updlock, INDEX=IX_matchid)
-	WHERE bettype <> 14 AND matchid = @matchid AND statusID NOT IN (101,102)
+	WHERE bettype not IN (14, 127) AND matchid = @matchid AND statusID NOT IN (101,102)
 END
 -- ===================================================
 -- ===================================================
