@@ -125,6 +125,7 @@ SET IsFGLG = CASE WHEN rs.cnt = 0 OR rs.cnt IS NULL THEN 0 ELSE 1 END
 	, IsHTFGLG = CASE WHEN rs1.cnt = 0 OR rs1.cnt IS NULL THEN 0 ELSE 1 END
 FROM #matchList m
 	LEFT JOIN rs ON m.matchid = rs.matchid
+	LEFT JOIN rs1 ON m.matchid = rs1.matchid
 
 SELECT * 
 FROM #matchList
