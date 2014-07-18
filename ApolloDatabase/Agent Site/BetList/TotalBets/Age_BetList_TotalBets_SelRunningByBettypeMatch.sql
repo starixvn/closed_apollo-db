@@ -17,6 +17,7 @@ Revisions:
 	- 20130507@Sophia: Add @AgentID for Super view total bets of Main shareholder
     - 20130627@Sophia: Add UGroup for Singbet
 	- 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
+	- 20140718@Sophia: Get BetFrom
 */
 
 SET NOCOUNT ON
@@ -58,7 +59,8 @@ BEGIN
 			B.refno,
 			B.DoubleCommLosing,
 			C.UGroup, 
-			B.PlayerDiscount
+			B.PlayerDiscount,
+			B.BetFrom
 		FROM Bettrans B WITH (NOLOCK)
 		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
 			ON B.TransID = BA.TransID
@@ -113,7 +115,8 @@ BEGIN
 			B.refno,
 			B.DoubleCommLosing,
 			C.UGroup,
-			B.PlayerDiscount
+			B.PlayerDiscount,
+			B.BetFrom
 		FROM Bettrans B WITH (NOLOCK)
 		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
 			ON B.TransID = BA.TransID
@@ -167,7 +170,8 @@ BEGIN
 			B.refno,
 			B.DoubleCommLosing,
 			C.UGroup,
-			B.PlayerDiscount
+			B.PlayerDiscount,
+			B.BetFrom
 		FROM Bettrans B WITH (NOLOCK)
 		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
 			ON B.TransID = BA.TransID
@@ -222,7 +226,8 @@ BEGIN
 			B.refno,
 			B.DoubleCommLosing,
 			C.UGroup,
-			B.PlayerDiscount
+			B.PlayerDiscount,
+			B.BetFrom
 		FROM Bettrans B WITH (NOLOCK)
 		INNER JOIN BetTrans_Agent AS BA WITH (NOLOCK) 
 			ON B.TransID = BA.TransID

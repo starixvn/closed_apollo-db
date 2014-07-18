@@ -19,6 +19,7 @@ Revisions:
 	- 20131014@Sophia: add hthomescore,htawayscore
     - 20131223@Sophia: Get detail for Parlay
 	- 20140225@Sophia: Check condition filter of parlay
+	- 20140718@Sophia: Get BetFrom
 
 Param's Explanation:  
 				
@@ -33,7 +34,7 @@ CREATE TABLE #Betlist ( TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						APositionTaking SMALLMONEY, ADiscount DECIMAL (9,8), AWinlost MONEY, AComm MONEY,
 						LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
 						hthomescore SMALLINT,htawayscore SMALLINT, FinalHomeScore SMALLINT, FinalAwayScore SMALLINT,
-						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT)
+						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT, BetFrom VARCHAR(1))
 
 CREATE TABLE #DirectChild ( AgentId INT)
 
@@ -97,7 +98,8 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 					m.FinalAwayScore,
 					B.IP,		
 					B.Oddstype,		
-					B.DoubleCommLosing
+					B.DoubleCommLosing,
+					B.BetFrom
  				FROM BetTrans_BK AS B  WITH (NOLOCK)		
 				INNER JOIN Match_BK m WITH (NOLOCK) ON  B.MatchId = m.MatchId 							
 				WHERE 
@@ -156,7 +158,8 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 					0 AS FinalAwayScore,
 					B.IP,		
 					0 as OddStype,		
-					B.DoubleCommLosing	
+					B.DoubleCommLosing,
+					B.BetFrom	
 			FROM	BetTrans_BK AS B  WITH (NOLOCK)			
 			WHERE	B.CustID = @CustId  				
 					AND B.StatusId NOT IN (0,1) 	
@@ -208,7 +211,8 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 					0 AS FinalAwayScore,
 					B.IP as IP,		
 					0 as oddstype,		
-					B.DoubleCommLosing
+					B.DoubleCommLosing,
+					B.BetFrom
 			FROM	BetTrans_BK B WITH (NOLOCK)	
 			INNER JOIN outright_BK as m WITH (NOLOCK) on  B.matchid = m.orid
 			INNER JOIN RepDB.dbo.league lg WITH (NOLOCK) on m.leagueid = lg.leagueid			
@@ -268,7 +272,8 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 					m.FinalAwayScore, 
 					B.IP,		
 					B.Oddstype,		
-					B.DoubleCommLosing
+					B.DoubleCommLosing,
+					B.BetFrom
  				FROM 	
 					BetTrans_BK AS B  WITH (NOLOCK)				
 					INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
@@ -349,7 +354,8 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 					0 AS FinalAwayScore,
 					B.IP,		
 					0 as OddStype,		
-					B.DoubleCommLosing	
+					B.DoubleCommLosing,
+					B.BetFrom	
 				FROM BetTrans_BK AS B  WITH (NOLOCK)		
 					INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 					LEFT JOIN BetTrans_Agent_BK D WITH (NOLOCK) 
@@ -415,7 +421,8 @@ SELECT val FROM strSplit_key (@Sporttypes, ',')
 					0 AS FinalAwayScore,
 					B.IP as IP,		
 					0 as oddstype,		
-					B.DoubleCommLosing
+					B.DoubleCommLosing,
+					B.BetFrom
 				FROM 		
 					BetTrans_BK B WITH (NOLOCK)
 					INNER JOIN BetTrans_Agent_BK AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId

@@ -28,6 +28,7 @@ Revisions:
 	  - 20131014@Sophia: add hthomescore,htawayscore
 	  - 20131223@Sophia: Get detail for Parlay
 	  - 20140225@Sophia: Check condition filter of parlay
+	  - 20140718@Sophia: Get BetFrom
 Param's Explanation:  
 				
 */  
@@ -41,7 +42,7 @@ CREATE TABLE #Betlist (TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVAR
 						APositionTaking SMALLMONEY, ADiscount DECIMAL (9,8), AWinlost MONEY, AComm MONEY,
 						LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
 						hthomescore SMALLINT,htawayscore SMALLINT, FinalHomeScore SMALLINT, FinalAwayScore SMALLINT,
-						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT)
+						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT, BetFrom VARCHAR(1))
 
 CREATE TABLE #DirectChild ( AgentId INT)
 
@@ -105,7 +106,8 @@ BEGIN
 					m.FinalAwayScore, 
 					B.IP,		
 					B.Oddstype,		
-					B.DoubleCommLosing
+					B.DoubleCommLosing,
+					B.BetFrom
  				FROM 	
 					BetTrans AS B  WITH (NOLOCK)				
 					INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
@@ -182,7 +184,8 @@ BEGIN
 					0 AS FinalAwayScore,
 					B.IP,		
 					0 as OddStype,		
-					B.DoubleCommLosing	
+					B.DoubleCommLosing,
+					B.BetFrom	
 				FROM BetTrans AS B  WITH (NOLOCK)
 					--INNER JOIN BettransM BM With (NOLOCK) ON BM.Refno = B.Refno
 					--INNER JOIN Match M WITH (NOLOCK) ON M.MatchId = BM.MatchId
@@ -250,7 +253,8 @@ BEGIN
 					0 AS FinalAwayScore,
 					B.IP as IP,		
 					0 as oddstype,		
-					B.DoubleCommLosing
+					B.DoubleCommLosing,
+					B.BetFrom
 				FROM 		
 					bettrans B WITH (NOLOCK)
 					INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
@@ -322,7 +326,8 @@ BEGIN
 					m.FinalAwayScore, 
 					B.IP,		
 					B.Oddstype,		
-					B.DoubleCommLosing
+					B.DoubleCommLosing,
+					B.BetFrom
  				FROM 	
 					BetTrans14 AS B  WITH (NOLOCK)				
 					INNER JOIN BetTrans14_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
@@ -400,7 +405,8 @@ BEGIN
 					0 AS FinalAwayScore,
 					B.IP,		
 					0 as OddStype,		
-					B.DoubleCommLosing	
+					B.DoubleCommLosing,
+					B.BetFrom	
 				FROM BetTrans14 AS B  WITH (NOLOCK)
 					--INNER JOIN BetTransM14 BM WITH (NOLOCK) ON BM.RefNo = B.RefNo
 					--INNER JOIN Match14 M WITH (NOLOCK) ON M.matchID = BM.matchID  						
@@ -468,7 +474,8 @@ BEGIN
 					0 AS FinalAwayScore,
 					B.IP as IP,		
 					0 as oddstype,		
-					B.DoubleCommLosing
+					B.DoubleCommLosing,
+					B.BetFrom
 				FROM 		
 					BetTrans14 B WITH (NOLOCK)
 					INNER JOIN BetTrans14_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
