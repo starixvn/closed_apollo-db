@@ -15,7 +15,7 @@ DB:  SVRAGE.RepDB
 Original:  
 
 Revisions:
- 
+  - 20140718@Sophia: Get BetFrom
 
 Param's Explanation:  
 
@@ -33,7 +33,7 @@ CREATE TABLE #Betlist ( TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						APositionTaking SMALLMONEY, ADiscount DECIMAL (9,8), AWinlost MONEY, AComm MONEY,
 						LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
 						hthomescore SMALLINT,htawayscore SMALLINT, FinalHomeScore SMALLINT, FinalAwayScore SMALLINT,
-						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT, UGroup VARCHAR(3))
+						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT, UGroup VARCHAR(3), BetFrom VARCHAR(1))
 
 CREATE TABLE #DirectChild ( AgentId INT)
 INSERT INTO #DirectChild 
@@ -145,7 +145,8 @@ BEGIN
 				B.IP,		
 				B.Oddstype,		
 				B.DoubleCommLosing,
-				'' as UGroup
+				'' as UGroup,
+				B.BetFrom
  			FROM 	
 				dbo.BetTrans AS B  WITH (NOLOCK) 
 				INNER JOIN dbo.BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId 				
@@ -212,7 +213,8 @@ BEGIN
 				B.IP,		
 				0 as OddStype,		
 				B.DoubleCommLosing,
-				'' as UGroup	
+				'' as UGroup,
+				B.BetFrom	
 			FROM dbo.BetTrans AS B  WITH (NOLOCK) 		
 				INNER JOIN dbo.BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId
 			WHERE BA.AgentId =  @AgentId
@@ -269,7 +271,8 @@ BEGIN
 				B.IP as IP,		
 				0 as oddstype,		
 				B.DoubleCommLosing,
-				'' as UGroup
+				'' as UGroup,
+				B.BetFrom
 			FROM 		
 				dbo.bettrans B WITH (NOLOCK)
 				INNER JOIN dbo.BetTrans_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId	
@@ -363,7 +366,8 @@ END
 					B.IP,		
 					B.Oddstype,		
 					B.DoubleCommLosing,
-					'' as UGroup
+					'' as UGroup,
+					B.BetFrom
  				FROM 	
 					dbo.Bettrans14 AS B  WITH (NOLOCK) 
 					INNER JOIN dbo.Bettrans14_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId	
@@ -431,7 +435,8 @@ END
 					B.IP,		
 					0 as OddStype,		
 					B.DoubleCommLosing,
-					'' as UGroup	
+					'' as UGroup,
+					B.BetFrom	
 				FROM dbo.Bettrans14 AS B  WITH (NOLOCK) 		
 					INNER JOIN dbo.Bettrans14_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId					
 				WHERE BA.AgentId =  @AgentId	
@@ -488,7 +493,8 @@ END
 					B.IP as IP,		
 					0 as oddstype,		
 					B.DoubleCommLosing,
-					'' as UGroup
+					'' as UGroup,
+					B.BetFrom
 				FROM 		
 					dbo.Bettrans14 B WITH (NOLOCK)
 					INNER JOIN dbo.Bettrans14_Agent AS BA WITH (NOLOCK) ON BA.TransId = B.TransId					

@@ -13,7 +13,7 @@ DB:  SVRAGE.RepDB
 Original:  
 
 Revisions:
-   
+    - 20140718@Sophia: Get BetFrom
 
 Param's Explanation:  
 
@@ -31,7 +31,7 @@ CREATE TABLE #Betlist ( TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						APositionTaking SMALLMONEY, ADiscount DECIMAL (9,8), AWinlost MONEY, AComm MONEY,
 						LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
 						hthomescore SMALLINT,htawayscore SMALLINT, FinalHomeScore SMALLINT, FinalAwayScore SMALLINT,
-						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT, UGroup VARCHAR(3))
+						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT, UGroup VARCHAR(3), BetFrom VARCHAR(1))
 
 CREATE TABLE #DirectChild ( AgentId INT)
 
@@ -87,7 +87,8 @@ BEGIN
 				B.IP,		
 				B.Oddstype,		
 				B.DoubleCommLosing,
-				C.UGroup
+				C.UGroup,
+				B.BetFrom
  			FROM 
 				BetTrans AS B  WITH (NOLOCK) 				
 				INNER JOIN Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 		
@@ -143,7 +144,8 @@ BEGIN
 				B.IP,		
 				0 as OddStype,		
 				B.DoubleCommLosing,
-				C.UGroup
+				C.UGroup,
+				B.BetFrom
 			FROM BetTrans AS B  WITH (NOLOCK) 
 			INNER JOIN CustInfo C  WITH (NOLOCK) ON  C.CustId = B.CustId
 			WHERE B.CustID = @CustId  				
@@ -193,7 +195,8 @@ BEGIN
 				B.IP as IP,		
 				0 as oddstype,		
 				B.DoubleCommLosing,
-				C.UGroup
+				C.UGroup,
+				B.BetFrom
 			FROM 		
 				bettrans B WITH (NOLOCK)
 				INNER JOIN outright as m WITH (NOLOCK) on  B.matchid=m.orid
@@ -253,7 +256,8 @@ BEGIN
 				B.IP,		
 				B.Oddstype,		
 				B.DoubleCommLosing,
-				C.UGroup
+				C.UGroup,
+				B.BetFrom
  			FROM 	
 				BetTrans AS B  WITH (NOLOCK)				
 				INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
@@ -318,7 +322,8 @@ BEGIN
 				B.IP,		
 				0 as OddStype,		
 				B.DoubleCommLosing,
-				C.UGroup	
+				C.UGroup,
+				B.BetFrom	
 			FROM BetTrans AS B  WITH (NOLOCK) 					
 				INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
 				LEFT JOIN Bettrans_Agent D WITH (NOLOCK) 
@@ -376,7 +381,8 @@ BEGIN
 				B.IP as IP,		
 				0 as oddstype,		
 				B.DoubleCommLosing,
-				C.UGroup
+				C.UGroup,
+				B.BetFrom
 			FROM 		
 				bettrans B WITH (NOLOCK)				
 				INNER JOIN BetTrans_Agent AS L WITH (NOLOCK) ON B.TransId = L.TransId AND L.AgentID = @LoggedId
@@ -400,7 +406,7 @@ END
 ---------------------------------
 -- Get Betlist
 	SELECT		* 
-	FROM		#Betlist 
+	FROM		#Betlist u
 	ORDER BY	TransID DESC
 
 

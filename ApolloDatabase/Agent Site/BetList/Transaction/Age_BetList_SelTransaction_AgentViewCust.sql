@@ -13,7 +13,7 @@ Task : Betlist for transaction report: Agent view Cust
 DB:  SVRAGE.RepDB
 Original:  
 Revisions:
- 
+	 - 20140718@Sophia: Get BetFrom
 Param's Explanation:  
 	 
 				
@@ -30,7 +30,7 @@ CREATE TABLE #Betlist ( TransId BIGINT, RefNo BIGINT, MatchId INT, MatchCode NVA
 						LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
 						hthomescore SMALLINT,htawayscore SMALLINT, 
 						FinalHomeScore SMALLINT, FinalAwayScore SMALLINT,
-						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT, UGroup VARCHAR(3))
+						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT, UGroup VARCHAR(3), BetFrom VARCHAR(1))
 
 CREATE TABLE #DirectChild ( AgentId INT)
 INSERT INTO #DirectChild 
@@ -143,7 +143,8 @@ END
 				B.IP,		
 				B.Oddstype,		
 				B.DoubleCommLosing,
-				C.UGroup
+				C.UGroup,
+				B.BetFrom
  			FROM 	
 				dbo.BetTrans AS B  WITH (NOLOCK)
 				INNER JOIN dbo.Match m WITH (NOLOCK) ON  B.MatchId = m.MatchId 						
@@ -201,7 +202,8 @@ END
 				B.IP,		
 				0 as OddStype,		
 				B.DoubleCommLosing,
-				'' as UGroup	
+				'' as UGroup,
+				B.BetFrom	
 			FROM dbo.BetTrans AS B  WITH (NOLOCK)				
 			WHERE   B.CustID = @CustId 				
 				AND B.TransDate Between @FromDate AND @ToDate
@@ -253,7 +255,8 @@ END
 				B.IP as IP,		
 				0 as oddstype,		
 				B.DoubleCommLosing,
-				'' as UGroup
+				'' as UGroup,
+				B.BetFrom
 			FROM dbo.bettrans B WITH (NOLOCK)											 
 				INNER JOIN dbo.outright as m WITH (NOLOCK) on  B.matchid=m.orid
 				INNER JOIN dbo.league lg WITH (NOLOCK) on m.leagueid = lg.leagueid	 
@@ -343,7 +346,8 @@ END
 					B.IP,		
 					B.Oddstype,		
 					B.DoubleCommLosing,
-					'' as UGroup
+					'' as UGroup,
+					B.BetFrom
  				FROM 	
 					dbo.Bettrans14 AS B  WITH (NOLOCK)									
 					INNER JOIN dbo.Match14 m WITH (NOLOCK) ON  B.MatchId = m.MatchId 						
@@ -402,7 +406,8 @@ END
 					B.IP,		
 					0 as OddStype,		
 					B.DoubleCommLosing,
-					'' as UGroup	
+					'' as UGroup,
+					B.BetFrom	
 				FROM dbo.Bettrans14 AS B  WITH (NOLOCK) 							
 				WHERE   B.CustID = @CustId	
 					AND B.TransDate Between @FromDate AND @ToDate
@@ -454,7 +459,8 @@ END
 					B.IP as IP,		
 					0 as oddstype,		
 					B.DoubleCommLosing,
-					'' as UGroup
+					'' as UGroup,
+					B.BetFrom
 				FROM dbo.Bettrans14 B WITH (NOLOCK)													
 					INNER JOIN dbo.Outright14 as m WITH (NOLOCK) on  B.matchid=m.orid
 					INNER JOIN dbo.league lg WITH (NOLOCK) on m.leagueid = lg.leagueid	

@@ -23,7 +23,7 @@ Revisions:
  - 20130718@Sophia: Get APositionTaking and ADiscount
  - 20131223@Sophia: Get detail for Parlay
  - 20140225@Sophia: Check condition filter of parlay
-	
+ - 20140718@Sophia: Get BetFrom	
 Parameters
 	@IsDirectMem : 1: Direct Member
 				   0: All Member
@@ -49,7 +49,7 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 						TransDate DATETIME, BetTeam VARCHAR(10), BetId BIGINT, 
 						LiveHomeScore SMALLINT, LiveAwayScore SMALLINT,LiveIndicator BIT, 
 						IP VARCHAR(40), OddsType TINYINT, DoubleCommLosing BIT, 
-						UGroup varchar(3))
+						UGroup varchar(3), BetFrom VARCHAR(1))
 	
  
 		IF EXISTS (SELECT TOP 1 1  FROM #BettypeList WHERE Bettype NOT IN (10,9,29) OR @Bettypes = '0')
@@ -90,7 +90,8 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 				B.IP,		
 				B.Oddstype,		
 				B.DoubleCommLosing,
-				C.UGroup
+				C.UGroup,
+				B.BetFrom
 			
  			FROM		Bettrans B WITH (NOLOCK)
 			INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
@@ -156,7 +157,8 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 				B.IP,		
 				0 AS OddStype,		
 				B.DoubleCommLosing,
-				C.UGroup
+				C.UGroup,
+				B.BetFrom
 			FROM		Bettrans B WITH (NOLOCK)
 			INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
 				ON		B.TransId = BA.TransId AND BA.AgentID = @LoggedId  
@@ -223,7 +225,8 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 				B.IP AS IP,		
 				0 AS oddstype,		
 				B.DoubleCommLosing,
-				C.UGroup
+				C.UGroup,
+				B.BetFrom
 			FROM Bettrans B WITH (NOLOCK)
 			INNER JOIN	BetTrans_Agent AS BA WITH (NOLOCK) 
 				ON		B.TransId = BA.TransId AND BA.AgentID = @LoggedID 

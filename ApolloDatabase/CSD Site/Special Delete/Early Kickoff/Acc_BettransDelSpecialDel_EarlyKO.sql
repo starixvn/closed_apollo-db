@@ -30,6 +30,7 @@ AS
 		- 20130725@Sophia: Change username nvarchar(50)
 		- 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
 		- 20140414@Sophia: Get EventStatus at match_remark_ex table
+		- 20140415@Sophia: Get TransId of Bettrans table Instead of TransId of BettransM to push message
 
 	Explanation's Param:
 	    - @SAFilter: 
@@ -720,15 +721,17 @@ SET NOCOUNT ON
 	
 	-- Parlay
 	UNION ALL 
-	SELECT  B.TransId, A.AgentID as TargetID, I.Username as TargetName, 1 as IsAgent
+	SELECT  A.TransId, A.AgentID as TargetID, I.Username as TargetName, 1 as IsAgent
 	FROM	#BetmDelete B
 	INNER JOIN Bettrans_Agent A WITH (NOLOCK)
 			ON A.RefNo = B.RefNo
 	INNER JOIN AgentInfo I WITH (NOLOCK)
 			ON I.AgentId = A.AgentId
 	UNION ALL 
-	SELECT  B.TransId, B.CustId as TargetID, B.Username as TargetName, 0 as IsAgent
+	SELECT  A.TransId, B.CustId as TargetID, B.Username as TargetName, 0 as IsAgent
 	FROM	#BetmDelete B
+	INNER JOIN Bettrans A WITH (NOLOCK)
+			ON A.RefNo = B.RefNo
 
 	----END : List data to put Message
 
