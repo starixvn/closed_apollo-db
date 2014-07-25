@@ -2175,6 +2175,9 @@
     <NotInBuild Include="Agent Site\Message\Age_Msg_HasPriMessage24.sql">
       <SubType>NotInBuild</SubType>
     </NotInBuild>
+    <NotInBuild Include="DBA\Task\Task_DeleteOldLog.sql">
+      <SubType>NotInBuild</SubType>
+    </NotInBuild>
   </ItemGroup>
   <ItemGroup>
     <Build Include="Agent Site\Forecast\Age_ScoreMap_SelMatch.sql">
