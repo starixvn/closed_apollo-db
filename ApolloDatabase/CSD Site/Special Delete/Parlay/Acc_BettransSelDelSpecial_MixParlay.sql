@@ -26,17 +26,25 @@ AS
 	Revisions:   	
 	 - 20130725@Sophia: Change username nvarchar(50)
 	 - 20131022@Sophia: Get CurrencyName not user currency
+	 - 20140811@Sophia: Add 2 new bettypes 1HT Total goal,1HT FGLG (126,127)
 	
 	Param's Explanation:
-			@Type
+	@Type
 				0	Dead
 				1	Live
 				2	All
-			@bettype:
+	@bettype:
 				0	All
 				9	MixParlay
 				29	System parlay
+	@BetTeam430: bettype =4: Correct Score ; bettype =30: 1st Correct Score
+	@BetTeam6: bettype=6: Total Goal; bettype = 126: 1st Total Goal
+	@BetTeam14: bettype=14: First Goal/Last Goal; bettype = 127: 1st First Goal/ Last Goal
+	@BetTeam16: bettype=16: Half Time/Full Time
 
+	EX:
+	exec Acc_BettransSelDelSpecial_MixParlay @bettypes='6^14^126^127',@betteam6='0-1^2-3^4-6^4&over',@livehomescore=NULL,@liveawayscore=NULL,@Type=2,@hdp=9999.0000,
+		@ToTransdate=NULL,@bettype=0,@FromTransdate=NULL,@betteam14='1:1^1:2^2:1^2:2^0:0',@betteam515='All',@betteam16=NULL,@betteam430=NULL,@betteam1378='All',@MatchID=9441346
 */  
 BEGIN   
 	SET NOCOUNT ON  
@@ -167,21 +175,21 @@ BEGIN
    
  IF @betteam6=''  
   DELETE #Ref  
-  WHERE bettype=6  
+  WHERE bettype IN (6,126)
  ELSE IF @betteam6<>'All'   
   DELETE r  
   FROM #Ref AS r    
    LEFT JOIN dbo.strSplit(@betteam6,'^') AS b6 ON b6.val=r.org_betteam    
-  WHERE r.bettype=6 AND (b6.val IS NULL)  
+  WHERE r.bettype IN (6,126) AND (b6.val IS NULL)  
    
  IF @betteam14=''  
   DELETE #Ref  
-  WHERE bettype=14  
+  WHERE bettype IN (14,127)  
  ELSE IF @betteam14<>'All'   
   DELETE r  
   FROM #Ref AS r    
    LEFT JOIN dbo.strSplit(@betteam14,'^') AS b14 ON b14.val=r.org_betteam    
-  WHERE r.bettype=14 AND (b14.val IS NULL)  
+  WHERE r.bettype IN (14,127) AND (b14.val IS NULL)  
    
  IF @betteam16=''  
   DELETE #Ref  

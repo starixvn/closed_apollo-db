@@ -34,7 +34,12 @@ AS
 	  - 20131017@Sophia: Get data to mail
 	  - 20140414@Sophia: Get EventStatus at match_remark_ex table
 	  - 20140415@Sophia: Get TransId of Bettrans table Instead of TransId of BettransM to push message
+	  - 20140811@Sophia: Add 2 new bettypes 1HT Total goal,1HT FGLG (126,127)
 	Param's Explanation: 
+	@BetTeam430: bettype =4: Correct Score ; bettype =30: 1st Correct Score
+	@BetTeam6: bettype=6: Total Goal; bettype = 126: 1st Total Goal
+	@BetTeam14: bettype=14: First Goal/Last Goal; bettype = 127: 1st First Goal/ Last Goal
+	@BetTeam16: bettype=16: Half Time/Full Time
 	
 	
 */
@@ -182,21 +187,21 @@ BEGIN
 	
 	IF @betteam6=''
 		DELETE #Ref
-		WHERE bettype=6
+		WHERE bettype IN (6,126)
 	ELSE IF @betteam6<>'All'	
 		DELETE r
 		FROM #Ref AS r 	
 			LEFT JOIN dbo.strSplit(@betteam6,'^') AS b6 ON b6.val=r.org_betteam		
-		WHERE r.bettype=6 AND (b6.val IS NULL)
+		WHERE r.bettype IN (6,126) AND (b6.val IS NULL)
 	
 	IF @betteam14=''
 		DELETE #Ref
-		WHERE bettype=14
+		WHERE bettype IN (14,127)
 	ELSE IF @betteam14<>'All'	
 		DELETE r
 		FROM #Ref AS r 	
 			LEFT JOIN dbo.strSplit(@betteam14,'^') AS b14 ON b14.val=r.org_betteam		
-		WHERE r.bettype=14 AND (b14.val IS NULL)
+		WHERE r.bettype IN (14,127) AND (b14.val IS NULL)
 	
 	IF @betteam16=''
 		DELETE #Ref

@@ -31,13 +31,20 @@ AS
 		- 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
 		- 20140414@Sophia: Get EventStatus at match_remark_ex table
 		- 20140415@Sophia: Get TransId of Bettrans table Instead of TransId of BettransM to push message
+		- 20140811@Sophia: Add 2 new bettypes 1HT Total goal,1HT FGLG (126,127)
 
 	Explanation's Param:
-	    - @SAFilter: 
-	      + 0: All tickets
-          + 1: Normal tickets only
-	      + 2: SA tickets only
-     		
+	
+	@BetTeam430: bettype =4: Correct Score ; bettype =30: 1st Correct Score
+	@BetTeam6: bettype=6: Total Goal; bettype = 126: 1st Total Goal
+	@BetTeam14: bettype=14: First Goal/Last Goal; bettype = 127: 1st First Goal/ Last Goal
+	@BetTeam16: bettype=16: Half Time/Full Time
+
+	EX:
+	declare @p11 int	
+	declare @p14 nvarchar(200)
+	exec Acc_BettransDelSpecialDel_EarlyKO @UserPwd=N'56E8A2D78170E87C928E480797CC73',@transids='1000065319',@IP='10.19.10.57',@bettypes='6^14^126^127',@KickOffDate='2014-06-01 04:59:50',@betteam430=NULL,@UserID=8,@betteam515=NULL,@hdp=9999.0000,@betteam6='0-1^2-3^4-6^7-over',@ErrCode=@p11 output,@SAFilter=0,@betteam14='1:1^1:2^2:1^2:2^0:0',@ErrMsg=@p14 output,@betteam16=NULL,@betteam1378=NULL,@matchid=9441341,@UserName=N'sa'
+	select @p11, @p14
 */
 BEGIN
 SET NOCOUNT ON
@@ -224,7 +231,7 @@ SET NOCOUNT ON
 												ELSE 0
 											  END
 				ELSE 1 END = 1
-			AND b.bettype NOT IN(4,6,14,16,30)
+			AND b.bettype NOT IN(4,6,14,16,30,126,127)
 			AND b.betfrom <>'P'
 			AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
 	
@@ -251,7 +258,7 @@ SET NOCOUNT ON
 			AND b.transdate>=@KickOffDate	
 			AND b.liveindicator=0		
 			AND betteam  in (SELECT CONVERT(VARCHAR,val) FROM dbo.strSplit(CASE WHEN @betteam6 = 'All' THEN betteam ELSE @betteam6 END,'^'))
-			AND b.bettype = 6
+			AND b.bettype IN(6,126)
 			AND b.betfrom <>'P'
 			AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
 		
@@ -264,7 +271,7 @@ SET NOCOUNT ON
 			b.matchid=@matchid	
 			AND b.transdate>=@KickOffDate	
 			AND b.liveindicator=0		
-			AND b.bettype = 14
+			AND b.bettype IN(14,127)
 			AND b.betfrom <>'P'
 			AND (@betteam14 = 'All' OR goal.val IS NOT NULL)
 			AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END

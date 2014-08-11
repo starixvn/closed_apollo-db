@@ -18,14 +18,18 @@ AS
 	DB: SVRCSD/RepDB
 
 	Revisions:		
-		 - 20131022@Sophia: Get CurrencyName not user currency
-		
+		- 20131022@Sophia: Get CurrencyName not user currency
+		- 20140811@Sophia: Add 2 new bettypes 1HT Total goal,1HT FGLG (126,127)
 	Explanation's Param:
-	    --- @SAFilter: 
-	    --  + 0: All tickets
-		--  + 1: Normal tickets only
-	    --  + 2: SA tickets only
-     		
+			
+	@BetTeam430: bettype =4: Correct Score ; bettype =30: 1st Correct Score
+	@BetTeam6: bettype=6: Total Goal; bettype = 126: 1st Total Goal
+	@BetTeam14: bettype=14: First Goal/Last Goal; bettype = 127: 1st First Goal/ Last Goal
+	@BetTeam16: bettype=16: Half Time/Full Time
+     
+	EX:
+		Exec Acc_BettransSelSpecialDel_EarlyKO @bettypes='6^14^126^127',@betteam16=NULL,@betteam1378=NULL,@hdp=9999.0000,@betteam515=NULL,@betteam14='1:1^1:2^2:1^2:2^0:0',@betteam6='0-1^2-3^4-6^7-over',@KickOffDate='2014-06-11 03:27:54',@MatchID=9441341,@betteam430=NULL
+
 */
 BEGIN
 	SET NOCOUNT ON 
@@ -126,7 +130,7 @@ BEGIN
 				 ELSE 0   
 				END  
 		ELSE 1 END = 1  
-		AND b.bettype NOT IN(4,6,14,16,30)
+		AND b.bettype NOT IN(4,6,14,16,30,126,127)
 		AND b.betfrom <>'P'
 		--AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
 
@@ -167,7 +171,7 @@ BEGIN
 		AND b.liveindicator=0				
 		AND b.betfrom <>'P'		
 		AND(
-			(b.bettype = 6 
+			(b.bettype IN (6,126)
 			AND b.betteam  in (SELECT convert(varchar,val) FROM dbo.strSplit(case when @betteam6 = 'All' then betteam else @betteam6 end,'^'))  
 			)			
 			OR
@@ -213,6 +217,7 @@ BEGIN
 		AND b.statusID NOT IN (101,102)
 		AND b.liveindicator=0				
 		AND b.betfrom <>'P'		
+		AND b.bettype IN (14,127)
 		AND (@betteam14='All' OR goal.val IS NOT NULL)
         --AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END		
 	

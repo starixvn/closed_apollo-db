@@ -1,4 +1,4 @@
-﻿ALTEr PROCEDURE [dbo].[Acc_BettransSelSpecialDel]
+﻿ALTER PROCEDURE [dbo].[Acc_BettransSelSpecialDel]
 	@MatchID int,
 	@FromRefNo bigint,
 	@ToRefNo bigint,	
@@ -29,18 +29,25 @@ BEGIN
 	Revisions:		
 	- 20130725@Sophia: Change Username nvarchar(50)
 	- 20131022@Sophia: Get CurrencyName not user currency
+	- 20140811@Sophia: Add 2 new bettypes 1HT Total goal,1HT FGLG (126,127)
 		
 	Explanation's Param:
-	    - @SAFilter: 
-	      + 0: All tickets
-          + 1: Normal tickets only
-	      + 2: SA tickets only
-     
-		- @liveindicator:
-		 + 0: Dead
-		 + 1: Live
-		 + 2: All
+	@SAFilter: 
+	  + 0: All tickets
+	  + 1: Normal tickets only
+	  + 2: SA tickets only
+ 
+	@liveindicator:
+	 + 0: Dead
+	 + 1: Live
+	 + 2: All
+	
+	@BetTeam430: bettype =4: Correct Score ; bettype =30: 1st Correct Score
+	@BetTeam6: bettype=6: Total Goal; bettype = 126: 1st Total Goal
+	@BetTeam14: bettype=14: First Goal/Last Goal; bettype = 127: 1st First Goal/ Last Goal
+	@BetTeam16: bettype=16: Half Time/Full Time
 
+	EX: exec Acc_BettransSelSpecialDel @bettypes='1^2^3^4^5^6^7^8^12^13^14^15^16^20^21^24^25^26^27^28^30^121^122^123^124^125^126^127^133^134^135^140^141^142^145^146^147^148^149^1',@betteam6='0-1^2-3^4-6^7-over',@livehomescore=NULL,@liveawayscore=NULL,@betteam515='1',@liveindicator=2,@ToTransdate=NULL,@ToRefNo=1000065397,@hdp=0.5000,@FromTransdate=NULL,@SAFilter=0,@betteam14='1:1^1:2^2:1^2:2^0:0',@FromRefNo=1000065331,@betteam16='1:1^1:0^1:2^0:1^0:0^0:2^2:1^2:0^2:2',@betteam430='1:0^2:0^2:1^3:0^3:1^3:2^4:0^4:1^4:2^4:3^5:0^0:0^1:1^2:2^3:3^4:4^0:1^0:2^1:2^0:3^1:3^2:3^0:4^1:4^2:4^3:4^0:5',@betteam1378='h',@MatchID=9441341,@UserName=N'sa'
 
 */
 	SET NOCOUNT ON
@@ -144,7 +151,7 @@ BEGIN
 													ELSE 0 
 											 END
 			ELSE 1 END = 1
-		AND b.bettype NOT IN(4,6,14,16,30)
+		AND b.bettype NOT IN(4,6,14,16,30,126,127)
 		AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
 
 	UNION ALL
@@ -186,7 +193,7 @@ BEGIN
 		--and status NOT IN ('Void', 'Reject')
 		and statusID NOT IN (101,102)		
 		AND(
-			(b.bettype = 6 
+			(b.bettype IN (6,126)
 			AND b.betteam  in (SELECT convert(varchar,val) FROM dbo.strSplit(case when @betteam6 = 'All' then betteam else @betteam6 end,'^'))  
 			)			
 			OR
@@ -237,7 +244,7 @@ BEGIN
 						AND		CASE WHEN @ToTransdate IS NOT NULL AND @liveindicator = 1 THEN @ToTransdate ELSE b.transdate END 
 		--and status NOT IN ('Void', 'Reject')
 		and statusID NOT IN (101,102)
-		AND b.bettype=14
+		AND b.bettype IN (14,127)
 		AND (@betteam14='All' OR goal.val IS NOT NULL)
 		AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
 		
@@ -257,5 +264,4 @@ END
 
 GO
 GRANT EXECUTE ON [dbo].[Acc_BettransSelSpecialDel] TO [aplweb] AS [dbo]
-GO
---GRANT VIEW DEFINITION ON [dbo].[Acc_BettransSelSpecialDel] TO [vnteam] AS [dbo]
+GO 

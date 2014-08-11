@@ -37,6 +37,7 @@ Revisions:
   - 20130729@Sophia: Get Username of Agent from AgentInfo table to put Message
   - 20130829@Sophia: change @f_transID /@t_transid to @FromTransId / @ToTransId
   - 20131017@Sophia: Get data to mail
+  - 20140811@Sophia: Add 2 new bettypes 1HT Total goal,1HT FGLG (126,127)
 		    
 Param's Explanation: Special bet delete option
 
@@ -49,6 +50,18 @@ Param's Explanation: Special bet delete option
 	 + 0: Dead
 	 + 1: Live
 	 + 2: All
+	
+	@Bettypes: chosen bettype 
+	@BetTeam430: bettype =4: Correct Score ; bettype =30: 1st Correct Score('6^14^126^127')
+	@BetTeam6: bettype=6: Total Goal; bettype = 126: 1st Total Goal 
+	@BetTeam14: bettype=14: First Goal/Last Goal; bettype = 127: 1st First Goal/ Last Goal
+	@BetTeam16: bettype=16: Half Time/Full Time
+
+EX:
+	declare @p16 int	
+	declare @p18 nvarchar(200)
+	exec Acc_BettransDelSpecial @UserPwd=N'56E8A2D78170E87C928E480797CC73',@transids='1000065331',@IP='10.19.10.57',@bettypes='1^2^3^4^5^6^7^8^12^13^14^15^16^20^21^24^25^26^27^28^30^121^122^123^124^125^126^127^133^134^135^140^141^142^145^146^147^148^149^1',@ToTransId=1000065397,@FromTransId=1000065331,@UserID=8,@liveawayscore=NULL,@betteam515=N'1',@ToTransdate=NULL,@liveindicator=2,@betteam6='0-1^2-3^4-6^7-over',@hdp=0.5000,@FromTransdate=NULL,@livehomescore=NULL,@ErrCode=@p16 output,@betteam14='1:1^1:2^2:1^2:2^0:0',@ErrMsg=@p18 output,@betteam16='1:1^1:0^1:2^0:1^0:0^0:2^2:1^2:0^2:2',@SAFilter=0,@betteam430='1:0^2:0^2:1^3:0^3:1^3:2^4:0^4:1^4:2^4:3^5:0^0:0^1:1^2:2^3:3^4:4^0:1^0:2^1:2^0:3^1:3^2:3^0:4^1:4^2:4^3:4^0:5',@betteam1378=N'h',@matchid=9441341,@UserName=N'sa'
+	select @p16, @p18
 
 */
 
@@ -164,7 +177,7 @@ Param's Explanation: Special bet delete option
 			WHEN b.bettype in (5,15) THEN CASE WHEN @betteam515 = 'ALL' THEN betteam ELSE @betteam515 END               
 			ELSE betteam 
 		END = betteam    
-		AND b.bettype NOT IN(4,6,14,16,30)
+		AND b.bettype NOT IN(4,6,14,16,30,126,127)
 		AND CASE WHEN b.bettype in (1,3,7,8) THEN CASE
 													WHEN @hdp = 9999 THEN 1
 													WHEN @hdp = (hdp1 + hdp2) THEN 1
@@ -205,7 +218,7 @@ Param's Explanation: Special bet delete option
 		AND b.liveawayscore = CASE WHEN @liveawayscore IS NOT NULL AND @liveindicator = 1 THEN @liveawayscore ELSE b.liveawayscore END	
 		AND b.transdate BETWEEN CASE WHEN @FromTransdate IS NOT NULL AND @liveindicator = 1 THEN @FromTransdate ELSE b.transdate END 
 						AND		CASE WHEN @ToTransdate IS NOT NULL AND @liveindicator = 1 THEN @ToTransdate ELSE b.transdate END 	
-		and b.bettype = 6
+		and b.bettype IN (6, 126)
 		AND (@betteam6='All' OR bt.val IS NOT NULL)
 		AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
 		AND b.TransID IN (SELECT CONVERT(BIGINT, val) FROM dbo.strSplit(@transids, ','))
@@ -222,7 +235,7 @@ Param's Explanation: Special bet delete option
 		AND b.liveawayscore = CASE WHEN @liveawayscore IS NOT NULL AND @liveindicator = 1 THEN @liveawayscore ELSE b.liveawayscore END
 		AND b.transdate BETWEEN CASE WHEN @FromTransdate IS NOT NULL AND @liveindicator = 1 THEN @FromTransdate ELSE b.transdate END 
 						AND		CASE WHEN @ToTransdate IS NOT NULL AND @liveindicator = 1 THEN @ToTransdate ELSE b.transdate END 
-		and b.bettype = 14
+		and b.bettype IN (14, 127)
 		AND (@betteam14='All' OR bt.val IS NOT NULL)
 		AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
 		AND b.TransID IN (SELECT CONVERT(BIGINT, val) FROM dbo.strSplit(@transids, ','))	
