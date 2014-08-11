@@ -20,7 +20,7 @@ SET NOCOUNT ON
 
 Declare @Doing nvarchar(300)
 SET @Doing = 'Call Task_DailySummary @WinLostDate = ' + CONVERT(nvarchar(10), @WinLostDate, 120) + ', @TestMode = ' + CAST(@TestMode as nvarchar(2))
-EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing  
+EXEC dbo.WriteLog_UserLog_T @UserID = 70, @Doing = @Doing  
 
 -- update ticket (if any) which WinLostDate is not synced with eventdate 
 UPDATE b
@@ -246,7 +246,7 @@ BEGIN
 		PRINT 'Some TEST Ticket need to Refund : Run with parameter = 2'
 
 	SET @Doing = 'Task_DailySummary : End Test'
-	EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing  
+	EXEC dbo.WriteLog_UserLog_T @UserID = 70, @Doing = @Doing  
 
 	RETURN
 END
@@ -348,7 +348,7 @@ END
 IF @TestMode <> 0 -- @TestMode = 2
 BEGIN
 	SET @Doing = 'Task_DailySummary : End Test (with Outright update)'
-	EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing  
+	EXEC dbo.WriteLog_UserLog_T @UserID = 70, @Doing = @Doing  
 
 
 	PRINT 'DATA OK && Outright Update : done'
@@ -438,7 +438,7 @@ WHERE VName = 'isMovingBet'
 
 -- =====================
 SET @Doing = 'Task_DailySummary : MoveBet start'
-EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing  
+EXEC dbo.WriteLog_UserLog_T @UserID = 70, @Doing = @Doing  
 
 SET NOCOUNT ON
 SET DEADLOCK_PRIORITY HIGH
@@ -580,7 +580,7 @@ SET DEADLOCK_PRIORITY NORMAL
 SET NOCOUNT OFF
 
 SET @Doing = 'Task_DailySummary : MoveBet done'
-EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing 
+EXEC dbo.WriteLog_UserLog_T @UserID = 70, @Doing = @Doing 
 
  
 -- =====================
@@ -589,7 +589,7 @@ EXEC Task_BalanceCheck @winlostdate, 2
 -- =====================
 
 SET @Doing = 'Task_DailySummary : SumWinlost start insert'
-EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing  
+EXEC dbo.WriteLog_UserLog_T @UserID = 70, @Doing = @Doing  
 
 EXEC Task_SummaryReport_GenData @winlostdate
 
@@ -610,7 +610,7 @@ EXEC SVRPRO.ProdDB.dbo.Task_DailySummary_ProdDB_Delete @winlostdate
 
 
 SET @Doing = 'Task_DailySummary : End (with Finish)'
-EXEC dbo.WriteLog_UserLog_T @UserID = 25520, @Doing = @Doing  
+EXEC dbo.WriteLog_UserLog_T @UserID = 70, @Doing = @Doing  
 
 PRINT CONVERT(varchar(10), @winlostdate, 120)
 
