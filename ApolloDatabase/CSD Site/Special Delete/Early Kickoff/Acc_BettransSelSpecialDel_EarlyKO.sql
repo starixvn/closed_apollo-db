@@ -165,6 +165,7 @@ BEGIN
 		m.LeagueId	  
 	FROM dbo.bettrans b with (NOLOCK)  		
 		INNER JOIN Match m WITH (NOLOCK) ON b.MatchId = m.MatchId 
+		INNER JOIN dbo.strSplit(@bettypes,'^') AS fb ON b.bettype=fb.val
 	WHERE b.matchid=@matchid   
 		AND b.transdate>=@KickOffDate		
 		AND b.statusID NOT IN (101,102)
@@ -211,6 +212,7 @@ BEGIN
 		m.LeagueId  
 	FROM dbo.bettrans b with (NOLOCK)  		
 		INNER JOIN Match m WITH (NOLOCK) ON b.MatchId = m.MatchId 
+		INNER JOIN dbo.strSplit(@bettypes,'^') AS fb ON b.bettype=fb.val
 		LEFT JOIN dbo.strSplit(@betteam14,'^') AS goal ON goal.val=b.betteam--dbo.Acc_SplitIndex(b.betteam,':',2)			
 	WHERE b.matchid=@matchid
 		AND b.transdate>=@KickOffDate		

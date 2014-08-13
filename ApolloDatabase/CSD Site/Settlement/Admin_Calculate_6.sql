@@ -16,6 +16,7 @@ IF @betcount = 0 AND @@SERVERNAME NOT LIKE N'DBIOM%' RETURN
 		- 20131125@Dan: use temp variable instead of temp tables to prevent problem when executing via replication
 		- 20140226@Sophia: Calculate Comm with new formula
 		- 20140514@Dan: Add new bettype 126
+		- 20140812@Sophia: Add new betteam 4&Over, 7&Over
 */
 --IF @@SERVERNAME IN ('DB04', 'DB042', 'DB043', 'DB044') RETURN
 
@@ -94,8 +95,8 @@ SET
 		WHEN betteam = '0-1' AND @totalgoal <= 1 THEN 1
 		WHEN betteam = '2-3' AND @totalgoal IN (2,3) THEN 1
 		WHEN betteam = '4-6' AND @totalgoal IN (4,5,6) THEN 1
-		WHEN betteam = '4-over' AND @totalgoal >= 4 THEN 1
-		WHEN betteam = '7-over' AND @totalgoal >= 7 THEN 1
+		WHEN betteam IN ('4-over','4&Over') AND @totalgoal >= 4 THEN 1
+		WHEN betteam IN ('7-over','7&Over') AND @totalgoal >= 7 THEN 1
 		ELSE -1
 		END,
 			
@@ -155,8 +156,8 @@ SET
 		WHEN betteam = '0-1' AND @totalgoal <= 1 THEN 1
 		WHEN betteam = '2-3' AND @totalgoal IN (2,3) THEN 1
 		WHEN betteam = '4-6' AND @totalgoal IN (4,5,6) THEN 1
-		WHEN betteam = '4-over' AND @totalgoal >= 4 THEN 1
-		WHEN betteam = '7-over' AND @totalgoal >= 7 THEN 1
+		WHEN betteam IN ('4-over','4&Over') AND @totalgoal >= 4 THEN 1
+		WHEN betteam IN ('7-over','7&Over') AND @totalgoal >= 7 THEN 1
 		ELSE -1
 		END,
 			

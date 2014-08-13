@@ -240,6 +240,7 @@ SET NOCOUNT ON
 	INSERT INTO #BetDelete (transid,refno,custid,Username,betfrom, statusID,Status)   
 	SELECT DISTINCT transid,refno,custid, Username, betfrom, statusID,Status
 	FROM bettrans b WITH (nolock)
+		INNER JOIN dbo.strSplit(@bettypes,'^') AS fb ON b.bettype=fb.val
 	WHERE
 			b.matchid=@matchid	
 			AND b.transdate>=@KickOffDate	
@@ -253,6 +254,7 @@ SET NOCOUNT ON
 	INSERT INTO #BetDelete (transid,refno,custid,Username, betfrom, statusID,Status)   
 	SELECT DISTINCT transid,refno,custid, Username,betfrom, statusID,Status
 	FROM bettrans b WITH (nolock)
+		INNER JOIN dbo.strSplit(@bettypes,'^') AS fb ON b.bettype=fb.val
 	WHERE
 			b.matchid=@matchid	
 			AND b.transdate>=@KickOffDate	
@@ -266,6 +268,7 @@ SET NOCOUNT ON
 	INSERT INTO #BetDelete (transid,refno,custid,Username,betfrom, statusID,Status)   
 	SELECT DISTINCT transid,refno,custid,Username,betfrom, statusID, Status
 	FROM bettrans b WITH (nolock)
+		INNER JOIN dbo.strSplit(@bettypes,'^') AS fb ON b.bettype=fb.val
 		LEFT JOIN dbo.strSplit(@betteam14,'^') AS goal ON goal.val=b.betteam 
 	WHERE
 			b.matchid=@matchid	
@@ -280,6 +283,7 @@ SET NOCOUNT ON
 	INSERT INTO #BetDelete (transid,refno,custid,Username,betfrom, statusID,Status)   
 	SELECT DISTINCT transid,refno,custid,Username,betfrom, statusID, Status
 	FROM bettrans b WITH (nolock)
+		INNER JOIN dbo.strSplit(@bettypes,'^') AS fb ON b.bettype=fb.val
 	WHERE
 			b.matchid=@matchid	
 			AND b.transdate>=@KickOffDate	

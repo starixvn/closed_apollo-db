@@ -9,6 +9,7 @@ AS
  * DB			: SVRTXN/TransDB
  * Revisions	:
  	- 20140523@Dan: Add new bettype 1H total goal, 1H FGLG (126, 127)
+	- 20140808@Sophia: Change name of fglgstatus to FGLGStatus, get HTFGLGStatus
  * Parameters:
  	- @matchid: match id
  
@@ -208,10 +209,11 @@ SELECT	match.sporttype,
 		isnull(mr.calculate,0) IsCalculated, isnull(mr.multiple,0) IsMultiCaled,
 		isnull(match.isNeutral, CONVERT(BIT,0)) as IsNeutral,
 		mr.ishtcal ishtcal,
-		mr.GoalRecord as GoalRecord,
-		@HTStatus HTStatus,
-		@FTStatus FTStatus,
-		@FGLGStatus fglgstatus,
+		mr.GoalRecord AS GoalRecord,
+		@HTStatus AS HTStatus,
+		@FTStatus AS FTStatus,
+		@HTFGLGStatus AS HTFGLGStatus,
+		@FGLGStatus AS FGLGStatus,		
 		@IsExistHTFGLG AS IsExistHTFGLG,
 		@IsExistHTLG AS IsExistHTLG,	
 		@IsExistFGLG AS IsExistFGLG,

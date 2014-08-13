@@ -83,8 +83,8 @@ BEGIN
 			m.SportType,
 			m.LeagueId
 		FROM bettrans b WITH (NOLOCK)
-			INNER JOIN Match m WITH (NOLOCK) 
-				ON b.MatchId = m.MatchId
+			INNER JOIN Match m WITH (NOLOCK) ON b.MatchId = m.MatchId
+			INNER JOIN dbo.strSplit(@BetTypes,'^') s ON s.val = b.bettype
 		WHERE
 			b.matchid=@matchid 
 			and b.transid between @FromRefNo and @ToRefNo 	
@@ -92,8 +92,7 @@ BEGIN
 			AND b.livehomescore = CASE WHEN @livehomescore IS NOT NULL AND @liveindicator = 1 THEN @livehomescore ELSE b.livehomescore END
 			AND b.liveawayscore = CASE WHEN @liveawayscore IS NOT NULL AND @liveindicator = 1 THEN @liveawayscore ELSE b.liveawayscore END
 			AND b.transdate BETWEEN CASE WHEN @FromTransdate IS NOT NULL AND @liveindicator = 1 THEN @FromTransdate ELSE b.transdate END 
-							AND		CASE WHEN @ToTransdate IS NOT NULL AND @liveindicator = 1 THEN @ToTransdate ELSE b.transdate END 
-			and b.bettype in ( SELECT convert(int,val) FROM dbo.strSplit(@bettypes,'^') )
+							AND		CASE WHEN @ToTransdate IS NOT NULL AND @liveindicator = 1 THEN @ToTransdate ELSE b.transdate END 			
 			and statusID NOT IN (101,102 )
 			and b.bettype in (4,30)
 			and b.betteam in (SELECT convert(varchar,val) FROM dbo.strSplit(case when @betteam430 = 'All' then betteam else @betteam430 end,'^'))
@@ -127,32 +126,31 @@ BEGIN
 		m.SportType,
 		m.LeagueId
 		FROM bettrans b WITH (NOLOCK)
-			INNER JOIN Match m WITH (NOLOCK) 
-				ON b.MatchId = m.MatchId 
-		WHERE b.MatchId = @matchid
-		and b.transid between @FromRefNo and @ToRefNo 	
-		and b.bettype in ( SELECT convert(int,val) FROM dbo.strSplit(@bettypes,'^') )
-		--and status NOT IN ('Void', 'Reject')
-		and statusID NOT IN (101,102)
+			INNER JOIN Match m WITH (NOLOCK) ON b.MatchId = m.MatchId 
+			INNER JOIN dbo.strSplit(@BetTypes,'^') s ON s.val = b.bettype
+		WHERE  b.MatchId = @matchid
+				and b.transid between @FromRefNo and @ToRefNo 					
+				--and status NOT IN ('Void', 'Reject')
+				and statusID NOT IN (101,102)
 
-		AND CASE WHEN @liveindicator = 2 THEN @liveindicator ELSE b.liveindicator END = @liveindicator
-		AND b.livehomescore = CASE WHEN @livehomescore IS NOT NULL AND @liveindicator = 1 THEN @livehomescore ELSE b.livehomescore END
-		AND b.liveawayscore = CASE WHEN @liveawayscore IS NOT NULL AND @liveindicator = 1 THEN @liveawayscore ELSE b.liveawayscore END
-		AND b.transdate BETWEEN CASE WHEN @FromTransdate IS NOT NULL AND @liveindicator = 1 THEN @FromTransdate ELSE b.transdate END 
-						AND		CASE WHEN @ToTransdate IS NOT NULL AND @liveindicator = 1 THEN @ToTransdate ELSE b.transdate END 
-		AND CASE
-			WHEN b.bettype in (1,3,7,8,2,12) THEN CASE WHEN @betteam1378 = 'ALL' THEN betteam ELSE @betteam1378 END
-			WHEN b.bettype in (5,15) THEN CASE WHEN @betteam515 = 'ALL' THEN betteam ELSE @betteam515 END		
-			ELSE betteam 
-			END = betteam		
-		AND CASE WHEN b.bettype in (1,3,7,8) THEN CASE 
-													WHEN @hdp = 9999 THEN 1
-													WHEN @hdp = (hdp1 + hdp2) THEN 1
-													ELSE 0 
-											 END
-			ELSE 1 END = 1
-		AND b.bettype NOT IN(4,6,14,16,30,126,127)
-		AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
+				AND CASE WHEN @liveindicator = 2 THEN @liveindicator ELSE b.liveindicator END = @liveindicator
+				AND b.livehomescore = CASE WHEN @livehomescore IS NOT NULL AND @liveindicator = 1 THEN @livehomescore ELSE b.livehomescore END
+				AND b.liveawayscore = CASE WHEN @liveawayscore IS NOT NULL AND @liveindicator = 1 THEN @liveawayscore ELSE b.liveawayscore END
+				AND b.transdate BETWEEN CASE WHEN @FromTransdate IS NOT NULL AND @liveindicator = 1 THEN @FromTransdate ELSE b.transdate END 
+								AND		CASE WHEN @ToTransdate IS NOT NULL AND @liveindicator = 1 THEN @ToTransdate ELSE b.transdate END 
+				AND CASE
+					WHEN b.bettype in (1,3,7,8,2,12) THEN CASE WHEN @betteam1378 = 'ALL' THEN betteam ELSE @betteam1378 END
+					WHEN b.bettype in (5,15) THEN CASE WHEN @betteam515 = 'ALL' THEN betteam ELSE @betteam515 END		
+					ELSE betteam 
+					END = betteam		
+				AND CASE WHEN b.bettype in (1,3,7,8) THEN CASE 
+															WHEN @hdp = 9999 THEN 1
+															WHEN @hdp = (hdp1 + hdp2) THEN 1
+															ELSE 0 
+													 END
+					ELSE 1 END = 1
+				AND b.bettype NOT IN(4,6,14,16,30,126,127)
+				AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
 
 	UNION ALL
 
@@ -181,27 +179,27 @@ BEGIN
 		m.SportType,
 		m.LeagueId
 		FROM bettrans b WITH (NOLOCK)
-			INNER JOIN Match m WITH (NOLOCK) 
-				ON b.MatchId = m.MatchId 
-		WHERE b.MatchId = @matchid
-		and b.transid between @FromRefNo and @ToRefNo 			 
-		AND CASE WHEN @liveindicator = 2 THEN @liveindicator ELSE b.liveindicator END = @liveindicator
-		AND b.livehomescore = CASE WHEN @livehomescore IS NOT NULL AND @liveindicator = 1 THEN @livehomescore ELSE b.livehomescore END
-		AND b.liveawayscore = CASE WHEN @liveawayscore IS NOT NULL AND @liveindicator = 1 THEN @liveawayscore ELSE b.liveawayscore END
-		AND b.transdate BETWEEN CASE WHEN @FromTransdate IS NOT NULL AND @liveindicator = 1 THEN @FromTransdate ELSE b.transdate END 
-						AND		CASE WHEN @ToTransdate IS NOT NULL AND @liveindicator = 1 THEN @ToTransdate ELSE b.transdate END 
-		--and status NOT IN ('Void', 'Reject')
-		and statusID NOT IN (101,102)		
-		AND(
-			(b.bettype IN (6,126)
-			AND b.betteam  in (SELECT convert(varchar,val) FROM dbo.strSplit(case when @betteam6 = 'All' then betteam else @betteam6 end,'^'))  
-			)			
-			OR
-			(b.bettype = 16
-			AND b.betteam  in (SELECT convert(varchar,val) FROM dbo.strSplit(case when @betteam16 = 'All' then betteam else @betteam16 end,'^'))  
-			)
-		)
-		AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
+			INNER JOIN Match m WITH (NOLOCK) ON b.MatchId = m.MatchId 
+			INNER JOIN dbo.strSplit(@BetTypes,'^') s ON s.val = b.bettype
+		WHERE	b.MatchId = @matchid
+				AND b.transid between @FromRefNo and @ToRefNo 			 
+				AND CASE WHEN @liveindicator = 2 THEN @liveindicator ELSE b.liveindicator END = @liveindicator
+				AND b.livehomescore = CASE WHEN @livehomescore IS NOT NULL AND @liveindicator = 1 THEN @livehomescore ELSE b.livehomescore END
+				AND b.liveawayscore = CASE WHEN @liveawayscore IS NOT NULL AND @liveindicator = 1 THEN @liveawayscore ELSE b.liveawayscore END
+				AND b.transdate BETWEEN CASE WHEN @FromTransdate IS NOT NULL AND @liveindicator = 1 THEN @FromTransdate ELSE b.transdate END 
+								AND		CASE WHEN @ToTransdate IS NOT NULL AND @liveindicator = 1 THEN @ToTransdate ELSE b.transdate END 
+				--and status NOT IN ('Void', 'Reject')
+				AND statusID NOT IN (101,102)				
+				AND(
+					(b.bettype IN (6,126)
+					AND b.betteam  in (SELECT convert(varchar,val) FROM dbo.strSplit(case when @betteam6 = 'All' then betteam else @betteam6 end,'^'))  
+					)			
+					OR
+					(b.bettype = 16
+					AND b.betteam  in (SELECT convert(varchar,val) FROM dbo.strSplit(case when @betteam16 = 'All' then betteam else @betteam16 end,'^'))  
+					)
+				)
+				AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END
 		
 	
 	UNION ALL 
@@ -231,8 +229,8 @@ BEGIN
 		m.SportType,
 		m.LeagueId
 	FROM bettrans b WITH (NOLOCK)
-		INNER JOIN Match m WITH (NOLOCK) 
-			ON b.MatchId = m.MatchId 
+		INNER JOIN Match m WITH (NOLOCK) ON b.MatchId = m.MatchId 
+		INNER JOIN dbo.strSplit(@BetTypes,'^') s ON s.val = b.bettype
 		LEFT JOIN dbo.strSplit(@betteam14,'^') AS goal ON goal.val=b.betteam--dbo.Acc_SplitIndex(b.betteam,':',2)			
 	WHERE
 		b.matchid=@matchid 
@@ -243,7 +241,7 @@ BEGIN
 		AND b.transdate BETWEEN CASE WHEN @FromTransdate IS NOT NULL AND @liveindicator = 1 THEN @FromTransdate ELSE b.transdate END 
 						AND		CASE WHEN @ToTransdate IS NOT NULL AND @liveindicator = 1 THEN @ToTransdate ELSE b.transdate END 
 		--and status NOT IN ('Void', 'Reject')
-		and statusID NOT IN (101,102)
+		and b.statusID NOT IN (101,102)
 		AND b.bettype IN (14,127)
 		AND (@betteam14='All' OR goal.val IS NOT NULL)
 		AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END

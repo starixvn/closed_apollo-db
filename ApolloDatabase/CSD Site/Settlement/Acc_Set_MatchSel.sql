@@ -86,8 +86,8 @@ CREATE TABLE #matchList
 		goalrecord VARCHAR(50),                       		
 		IsHTCal BIT,	
 		IsKeyscore BIT,
-		IsFGLG BIT,
-		IsHTFGLG BIT, 
+		IsExistFGLG BIT,
+		IsExistHTFGLG BIT, 
 		FailedActionID TINYINT,
 		DisabledAutoSettle BIT
 	)
@@ -121,8 +121,8 @@ EXEC SVRPro.ProdDB.dbo.[Acc_Set_MatchSelInfo]
 		GROUP BY matchid 
 	)
 UPDATE m
-SET IsFGLG = CASE WHEN rs.cnt = 0 OR rs.cnt IS NULL THEN 0 ELSE 1 END
-	, IsHTFGLG = CASE WHEN rs1.cnt = 0 OR rs1.cnt IS NULL THEN 0 ELSE 1 END
+SET IsExistFGLG = CASE WHEN rs.cnt = 0 OR rs.cnt IS NULL THEN 0 ELSE 1 END
+	, IsExistHTFGLG = CASE WHEN rs1.cnt = 0 OR rs1.cnt IS NULL THEN 0 ELSE 1 END
 FROM #matchList m
 	LEFT JOIN rs ON m.matchid = rs.matchid
 	LEFT JOIN rs1 ON m.matchid = rs1.matchid

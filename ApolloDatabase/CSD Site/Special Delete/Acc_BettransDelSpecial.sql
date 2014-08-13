@@ -163,7 +163,7 @@ EX:
 	INSERT INTO #BetDelete (transid, CustId, PlayerName, betfrom, statusID, status )   
 	SELECT DISTINCT transid, CustId, username, betfrom, statusID, status
 	FROM bettrans b WITH (nolock)
-		INNER JOIN dbo.strSplit(@bettypes,'^') AS bt ON bt.val=b.bettype
+		INNER JOIN dbo.strSplit(@bettypes,'^') AS t ON t.val=b.bettype
 	WHERE
 		b.matchid=@matchid 
 		AND b.transid between @FromTransId and @ToTransId
@@ -191,6 +191,7 @@ EX:
 	INSERT INTO #BetDelete (transid, CustId, PlayerName, betfrom, statusID, status)   
 	SELECT DISTINCT transid, CustId, Username, betfrom, statusID, status
 	FROM bettrans b WITH (nolock)
+		INNER JOIN dbo.strSplit(@bettypes,'^') AS t ON t.val=b.bettype
 		LEFT JOIN dbo.strSplit(@betteam430,'^') AS bt ON b.betteam=CONVERT(varchar(3),bt.val)
 	WHERE
 		b.matchid=@matchid and           
@@ -209,6 +210,7 @@ EX:
 	INSERT INTO #BetDelete (transid, CustId, PlayerName, betfrom, statusID, status)   
 	SELECT DISTINCT transid, CustId, Username, betfrom, statusID, status
 	FROM dbo.bettrans AS b WITH (nolock)
+		INNER JOIN dbo.strSplit(@bettypes,'^') AS t ON t.val=b.bettype
 		LEFT JOIN dbo.strSplit(@betteam6,'^') AS bt ON bt.val=b.betteam
 	WHERE
 		b.matchid=@matchid and           
@@ -226,6 +228,7 @@ EX:
 	INSERT INTO #BetDelete (transid, CustId, PlayerName, betfrom, statusID,status)   
 	SELECT DISTINCT transid, CustId, Username, betfrom, statusID, status
 	FROM bettrans b WITH (nolock)
+		INNER JOIN dbo.strSplit(@bettypes,'^') AS t ON t.val=b.bettype
 		LEFT JOIN dbo.strSplit(@betteam14,'^') AS bt ON b.betteam=CONVERT(varchar(3),bt.val)
 	WHERE
 		b.matchid=@matchid and           
@@ -243,6 +246,7 @@ EX:
 	INSERT INTO #BetDelete (transid, CustId, PlayerName, betfrom, statusID, status)   
 	SELECT DISTINCT transid, CustId, Username, betfrom, statusID, status
 	FROM dbo.bettrans AS b WITH (nolock)
+		INNER JOIN dbo.strSplit(@bettypes,'^') AS t ON t.val=b.bettype
 		LEFT JOIN dbo.strSplit(@betteam16,'^') AS bt ON bt.val=b.betteam
 	WHERE
 		b.matchid=@matchid and           
