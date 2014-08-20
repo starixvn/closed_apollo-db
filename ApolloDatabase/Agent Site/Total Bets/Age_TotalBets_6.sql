@@ -19,7 +19,7 @@ AS
   - 20130128@Terry.Nguyen	: Implement
   - 20130629@Sophia: Add Showtime
   - 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
-
+  - 20140820@Sophia: Add 1H total goal (bettype = 126)
  * Parameters:
  *	•
  *	•
@@ -29,30 +29,77 @@ AS
 SET NOCOUNT ON
 BEGIN
 	SELECT
-		ba.MatchId,
+		b.MatchId,
 		m.HomeId,
 		m.AwayId,
 		m.MatchCode,
 		m.kickofftime,
 		m.Showtime,
-		SUM((CASE BetTeam WHEN '0-1' THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * (CASE WHEN @LoggedId = 1 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END)) AS Total01,
-		SUM((CASE BetTeam WHEN '2-3' THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * (CASE WHEN @LoggedId = 1 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END)) AS Total23,
-		SUM((CASE BetTeam WHEN '4-6' THEN (ba.Stake * b.Odds) - ba.Stake ELSE - ba.Stake END ) * (CASE WHEN @LoggedId = 1 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END)) AS Total46,
-		SUM((CASE BetTeam WHEN '7-over' THEN (ba.Stake * b.Odds) - ba.Stake ELSE -ba.Stake END ) * (CASE WHEN @LoggedId = 1 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END)) AS Total7Over,
+
+		SUM((CASE WHEN b.Bettype = 6 
+				  THEN CASE WHEN b.BetTeam = '0-1'
+							THEN (b.Stake * b.Odds) - b.Stake 
+							ELSE - b.Stake END
+				  ELSE 0 END) * APositionTaking) AS Total01,
+
+		SUM((CASE WHEN b.Bettype = 6 
+				  THEN CASE WHEN b.BetTeam = '2-3'
+							THEN (b.Stake * b.Odds) - b.Stake 
+							ELSE - b.Stake END
+				  ELSE 0 END) * APositionTaking) AS Total23,
+
+		SUM((CASE WHEN b.Bettype = 6 
+				  THEN CASE WHEN b.BetTeam = '4-6'
+							THEN (b.Stake * b.Odds) - b.Stake 
+							ELSE - b.Stake END
+				  ELSE 0 END) * APositionTaking) AS Total46,	 
+				   		    
+		SUM((CASE WHEN b.Bettype = 6 
+				  THEN CASE WHEN b.BetTeam IN ('7-over','7&Over') 
+							THEN (b.Stake * b.Odds) - b.Stake 
+							ELSE - b.Stake END
+				  ELSE 0 END) * APositionTaking) AS Total7Over,
+
+		--------------------------------
+
+		SUM((CASE WHEN b.Bettype = 126 
+				  THEN CASE WHEN b.BetTeam = '0-1'
+							THEN (b.Stake * b.Odds) - b.Stake 
+							ELSE - b.Stake END
+				  ELSE 0 END) * APositionTaking) AS HTTotal01,
+
+		SUM((CASE WHEN b.Bettype = 126 
+				  THEN CASE WHEN b.BetTeam = '2-3'
+							THEN (b.Stake * b.Odds) - b.Stake 
+							ELSE - b.Stake END
+				  ELSE 0 END) * APositionTaking) AS HTTotal23,
+
+					   		    
+		SUM((CASE WHEN b.Bettype = 126 
+				  THEN CASE WHEN b.BetTeam IN ('4-over','4&Over') 
+							THEN (b.Stake * b.Odds) - b.Stake 
+							ELSE - b.Stake END
+				  ELSE 0 END) * APositionTaking) AS HTTotal4Over,
+
 		ISNULL(m.IsNeutral, CONVERT(BIT, 0)) AS IsNeutral
-	FROM  
-		BetTrans_Agent AS ba WITH (NOLOCK) 
-		INNER JOIN BetTrans AS b WITH (NOLOCK) ON ba.TransId = b.TransId 
-		INNER JOIN Match AS m WITH (NOLOCK) ON b.MatchId = m.MatchId
-	WHERE
-		ba.AgentId = @AgentId	
-		AND b.BetType = 6 	
-		AND b.StatusId = 0
-		AND m.EventStatus = 'running'  
-		AND (ISNULL(b.SecAcceptFlag, 0) = 0 OR (ISNULL(b.SecAcceptFlag, 0) = 1 AND ISNULL(b.CheckTime, CURRENT_TIMESTAMP) <= CURRENT_TIMESTAMP ))
-		AND b.Ruben = 0
+
+	FROM	(
+			SELECT	b.bettype, b.BetTeam, b.Stake, b.Odds, b.MatchId,					
+					CASE WHEN @LoggedId = 1 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END AS APositionTaking
+			FROM dbo.BetTrans AS b WITH (NOLOCK) 
+				INNER JOIN dbo.BetTrans_Agent AS ba WITH (NOLOCK) 
+						ON ba.TransId = b.TransId 
+			WHERE  ba.AgentId = @AgentId	
+					AND b.BetType IN (6, 126)
+					AND b.StatusId = 0
+					AND (ISNULL(b.SecAcceptFlag, 0) = 0 OR (ISNULL(b.SecAcceptFlag, 0) = 1 AND ISNULL(b.CheckTime, CURRENT_TIMESTAMP) <= CURRENT_TIMESTAMP ))
+					AND b.Ruben = 0
+			) b		
+			INNER JOIN dbo.Match AS m WITH (NOLOCK) 
+					ON b.MatchId = m.MatchId
+	WHERE m.EventStatus = 'running'  		
 	GROUP BY
-		ba.MatchId,
+		b.MatchId,
 		m.HomeId,
 		m.AwayId,
 		m.MatchCode,
@@ -62,4 +109,7 @@ BEGIN
 	ORDER by m.matchcode
 
 END
-
+GO
+GRANT EXECUTE ON  [Age_TotalBets_6] TO [aplweb]
+GO
+ 

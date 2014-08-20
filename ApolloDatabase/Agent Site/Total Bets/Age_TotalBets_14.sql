@@ -19,105 +19,123 @@ AS
   - 20130509@Sophia: revise code, order by LeagueId
   - 20130513@Sophia: add super view
   - 20130708@Sophia: Change SuperId from 0 to 1 (@AgentID = 1)
+  - 20140820@Sophia: Add 1HT FGLF (bettype = 127)
  * Parameters:
  *	@AgentId: agent ID
  *  
  */
 
 SET NOCOUNT ON
-IF @LoggedId = 1 
-BEGIN 
+ 
 	SELECT
 		m.ShowTime, 
 		m.kickofftime,
 		m.LeagueId,
 		m.MatchCode,
-		bt.LiveIndicator,
+		b.LiveIndicator,
 		m.MatchId,
 		m.HomeId,
 		m.AwayId,
-		bt.LiveHomeScore,
-		bt.LiveAwayScore,
-		SUM(CASE WHEN hdp1 = 1 AND hdp2 = 1 THEN bt.Stake * (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) * (1-bt.TPositionTaking) ELSE - bt.Actual_Stake * (1-bt.TPositionTaking) END) AS WinLostHomeFG,
-		SUM(CASE WHEN hdp1 = 1 AND hdp2 = 2 THEN bt.Stake * (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) * (1-bt.TPositionTaking) ELSE - bt.Actual_Stake * (1-bt.TPositionTaking) END) AS WinLostHomeLG,
-		SUM(CASE WHEN hdp1 = 2 AND hdp2 = 1 THEN bt.Stake * (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) * (1-bt.TPositionTaking) ELSE - bt.Actual_Stake * (1-bt.TPositionTaking) END) AS WinLostAwayFG,
-		SUM(CASE WHEN hdp1 = 2 AND hdp2 = 2 THEN bt.Stake * (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) * (1-bt.TPositionTaking) ELSE - bt.Actual_Stake * (1-bt.TPositionTaking) END) AS WinLostAwayLG,
-		SUM(CASE WHEN hdp1 = 0 AND hdp2 = 0 THEN bt.Stake * (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) * (1-bt.TPositionTaking) ELSE - bt.Actual_Stake * (1-bt.TPositionTaking) END) AS WinLostNoGoal,
+		b.LiveHomeScore,
+		b.LiveHomeScore,
+		SUM((CASE WHEN b.Bettype = 14 
+					THEN CASE WHEN hdp1 = 1 AND hdp2 = 1 
+							  THEN b.Stake * (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) 
+							  ELSE - b.Actual_Stake END 
+					ELSE 0 END) * b.APositionTaking) AS WinLostHomeFG,
+
+		SUM((CASE WHEN b.Bettype = 14 
+					THEN CASE WHEN hdp1 = 1 AND hdp2 = 2 
+							  THEN b.Stake * (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) 
+							  ELSE - b.Actual_Stake END 
+					ELSE 0 END) * b.APositionTaking) AS WinLostHomeLG,
+
+		SUM((CASE WHEN b.Bettype = 14 
+					THEN CASE WHEN hdp1 = 2 AND hdp2 = 1
+							  THEN b.Stake * (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) 
+							  ELSE - b.Actual_Stake END 
+					ELSE 0 END) * b.APositionTaking) AS WinLostAwayFG,
+
+		SUM((CASE WHEN b.Bettype = 14 
+					THEN CASE WHEN hdp1 = 2 AND hdp2 = 2
+							  THEN b.Stake * (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) 
+							  ELSE - b.Actual_Stake END 
+					ELSE 0 END) * b.APositionTaking) AS WinLostAwayLG,
+
+		SUM((CASE WHEN b.Bettype = 14 
+					THEN CASE WHEN hdp1 = 0 AND hdp2 = 0
+							  THEN b.Stake * (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) 
+							  ELSE - b.Actual_Stake END 
+					ELSE 0 END) * b.APositionTaking) AS WinLostNoGoal,
+								
+		----------------------------------------------
+
+		SUM((CASE WHEN b.Bettype = 127 
+					THEN CASE WHEN hdp1 = 1 AND hdp2 = 1 
+							  THEN b.Stake * (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) 
+							  ELSE - b.Actual_Stake END 
+					ELSE 0 END) * b.APositionTaking) AS HTWinLostHomeFG,
+
+		SUM((CASE WHEN b.Bettype = 127 
+					THEN CASE WHEN hdp1 = 1 AND hdp2 = 2 
+							  THEN b.Stake * (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) 
+							  ELSE - b.Actual_Stake END 
+					ELSE 0 END) * b.APositionTaking) AS HTWinLostHomeLG,
+
+		SUM((CASE WHEN b.Bettype = 127 
+					THEN CASE WHEN hdp1 = 2 AND hdp2 = 1
+							  THEN b.Stake * (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) 
+							  ELSE - b.Actual_Stake END 
+					ELSE 0 END) * b.APositionTaking) AS HTWinLostAwayFG,
+
+		SUM((CASE WHEN b.Bettype = 127 
+					THEN CASE WHEN hdp1 = 2 AND hdp2 = 2
+							  THEN b.Stake * (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) 
+							  ELSE - b.Actual_Stake END 
+					ELSE 0 END) * b.APositionTaking) AS HTWinLostAwayLG,
+
+		SUM((CASE WHEN b.Bettype = 127 
+					THEN CASE WHEN hdp1 = 0 AND hdp2 = 0
+							  THEN b.Stake * (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) 
+							  ELSE - b.Actual_Stake END 
+					ELSE 0 END) * b.APositionTaking) AS HTWinLostNoGoal,
+
 		ISNULL(m.IsNeutral, CONVERT(BIT, 0)) AS IsNeutral
-	FROM
-		BetTrans_Agent AS bta WITH (NOLOCK)
-		INNER JOIN BetTrans AS bt  WITH (NOLOCK) ON bta.TransId = bt.TransId
-		INNER JOIN Match AS m  WITH (NOLOCK) ON m.MatchId = bt.MatchId
-	WHERE 
-		bta.AgentId = @AgentId 
-		AND m.EventStatus ='running'
-		AND bt.BetType = 14 
-		AND bt.Ruben = 0 -- Match not yet settle
-		AND bt.StatusId = 0 -- status is running
-		AND (	ISNULL(bt.SecAcceptFlag, 0) = 0
-				OR (ISNULL(bt.SecAcceptFlag, 0) = 1 AND ISNULL(bt.CheckTime, CURRENT_TIMESTAMP) <= CURRENT_TIMESTAMP))
+	FROM (
+			SELECT  b.LiveIndicator, b.LiveHomeScore, b.LiveAwayScore, b.MatchId,
+					b.Hdp1, b.Hdp2, b.Odds, b.Stake, b.Actual_Stake, b.bettype,
+					CASE WHEN @LoggedId = 1 THEN (1-b.TPositionTaking) ELSE ba.APositionTaking END AS APositionTaking
+			FROM  dbo.BetTrans_Agent AS ba WITH (NOLOCK)
+				INNER JOIN dbo.BetTrans AS b  WITH (NOLOCK)
+						ON ba.TransId = b.TransId
+			WHERE ba.AgentId = @AgentId 
+				AND b.BetType IN (14,127)
+				AND b.Ruben = 0 -- Match not yet settle
+				AND b.StatusId = 0 -- status is running
+				AND (	ISNULL(b.SecAcceptFlag, 0) = 0
+						OR (ISNULL(b.SecAcceptFlag, 0) = 1 AND ISNULL(b.CheckTime, CURRENT_TIMESTAMP) <= CURRENT_TIMESTAMP))
+		) b
+		INNER JOIN Match AS m WITH (NOLOCK) 
+				ON m.MatchId = b.MatchId
+	WHERE m.EventStatus ='running'		
 	GROUP BY
-		bt.LiveIndicator,
+		b.LiveIndicator,
 		m.HomeId,
 		m.AwayId,
 		m.MatchId,
 		m.MatchCode, 
 		m.LeagueId,
-		bt.LiveHomeScore,
-		bt.LiveAwayScore,
+		b.LiveHomeScore,
+		b.LiveAwayScore,
 		m.ShowTime,
 		m.KickOffTime,
 		m.IsNeutral
 	ORDER BY
 		m.LeagueId,
 		m.MatchCode, 
-		bt.LiveIndicator DESC
-END
-ELSE
-BEGIN
-	SELECT
-		m.ShowTime, 
-		m.KickOffTime,
-		m.LeagueId,
-		m.MatchCode,
-		bt.LiveIndicator,
-		m.MatchId,
-		m.HomeId,
-		m.AwayId,
-		bt.LiveHomeScore,
-		bt.LiveAwayScore,
-		SUM(CASE WHEN hdp1 = 1 AND hdp2 = 1 THEN bta.Stake * (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) * bta.APositionTaking ELSE - bta.Actual_Stake * bta.APositionTaking END) AS WinLostHomeFG,
-		SUM(CASE WHEN hdp1 = 1 AND hdp2 = 2 THEN bta.Stake * (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) * bta.APositionTaking ELSE - bta.Actual_Stake * bta.APositionTaking END) AS WinLostHomeLG,
-		SUM(CASE WHEN hdp1 = 2 AND hdp2 = 1 THEN bta.Stake * (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) * bta.APositionTaking ELSE - bta.Actual_Stake * bta.APositionTaking END) AS WinLostAwayFG,
-		SUM(CASE WHEN hdp1 = 2 AND hdp2 = 2 THEN bta.Stake * (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) * bta.APositionTaking ELSE - bta.Actual_Stake * bta.APositionTaking END) AS WinLostAwayLG,
-		SUM(CASE WHEN hdp1 = 0 AND hdp2 = 0 THEN bta.Stake * (CASE WHEN odds < 0 THEN 1 ELSE odds - 1 END) * bta.APositionTaking ELSE - bta.Actual_Stake * bta.APositionTaking END) AS WinLostNoGoal,
-		ISNULL(m.IsNeutral, CONVERT(BIT, 0)) AS IsNeutral
-	FROM
-		BetTrans_Agent AS bta WITH (NOLOCK)
-		INNER JOIN BetTrans AS bt  WITH (NOLOCK) ON bta.TransId = bt.TransId
-		INNER JOIN Match AS m  WITH (NOLOCK) ON m.MatchId = bt.MatchId
-	WHERE 
-		bta.AgentId = @AgentId 
-		AND m.EventStatus ='running'
-		AND bt.BetType = 14 
-		AND bt.Ruben = 0 -- Match not yet settle
-		AND bt.StatusId = 0 -- status is running
-		AND (	ISNULL(bt.SecAcceptFlag, 0) = 0
-				OR (ISNULL(bt.SecAcceptFlag, 0) = 1 AND ISNULL(bt.CheckTime, CURRENT_TIMESTAMP) <= CURRENT_TIMESTAMP))
-	GROUP BY
-		bt.LiveIndicator,
-		m.HomeId,
-		m.AwayId,
-		m.MatchId,
-		m.MatchCode, 
-		m.LeagueId,
-		bt.LiveHomeScore,
-		bt.LiveAwayScore,
-		m.ShowTime,
-		m.KickOffTime,
-		m.IsNeutral
-	ORDER BY
-		m.LeagueId,
-		m.MatchCode, 
-		bt.LiveIndicator DESC 
-END 
+		b.LiveIndicator DESC
+
+
+GO
+GRANT EXECUTE ON  [Age_TotalBets_14] TO [aplweb]
+GO

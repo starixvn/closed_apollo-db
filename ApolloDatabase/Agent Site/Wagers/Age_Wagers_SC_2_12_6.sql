@@ -23,6 +23,7 @@ DB: SVRAGE.REPDB
 Revisions:    
 	- 20130712@Sophia: Add @IsSuperView and calculate Stake after Share
 	- 20130718@Sophia: Add Stake berfore Share
+	- 20140820@Sophia: Add 1H total goal (bettype = 126)
 
 Parameters
 	@IsDirectMem : 1: Direct Member
@@ -43,7 +44,11 @@ SET NOCOUNT ON
 				SUM(CASE WHEN B.BetType = 6 AND betteam = '0-1' THEN B.StakeBefore ELSE 0 END) AS Total01StakeBefore,
 				SUM(CASE WHEN B.BetType = 6 AND betteam = '2-3' THEN B.StakeBefore ELSE 0 END) AS Total23StakeBefore,
 				SUM(CASE WHEN B.BetType = 6 AND betteam = '4-6' THEN B.StakeBefore ELSE 0 END) AS Total46StakeBefore,
-				SUM(CASE WHEN B.BetType = 6 AND betteam = '7-over' THEN B.StakeBefore ELSE 0 END) AS Total7OverStakeBefore,
+				SUM(CASE WHEN B.BetType = 6 AND betteam IN ('7-over','7&Over') THEN B.StakeBefore ELSE 0 END) AS Total7OverStakeBefore,
+
+				SUM(CASE WHEN B.BetType = 126 AND betteam = '0-1' THEN B.StakeBefore ELSE 0 END) AS HTTotal01StakeBefore,
+				SUM(CASE WHEN B.BetType = 126 AND betteam = '2-3' THEN B.StakeBefore ELSE 0 END) AS HTTotal23StakeBefore,
+				SUM(CASE WHEN B.BetType = 126 AND betteam IN ('4-over','4&Over') THEN B.StakeBefore ELSE 0 END) AS HTTotal4OverStakeBefore,
 
 				--------------------------
 				SUM(CASE WHEN B.BetType = 2 AND betteam = 'h' THEN B.Stake ELSE 0 END) AS HomeStakeOE,
@@ -55,7 +60,11 @@ SET NOCOUNT ON
 				SUM(CASE WHEN B.BetType = 6 AND betteam = '0-1' THEN B.Stake ELSE 0 END) AS Total01Stake,
 				SUM(CASE WHEN B.BetType = 6 AND betteam = '2-3' THEN B.Stake ELSE 0 END) AS Total23Stake,
 				SUM(CASE WHEN B.BetType = 6 AND betteam = '4-6' THEN B.Stake ELSE 0 END) AS Total46Stake,
-				SUM(CASE WHEN B.BetType = 6 AND betteam = '7-over' THEN B.Stake ELSE 0 END) AS Total7OverStake,
+				SUM(CASE WHEN B.BetType = 6 AND betteam IN ('7-over','7&Over') THEN B.Stake ELSE 0 END) AS Total7OverStake,
+
+				SUM(CASE WHEN B.BetType = 126 AND betteam = '0-1' THEN B.Stake ELSE 0 END) AS HTTotal01Stake,
+				SUM(CASE WHEN B.BetType = 126 AND betteam = '2-3' THEN B.Stake ELSE 0 END) AS HTTotal23Stake,
+				SUM(CASE WHEN B.BetType = 126 AND betteam IN ('4-over','4&Over') THEN B.Stake ELSE 0 END) AS HTTotal4OverStake,
 								
 				--------------------------
 				SUM(CASE WHEN B.Bettype = 2 AND betteam = 'h' THEN B.BetCount ELSE 0 END) AS HomeCountOE,
@@ -67,7 +76,11 @@ SET NOCOUNT ON
 				SUM(CASE WHEN B.BetType = 6 AND betteam = '0-1' THEN B.BetCount ELSE 0 END) AS Total01Count,
 				SUM(CASE WHEN B.BetType = 6 AND betteam = '2-3' THEN B.BetCount ELSE 0 END) AS Total23Count,
 				SUM(CASE WHEN B.BetType = 6 AND betteam = '4-6' THEN B.BetCount ELSE 0 END) AS Total46Count,
-				SUM(CASE WHEN B.BetType = 6 AND betteam = '7-over' THEN B.BetCount ELSE 0 END) AS Total7OverCount,
+				SUM(CASE WHEN B.BetType = 6 AND betteam IN ('7-Over','7&Over') THEN B.BetCount ELSE 0 END) AS Total7OverCount,
+
+				SUM(CASE WHEN B.BetType = 126 AND betteam = '0-1' THEN B.BetCount ELSE 0 END) AS HTTotal01Count,
+				SUM(CASE WHEN B.BetType = 126 AND betteam = '2-3' THEN B.BetCount ELSE 0 END) AS HTTotal23Count,
+				SUM(CASE WHEN B.BetType = 126 AND betteam IN ('4-Over','4&Over') THEN B.BetCount ELSE 0 END) AS HTTotal4OverCount,
 
 				--------------------------
 				MAX(CASE WHEN B.Bettype = 2 AND betteam = 'h' THEN 'h' ELSE '0' END) AS HomeBetteamOE,
@@ -79,7 +92,11 @@ SET NOCOUNT ON
 				MAX(CASE WHEN B.BetType = 6 AND betteam = '0-1' THEN '0-1' ELSE '0' END) AS Total01Betteam,
 				MAX(CASE WHEN B.BetType = 6 AND betteam = '2-3' THEN '2-3' ELSE '0' END) AS Total23Betteam,
 				MAX(CASE WHEN B.BetType = 6 AND betteam = '4-6' THEN '4-6' ELSE '0' END) AS Total46Betteam,
-				MAX(CASE WHEN B.BetType = 6 AND betteam = '7-over' THEN '7-over' ELSE '0' END) AS Total7OverBetteam
+				MAX(CASE WHEN B.BetType = 6 AND betteam IN ('7-Over','7&Over') THEN '7&Over' ELSE '0' END) AS Total7OverBetteam,
+
+				MAX(CASE WHEN B.BetType = 126 AND betteam = '0-1' THEN '0-1' ELSE '0' END) AS HTTotal01Betteam,
+				MAX(CASE WHEN B.BetType = 126 AND betteam = '2-3' THEN '2-3' ELSE '0' END) AS HTTotal23Betteam,
+				MAX(CASE WHEN B.BetType = 126 AND betteam IN ('4-Over','4&Over') THEN '4&Over' ELSE '0' END) AS HTTotal4OverBetteam
 
 	FROM (		
 				SELECT		M.ShowTime, B.LiveIndicator,
@@ -90,12 +107,12 @@ SET NOCOUNT ON
 							Count(B.TransID) as BetCount
 				FROM		Bettrans B WITH (NOLOCK)
 				INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
-					ON		B.TransId = BA.TransId AND BA.AgentID = @LoggedID  AND BA.Bettype IN (2,12,6) AND BA.StatusId IN (0,1)
+					ON		B.TransId = BA.TransId AND BA.AgentID = @LoggedID  AND BA.Bettype IN (2,12,6,126) AND BA.StatusId IN (0,1)
 				INNER JOIN	Match M WITH (NOLOCK)
 					ON		M.matchID = B.MatchID
 				INNER JOIN  CustInfo C WITH (NOLOCK)
 					ON		C.CustID = B.CustID
-				WHERE		B.Bettype IN (2,12,6)
+				WHERE		B.Bettype IN (2,12,6,126)
 							AND B.StatusId IN (0,1)							
 							AND B.LiveIndicator = 0
 							AND M.Sporttype = 1	

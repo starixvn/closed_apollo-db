@@ -22,6 +22,7 @@ DB: SVRAGE.REPDB
 Revisions:    
 	 - 20130712@Sophia: Add @IsSuperView and calculate Stake after Share
 	 - 20130718@Sophia: Add Stake berfore Share
+	 - 20140820@Sophia: exclude bettype 126 (1H total goal) 
 Parameters
 	@IsDirectMem : 1: Direct Member
 				   0: All Member
@@ -54,14 +55,14 @@ FROM (
 			INNER JOIN	Bettrans_Agent BA WITH (NOLOCK)
 				ON		B.TransId = BA.TransId 
 						AND BA.AgentID = @LoggedID  
-						AND BA.Bettype NOT IN (1,2,3,4,5,6,7,8,9,10,12,15,16,29,30) 
+						AND BA.Bettype NOT IN (1,2,3,4,5,6,7,8,9,10,12,15,16,29,30,126) 
 						AND BA.Bettype <=19000
 						AND BA.StatusId IN (0,1)
 			INNER JOIN	Match M WITH (NOLOCK)
 				ON		M.matchID = B.MatchID
 			INNER JOIN  CustInfo C WITH (NOLOCK)
 				ON		C.CustID = B.CustID
-			WHERE		B.Bettype NOT IN (1,2,3,4,5,6,7,8,9,10,12,15,16,29,30)
+			WHERE		B.Bettype NOT IN (1,2,3,4,5,6,7,8,9,10,12,15,16,29,30,126)
 						AND B.Bettype <=19000
 						AND B.StatusId IN (0,1)							
 						AND B.LiveIndicator = 0
