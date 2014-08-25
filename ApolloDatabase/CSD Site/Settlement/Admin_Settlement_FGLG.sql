@@ -1,5 +1,5 @@
 ALTER PROCEDURE [dbo].[Admin_Settlement_FGLG]
-	@creator int,
+	@AdminId int,
 	@matchid int,	
 	@action varchar(10) = 'CAL-FT',
 	@betstatus nvarchar(50),
@@ -18,6 +18,8 @@ AS
 	
 	Revisions:		
 		- 20140514@Dan: Add 1H FGLG bettypes (127)
+		- 20140819@Sophia: Change @creator to @AdminId
+
 	Param's Explanation:
 		+ @betstatus: FGLG status
 		+ @IsLoopTempTable: 1 : is nested
@@ -48,7 +50,7 @@ BEGIN
 		BEGIN
 			BEGIN TRY
 				EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-					@UserID = @creator, 
+					@UserID = @AdminId, 
 					@Matchid = @matchid, 
 					@KeyID = 1,
 					@ActionID = @ActionID, 
@@ -57,7 +59,7 @@ BEGIN
 			BEGIN CATCH	
 				SELECT @Remark = 'ADD SUCCESS ErrMsg=' + left(error_message(), 400)
 				EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-					@UserID = @creator, 
+					@UserID = @AdminId, 
 					@Matchid = @matchid, 
 					@KeyID = 1,
 					@ActionID = @ActionID, 
@@ -76,7 +78,7 @@ BEGIN
 											@MatchID	= @matchid, 
 											@BetStatus	= @betstatus,
 											@GoalRecord	= @goalrecord,
-											@creator	= @creator
+											@AdminId	= @AdminId
 	-------------------------
 	--First Goal, Last Goal 
 	DECLARE @FGLG1 varchar(10), @FGLG2 varchar(10), @FLString varchar(10), 
@@ -153,7 +155,7 @@ BEGIN
 				
 				EXEC dbo.Admin_Settlement_Refund_FGLG	--refund  all LG
 					@matchid = @matchid,
-					@adminid = @creator,
+					@adminid = @AdminId,
 					@action = 'CAL',
 					@LGOnly = 1,
 					@IP = @IP,
@@ -171,7 +173,7 @@ BEGIN
 		begin
 				EXEC dbo.Admin_Settlement_Refund_FGLG	--refund FT LG
 					@matchid = @matchid,
-					@adminid = @creator,
+					@adminid = @AdminId,
 					@action = @action,
 					@LGOnly = 1,
 					@IP = @IP,
@@ -242,13 +244,13 @@ BEGIN
 	SELECT @LogData = 'Calculate FGLG for matchid:' + CAST(@matchid as nvarchar(10)) 
 		+ ' score:' + CAST(ISNULL(@finalhomescore,0) as nvarchar(10)) + '-' + CAST(ISNULL(@finalawayscore,0) as nvarchar(10)) + ' HT:' + CAST(@hthomescore as nvarchar(10)) + '-' + CAST(@htawayscore as nvarchar(10)) 
 		+ ' GoalRecord:' + ISNULL(@goalrecord, '') + ') Remark(BetStatus=' + @betstatus + ', IncludeLG=' + convert(char(1),@IncludeLG) + ', Action='+ @action + ')'
-	EXEC dbo.WriteLog_UserLog_T @creator, @LogData
+	EXEC dbo.WriteLog_UserLog_T @AdminId, @LogData
 
 	SELECT @Remark = 'IncludeLG=' + convert(char(1),@IncludeLG) + 'Action='+@action
 
 	BEGIN TRY
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Settle
-			@UserID = @creator,
+			@UserID = @AdminId,
 			@Matchid = @matchid,
 			@ActionID = @ActionID,
 			@finalhomescore = @finalhomescore,
@@ -263,7 +265,7 @@ BEGIN
 	BEGIN CATCH	
 		SELECT @Remark = @Remark + ' ErrMsg=' + left(error_message(), 250)   
 		EXEC LogDB.dbo.WriteLog_Settlement_Settle
-			@UserID = @creator,
+			@UserID = @AdminId,
 			@Matchid = @matchid,
 			@ActionID = @ActionID,
 			@finalhomescore = @finalhomescore,
@@ -284,7 +286,7 @@ BEGIN
 		BEGIN
 			BEGIN TRY
 				EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-					@UserID = @creator, 
+					@UserID = @AdminId, 
 					@Matchid = @matchid, 
 					@KeyID = 1,
 					@ActionID = @ActionID, 
@@ -293,7 +295,7 @@ BEGIN
 			BEGIN CATCH		
 				SELECT @Remark = 'DEL SUCCESS ErrMsg=' + left(error_message(), 400)		
 				EXEC LogDB.dbo.WriteLog_Settlement_Checking 
-					@UserID = @creator, 
+					@UserID = @AdminId, 
 					@Matchid = @matchid, 
 					@KeyID = 1,
 					@ActionID = @ActionID, 
@@ -304,7 +306,7 @@ BEGIN
 		BEGIN
 			BEGIN TRY
 				EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-					@UserID = @creator, 
+					@UserID = @AdminId, 
 					@Matchid = @matchid, 
 					@KeyID = 1,
 					@ActionID = @ActionID, 
@@ -313,7 +315,7 @@ BEGIN
 			BEGIN CATCH		
 				SELECT @Remark = 'DEL FAILED ErrMsg=' + left(error_message(), 400)		
 				EXEC LogDB.dbo.WriteLog_Settlement_Checking
-					@UserID = @creator, 
+					@UserID = @AdminId, 
 					@Matchid = @matchid, 
 					@KeyID = 1,
 					@ActionID = @ActionID, 

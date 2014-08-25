@@ -1,6 +1,6 @@
 ALTER PROCEDURE [dbo].[Admin_Settlement_Refund_All]
 	@matchid int,
-	@creator int, 		
+	@AdminId int, 		
 	@betstatus nvarchar(50) = NULL,	
 	@IP varchar(15) = '',
 	@ErrCode int = 0 OUTPUT,
@@ -16,6 +16,8 @@ DB: SVRTXN/TransDB
 
 Revisions: 
 	- 20140514@Dan: Add 1H FGLG bettypes (127)
+	- 20140819@Sophia: Change @creator to @AdminId
+
 Param's Explanation:
 • @matchid: matchid need to refund
 BetDaq account: 
@@ -44,7 +46,7 @@ IF (@@Error = 0)
 BEGIN
 	BEGIN TRY
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking  
-			@UserID = @creator, 
+			@UserID = @AdminId, 
 			@Matchid = @matchid, 
 			@KeyID = 1,
 			@ActionID = @ActionID, 
@@ -53,7 +55,7 @@ BEGIN
 	BEGIN CATCH
 		SELECT @Remark = 'ADD SUCCESS ErrMsg=' + left(error_message(), 400)
 		EXEC LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = @creator, 
+			@UserID = @AdminId, 
 			@Matchid = @matchid, 
 			@KeyID = 1,
 			@ActionID = @ActionID, 
@@ -86,7 +88,7 @@ WHERE	matchid = @matchid
 		AND bettype not IN (14, 127)
 GROUP BY custid
 
-EXEC SVRPRO.ProdDB.dbo.Admin_Match_Update @Command = 'Admin_Settlement_Refund_All', @MatchID = @matchid, @creator = @creator , @betstatus = @betstatus
+EXEC SVRPRO.ProdDB.dbo.Admin_Match_Update @Command = 'Admin_Settlement_Refund_All', @MatchID = @matchid, @AdminId = @AdminId , @betstatus = @betstatus
 -- in IBC, web call this after refund. But we update it in apollo as refund FT/HT
 EXEC SVRPRO.ProdDB.dbo.Admin_Match_UpdateMatchRemark @matchid, 'F'
 
@@ -125,13 +127,13 @@ SELECT	@stop = CURRENT_TIMESTAMP
 Declare @LogData nvarchar(200)
 SELECT @LogData = 'Calculate (Refund All) for matchid:' + CAST(@matchid as nvarchar(10))
 
-EXEC dbo.WriteLog_UserLog_T @creator, @LogData
+EXEC dbo.WriteLog_UserLog_T @AdminId, @LogData
 
 --Write Log Settle
 SELECT @Remark = 'Duration=' + CAST(DATEDIFF(millisecond, @start, @stop) as nvarchar(50)) + ' ms;'
 BEGIN TRY					
 	EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Settle
-		@UserID = @creator,
+		@UserID = @AdminId,
 		@Matchid = @matchid,
 		@ActionID = @ActionID,
 		@finalhomescore = 0,
@@ -146,7 +148,7 @@ END TRY
 BEGIN CATCH
 	SELECT @Remark = @Remark + ' ErrMsg=' + left(error_message(), 250)	
 	EXEC LogDB.dbo.WriteLog_Settlement_Settle
-		@UserID = @creator,
+		@UserID = @AdminId,
 		@Matchid = @matchid,
 		@ActionID = @ActionID,
 		@finalhomescore = 0,
@@ -167,7 +169,7 @@ IF (@@Error = 0)
 BEGIN
 	BEGIN TRY
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking
-			@UserID = @creator, 
+			@UserID = @AdminId, 
 			@Matchid = @matchid, 
 			@KeyID = 1,
 			@ActionID = @ActionID, 
@@ -176,7 +178,7 @@ BEGIN
 	BEGIN CATCH
 		SELECT @Remark = 'DEL SUCCESS ErrMsg=' + left(error_message(), 350)	
 		EXEC LogDB.dbo.WriteLog_Settlement_Checking
-			@UserID = @creator, 
+			@UserID = @AdminId, 
 			@Matchid = @matchid, 
 			@KeyID = 1,
 			@ActionID = @ActionID, 
@@ -187,7 +189,7 @@ ELSE
 BEGIN
 	BEGIN TRY
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking
-			@UserID = @creator, 
+			@UserID = @AdminId, 
 			@Matchid = @matchid, 
 			@KeyID = 1,
 			@ActionID = @ActionID, 
@@ -196,7 +198,7 @@ BEGIN
 	BEGIN CATCH		
 		SELECT @Remark = 'DEL FAILED ErrMsg=' + left(error_message(), 350)	
 		EXEC LogDB.dbo.WriteLog_Settlement_Checking
-			@UserID = @creator, 
+			@UserID = @AdminId, 
 			@Matchid = @matchid, 
 			@KeyID = 1,
 			@ActionID = @ActionID, 

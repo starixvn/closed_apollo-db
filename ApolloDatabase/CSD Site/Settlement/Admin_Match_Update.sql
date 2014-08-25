@@ -12,7 +12,7 @@ alter PROCEDURE [dbo].[Admin_Match_Update]
 	@FTDone BIT = 0,
 	@HTDone BIT = 0,
 	@RowCount INT = 0 OUTPUT,
-	@Creator INT = 0
+	@AdminId INT = 0
 ) 
 AS
 /*
@@ -25,6 +25,7 @@ AS
 	Revisions:
 		- 20131205@bobby: Allow user to change match's event status to "Closed" manually
 		- 20140515@Dan: Modify betstatus value (Offer 1H FGLG) 
+		- 20140819@Sophia: Change @creator to @AdminId
 */
 BEGIN
 	SET @betstatus = ISNULL(@betstatus, N'')

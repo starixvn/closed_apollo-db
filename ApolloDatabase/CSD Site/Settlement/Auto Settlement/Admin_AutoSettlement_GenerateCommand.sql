@@ -16,6 +16,7 @@ AS
 	Original SP: 
 	History:
 		- 20140530@Dan: add new bettype 126, 127
+		- 20140819@Sophia: Change @creator to @AdminId  
 	Param's Explanation:					
 */
 
@@ -63,7 +64,7 @@ BEGIN
 			, @SPName='Admin_Settlement_1'
 
 	SELECT @SQLCommand = 'EXEC [dbo].[Admin_Settlement_1] ' +
-		' @creator = 0 ' + ' ,' +
+		' @AdminId = 0 ' + ' ,' +
 		' @matchid = ' + CAST(@matchid AS varchar(50)) + ' ,' +
 		' @fth = ' + CASE WHEN @fth IS NULL THEN 'NULL' ELSE CAST(@fth AS varchar(50))  END + ' ,' +
 		' @fta = ' + CASE WHEN @fta IS NULL THEN 'NULL' ELSE CAST(@fta AS varchar(50)) END + ' ,' + 
@@ -84,7 +85,7 @@ BEGIN
 			END
 			, @SPName='Admin_Settlement_Parlay'
 	SELECT @SQLCommand = 'EXEC [dbo].[Admin_Settlement_Parlay] ' +
-		' @creator = 0 ' + ' ,' +
+		' @AdminId = 0 ' + ' ,' +
 		' @matchids = ''' + CAST(@matchid AS varchar(50)) + ''' ,' +		
 		' @action = ''' + @action + ''' ,' + 
 		' @ErrCode = @ErrCode OUTPUT , ' +
@@ -100,7 +101,7 @@ BEGIN
 			END
 
 	SELECT @SQLCommand = 'EXEC [dbo].[Admin_Settlement_FGLG] ' +
-		' @creator = 0 ' + ' ,' +
+		' @AdminId = 0 ' + ' ,' +
 		' @matchid = ' + CAST(@matchid AS varchar(50)) + ' ,' +		
 		' @action = ''' + @action + ''' ,' + 
 		' @goalrecord = ' + CASE WHEN @goalrecord IS NULL THEN 'NULL' ELSE '''' + CAST(@goalrecord AS varchar(50)) + '''' END + ',' + 		
@@ -132,7 +133,7 @@ END
 ELSE IF @actionID IN (13) -- Refund All
 BEGIN	
 	SELECT @SQLCommand = 'EXEC [dbo].[Admin_Settlement_Refund_All] ' +
-		' @creator = 0 ' + ' ,' +
+		' @AdminId = 0 ' + ' ,' +
 		' @matchid = ' + CAST(@matchid AS varchar(50)) + ' ,' +						
 		' @betstatus = ' + + CASE WHEN @betstatus IS NULL THEN 'NULL' ELSE 'N''' + CAST(@betstatus AS nvarchar(50)) + '''' END + ',' + 
 		' @ErrCode = @ErrCode OUTPUT , ' +
@@ -142,9 +143,9 @@ END
 ELSE IF @actionID IN (17,19, 20 ) -- Refund FT FGLG, Refund HT FGLG, Refund All FGLG
 BEGIN	
 	SELECT @action = CASE @actionID 			
-			WHEN 19 THEN 'CAL-HT'
-			WHEN 17 THEN 'CAL-FT'			
-			WHEN 20 THEN 'CAL'			
+			WHEN 19 THEN 'REFUND-HT'
+			WHEN 17 THEN 'REFUND-FT'			
+			WHEN 20 THEN 'REFUND'			
 			END			
 
 	SELECT @SQLCommand = 'EXEC [dbo].[Admin_Settlement_Refund_FGLG] ' +
@@ -160,9 +161,9 @@ END
 ELSE IF @actionID IN (18,21,22 ) -- Refund FT LG,  	Refund HT LG,  	Refund All LG
 BEGIN	
 	SELECT @action = CASE @actionID 			
-				WHEN 21 THEN 'CAL-HT'
-				WHEN 18 THEN 'CAL-FT'			
-				WHEN 22 THEN 'CAL'			
+				WHEN 21 THEN 'REFUND-HT'
+				WHEN 18 THEN 'REFUND-FT'			
+				WHEN 22 THEN 'REFUND'			
 				END
 								
 	SELECT @SQLCommand = 'EXEC [dbo].[Admin_Settlement_Refund_FGLG] ' +
@@ -195,7 +196,7 @@ BEGIN
 	SELECT
 			@SPName [SPName]
 			,'EXEC [dbo].[Admin_Settlement_Parlay] ' +
-				' @creator = 0 ' + ' ,' +
+				' @AdminId = 0 ' + ' ,' +
 				' @matchids = ''' + CAST(matchid AS varchar(50)) + ''' ,' +		
 				' @action = ''' + @action + ''' ,' + 
 				' @ErrCode = @ErrCode OUTPUT , ' +

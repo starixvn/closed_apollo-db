@@ -1,7 +1,7 @@
 ALTER PROCEDURE [dbo].[Admin_Settlement_Parlay] 
 (
 	@matchids	VARCHAR(2000),
-	@creator	INT,
+	@AdminId	INT,
 	@action		VARCHAR(10) = 'CAL',
 	@IP			VARCHAR(15) = '',
 	@ErrCode	INT = 0 OUTPUT,
@@ -15,7 +15,9 @@ AS
 	DB: SVRTXN/TransDB
 
 	History:		
-		- 20140514@Dan: allow to execute undo action without score   						   
+		- 20140514@Dan: allow to execute undo action without score   
+		- 20140819@Sophia: Change @creator to @AdminId
+								   
 	Param's Explanation:
 		+ @betstatus: Used for score table, FGLG status, refund status
 		
@@ -280,7 +282,7 @@ END --IF @SkipBalanceUpdate = 0
 
 		---------------------------------------------------------------
 		-- update match coz m88 project using DB02.dbo.match.tstamp to know match do parlay settle (vivi@2009-8-27)	
-		EXEC SVRPRO.ProdDB.dbo.Admin_Match_Update @Command = 'Admin_Settlement_Parlay', @Matchid = @matchid, @creator = @creator 
+		EXEC SVRPRO.ProdDB.dbo.Admin_Match_Update @Command = 'Admin_Settlement_Parlay', @Matchid = @matchid, @AdminId = @AdminId 
 		---------------------------------------------------------------
 
 		SET @rn = @rn + 1
@@ -363,7 +365,7 @@ DROP TABLE #BalanceAfter
 			+ ' (' + CAST(DATEDIFF(millisecond, @start, @stop) as nvarchar(50)) + ' ms)'
 			+ ' mpcs=' + CAST(@CalTime as nvarchar(10)) + ':' + CAST(@PreCal as nvarchar(10)) + ':' + CAST(@Calculate as nvarchar(10)) + ':' + CAST(@Summary as nvarchar(10))
 			+ ' tsu2s=' + CAST(@9Time as nvarchar(10)) + ':' + CAST(@selTime as varchar(10)) + ':' + CAST(@updTIme as varchar(10)) + ':' + CAST(@2Call as nvarchar(10)) + ':' + CAST(@29Time as nvarchar(10))
-		EXEC dbo.WriteLog_UserLog_T @creator, @LogData
+		EXEC dbo.WriteLog_UserLog_T @AdminId, @LogData
 
 		--Write Log Settle
 		SELECT @ActionID = CASE @Action 
@@ -379,7 +381,7 @@ DROP TABLE #BalanceAfter
 
 		BEGIN TRY
 			EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Settle
-				@UserID = @creator,
+				@UserID = @AdminId,
 				@Matchid = @matchid,
 				@ActionID = @ActionID,
 				@finalhomescore = @finalhomescore,
@@ -394,7 +396,7 @@ DROP TABLE #BalanceAfter
 		BEGIN CATCH	
 			SELECT @Remark = @Remark + ' ErrMsg=' + left(error_message(), 250)	
 			EXEC LogDB.dbo.WriteLog_Settlement_Settle
-				@UserID = @creator,
+				@UserID = @AdminId,
 				@Matchid = @matchid,
 				@ActionID = @ActionID,
 				@finalhomescore = @finalhomescore,

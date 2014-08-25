@@ -1,6 +1,6 @@
 ALTER PROCEDURE [dbo].[Admin_Calculate_RefundFGLG]
 	@matchid	int,
-	@action varchar(10) = 'CAL',
+	@action varchar(10) = 'REFUND',
 	@LGOnly		bit,
 	@matchdate	datetime
 AS
@@ -17,11 +17,11 @@ BEGIN
 
 	DECLARE @bettype int
 
-	SELECT @bettype = CASE WHEN @action = 'CAL-HT' then 127
-							when @action = 'CAL-FT' then 14
-							ELSE 0
+	select @bettype = CASE WHEN @action = 'REFUND-HT' then 127
+						   when @action = 'REFUND-FT' then 14
+						   ELSE 0
+					  end 
 
-						end
 	WHILE 1=1
 	BEGIN
 		UPDATE TOP (10000) dbo.bettrans with (ROWLOCK, UPDLOCK)

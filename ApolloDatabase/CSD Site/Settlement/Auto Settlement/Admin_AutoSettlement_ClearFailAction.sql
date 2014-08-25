@@ -1,5 +1,5 @@
 ALTER PROCEDURE  [dbo].[Admin_AutoSettlement_ClearFailAction]		
-	@creator int,
+	@AdminId int,
 	@matchid int,	
 	@matchids	VARCHAR(2000) = '',
 	@ErrCode int = 0 OUTPUT,
@@ -11,7 +11,7 @@ AS
 	Task: clear failed auto settlement action for a match
 	DB: SVRPROD/ProdDB	
 	Revisions:		
-
+		- 20140819@Sophia: Change @creator to @AdminId
 	Param explanation:										
 			
 */

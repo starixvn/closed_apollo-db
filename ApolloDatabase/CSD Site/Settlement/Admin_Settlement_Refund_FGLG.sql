@@ -1,7 +1,7 @@
 ALTER PROCEDURE [dbo].[Admin_Settlement_Refund_FGLG]
 	@matchid int,
-	@adminid int,
-	@action varchar(10) = 'CAL',
+	@AdminId int,
+	@action varchar(10) = 'REFUND', -- REFUND, REFUND-FT, REFUND-HT
 	@LGOnly bit,
 	@IP varchar(15) = '',
 	@IsLoopTempTable BIT = 0,
@@ -29,11 +29,13 @@ SET NOCOUNT ON
 DECLARE @Remark VARCHAR(500)
 		, @ActionID	INT
 		, @bettype int
-SELECT	@ActionID = 112
-		, @bettype = CASE when @action = 'CAL-HT' THEN 127
-						  when @action = 'CAL-FT' then 14
-						  ELSE 0
-					 END 
+
+SELECT @ActionID = 112
+		,@bettype = CASE 
+			WHEN @action = 'REFUND-HT' THEN 127
+			WHEN @action = 'REFUND-FT' THEN 14
+			ELSE 0
+			END
 
 IF @IsLoopTempTable = 0
 BEGIN
@@ -50,7 +52,7 @@ BEGIN
 	BEGIN
 		BEGIN TRY
 			EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-				@UserID = @adminID,
+				@UserID = @AdminId,
 				@Matchid = @matchid, 
 				@KeyID = 1,
 				@ActionID = @ActionID, 
@@ -59,7 +61,7 @@ BEGIN
 		BEGIN CATCH	
 			SELECT @Remark = 'ADD SUCCESS ErrMsg=' + left(error_message(), 400)
 			EXEC LogDB.dbo.WriteLog_Settlement_Checking 
-				@UserID = @adminID,
+				@UserID = @AdminId,
 				@Matchid = @matchid, 
 				@KeyID = 1,
 				@ActionID = @ActionID, 
@@ -91,7 +93,9 @@ DECLARE
 	@finalhomescore INT, @finalawayscore INT,
 	@hthomescore INT, @htawayscore INT,
 	@goalrecord varchar(50), @betstatus nvarchar(50),
-	@matchdate datetime
+	@matchdate datetime,
+	@betstatus1 nvarchar(50),
+	@betstatus2 nvarchar(50)
 
 SELECT	@matchdate = eventdate		
 FROM SVRPRO.ProdDB.dbo.match WITH(NOLOCK)
@@ -101,37 +105,48 @@ SELECT	@betstatus = betstatus
 FROM SVRPRO.ProdDB.dbo.match_remark_ex WITH(NOLOCK)
 WHERE matchid=@matchid
 
-IF @LGOnly = 1 ---refund last goal
-BEGIN		
-	IF @action in ('CAL', 'CAL-FT')
-		SET @betStatus = CASE WHEN CHARINDEX('FL:',@betstatus) > 0 THEN STUFF(@betStatus,LEN(@betStatus),1,'0')
-						ELSE @betStatus END 
-	IF @action in ('CAL', 'CAL-HT')
-		SET @betStatus = CASE WHEN CHARINDEX('1FL:',@betstatus) > 0 THEN STUFF(@betstatus, CHARINDEX('1FL:',@betstatus)+ 6,1,'0')
-						ELSE @betStatus END 
-END
-ELSE  --- refund all FGLG
-BEGIN
-	IF @betStatus = 'Refund' 
-		SET @betStatus = 'Refund;'
-	
-	IF @action in ('CAL', 'CAL-HT')
+SELECT @betstatus1 = CASE when CHARINDEX('1FL:',@betstatus) > 0 THEN SUBSTRING(@betstatus, CHARINDEX('1FL:',@betstatus),8)
+							ELSE ''
+					END,
+		@betstatus2 = CASE when CHARINDEX('1FL:',@betstatus) > 0 THEN REPLACE(@betstatus,@betstatus1,'')
+							ELSE @betstatus	
+					END							
+			
+IF @LGOnly = 1 --refund last goal
 	BEGIN
-		SET @betStatus = CASE WHEN CHARINDEX('1FL:',@betstatus) > 0 THEN STUFF(@betstatus, CHARINDEX('1FL:',@betstatus),7,'1FL:0-0')
-						ELSE ISNULL(@betstatus,'') + '1FL:0-0;' END
-	END 
-	
+		IF @action IN ('REFUND', 'REFUND-HT')
+		BEGIN
+			SELECT @betstatus1 = CASE WHEN @betstatus1 = '' THEN @betstatus1 -- Ex: 1FL:1-0;
+									 ELSE STUFF(@betstatus1,7,1,'0')
+								END
+		END
+		IF @action IN ('REFUND', 'REFUND-FT')
+		BEGIN
+			select @betstatus2 = CASE when CHARINDEX('FL:',@betstatus2) > 0 THEN STUFF(@betstatus2,CHARINDEX('FL:',@betstatus2)+5,1,'0')
+									  ELSE @betstatus2
+								 end -- Ex: Refund;FL:1-0;
+		END
+	END
+	ELSE -- refund all FGLG
+	BEGIN
+		IF @action IN ('REFUND', 'REFUND-HT')
+		BEGIN
+			select @betstatus1 = '1FL:0-0;'
+		END
+		IF @action IN ('REFUND', 'REFUND-FT')
+		BEGIN
+			select @betstatus2 = CASE when CHARINDEX('FL:',@betstatus2) > 0 then STUFF(@betstatus2,CHARINDEX('FL:',@betstatus2),7,'FL:0-0;')
+										ELSE @betstatus2 + 'FL:0-0;' -- Ex: Refund;FL:0-0;
+								END 
+		END
+	END
 
-	IF @action in ('CAL', 'CAL-FT')
-	begin
-		SET @betStatus = CASE WHEN CHARINDEX(';FL:',@betstatus) > 0 THEN SUBSTRING(@betStatus,1,CHARINDEX(';FL:',@betStatus)) + 'FL:0-0'  
-						ELSE ISNULL(@betstatus,'') +  'FL:0-0' END 
-	end
-END
+	SELECT @betstatus = @betstatus1 + @betstatus2 
 
-EXEC SVRPRO.ProdDB.dbo.Admin_Match_Update @Command	= 'Admin_Settlement_Refund_FGLG', 
+EXEC SVRPRO.ProdDB.dbo.Admin_Match_Update   @Command	= 'Admin_Settlement_Refund_FGLG', 
 											@MatchID	= @matchid,										
-											@BetStatus	= @betstatus											
+											@BetStatus	= @betstatus,
+											@AdminId	= @AdminId 											
 
 EXEC dbo.Admin_Calculate_RefundFGLG @matchid = @matchid, @action = @action, @LGOnly=@LGOnly, @matchdate=@matchdate
 
@@ -184,7 +199,7 @@ Declare @LogData nvarchar(200)
 SELECT @LogData = 'Calculate (Refund FT FGLG) for matchid:' + CAST(@matchid as nvarchar(10))	
 	+ 'action: ' + @action
 	+ 'LG Only:' + case when @LGOnly = 1 then ' (LG only)' else ' (All)' end
-EXEC dbo.WriteLog_UserLog_T @AdminID, @LogData
+EXEC dbo.WriteLog_UserLog_T @AdminId, @LogData
 
 
 --Write Log Settle
@@ -202,7 +217,7 @@ SELECT @Remark = 'Action=' +@action + ' RefundLGOnly=' + convert(char(1), @LGOnl
 
 BEGIN TRY
 	EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Settle
-		@UserID = @adminid,
+		@UserID = @AdminId,
 		@Matchid = @matchid,
 		@ActionID = @ActionID,
 		@finalhomescore = @finalhomescore,
@@ -217,7 +232,7 @@ END TRY
 BEGIN CATCH
 	SELECT @Remark = @Remark + ' ErrMsg=' + left(error_message(), 350)
 	EXEC LogDB.dbo.WriteLog_Settlement_Settle
-		@UserID = @adminid,
+		@UserID = @AdminId,
 		@Matchid = @matchid,
 		@ActionID = @ActionID,
 		@finalhomescore = @finalhomescore,
@@ -239,7 +254,7 @@ BEGIN
 	BEGIN
 		BEGIN TRY
 			EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking
-				@UserID = @adminID,
+				@UserID = @AdminId,
 				@Matchid = @matchid, 
 				@KeyID = 1,
 				@ActionID = @ActionID, 
@@ -248,7 +263,7 @@ BEGIN
 		BEGIN CATCH
 			SELECT @Remark = 'DEL SUCCESS ErrMsg=' + left(error_message(), 400)
 			EXEC LogDB.dbo.WriteLog_Settlement_Checking
-				@UserID = @adminID,
+				@UserID = @AdminId,
 				@Matchid = @matchid, 
 				@KeyID = 1,
 				@ActionID = @ActionID, 
@@ -259,7 +274,7 @@ BEGIN
 	BEGIN
 		BEGIN TRY
 			EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking
-				@UserID = @adminID,
+				@UserID = @AdminId,
 				@Matchid = @matchid, 
 				@KeyID = 1,
 				@ActionID = @ActionID,
@@ -268,7 +283,7 @@ BEGIN
 		BEGIN CATCH
 			SELECT @Remark = 'DEL FAILED ErrMsg=' + left(error_message(), 400)
 			EXEC LogDB.dbo.WriteLog_Settlement_Checking
-				@UserID = @adminID,
+				@UserID = @AdminId,
 				@Matchid = @matchid, 
 				@KeyID = 1,
 				@ActionID = @ActionID,

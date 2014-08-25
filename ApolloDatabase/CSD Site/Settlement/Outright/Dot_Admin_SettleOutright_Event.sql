@@ -1,5 +1,5 @@
 ALTER PROCEDURE [dbo].[Dot_Admin_SettleOutright_Event]
-	@creator int = 0,
+	@AdminId int = 0,
 	@matchid int,
 	@status nvarchar(10),
 	@isDeadheat bit=0,
@@ -16,6 +16,8 @@ Original: DBPRO.BODB02.Dot_Admin_SettleOutright_Event
 
 Revisions:						
 	- 20131125@Dan: add undo action
+	- 20140819@Sophia: Change @creator to @AdminId
+
 Param's Explanation:
 	- @deadheat = fraction of deadheat to divide (1,2,3  etc)
 
@@ -38,7 +40,7 @@ INSERT INTO SVRTXN.TransDB.dbo.TempVariableNumber (KeyID, KeyValue) VALUES (2, @
 IF (@@Error = 0)
 	BEGIN TRY
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = @creator, 
+			@UserID = @AdminId, 
 			@Matchid = @matchid, 
 			@KeyID = 2,
 			@ActionID = @ActionID, 
@@ -47,7 +49,7 @@ IF (@@Error = 0)
 	BEGIN CATCH		
 		SELECT @LogData = 'ADD SUCCESS SPName = Dot_Admin_SettleOutright_Event MatchID=' + @matchid + ' KeyID=2 ErrMsg='+ left(error_message(), 70)		
 		EXEC SVRTXN.LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = @creator, 
+			@UserID = @AdminId, 
 			@Matchid = @matchid, 
 			@KeyID = 2,
 			@ActionID = @ActionID, 
@@ -117,7 +119,7 @@ END
 
 BEGIN TRY
 	EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_SettleOutright
-		@UserID = @creator,
+		@UserID = @AdminId,
 		@OrId = @matchid,
 		@LeagueId = 0,
 		@ActionID = @ActionID,
@@ -129,7 +131,7 @@ END TRY
 BEGIN CATCH	
 	SELECT @LogData = ' ErrMsg=' + left(error_message(), 250)	
 	EXEC SVRTXN.LogDB.dbo.WriteLog_Settlement_SettleOutright
-		@UserID = @creator,
+		@UserID = @AdminId,
 		@OrId = @matchid,
 		@LeagueId = 0,
 		@ActionID = @ActionID,
@@ -146,7 +148,7 @@ IF (@@Error = 0)
 BEGIN
 	BEGIN TRY
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = @creator, 
+			@UserID = @AdminId, 
 			@Matchid = @matchid, 
 			@KeyID = 2,
 			@ActionID = @ActionID, 
@@ -155,7 +157,7 @@ BEGIN
 	BEGIN CATCH		
 		SELECT @LogData = 'DEL SUCCESS SPName = Dot_Admin_SettleOutright_Event MatchID=' + @matchid + ' KeyID=2 ErrMsg='+ left(error_message(), 70)		
 		EXEC SVRTXN.LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = @creator, 
+			@UserID = @AdminId, 
 			@Matchid = @matchid, 
 			@KeyID = 2,
 			@ActionID = @ActionID, 
@@ -166,7 +168,7 @@ ELSE
 BEGIN
 	BEGIN TRY
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = @creator, 
+			@UserID = @AdminId, 
 			@Matchid = @matchid, 
 			@KeyID = 2,
 			@ActionID = @ActionID, 
@@ -175,7 +177,7 @@ BEGIN
 	BEGIN CATCH		
 		SELECT @LogData = 'DEL FAILED SPName = Dot_Admin_SettleOutright_Event MatchID=' + @matchid + ' KeyID=2 ErrMsg='+ left(error_message(), 70)		
 		EXEC SVRTXN.LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = @creator, 
+			@UserID = @AdminId, 
 			@Matchid = @matchid, 
 			@KeyID = 2,
 			@ActionID = @ActionID, 

@@ -1,3 +1,10 @@
+USE [TransDB]
+GO
+/****** Object:  StoredProcedure [dbo].[Admin_Settlement_RefundFT]    Script Date: 8/20/2014 9:18:22 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 ALTER PROCEDURE [dbo].[Admin_Settlement_RefundFT]
 	@matchid int,
 	@AdminId int,		
@@ -16,6 +23,8 @@ Original:
 	
 Revisions:	
 	- 20140515@Dan: Add 2 new bettypes - 1H total goal, 1H FGLG  (126,127) 
+	- 20140819@Sophia: Change @creator to @AdminId
+
 Param's Explanation:
 • @matchid: matchid of match to Refund HT
 
@@ -152,7 +161,7 @@ BEGIN
 	
 	EXEC dbo.Admin_Settlement_Refund_All 
 		@matchid=@matchid , 		
-		@creator=@adminid,		
+		@AdminId=@adminid,		
 		@betstatus = @betstatus,		
 		@IP=@IP,
 		@ErrCode = @ErrCode OUTPUT,
@@ -167,7 +176,7 @@ EXEC SVRPRO.ProdDB.dbo.Admin_Match_Update @Command	= 'Admin_Settlement_RefundFT'
 										@MatchID	= @matchid, 
 										@HTDone		= @HTDone,
 										@RowCount	= @RowCount OUTPUT,
-										@creator	= @adminid 
+										@AdminId	= @adminid 
 
 IF @RowCount > 0
 BEGIN
@@ -302,5 +311,3 @@ BEGIN
 	END CATCH
 END
 
-GO
-GRANT EXECUTE ON [dbo].[Admin_Settlement_RefundFT] TO [aplweb]

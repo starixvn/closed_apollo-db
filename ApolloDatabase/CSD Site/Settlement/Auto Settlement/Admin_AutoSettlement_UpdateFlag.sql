@@ -1,5 +1,5 @@
 ALTER PROCEDURE  [dbo].[Admin_AutoSettlement_UpdateFlag]		
-	@creator int,
+	@AdminId int,
 	@matchid int,
 	@isTurnOn bit,
 	@IP varchar(15) = '',
@@ -12,6 +12,7 @@ AS
 	Task: turn on/off settlement for a match/all match
 	DB: SVRTRANS/TRANSDB	
 	Revisions:		
+		- 20140819@Sophia: Change @creator to @AdminId
 
 	Param explanation:						
 		@isTurnOn: 0-off; 1-on
@@ -125,11 +126,11 @@ BEGIN
 	SELECT @LogData = 'Turn ' + CASE WHEN @isTurnOn =1 THEN 'on' ELSE 'off' END + ' auto settlement for matchid=' +  CAST(@matchid as varchar(50)) 
 END
 		
-EXEC dbo.WriteLog_UserLog_T  @creator, @LogData
+EXEC dbo.WriteLog_UserLog_T  @AdminId, @LogData
 
 BEGIN TRY
 	EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Settle
-		@UserID = @creator,
+		@UserID = @AdminId,
 		@Matchid = @matchid,
 		@ActionID = 125,
 		@finalhomescore = null,
@@ -144,7 +145,7 @@ END TRY
 BEGIN CATCH	
 	SELECT @LogData = @LogData + ' ErrMsg=' + left(error_message(), 250)	
 	EXEC LogDB.dbo.WriteLog_Settlement_Settle
-		@UserID = @creator,
+		@UserID = @AdminId,
 		@Matchid = @matchid,
 		@ActionID = 125,
 		@finalhomescore = null,

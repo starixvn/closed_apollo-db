@@ -1,5 +1,5 @@
 ALTER PROCEDURE [dbo].[Admin_Settlement_1]
-	@creator int,
+	@AdminId int,
 	@matchid int,
 	@fth smallint = NULL,
 	@fta smallint = NULL,
@@ -21,7 +21,7 @@ AS
 	Original SP: Admin_Settlement_1
 	History:
 		- 20140514@Dan: Add 1H Total Goal and 1H FGLG bettypes (126, 127)
-		
+		- 20140819@Sophia: Change @creator to @AdminId
 	Param's Explanation:
 		+ @betstatus: Used for score table, FGLG status, refund status
 		
@@ -116,7 +116,7 @@ IF (@@Error = 0)
 BEGIN
 	BEGIN TRY
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = @creator, 
+			@UserID = @AdminId, 
 			@Matchid = @matchid, 
 			@KeyID = 1,
 			@ActionID = @ActionID, 
@@ -125,7 +125,7 @@ BEGIN
 	BEGIN CATCH	
 		SELECT @Remark = 'ADD SUCCESS ErrMsg=' + left(error_message(), 400)
 		EXEC LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = @creator, 
+			@UserID = @AdminId, 
 			@Matchid = @matchid, 
 			@KeyID = 1,
 			@ActionID = @ActionID, 
@@ -184,10 +184,10 @@ IF @action = 'UNDO'
 BEGIN
 				
 	EXEC dbo.Admin_Calculate_Undo @matchid
-	EXEC dbo.Admin_Settlement_Parlay @matchid, @creator, 'UNDO', @IP = @IP
+	EXEC dbo.Admin_Settlement_Parlay @matchid, @AdminId, 'UNDO', @IP = @IP
 	EXEC SVRPRO.ProdDB.dbo.Admin_Match_UpdateMatchRemark @matchid, 'U'
 	
-	EXEC SVRPRO.ProdDB.dbo.Admin_Match_Update @Command = 'Admin_Settlement_1-UNDO', @MatchID = @matchid, @creator = @creator 		
+	EXEC SVRPRO.ProdDB.dbo.Admin_Match_Update @Command = 'Admin_Settlement_1-UNDO', @MatchID = @matchid, @AdminId = @AdminId 		
 END
 ELSE
 BEGIN
@@ -243,11 +243,11 @@ BEGIN
 											@Action		= @action,
 											@FTDone		= @FTDone,
 											@HTDone		= @HTDone,
-											@creator	= @creator
+											@AdminId	= @AdminId
 
 	IF LEFT(@action, 3) = 'CAL' 
 	BEGIN		
-		EXEC dbo.Admin_Settlement_3 @creator, @matchid, @action
+		EXEC dbo.Admin_Settlement_3 @AdminId, @matchid, @action
 	END
 
 	--Check and calc FGLG
@@ -257,7 +257,7 @@ BEGIN
 			OR EXISTS (select 1 from bettransm with (nolock) where bettype = 14 and matchid = @matchid)	
 			
 				EXEC dbo.Admin_Settlement_FGLG
-					@creator = @creator,
+					@AdminId = @AdminId,
 					@matchid = @matchid,	
 					@action  = 'CAL-FT',
 					@betstatus = @betstatus,
@@ -275,7 +275,7 @@ BEGIN
 				IF CHARINDEX('1FL:', @betstatus) > 0
 				BEGIN
 					EXEC dbo.Admin_Settlement_FGLG
-						@creator = @creator,
+						@AdminId = @AdminId,
 						@matchid = @matchid,	
 						@action = 'CAL-HT',
 						@betstatus = @betstatus,
@@ -369,7 +369,7 @@ SELECT @stop = CURRENT_TIMESTAMP
 SELECT @LogData = 'Calculate (' + @action + ') for matchid:' + CAST(@matchid as nvarchar(10)) 
 	+ ' score:' + CAST(ISNULL(@fth,0) as nvarchar(10)) + '-' + CAST(ISNULL(@fta,0) as nvarchar(10)) + ' HT:' + CAST(@hth as nvarchar(10)) + '-' + CAST(@hta as nvarchar(10)) 
 	+ ' GoalRecord:' + ISNULL(@goalrecord, '') + '(Old:' + @goalrecord_old  + ') Remark(' + @betstatus + ') (' + CAST(DATEDIFF(millisecond, @start, @stop) as nvarchar(50)) + ' ms)'
-EXEC dbo.WriteLog_UserLog_T  @creator, @LogData
+EXEC dbo.WriteLog_UserLog_T  @AdminId, @LogData
 
 --Write Log Settle
 SELECT @Remark = CASE WHEN LEN(@goalrecord_old) = 0 THEN '' ELSE  'Old GoalRecord:' + @goalrecord_old  + '<br/> ' END 
@@ -379,7 +379,7 @@ SELECT @Remark = CASE WHEN LEN(@goalrecord_old) = 0 THEN '' ELSE  'Old GoalRecor
 	
 BEGIN TRY
 	EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Settle
-		@UserID = @creator,
+		@UserID = @AdminId,
 		@Matchid = @matchid,
 		@ActionID = @ActionID,
 		@finalhomescore = @fth,
@@ -394,7 +394,7 @@ END TRY
 BEGIN CATCH	
 	SELECT @Remark = @Remark + ' ErrMsg=' + left(error_message(), 250)	
 	EXEC LogDB.dbo.WriteLog_Settlement_Settle
-		@UserID = @creator,
+		@UserID = @AdminId,
 		@Matchid = @matchid,
 		@ActionID = @ActionID,
 		@finalhomescore = @fth,
@@ -415,7 +415,7 @@ IF (@@Error = 0)
 BEGIN
 	BEGIN TRY
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = @creator, 
+			@UserID = @AdminId, 
 			@Matchid = @matchid, 
 			@KeyID = 1,
 			@ActionID = @ActionID, 
@@ -424,7 +424,7 @@ BEGIN
 	BEGIN CATCH		
 		SELECT @Remark = 'DEL SUCCESS  ErrMsg=' + left(error_message(), 400)				
 		EXEC LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = @creator, 
+			@UserID = @AdminId, 
 			@Matchid = @matchid, 
 			@KeyID = 1,
 			@ActionID = @ActionID, 
@@ -435,7 +435,7 @@ ELSE
 BEGIN
 	BEGIN TRY		
 		EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = @creator, 
+			@UserID = @AdminId, 
 			@Matchid = @matchid, 
 			@KeyID = 1,
 			@ActionID = @ActionID, 
@@ -444,7 +444,7 @@ BEGIN
 	BEGIN CATCH		
 		SELECT @Remark = 'DEL FAILED  ErrMsg=' + left(error_message(), 400)				
 		EXEC LogDB.dbo.WriteLog_Settlement_Checking 
-			@UserID = @creator, 
+			@UserID = @AdminId, 
 			@Matchid = @matchid, 
 			@KeyID = 1,
 			@ActionID = @ActionID, 

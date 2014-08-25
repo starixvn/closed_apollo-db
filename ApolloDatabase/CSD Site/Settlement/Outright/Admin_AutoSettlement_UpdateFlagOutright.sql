@@ -1,5 +1,5 @@
 ALTER PROCEDURE  [dbo].[Admin_AutoSettlement_UpdateFlagOutright]
-	@creator int,
+	@AdminId int,
 	@leagueid int,
 	@isTurnOn bit,
 	@IP varchar(15) = '',
@@ -12,7 +12,7 @@ AS
 	Task: turn on/off settlement for outright
 	DB: SVRTRANS/TRANSDB	
 	Revisions:		
-
+		- 20140819@Sophia: Change @creator to @AdminId
 	Param explanation:						
 		@isTurnOn: 0-off; 1-on
 		@leagueid: outright league
@@ -81,11 +81,11 @@ END CATCH
 
 SELECT @LogData = 'Turn ' + CASE WHEN @isTurnOn =1 THEN 'on' ELSE 'off' END + ' auto outright settlement for leagueid=' +  CAST(@LeagueID as varchar(50)) 
 		
-EXEC dbo.WriteLog_UserLog_T  @creator, @LogData
+EXEC dbo.WriteLog_UserLog_T  @AdminId, @LogData
 
 BEGIN TRY
 	EXEC SVRLOG.LogDB.dbo.WriteLog_Settlement_SettleOutright
-		@UserID = @creator,
+		@UserID = @AdminId,
 		@OrId = 0,
 		@LeagueId = @leagueid,
 		@ActionID = 126,
@@ -97,7 +97,7 @@ END TRY
 BEGIN CATCH	
 	SELECT @LogData = @LogData + ' ErrMsg=' + left(error_message(), 250)	
 	EXEC LogDB.dbo.WriteLog_Settlement_SettleOutright
-		@UserID = @creator,
+		@UserID = @AdminId,
 		@OrId = 0,
 		@LeagueId = @leagueid,
 		@ActionID = 126,

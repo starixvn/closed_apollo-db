@@ -1,5 +1,5 @@
 ALTER PROCEDURE [dbo].[Admin_Settlement_3]
-	@creator int,
+	@AdminId int,
 	@matchid int,
 	@mode varchar(6) = 'CAL'
 AS
@@ -11,6 +11,7 @@ DB: SVRTXN/TransDB
 Original SP: bodb02.[Admin_Settlement_3]
 Revisions:
 	 - 20140514@Dan: Add new bettype 126
+	 - 20140819@Sophia: Change @creator to @AdminId 
 • @Mode:
     CAL : All BetTypes
     CAL-HT : HT Only

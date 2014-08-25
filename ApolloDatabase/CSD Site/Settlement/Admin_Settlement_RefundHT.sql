@@ -15,6 +15,7 @@ Original:
 
 Revisions:
 	- 20140515@Dan: Add new bettype 126		
+	- 20140819@Sophia: Change @creator to @AdminId
 Param's Explanation:
 • @matchid: matchid of match to Refund HT
 
@@ -129,7 +130,7 @@ BEGIN
 	
 	EXEC dbo.Admin_Settlement_Refund_All 
 			@matchid = @matchid, 
-			@creator = @adminid,			
+			@AdminId = @adminid,			
 			@betstatus = NULL,			
 			@IP = @IP,
 			@ErrCode = @ErrCode OUTPUT,
@@ -143,7 +144,7 @@ DECLARE @RowCount INT
 EXEC SVRPRO.ProdDB.dbo.Admin_Match_Update @Command	= 'Admin_Settlement_RefundHT', 
 										@Matchid	= @matchid,
 										@RowCount	= @Rowcount OUTPUT,
-										@creator	= @adminid 
+										@AdminId	= @adminid 
 
 IF @Rowcount > 0
 BEGIN
