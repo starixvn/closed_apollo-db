@@ -15,6 +15,8 @@ AS
 
 	Revisions:		 
 		 - 20131022@Sophia: Get CurrencyName not user currency
+		 - 20140820@Sophia: Add refund ticket
+
 	Explanation's Param:
 	 	- @IsDeleteAll:
 			 + 0: can only delete the unsettled or refunded tickets
@@ -63,7 +65,7 @@ AS
 		WHERE   B.TransID = @TransID
 				AND Bettype NOT IN (9,29)
 				AND B.StatusID NOT IN (101,102) -- Void, Reject
-			    AND (B.StatusId IN (0,1) OR @IsShowAll = 1)
+			    AND (B.StatusId IN (0,1,103) OR @IsShowAll = 1)
 
 
 		INSERT INTO #Betlist 
@@ -100,7 +102,7 @@ AS
 		WHERE	B.TransID = @TransID
 				AND Bettype NOT IN (9,29)
 				AND B.StatusID NOT IN (101,102) -- Void, Reject
-			    AND (B.StatusId IN (0,1) OR @IsShowAll = 1)	
+			    AND (B.StatusId IN (0,1,103) OR @IsShowAll = 1)	
  
 			   
 	END 
@@ -147,7 +149,7 @@ AS
 			  AND Bettype NOT IN (9,29)
 			  AND B.CustID = @CustID
 			  AND B.StatusID NOT IN (101,102) -- Void, Reject
-			  AND (B.StatusId IN (0,1) OR @IsShowAll = 1)
+			  AND (B.StatusId IN (0,1,103) OR @IsShowAll = 1)
 
 		INSERT INTO #Betlist
 		SELECT
@@ -183,7 +185,7 @@ AS
 			  AND Bettype NOT IN (9,29)
 			  AND B.CustID = @CustID
 			  AND B.StatusID NOT IN (101,102) -- Void, Reject
-			  AND (B.StatusId IN (0,1) OR @IsShowAll = 1)
+			  AND (B.StatusId IN (0,1,103) OR @IsShowAll = 1)
 
 
 

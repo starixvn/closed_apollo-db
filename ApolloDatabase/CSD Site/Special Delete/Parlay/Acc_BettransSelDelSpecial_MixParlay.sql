@@ -27,6 +27,7 @@ AS
 	 - 20130725@Sophia: Change username nvarchar(50)
 	 - 20131022@Sophia: Get CurrencyName not user currency
 	 - 20140811@Sophia: Add 2 new bettypes 1HT Total goal,1HT FGLG (126,127)
+	 - 20140825@Sophia: Get choice_Status
 	
 	Param's Explanation:
 	@Type
@@ -66,6 +67,7 @@ BEGIN
         ,status nvarchar(10)  
         ,spositiontaking smallmoney  
         ,currencyName varchar(50)
+		,choice_Status nvarchar(10)
         ,choice_Bettype int  
         ,choice_HomeID int  
         ,choice_AwayID int   
@@ -94,7 +96,8 @@ BEGIN
       ,liveawayscore smallint  
       ,liveindicator bit        
       ,org_betteam nvarchar(10)       
-      ,statusID int  
+      ,statusID int 
+	  ,Status nvarchar(10) 
      )  
    
 	INSERT INTO #Ref (  
@@ -109,7 +112,8 @@ BEGIN
      ,liveawayscore  
      ,liveindicator  
      ,org_betteam       
-     ,statusID  
+     ,statusID 
+	 ,Status 
     )  
  SELECT refno  
   ,transid  
@@ -122,7 +126,8 @@ BEGIN
   ,liveawayscore  
   ,liveindicator  
   ,betteam    
-  ,statusID  
+  ,statusID 
+  ,Status 
  FROM dbo.bettransm AS b WITH(NOLOCK)    
  WHERE	matchid=@MatchID    
 		AND CASE WHEN @Type = 2 THEN @Type ELSE b.liveindicator END = @Type
@@ -218,7 +223,8 @@ BEGIN
    b.betteam,  
    b.status,  
    b.tpositiontaking,  
-   b.currencyName,       
+   b.currencyName,  
+   r.Status as Choice_Status,     
    r.bettype AS choice_bettype  
    ,m.homeid  
    ,m.awayid  
