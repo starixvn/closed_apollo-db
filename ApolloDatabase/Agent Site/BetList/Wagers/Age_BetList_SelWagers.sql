@@ -24,6 +24,7 @@ Revisions:
  - 20131223@Sophia: Get detail for Parlay
  - 20140225@Sophia: Check condition filter of parlay
  - 20140718@Sophia: Get BetFrom	
+ - 20140828@Sophia: Check betteam for 1H total goal ('4&Over'/'7&Over' instead of 4-Over'/'7-Over')
 Parameters
 	@IsDirectMem : 1: Direct Member
 				   0: All Member
@@ -105,8 +106,12 @@ CREATE TABLE #Betlist  (TransId BIGINT PRIMARY KEY, RefNo BIGINT, MatchId INT, M
 			WHERE		(@Bettypes = '0' OR B.Bettype IN (Select Bettype FROM #BettypeList ))
 						AND B.StatusId IN (0,1)							
 						AND B.LiveIndicator = @LiveIndicator
-						AND (B.betteam = @Betteam OR @betteam = '0')
-						
+						AND (B.betteam = @Betteam 
+							 OR @betteam = '0'
+							 OR (@betteam = '4&Over' AND B.Betteam IN ('4&over', '4-over'))
+							 OR (@betteam = '7&Over' AND B.Betteam IN ('7&over', '7-over'))
+							 )
+							 													
 						AND M.MatchId = @MatchID 
 						AND (@Sporttypes = '0' OR M.sporttype IN (Select sporttype FROM #SportsList))
 						AND M.Eventdate = @Fromdate
