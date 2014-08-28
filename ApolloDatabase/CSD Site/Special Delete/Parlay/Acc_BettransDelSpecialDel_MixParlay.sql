@@ -35,6 +35,8 @@ AS
 	  - 20140414@Sophia: Get EventStatus at match_remark_ex table
 	  - 20140415@Sophia: Get TransId of Bettrans table Instead of TransId of BettransM to push message
 	  - 20140811@Sophia: Add 2 new bettypes 1HT Total goal,1HT FGLG (126,127)
+	  - 20140825@Sophia: Get choice_Status
+
 	Param's Explanation: 
 	@BetTeam430: bettype =4: Correct Score ; bettype =30: 1st Correct Score
 	@BetTeam6: bettype=6: Total Goal; bettype = 126: 1st Total Goal
@@ -120,6 +122,7 @@ BEGIN
 						,liveindicator
 						,org_betteam
 						,statusID 
+						,Status
 				)
 	SELECT b.refno
 		,b.transid
@@ -135,6 +138,7 @@ BEGIN
 		,b.liveindicator
 		,b.betteam		
 		,b.statusID
+		,b.Status
 	FROM dbo.bettransm AS b WITH(NOLOCK)	
 	WHERE b.matchid=@MatchID	
 		AND CASE WHEN @Type = 2 THEN @Type ELSE b.liveindicator END = @Type
@@ -245,7 +249,8 @@ BEGIN
 			   b.betteam,  
 			   b.status,  
 			   b.tpositiontaking,  
-			   b.CurrencyName,       
+			   b.CurrencyName,    
+			   r.Status as Choice_Status, 			   
 			   r.bettype AS choice_bettype  
 			   ,m.homeid AS choice_HomeID  
 			   ,m.awayid AS choice_AwayID

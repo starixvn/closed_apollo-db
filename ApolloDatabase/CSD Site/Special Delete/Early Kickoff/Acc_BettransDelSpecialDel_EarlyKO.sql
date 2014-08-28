@@ -655,6 +655,7 @@ SET NOCOUNT ON
 				m.SportType,
 				m.LeagueId , 
 				b.bettype as parlaytype,
+				b.Betteam as ChoiceBetTeam,
 				0 as IsMP
 			FROM bettrans b WITH (NOLOCK)
 			INNER JOIN #BetDelete d WITH (NOLOCK)
@@ -675,8 +676,8 @@ SET NOCOUNT ON
 				b.modds,    
 				b.OddsType,    
 				bm.transdate,  
-				bm.bettype,  
-				bm.betteam,  
+				b.bettype,  
+				b.betteam,  
 				bm.hdp1,  
 				bm.hdp2,  
 				bm.livehomescore,  
@@ -689,7 +690,8 @@ SET NOCOUNT ON
 				m.AwayId, 
 				m.SportType,
 				m.LeagueId,  		
-				b.bettype as parlaytype,
+				bm.bettype as parlaytype,
+				bm.Betteam as ChoiceBetTeam,
 				1 as IsMP
 			FROM bettrans b WITH (NOLOCK)
 			INNER JOIN BettransM bm WITH (NOLOCK)
