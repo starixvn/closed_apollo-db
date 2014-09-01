@@ -92,11 +92,11 @@ BEGIN
 		' @ErrMsg = @ErrMsg OUTPUT '
 
 END
-ELSE IF @actionID IN (1,23) -- Calculate FG/NG FT, Calculate FG/NG HT
+ELSE IF @actionID IN (1,7) -- Calculate FG/NG FT, Calculate FG/NG HT
 BEGIN	
 
 	SELECT @action = CASE @actionID 			
-			WHEN 23 THEN 'CAL-HT'
+			WHEN 7 THEN 'CAL-HT'
 			WHEN 1 THEN 'CAL-FT'			
 			END
 

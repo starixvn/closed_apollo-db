@@ -156,7 +156,7 @@ BEGIN
 				EXEC dbo.Admin_Settlement_Refund_FGLG	--refund  all LG
 					@matchid = @matchid,
 					@adminid = @AdminId,
-					@action = 'CAL',
+					@action = 'REFUND',
 					@LGOnly = 1,
 					@IP = @IP,
 					@IsLoopTempTable = 1 ---Not check concurrency by TempVariableNumber table
@@ -174,7 +174,7 @@ BEGIN
 				EXEC dbo.Admin_Settlement_Refund_FGLG	--refund FT LG
 					@matchid = @matchid,
 					@adminid = @AdminId,
-					@action = @action,
+					@action = 'REFUND-FT',
 					@LGOnly = 1,
 					@IP = @IP,
 					@IsLoopTempTable = 1 ---Not check concurrency by TempVariableNumber table

@@ -141,7 +141,7 @@ IF @LGOnly = 1 --refund last goal
 		END
 	END
 
-	SELECT @betstatus = @betstatus1 + @betstatus2 
+	SELECT @betstatus = @betstatus2 + @betstatus1
 
 EXEC SVRPRO.ProdDB.dbo.Admin_Match_Update   @Command	= 'Admin_Settlement_Refund_FGLG', 
 											@MatchID	= @matchid,										
