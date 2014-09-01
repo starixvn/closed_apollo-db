@@ -654,8 +654,9 @@ SET NOCOUNT ON
 				m.AwayId, 
 				m.SportType,
 				m.LeagueId , 
-				b.bettype as parlaytype,
+				b.bettype as ChoiceBetType,
 				b.Betteam as ChoiceBetTeam,
+				b.status as ChoiceStatus,
 				0 as IsMP
 			FROM bettrans b WITH (NOLOCK)
 			INNER JOIN #BetDelete d WITH (NOLOCK)
@@ -685,13 +686,14 @@ SET NOCOUNT ON
 				b.Actual_stake,
 				b.stake,
 				b.currencyName, 		
-				d.status,	
+				b.status,	
 				m.HomeId, 
 				m.AwayId, 
 				m.SportType,
 				m.LeagueId,  		
-				bm.bettype as parlaytype,
+				bm.bettype as ChoiceBetType,
 				bm.Betteam as ChoiceBetTeam,
+				bm.status as ChoiceStatus,
 				1 as IsMP
 			FROM bettrans b WITH (NOLOCK)
 			INNER JOIN BettransM bm WITH (NOLOCK)

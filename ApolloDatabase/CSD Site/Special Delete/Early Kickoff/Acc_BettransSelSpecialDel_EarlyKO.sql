@@ -41,7 +41,7 @@ BEGIN
 	
 	CREATE TABLE #SpecialDeleteBetms (transid bigint,SubTransid bigint,refno bigint
 	,custid int, username nvarchar(50), odds smallmoney,modds smallmoney, OddsType int, transdate datetime,bettype smallint, betteam nvarchar(10),hdp1 smallmoney, hdp2 smallmoney,livehomescore smallint, liveawayscore smallint
-	,Actualstake Money, Stake money, CurrencyName varchar(50) , status nvarchar(10), HomeId Int, AwayId int, SportType smallint, LeagueId int, ParlayType smallint, ChoiceBetteam VARCHAR(10))  
+	,Actualstake Money, Stake money, CurrencyName varchar(50) , status nvarchar(10), HomeId Int, AwayId int, SportType smallint, LeagueId int, ChoiceBetType smallint, ChoiceBetteam VARCHAR(10), ChoiceStatus NVARCHAR(10))  
 
 	IF EXISTS( SELECT convert(int,val) FROM dbo.strSplit(@bettypes,'^') Where convert(int,val) in (4,30) )	
 		INSERT INTO #SpecialDeleteBets 
@@ -225,7 +225,8 @@ BEGIN
         --AND ISNULL(SecAcceptFlag,0) = CASE @SAFilter WHEN 0 then ISNULL(SecAcceptFlag,0) WHEN 1 THEN 0 WHEN 2 THEN 1 END		
 	
 	---get sub ticket of a mix parlay	
-	CREATE TABLE #Currency (transid bigint,Refno bigint, CurrencyName varchar(100),oddstype tinyint, bettype smallint, betteam VARCHAR(10), username NVARCHAR(50), modds smallmoney, Actual_stake MONEY, stake MONEY)
+	CREATE TABLE #Currency (transid bigint,Refno bigint, CurrencyName varchar(100),oddstype tinyint, bettype smallint, betteam VARCHAR(10), username NVARCHAR(50),
+							modds smallmoney, Actual_stake MONEY, stake MONEY, Status NVARCHAR(10))
 	IF EXISTS (SELECT 1 FROM dbo.strSplit(@bettypes,'^') WHERE val IN (9,29))
 		AND EXISTS (SELECT 1 FROM dbo.bettransm AS b WITH(NOLOCK) 
 					WHERE b.matchid=@matchid  AND b.transdate>=@KickOffDate 
@@ -235,7 +236,7 @@ BEGIN
 						
 	BEGIN		
 		INSERT INTO #Currency
-		SELECT transid,Refno,CurrencyName,oddstype, b2.bettype, b2.betteam, b2.username,b2.modds, b2.Actual_stake, b2.stake
+		SELECT transid, Refno, CurrencyName, oddstype, b2.bettype, b2.betteam, b2.username, b2.modds, b2.Actual_stake, b2.stake, b2.Status
 		FROM dbo.bettrans AS b2 WITH(NOLOCK)
 			 INNER JOIN dbo.strSplit(@bettypes,'^') AS fb ON b2.bettype=fb.val
 		WHERE b2.matchid IN (9,29)
@@ -267,13 +268,14 @@ BEGIN
 			cy.Actual_stake,
 			cy.stake,
 			cy.currencyName, 		
-			b.status,	
+			cy.status,	
 			m.HomeId, 
 			m.AwayId, 
 			m.SportType,
 			m.LeagueId,  		
-			b.bettype as parlaytype,
-			b.betteam as ChoiceBetTeam
+			b.bettype as ChoiceBetType,
+			b.betteam as ChoiceBetTeam,
+			b.Status AS ChoiceStatus
 		FROM dbo.bettransm b with (NOLOCK)		
 			INNER JOIN Match M WITH (NOLOCK) ON M.MatchId = B.MatchId		
 			INNER JOIN #Currency AS cy WITH(NOLOCK) ON cy.refno= b.refno			
@@ -287,7 +289,7 @@ BEGIN
 	END 
 
 	--SINGLE TICKET SECTION	
-	SELECT s.*, 0 as parlaytype, Betteam AS ChoiceBetTeam, IsMP=0
+	SELECT s.*, 0 as ChoiceBetType, Betteam AS ChoiceBetTeam, Status AS ChoiceStatus, IsMP=0
 	FROM #SpecialDeleteBets AS s with (NOLOCK)	
 		
 	UNION ALL 
