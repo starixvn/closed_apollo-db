@@ -27,6 +27,7 @@ AS
 		- 20140515@Dan: Modify betstatus value (Offer 1H FGLG) 
 		- 20140819@Sophia: Change @creator to @AdminId
 		- 20140828@Sophia: Edit betstatus of FGLG
+		- 20140904@Sophia: Only update HT part of goalrecord when calculating HT
 */
 BEGIN
 	SET @betstatus = ISNULL(@betstatus, N'')
@@ -66,7 +67,10 @@ BEGIN
 			finalhomescore = @FTHome, finalawayscore = @FTAway,
 			hthomescore = @HTHome, htawayscore = @HTAway,
 			betstatus = CASE WHEN @action = 'CAL-FT' AND CHARINDEX('Refund HT;',betstatus)>0 THEN 'Refund HT;' + ISNULL(@betstatus,'') ELSE @betstatus END,
-			GoalRecord = CASE WHEN @GoalRecord IS NULL OR @GoalRecord = '' THEN GoalRecord ELSE @GoalRecord END,
+			--GoalRecord = CASE WHEN @GoalRecord IS NULL OR @GoalRecord = '' THEN GoalRecord ELSE @GoalRecord END,
+			GoalRecord = CASE WHEN @goalrecord IS NULL OR @goalrecord = '' THEN goalrecord 
+							  WHEN @action = 'CAL-HT' AND ISNULL(GoalRecord,'') <> '' THEN REPLACE(GoalRecord,LEFT(GoalRecord,CHARINDEX(';',GoalRecord)),(LEFT(@goalrecord,CHARINDEX(';',@goalrecord)))) -- only update HT part
+							  ELSE @goalrecord END,
 			eventstatus = CASE	WHEN @action = 'CAL' THEN N'completed'
 								WHEN @action = 'CAL-HT' AND @FTDone = 1 THEN N'completed'
 								WHEN @action = 'CAL-FT' AND @HTDone = 1 THEN N'completed'
@@ -139,7 +143,12 @@ BEGIN
 			betstatus= case when right(@BetStatus,1) = ';' THEN @betstatus
 							 ELSE @betstatus + ';'
 						END,
-			GoalRecord = @GoalRecord, changetime = GETDATE()
+			GoalRecord = CASE WHEN @goalrecord IS NULL OR @goalrecord = '' THEN goalrecord 
+							   WHEN @action = 'CAL-HT' AND ISNULL(GoalRecord,'') <> '' THEN REPLACE(GoalRecord,LEFT(GoalRecord,CHARINDEX(';',GoalRecord)),(LEFT(@goalrecord,CHARINDEX(';',@goalrecord)))) -- only update HT part
+							   ELSE @goalrecord 
+						  END,
+			--GoalRecord = @GoalRecord, 
+			changetime = GETDATE()
 		WHERE matchid = @MatchID
 	END
 	IF @Command = 'Admin_Settlement_Refund_FGLG'
