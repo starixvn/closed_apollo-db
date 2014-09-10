@@ -26,27 +26,39 @@ EXEC dbo.WriteLog_UserLog_T @UserID = 70, @Doing = @Doing
 UPDATE b
 SET WinLostDate = o.eventdate
 FROM dbo.bettrans b WITH (ROWLOCK,UPDLOCK)
-INNER JOIN dbo.outright o  WITH (NOLOCK) ON b.matchid = o.orid
+	INNER JOIN dbo.outright o  WITH (NOLOCK) ON b.matchid = o.orid
 WHERE b.winlostdate <> o.eventdate
+	AND b.matchid > 0
+	AND BetType IN (10,31,32,33)
 
 UPDATE b
 SET WinLostDate = o.eventdate
 FROM dbo.BetTrans_Agent b WITH (ROWLOCK,UPDLOCK)
 INNER JOIN dbo.outright o  WITH (NOLOCK) ON b.matchid = o.orid
 WHERE b.winlostdate <> o.eventdate
+	AND b.matchid > 0
+	AND BetType IN (10,31,32,33)
 -----
 
 UPDATE b
 SET winlostdate = m.eventdate
 FROM dbo.bettrans b WITH (ROWLOCK,UPDLOCK)
-INNER JOIN dbo.match m  WITH (NOLOCK) ON b.matchid = m.matchid
-WHERE b.winlostdate <> m.eventdate
+	INNER JOIN dbo.match m  WITH (NOLOCK) ON b.matchid = m.matchid
+WHERE b.winlostdate <> m.eventdate	
+	AND b.matchid > 0
+	AND b.bettype NOT IN (1231, 1232, 1233, 1237, 1238) -- exclude vsoutright
+	AND b.bettype NOT IN (10,31,32,33) -- exclude outright 
+	AND b.bettype NOT BETWEEN 1501 AND 1599  --- exclude keno
 
 UPDATE b
 SET winlostdate = m.eventdate
 FROM dbo.BetTrans_Agent b WITH (ROWLOCK,UPDLOCK)
 INNER JOIN dbo.match m WITH (NOLOCK) ON b.matchid = m.matchid
 WHERE b.winlostdate <> m.eventdate
+	AND b.matchid > 0
+	AND b.bettype NOT IN (1231, 1232, 1233, 1237, 1238) -- exclude vsoutright
+	AND b.bettype NOT IN (10,31,32,33) -- exclude outright 
+	AND b.bettype NOT BETWEEN 1501 AND 1599  --- exclude keno
 
  
  
@@ -233,7 +245,7 @@ BEGIN
 	PRINT 'DATA OK'
 
 	IF EXISTS (SELECT 1 FROM bettrans WITH (NOLOCK)
-		WHERE bettype = 10 
+		WHERE BetType IN (10,31,32,33)
 			AND statusID = 0 
 			AND winlostdate = @winlostdate)
 		PRINT 'Some Outright need to moved : Run with parameter = 2'
@@ -256,7 +268,7 @@ END
 -- =====================
 
 SELECT	TOP 1 transid FROM bettrans WITH (NOLOCK)
-WHERE	bettype = 10 
+WHERE	BetType IN (10,31,32,33)
 		AND statusID = 0 
 		AND winlostdate = @winlostdate  
 
@@ -264,7 +276,7 @@ IF @@ROWCOUNT > 0
 BEGIN
 	Declare @outright TABLE (orid int)
 	INSERT INTO @outright SELECT distinct matchid FROM bettrans WITH (NOLOCK)
-	WHERE	bettype = 10 
+	WHERE	BetType IN (10,31,32,33)
 			AND statusID = 0 
 			AND winlostdate <= @winlostdate
 
@@ -358,12 +370,6 @@ END
 -- =====================
 -- Daily Summary Process
 -- =====================
-
--- Summary WinLost Report : Later
-/*
-EXEC DB06.bodb02.dbo.Task_rptWinLost_UpdateTable @winlostdate
-WAITFOR DELAY '000:00:30'
-*/
 
 ---- No Need because Delete /Cancel ticket not have custID = 0 any more 
 ---- Clear deleted/cancel record (custid = 0)
@@ -591,6 +597,7 @@ EXEC Task_BalanceCheck @winlostdate, 2
 SET @Doing = 'Task_DailySummary : SumWinlost start insert'
 EXEC dbo.WriteLog_UserLog_T @UserID = 70, @Doing = @Doing  
 
+--summary winlost report
 EXEC Task_SummaryReport_GenData @winlostdate
 
 SET NOCOUNT OFF
@@ -605,7 +612,9 @@ where orid in (select orid from outright where eventdate = @winlostdate AND odds
 
 EXEC [Task_AutoSettlement_CleanUp] @winlostdate
 
-EXEC SVRPRO.ProdDB.dbo.Task_DailySummary_ProdDB_Delete @winlostdate
+
+IF (@@SERVERNAME != 'SANDBOX-TRANS') --not delete event at sandbox, it will be deleted by production 
+	EXEC SVRPRO.ProdDB.dbo.Task_DailySummary_ProdDB_Delete @winlostdate
 
 
 
