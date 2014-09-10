@@ -101,7 +101,8 @@ BEGIN
 						,liveawayscore smallint
 						,liveindicator bit						
 						,org_betteam nvarchar(10)	
-						,statusID int 				
+						,statusID int 
+						,Status VARCHAR(10)
 					) 
  
 
