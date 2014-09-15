@@ -66,7 +66,8 @@ BEGIN
 		SET
 			finalhomescore = @FTHome, finalawayscore = @FTAway,
 			hthomescore = @HTHome, htawayscore = @HTAway,
-			betstatus = CASE WHEN @action = 'CAL-FT' AND CHARINDEX('Refund HT;',betstatus)>0 THEN 'Refund HT;' + ISNULL(@betstatus,'') ELSE @betstatus END,
+			--betstatus = CASE WHEN @action = 'CAL-FT' AND CHARINDEX('Refund HT;',betstatus)>0 THEN 'Refund HT;' + ISNULL(@betstatus,'') ELSE @betstatus END,
+			betstatus = ISNULL(@betstatus,''),
 			--GoalRecord = CASE WHEN @GoalRecord IS NULL OR @GoalRecord = '' THEN GoalRecord ELSE @GoalRecord END,
 			GoalRecord = CASE WHEN @goalrecord IS NULL OR @goalrecord = '' THEN goalrecord 
 							  WHEN @action = 'CAL-HT' AND ISNULL(GoalRecord,'') <> '' THEN REPLACE(GoalRecord,LEFT(GoalRecord,CHARINDEX(';',GoalRecord)),(LEFT(@goalrecord,CHARINDEX(';',@goalrecord)))) -- only update HT part
