@@ -28,6 +28,7 @@ AS
 		- 20140819@Sophia: Change @creator to @AdminId
 		- 20140828@Sophia: Edit betstatus of FGLG
 		- 20140904@Sophia: Only update HT part of goalrecord when calculating HT
+		- 20140918@Sophia: fix Null value of betstatus when refund (Redmine ID: #22758)
 */
 BEGIN
 	SET @betstatus = ISNULL(@betstatus, N'')
@@ -92,10 +93,10 @@ BEGIN
 			--							 when CHARINDEX('1FL:',ISNULL(betstatus,'')) = 0 AND CHARINDEX('FL:',ISNULL(betstatus,'')) <> 0 THEN ';' + SUBSTRING(betstatus,CHARINDEX('FL:', betstatus),LEN(betstatus))
 			--							 ELSE ';' + SUBSTRING(betstatus,CHARINDEX('1FL', betstatus),LEN(betstatus))
 			--						END 
-			,betstatus = 'Refund;' + CASE  WHEN CHARINDEX('Refund;',betstatus) > 0 THEN REPLACE(betstatus,'Refund;','')
-										WHEN CHARINDEX('Refund FT;',betstatus) > 0 THEN REPLACE(betstatus,'Refund FT;','')
-										WHEN CHARINDEX('Refund HT;',betstatus)>0 THEN REPLACE(betstatus,'Refund HT;','')
-										ELSE betstatus
+			,betstatus = 'Refund;' + CASE  WHEN CHARINDEX('Refund;',betstatus) > 0 THEN REPLACE(ISNULL(betstatus,''),'Refund;','')
+										WHEN CHARINDEX('Refund FT;',betstatus) > 0 THEN REPLACE(ISNULL(betstatus,''),'Refund FT;','')
+										WHEN CHARINDEX('Refund HT;',betstatus)>0 THEN REPLACE(ISNULL(betstatus,''),'Refund HT;','')
+										ELSE ISNULL(betstatus,'')
 									END
 			,GoalRecord =''
 			,changetime = GETDATE(), settleTime = GETDATE()
@@ -107,10 +108,10 @@ BEGIN
 		SET finalhomescore=0, finalawayscore=0, 
 			--betstatus = CASE WHEN CHARINDEX('Refund;', betstatus) > 0 THEN betstatus ELSE 'Refund FT;' + replace(ISNULL(betstatus,''), 'Refund FT;', '') END ,
 			betstatus = CASE WHEN CHARINDEX('Refund;', betstatus) > 0 
-									THEN betstatus 
+									THEN ISNULL(betstatus,'') 
 							 ELSE 'Refund FT;' + CASE WHEN CHARINDEX('Refund HT;',betstatus) > 0 
-															THEN REPLACE(betstatus, 'Refund HT;', '') 
-													  ELSE REPLACE(betstatus, 'Refund FT;', '')
+															THEN REPLACE(ISNULL(betstatus,''), 'Refund HT;', '') 
+													  ELSE REPLACE(ISNULL(betstatus,''), 'Refund FT;', '')
 												 END
 						END,
 			eventstatus = 'Completed', changetime = GETDATE(), settleTime = GETDATE()
@@ -125,10 +126,10 @@ BEGIN
 		SET hthomescore=0, htawayscore=0, 
 			--betstatus = CASE WHEN CHARINDEX('Refund;', betstatus) > 0 THEN betstatus ELSE 'Refund HT;' + replace(ISNULL(betstatus,''), 'Refund HT;', '') END,
 			betstatus = CASE WHEN CHARINDEX('Refund;', betstatus) > 0 
-									THEN betstatus 
+									THEN ISNULL(betstatus,'') 
 							 ELSE 'Refund HT;' + CASE WHEN CHARINDEX('Refund FT;',betstatus) > 0 
 															THEN REPLACE(ISNULL(betstatus,''), 'Refund FT;', '') 
-													  ELSE REPLACE(betstatus, 'Refund HT;', '')
+													  ELSE REPLACE(ISNULL(betstatus,''), 'Refund HT;', '')
 												 END
 						END,
 			changetime = GETDATE()
