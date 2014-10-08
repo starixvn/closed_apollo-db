@@ -1,10 +1,13 @@
 USE [TransDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Admin_Settlement_Parlay]    Script Date: 10/2/2014 2:51:19 AM ******/
+
+/****** Object:  StoredProcedure [dbo].[Admin_Settlement_Parlay]    Script Date: 10/8/2014 5:14:21 AM ******/
 SET ANSI_NULLS ON
 GO
+
 SET QUOTED_IDENTIFIER ON
 GO
+
 /****** Object:  Stored Procedure dbo.Admin_Settlement_Parlay    Script Date: 9/10/2014 9:39:38 AM ******/
 ALTER PROCEDURE [dbo].[Admin_Settlement_Parlay] 
 (
@@ -25,7 +28,6 @@ AS
 	History:		
 		- 20140514@Dan: allow to execute undo action without score   
 		- 20140819@Sophia: Change @creator to @AdminId
-		- 20141002@Dan: Compare with 'Refund;' instead of 'Refund' at checking Tennis/VolleyBall/Badminton/Squash section
 								   
 	Param's Explanation:
 		+ @betstatus: Used for score table, FGLG status, refund status
@@ -145,7 +147,7 @@ BEGIN
 		FROM @match
 		WHERE rn = @rn
 
-		IF (@SportType IN (5, 6, 9, 30)) and @action = 'CAL' and @betstatus <> 'Refund;' -- Tennis/VolleyBall/Badminton/Squash: get TotalGamesPlayed
+		IF (@SportType IN (5, 6, 9, 30)) and @action = 'CAL' and @betstatus not like 'Refund%' -- Tennis/VolleyBall/Badminton/Squash: get TotalGamesPlayed
 			EXEC dbo.Admin_Settlement_2
 					@betstatus	= @betstatus,
 					@Total		= @TennisTotal OUTPUT,
@@ -436,3 +438,9 @@ DROP TABLE #BalanceAfter
     WHERE VName = 'isCalculatingParlay'
 
 END
+GO
+
+GRANT EXECUTE ON [dbo].[Admin_Settlement_Parlay] TO [aplweb] AS [dbo]
+GO
+
+
