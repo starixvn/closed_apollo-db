@@ -1,10 +1,13 @@
 ﻿USE [CustDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateDirectMemberPositionTaking]    Script Date: 9/20/2013 4:53:07 PM ******/
+/****** Object:  StoredProcedure [dbo].[Age_Agent_UpdateDirectMemberPositionTaking]    Script Date: 10/12/2014 10:41:50 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+/****** Object:  Stored Procedure dbo.Age_Agent_UpdateDirectMemberPositionTaking    Script Date: 10/28/2013 10:56:00 AM ******/
+
+
 
 
 
@@ -63,7 +66,29 @@ BEGIN
 	SET NOCOUNT ON
 	
 	-- Check update permission
-	DECLARE @hasPermission BIT	
+	IF @ActorAgentId <> @AgentId
+	BEGIN
+		DECLARE @hasPermission BIT
+
+		EXEC dbo.Age_Agent_CheckUpdatePermission 
+			@ActorAgentId,
+			@AgentId,
+			1,				-- Is Agent
+			@hasPermission OUTPUT 
+	
+		IF @hasPermission = 0
+			BEGIN
+				SELECT 
+					@ErrCode = 1000,
+					@ErrMsg	= 
+						CASE @Language
+							WHEN 'en-US' THEN 'You do not have permission to update setting'
+							ELSE [dbo].f_Msg_GetContentById (1000, @Language)
+						END
+
+				RETURN
+			END
+	END
 
 	IF @PositionTaking <> ''
 		BEGIN
@@ -74,14 +99,9 @@ BEGIN
 				@duration		INT,
 				@logSPData		VARCHAR(5000),
 				@logSPDataOld	VARCHAR(5000),
-				@xml			XML,
-				@CustId			INT
+				@xml			XML
 
-			SET @startRun = GETDATE()
-
-			SELECT TOP(1) @CustId = CustId
-			FROM CustInfo WITH (NOLOCK)
-			WHERE AgentId = @AgentId
+			SET @startRun = GETDATE()			
 
 			CREATE TABLE #TablePositionTaking(
 				SportType	SMALLINT,
@@ -120,13 +140,13 @@ BEGIN
 			DELETE tpt
 			FROM 
 				#TablePositionTaking AS tpt
-				INNER JOIN dbo.CustPositionTaking AS cpt WITH (NOLOCK)
+				INNER JOIN dbo.AgentCustPositionTaking AS cpt WITH (NOLOCK)
 				ON 	cpt.SportType	= tpt.SportType
 					AND cpt.BetType	= tpt.BetType
 					AND cpt.IsLive	= tpt.IsLive
 			WHERE 
 				cpt.PositionTaking	= tpt.PT
-				AND cpt.CustId		= @CustId
+				AND cpt.AgentCustId	= @AgentId
 				AND cpt.AgentId		= @AgentId
 
 			IF EXISTS (	SELECT 1 FROM #TablePositionTaking )
@@ -138,10 +158,10 @@ BEGIN
 							,BetType		AS '@b'
 							,IsLive			AS '@i'
 							,PositionTaking	AS '@p'
-						FROM dbo.CustPositionTaking WITH (NOLOCK)							
+						FROM dbo.AgentCustPositionTaking WITH (NOLOCK)							
 						WHERE 
-							AgentId	= @AgentId
-							AND CustId	= @CustId
+							AgentId			= @AgentId
+							AND AgentCustId	= @AgentId
 						ORDER BY
 							SportType							
 							,IsLive
@@ -292,8 +312,7 @@ BEGIN
 							ON apt.SportType	= tpt.SportType
 							AND apt.BetType		= tpt.BetType
 							AND apt.IsLive		= tpt.IsLive
-					WHERE ai.AgentHId.IsDescendantOf(@agentHId) = 1	 
-						AND EXISTS (SELECT TOP(1) * FROM CustInfo AS ci WITH (NOLOCK) WHERE ci.AgentId = ai.AgentId)						
+					WHERE ai.AgentHId.IsDescendantOf(@agentHId) = 1	 						
 						AND ai.AgentId = @AgentId
 				   
 					UPDATE pt
@@ -310,15 +329,12 @@ BEGIN
 							ON pt.SportType			= tpt.SportType
 							AND pt.BetType			= tpt.BetType
 							AND pt.IsLive			= tpt.IsLive
-						INNER JOIN CustPositionTaking AS cpt WITH (NOLOCK)
+						INNER JOIN AgentCustPositionTaking AS cpt WITH (NOLOCK)
 							ON pt.SportType			= cpt.SportType
 							AND pt.BetType			= cpt.BetType
 							AND pt.IsLive			= cpt.IsLive			
-						INNER JOIN CustInfo AS ci WITH (NOLOCK)
-							ON cpt.CustId			= ci.CustId
-							AND cpt.AgentId			= pt.AgentId
-					WHERE ci.AgentId	= pt.AgentId 
-						AND ci.CustId 	= @CustId
+							AND pt.AgentId			= cpt.AgentCustId
+							AND pt.ParentAgentId	= cpt.AgentId						
 					
 					UPDATE pt
 					SET pt.SumPresetDown			= temp.SumPresetDownLine	
@@ -403,17 +419,15 @@ BEGIN
 					FROM #TableAllLinePositionTaking AS pt
 					WHERE pt.MemPositionTaking = pt.NewMemPositionTaking			
 																							 
-					UPDATE cpt 
-					SET	cpt.PositionTaking = tapt.NewMemPositionTaking
-					FROM CustPositionTaking AS cpt WITH (ROWLOCK, UPDLOCK)
-						INNER JOIN CustInfo AS ci WITH (NOLOCK)
-							ON cpt.CustId = ci.CustId
+					UPDATE acpt 
+					SET	acpt.PositionTaking = tapt.NewMemPositionTaking
+					FROM AgentCustPositionTaking AS acpt WITH (ROWLOCK, UPDLOCK)						
 						INNER JOIN #TableAllLinePositionTaking AS tapt
-							ON ci.AgentId		= tapt.AgentId
-							AND cpt.SportType	= tapt.SportType
-							AND cpt.BetType		= tapt.BetType
-							AND cpt.IsLive		= tapt.IsLive
-							AND cpt.AgentId		= tapt.ParentAgentId															
+							ON acpt.AgentCustId	= tapt.AgentId
+							AND acpt.SportType	= tapt.SportType
+							AND acpt.BetType	= tapt.BetType
+							AND acpt.IsLive		= tapt.IsLive
+							AND acpt.AgentId	= tapt.ParentAgentId															
 					-- End edit position taking on member 	
 
 					DROP TABLE #TableAllLinePositionTaking
@@ -465,3 +479,7 @@ BEGIN
 		END
 END
 
+GO
+
+GRANT EXECUTE ON [dbo].[Age_Agent_UpdateDirectMemberPositionTaking] TO [aplweb] AS [dbo]
+GO
