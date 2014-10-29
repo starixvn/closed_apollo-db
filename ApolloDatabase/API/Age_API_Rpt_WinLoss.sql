@@ -42,11 +42,11 @@ Test string:
 BEGIN 
 SET NOCOUNT ON
 
-IF NOT EXISTS ( SELECT 1 FROM dbo.AgentUser WITH (NOLOCK) WHERE AgentUserId = @UserId )
+IF NOT EXISTS ( SELECT 1 FROM dbo.AgentInfo WITH (NOLOCK) WHERE AgentId = @UserId )
 			BEGIN
 				SELECT 
-					@ErrCode = 5300, 
-					@ErrMsg = 'Agent user ID not exist [AgentUserId = ' + COALESCE(CAST(@UserId AS VARCHAR(10)), SPACE(1)) + ']'
+					@ErrCode = 5100, 
+					@ErrMsg = 'Agent ID not exist [AgentId = ' + COALESCE(CAST(@UserId AS VARCHAR(10)), SPACE(1)) + ']'
 				RETURN
 			END	
 
@@ -176,7 +176,7 @@ BEGIN
 				SUM(BetAmount) AS Member_Stake,
 				SUM(Winlost) AS Winloss_Amt,	
 				SUM(CommBase) AS Comm_Base_Amt,
-				CONVERT(VARCHAR(10),'') AS Comm_Type,
+				CONVERT(NVARCHAR(1),'') AS Comm_Type,
 				CONVERT(MONEY,0) AS Comm_Rate,
 				SUM(PlayerComm) AS Comm_Amt,
 				SUM(MemberTotal) AS Total_Amt,
