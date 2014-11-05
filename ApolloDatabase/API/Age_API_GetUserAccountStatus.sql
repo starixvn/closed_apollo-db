@@ -90,3 +90,7 @@ END
 GO 
 GRANT EXECUTE ON [dbo].[Age_API_GetUserAccountStatus] TO [aplweb]
 Go
+
+GO
+GRANT EXECUTE ON [dbo].[Age_API_GetUserAccountStatus] TO [apollo_srv] AS [dbo]
+GO
