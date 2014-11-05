@@ -207,6 +207,6 @@ END
 
 END 
 
-
-
-
+GO
+GRANT EXECUTE ON [dbo].[Age_API_Rpt_WinLoss] TO [apollo_srv] AS [dbo]
+GO
