@@ -64,6 +64,19 @@ BEGIN
 	INSERT INTO #DetailMember (Username, CustId, Share, BetCount, BetAmount, CommBase,  Winlost, PlayerComm, MemberTotal, AWinLost, AComm, ATotal, UplineEffStake, UplineTotal, OutstandingAmount, OutstandingShareAmount)
 	EXEC Age_Rpt_WinLoss_Member @FromDate = @FromDate, @ToDate = @ToDate, @BalanceUpDay = @BalanceUpDay, @MoveBetDay = @MoveBetDay, @AgentID = @UserId,@Sporttypes='0',@Bettypes='0'
 
+
+---delete data no need	
+DELETE	#DetailMember 
+WHERE	ISNULL(BetAmount ,0) = 0
+		AND ISNULL( CommBase ,0) = 0
+		AND ISNULL( Winlost ,0) = 0
+		AND ISNULL( PlayerComm ,0) = 0
+		AND ISNULL( MemberTotal ,0) = 0
+		AND ISNULL( BetCount ,0) = 0	 
+
+
+
+---Get data
 	SELECT	0 AS User_Type,
 			R.CustId AS User_Id,  
 			R.Username AS User_Name,
@@ -82,7 +95,8 @@ BEGIN
 			ON C.CustId = R.CustId
 	INNER JOIN SVRCUST.CustDB.dbo.CustDiscount D WITH (NOLOCK) 
 			ON C.CustID = D.CustID AND D.Bettype = 1 AND D.Sporttype = 1
-	
+	WHERE	ISNULL(BetCount,0)>0
+
 END
 ELSE
 BEGIN 
@@ -115,6 +129,39 @@ BEGIN
 	END 
 	
 	
+
+	
+---delete data no need
+DELETE	#WinLossAgent 
+WHERE	ISNULL(BetAmount,0) = 0
+		AND ISNULL(CommBase,0) = 0
+		AND ISNULL(Winlost,0) = 0
+		AND ISNULL(PlayerComm,0) = 0
+		AND ISNULL(MemberTotal,0) = 0
+		AND ISNULL(AWinLost ,0) = 0
+		AND ISNULL(AComm ,0) = 0
+		AND ISNULL(ATotal ,0) = 0 
+		AND ISNULL(DownlineEffStake ,0) = 0
+		AND ISNULL(GrossTotal ,0) = 0
+		AND ISNULL(UplineEffStake ,0) = 0
+		AND ISNULL(UplineTotal ,0) = 0
+		
+
+
+DELETE	#WinLossMember 
+WHERE	ISNULL(BetAmount ,0) = 0
+		AND ISNULL( CommBase ,0) = 0
+		AND ISNULL( Winlost ,0) = 0
+		AND ISNULL( PlayerComm ,0) = 0
+		AND ISNULL( MemberTotal ,0) = 0
+		AND ISNULL( AWinLost ,0) = 0
+		AND ISNULL( AComm ,0) = 0
+		AND ISNULL( ATotal ,0) = 0		
+		AND ISNULL( UplineEffStake ,0) = 0
+		AND ISNULL( UplineTotal ,0) = 0
+
+
+
 
 	----- ################## GET DATA ##################---------
 	--- agent's direct downline agents
@@ -149,6 +196,7 @@ BEGIN
 		INNER JOIN #AgentShare PT
 				ON PT.AgentID = A.AgentId 
 		GROUP BY A.AgentId, A.Username, A.isAgent, PT.MaxUpperPositionTaking 
+		HAVING SUM(BetCount) > 0    
 		ORDER BY Agent_Share ASC, Username ASC
 
 	END			
@@ -170,35 +218,39 @@ BEGIN
 
 		 
 		----- Get Data  
-		SELECT	1 AS User_Type,
-				@UserId AS User_Id,  
-				@Username AS User_Name,
-				SUM(BetAmount) AS Bet_Amt,
-				SUM(Winlost) AS Winloss_Amt,	
-				SUM(CommBase) AS Comm_Base_Amt,
-				CONVERT(VARCHAR(3),'') AS Comm_Type,
-				CONVERT(MONEY,0) AS Comm_Rate,
-				SUM(PlayerComm) AS Comm_Amt,
-				SUM(MemberTotal) AS Total_Amt,
-				@MaxUpperPositionTaking AS Agent_Share,
-				SUM(GrossTotal) AS Ptu_Amt, 
-				SUM(BetCount) AS Bet_Count
-		FROM	#WinLossAgent A		
-		UNION ALL	
-		SELECT	0 AS User_Type,
-				@UserId  AS User_Id,  
-				@Username AS User_Name,
-				SUM(BetAmount) AS Bet_Amt,
-				SUM(Winlost) AS Winloss_Amt,	
-				SUM(CommBase) AS Comm_Base_Amt,
-				CONVERT(VARCHAR(3),'') AS Comm_Type,
-				CONVERT(MONEY,0) AS Comm_Rate,
-				SUM(PlayerComm) AS Comm_Amt,
-				SUM(MemberTotal) AS Total_Amt,
-				@MaxUpperPositionTaking AS Agent_Share,
-				SUM(GrossTotal) AS Ptu_Amt, 
-				SUM(BetCount) AS Bet_Count
-		FROM	#WinLossMember A 
+		SELECT * FROM 
+				(
+				SELECT	1 AS User_Type,
+						@UserId AS User_Id,  
+						@Username AS User_Name,
+						SUM(BetAmount) AS Bet_Amt,
+						SUM(Winlost) AS Winloss_Amt,	
+						SUM(CommBase) AS Comm_Base_Amt,
+						CONVERT(VARCHAR(3),'') AS Comm_Type,
+						CONVERT(MONEY,0) AS Comm_Rate,
+						SUM(PlayerComm) AS Comm_Amt,
+						SUM(MemberTotal) AS Total_Amt,
+						@MaxUpperPositionTaking AS Agent_Share,
+						SUM(GrossTotal) AS Ptu_Amt, 
+						SUM(BetCount) AS Bet_Count
+				FROM	#WinLossAgent A		
+				UNION ALL	
+				SELECT	0 AS User_Type,
+						@UserId  AS User_Id,  
+						@Username AS User_Name,
+						SUM(BetAmount) AS Bet_Amt,
+						SUM(Winlost) AS Winloss_Amt,	
+						SUM(CommBase) AS Comm_Base_Amt,
+						CONVERT(VARCHAR(3),'') AS Comm_Type,
+						CONVERT(MONEY,0) AS Comm_Rate,
+						SUM(PlayerComm) AS Comm_Amt,
+						SUM(MemberTotal) AS Total_Amt,
+						@MaxUpperPositionTaking AS Agent_Share,
+						SUM(GrossTotal) AS Ptu_Amt, 
+						SUM(BetCount) AS Bet_Count
+				FROM	#WinLossMember A 
+				) A 
+		WHERE ISNULL(Bet_Count, 0) > 0 
 		ORDER BY User_Type DESC
 
 	END 
