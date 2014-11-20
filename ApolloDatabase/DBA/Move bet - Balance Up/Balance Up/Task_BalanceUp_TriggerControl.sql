@@ -15,7 +15,7 @@ DB: SVRTXN.TransDB
 Original: 
 
 Revisions: 
-	
+	- 20141119@Sophia: Add trigger Balance_Insert_CreditTrans
 Param's Explanation: 
 
 */
@@ -23,9 +23,11 @@ SET NOCOUNT ON
 	
 	IF @On = 1 ENABLE  TRIGGER balance_insert_Bettrans ON BalanceTable_tmp
 	IF @On = 0 DISABLE TRIGGER balance_insert_Bettrans ON BalanceTable_tmp
-
+	
 	IF @On = 1 ENABLE  TRIGGER balance_insert_Bettrans_Agent ON BalanceTable_Agent_tmp
 	IF @On = 0 DISABLE TRIGGER balance_insert_Bettrans_Agent ON BalanceTable_Agent_tmp
 
+	IF @On = 1 ENABLE  TRIGGER Balance_Insert_CreditTrans ON BalanceCreditTrans
+	IF @On = 0 DISABLE TRIGGER Balance_Insert_CreditTrans ON BalanceCreditTrans
 
 WAITFOR DELAY '000:00:04.000'

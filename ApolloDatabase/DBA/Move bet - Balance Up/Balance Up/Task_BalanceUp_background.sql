@@ -20,7 +20,7 @@ Original:
 
 Revisions: 
 	- 20131230@Sophia: Not insert Balance ticket (bettype 20000) for deleted AgentID (AgentID not have data in AgentInfo)
-	
+	- 20141118@Sophia: Balance Up for CreditTrans
 Param's Explanation: 
 
 */
@@ -104,6 +104,7 @@ BEGIN
 	truncate table BalanceTable_tmp
 	truncate table BalanceTable_Agent
 	truncate table BalanceTable_Agent_Tmp
+	truncate table BalanceCreditTrans
 
 	---later
 	EXEC dbo.Task_BalanceCheck @fdate, 11
@@ -193,7 +194,7 @@ BEGIN
 			) T
 		GROUP BY AgentId  
  
-		----- Delete AgentID not have data in AgentInfo (Deleted AgentID)
+		------- Delete AgentID not have data in AgentInfo (Deleted AgentID)
 		DELETE	B
 		FROM	BalanceTable_Agent B
 		LEFT JOIN AgentInfo  A 
@@ -275,6 +276,18 @@ BEGIN
 				,[TicketCount],[BalTicketCount] 
 		FROM BalanceTable_Agent
  
+
+		------ Balance of CreditTrans		
+		--- Not to care The Balance Credit Transfer of CustId , because it is calculated on Bettrans table
+
+		INSERT INTO BalanceCreditTrans (AgentId, WinlostDate, Amount, Username, TicketCount)
+		SELECT	AgentId, @fdate, SUM(Amount) AS Amount, Username, Count(*) AS TicketCount
+		FROM	dbo.CreditTrans WITH (NOLOCK)
+		WHERE	WinlostDate < @fdate
+		GROUP BY AgentId, Username 
+
+
+
 	-- =====================
 	--   CLEAN OLD EVENTS
 	-- =====================
@@ -319,8 +332,23 @@ END
 -- ================== BalanceUp Agent
 
 
+
 -- ================== STEP : 6
-IF @step = 6
+IF @step =6
+BEGIN
+-- ================== BalanceUp CreditTrans
+	SET NOCOUNT ON
+
+	EXEC dbo.Task_BalanceUp_CreditTrans @fdate
+	SET NOCOUNT OFF
+-- ================== END STEP : 6
+END
+-- ================== BalanceUp CreditTrans
+
+
+
+-- ================== STEP : 7
+IF @step = 7
 BEGIN
 -- ================== Finishing
 
@@ -338,7 +366,7 @@ BEGIN
 
 	SET @Doing = 'Task_BalanceUp_background : Done'
 	EXEC dbo.WriteLog_UserLog_T @UserID = 70, @Doing = @Doing  
--- ================== END STEP : 6
+-- ================== END STEP : 7
 END
 -- ================== Finishing
 

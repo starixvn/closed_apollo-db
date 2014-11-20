@@ -28,19 +28,31 @@ Param's Explanation:
 					2 = AgentUser (Not Use)
 
 Test string:
+	DECLARE @ErrCode INT , @ErrMsg NVARCHAR(1000) 
 
 	EXEC [Age_API_Rpt_WinLoss] 
 		@RptType	 = 1,
 		@UserId		= 68,
 		@UserType	= 2,
 		@FromDate	= '2014-09-01 00:00:00',
-		@ToDate		= '2014-10-17 00:00:00'
+		@ToDate		= '2014-10-17 00:00:00',
+		@ErrCode =  @ErrCode OUTPUT,
+		@ErrMsg = @ErrMsg OUTPUT
 
+	SELECT  @ErrCode, @ErrMsg
 
 */
 
 BEGIN 
 SET NOCOUNT ON
+IF @UserType IN (0,2) 
+BEGIN 
+	SELECT 
+		@ErrCode = 1001, 
+		@ErrMsg = 'Data not available'
+		RETURN
+END 
+
 
 IF NOT EXISTS ( SELECT 1 FROM dbo.AgentInfo WITH (NOLOCK) WHERE AgentId = @UserId )
 			BEGIN

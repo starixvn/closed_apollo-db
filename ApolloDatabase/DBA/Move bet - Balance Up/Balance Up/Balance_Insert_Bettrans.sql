@@ -30,7 +30,7 @@ BEGIN
 			(case when amount < 0 then 0 else amount end) as Winlost,  ---- The positive balance
 			(case when amount < 0 then abs(amount) else 0 end) as actual_stake, ---- The negative balance
 			0 as playerComm,
-			20000, 0, 'BALANCE', 141, 'OPENING BALANCE', 260000000000, 148, 1,
+			20000, 0, 'BALANCE', 141, 'OPENING BALANCE', 260000000000, 8, 1,
 			currency, UserName, CurrencyName, actualrate, actualrate
 		FROM deleted
 		WHERE Amount <> 0

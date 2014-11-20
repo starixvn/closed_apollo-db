@@ -5,6 +5,7 @@ ALTER PROCEDURE [dbo].[Age_Transfer_AgentToAgent]
 	@Amount		INT,
 	@TransType	TINYINT = 1,
 	@IP			VARCHAR(40) = '',
+	@AdminId	INT = NULL,
 	@ErrCode	INT = 0 OUTPUT,
 	@ErrMsg		NVARCHAR(1000) = '' OUTPUT
 
@@ -20,7 +21,20 @@ ALTER PROCEDURE [dbo].[Age_Transfer_AgentToAgent]
 		@TransType  = 1: Deposit
 					= 2: Draw		
 	Test string: 
-		EXEC [Age_Transfer_AgentToAgent]	
+		DECLARE @ErrCode	INT ,
+				@ErrMsg		NVARCHAR(1000) 
+
+
+		EXEC [Age_Transfer_AgentToAgent] 
+			@LoggedId	= 1,
+			@AgentId	= 68,
+			@Amount		= 100,
+			@TransType	= 1,
+			@IP			= '123456',
+			@ErrCode	= @ErrCode OUTPUT,
+			@ErrMsg		= @ErrMsg OUTPUT
+		
+		SELECT @ErrCode, @ErrMsg
 				 
 
  */
@@ -29,8 +43,9 @@ BEGIN
 SET NOCOUNT ON
 
 DECLARE @LoggedHId	HIERARCHYID, 
-		@rowcnt INT, @Bettype SMALLINT,
-		@ParentId INT, @ParentName  NVARCHAR(50), @ParentBalanceBefore MONEY, 
+		@Bettype SMALLINT,
+		@ParentId INT, @ParentLevel SMALLINT,
+		@ParentName NVARCHAR(50), @ParentBalanceBefore MONEY, 
 		@Username NVARCHAR(50), @BalanceBefore MONEY 			
 
 DECLARE @RefNo BIGINT, @grefno INT, @TransDate DATETIME	
@@ -44,30 +59,38 @@ DECLARE
 		@xml			XML
 
 
-IF @TransType = 1 
-	SET @Bettype = 22001  ---Deposit
-ELSE 
-	SET @Bettype = 22002  ---Draw					
+
+IF ISNULL(@TransType,0) not in (1,2)
+BEGIN
+	SELECT	@ErrMsg = 'Trans Type is invalid.', 
+			@ErrCode = 8010	
+	RETURN		
+END
+
+
+SELECT @Bettype = 
+	CASE @TransType 
+		WHEN 1 THEN 22001 --- DEPOSIT
+		WHEN 2 THEN 22002 --- DRAW		
+	END
 
 ----- Get Agent Info
-	SELECT @LoggedHId = AgentHId 
-	FROM  dbo.AgentInfo WITH (NOLOCK) 
-	WHERE AgentId = @LoggedId
-			
-
 	SELECT	@Username = A.Username,	
-			@ParentId = A.ParentId,
-			@ParentName = (SELECT Username FROM dbo.AgentInfo WITH (NOLOCK) WHERE AgentID = A.ParentId) 
+			@ParentId = A.ParentId		
 	FROM	dbo.AgentInfo A WITH (NOLOCK)			
-	WHERE	A.AgentHId.IsDescendantOf(@LoggedHId) = 1
-			AND A.AgentID = @AgentID 
-			AND A.AgentID <> @LoggedID 
+	WHERE	A.AgentID = @AgentID 
+
+	SELECT 	@ParentName = Username,
+			@ParentLevel = AgentLevel
+	FROM	dbo.AgentInfo WITH (NOLOCK) 
+			WHERE AgentID = @ParentId
+			
 
  --- Check exists
  IF ISNULL(@Username ,'') = '' AND ISNULL(@ParentId, 0) = 0
  BEGIN 
 	SELECT	@ErrCode = 5106,			
-			@ErrMsg = 'Invalid agent ID'
+			@ErrMsg = 'Invalid agent ID.'
 	RETURN
  END
  
@@ -94,7 +117,6 @@ ELSE
 		RETURN
 
 	END
-
 	
 	SELECT @TransDate = GETDATE()
 
@@ -107,20 +129,21 @@ ELSE
 			SELECT @ParentBalanceBefore = SUM(ISNULL(Amount,0)) FROM dbo.CreditTrans WITH (NOLOCK) WHERE AgentId = @ParentId
 		
 			--- Check valid
-			IF @ParentBalanceBefore < 0
-			BEGIN 
-				SELECT	@ErrCode = 8001,			
-						@ErrMsg = 'Sport Credit of '+ @ParentName +' is not enough to deposit.'
-				RETURN
-			END
-
-			-----Deposit amount = [0; parent's credit]
-			IF @Amount NOT BETWEEN 0 AND @ParentBalanceBefore 
+			IF @Amount < 0
 			BEGIN 
 				SELECT	@ErrCode = 8003,			
 						@ErrMsg = 'Invalid Amount.'
 				RETURN
 			END
+
+			IF @ParentBalanceBefore < @Amount AND @ParentLevel >= 2
+			BEGIN 
+				SELECT	@ErrCode = 8001,			
+						@ErrMsg = 'Sport Credit of '+ @ParentName +' is not enough to deposit.'
+				RETURN
+			END
+			
+		SELECT @ParentBalanceBefore = ISNULL(@ParentBalanceBefore, 0)	
 
 		---- 1.a. Upline Transfer Transaction
 		INSERT INTO CreditTrans (				
@@ -202,6 +225,7 @@ ELSE
 					
 		----2.a. Downline Transfer Transaction
 		SELECT @BalanceBefore = SUM(ISNULL(Amount,0)) FROM dbo.CreditTrans WITH (NOLOCK) WHERE AgentId = @AgentId
+		SELECT @BalanceBefore = ISNULL(@BalanceBefore, 0)
 
 		INSERT INTO CreditTrans (				
 					AgentId
@@ -324,6 +348,7 @@ ELSE
 				BEGIN TRY
 					EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
 					@UserId			= @LoggedID,
+					@AdminID		= @AdminId,
 					@SPName			= 'Age_Transfer_AgentToAgent',
 					@LogDate		= @startRun,
 					@AgentId		= @AgentId,
@@ -334,6 +359,7 @@ ELSE
 				BEGIN CATCH
 					EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
 					@UserId			= @LoggedID,
+					@AdminID		= @AdminId,
 					@SPName			= 'Age_Transfer_AgentToAgent',
 					@LogDate		= @startRun,
 					@AgentId		= @AgentId,
@@ -350,22 +376,24 @@ ELSE
 	BEGIN 
 		
 		SELECT @BalanceBefore = SUM(ISNULL(Amount,0)) FROM dbo.CreditTrans WITH (NOLOCK) WHERE AgentId = @AgentId
+		SELECT @BalanceBefore = ISNULL(@BalanceBefore, 0)
 				
 		--- Check valid
-			IF @BalanceBefore < 0
+		
+			IF @Amount  < 0
+			BEGIN 
+				SELECT	@ErrCode = 8003,			
+						@ErrMsg = 'Invalid amount.'
+				RETURN
+			END
+
+			IF @BalanceBefore < @Amount
 			BEGIN 
 				SELECT	@ErrCode = 8002,			
 						@ErrMsg = 'Sport Credit of downline '+ @Username +' is not enough to draw.'
 				RETURN
 			END 
 
-		-----Draw amount = [0; his credit]
-			IF @Amount NOT BETWEEN 0 AND @BalanceBefore 
-			BEGIN 
-				SELECT	@ErrCode = 8003,			
-						@ErrMsg = 'Invalid amount.'
-				RETURN
-			END
 
 		----1.a. Downline Transfer Transaction	
 		INSERT INTO CreditTrans (				
@@ -446,7 +474,8 @@ ELSE
 
 		----2.a. Upline Transfer Transaction
 		SELECT @ParentBalanceBefore = SUM(ISNULL(Amount,0)) FROM dbo.CreditTrans WITH (NOLOCK) WHERE AgentId = @ParentId
-		
+		SELECT @ParentBalanceBefore = ISNULL(@ParentBalanceBefore, 0)
+
 		INSERT INTO CreditTrans (				
 					AgentId
 					,CustId
@@ -566,6 +595,7 @@ ELSE
 				BEGIN TRY
 					EXEC SVRLOG.LogDB.dbo.WriteLog_RunSpAgent
 					@UserId			= @LoggedID,
+					@AdminID		= @AdminId,
 					@SPName			= 'Age_Transfer_AgentToAgent',
 					@LogDate		= @startRun,
 					@AgentId		= @AgentId,
@@ -576,6 +606,7 @@ ELSE
 				BEGIN CATCH
 					EXEC SVRTXN.LogDB.dbo.WriteLog_RunSpAgent
 					@UserId			= @LoggedID,
+					@AdminID		= @AdminId,
 					@SPName			= 'Age_Transfer_AgentToAgent',
 					@LogDate		= @startRun,
 					@AgentId		= @AgentId,
@@ -583,9 +614,9 @@ ELSE
 					@Data			= @logSPData,
 					@OldData		= ''
 				END CATCH
-
-	 
+				 
 END
+
 
 END 
 GO 

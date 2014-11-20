@@ -7,9 +7,10 @@ SET QUOTED_IDENTIFIER ON
 GO
 ALTER PROCEDURE [dbo].[ExecRep_07]
 	@custids varchar(2000),
-	--@custid int,
-	@isAgent int,
+	@isAgent TINYINT,
+	@IsCreditTrans TINYINT = 0,
 	@winlostdate smalldatetime
+
 AS
 /*
 	Created by: Dan
@@ -17,38 +18,48 @@ AS
 	Task: Delete bettrans after balance-up 
 	DB: SVRTXN.TransDB
 	Orginal SP: bodb02.ExecRep_07
+
 	Revisions:
+		- 20141118@Sophia: Add Param @IsCreditTrans to delete table CreditTrans
 		
 */
 --SET NOCOUNT ON
 
 	BEGIN TRY
 		BEGIN TRANSACTION
+			IF @IsCreditTrans = 0 
+			BEGIN 
 
-		IF @isAgent = 0 -- for customers
-		BEGIN
-			DELETE FROM bettrans
-			WHERE CustId IN (SELECT val FROM dbo.strSplit(@custids, ','))
-			AND ruben = 1 AND winlostdate < @winlostdate
-		END
-		ELSE -- for agents
-		BEGIN
+				IF @isAgent = 0 -- for customers
+				BEGIN
+					DELETE FROM bettrans
+					WHERE CustId IN (SELECT val FROM dbo.strSplit(@custids, ','))
+					AND ruben = 1 AND winlostdate < @winlostdate
+				END
+				ELSE -- for agents
+				BEGIN
 						
-			--DELETE OLD BALANCE
-			DELETE B			
-			FROM BetTrans_Agent BA JOIN Bettrans B ON BA.Transid=B.Transid
-			WHERE AgentId IN (SELECT val FROM dbo.strSplit(@custids, ','))
-				AND B.ruben = 1 AND B.winlostdate < @winlostdate
-				AND B.BETTYPE=20000 
-				AND BA.winlostdate < @winlostdate				 
+					--DELETE OLD BALANCE
+					DELETE B			
+					FROM BetTrans_Agent BA JOIN Bettrans B ON BA.Transid=B.Transid
+					WHERE AgentId IN (SELECT val FROM dbo.strSplit(@custids, ','))
+						AND B.ruben = 1 AND B.winlostdate < @winlostdate
+						AND B.BETTYPE=20000 
+						AND BA.winlostdate < @winlostdate				 
 				
-			DELETE BA			
-			FROM BetTrans_Agent BA --JOIN Bettrans B ON BA.Transid=B.Transid
-			WHERE AgentId IN (SELECT val FROM dbo.strSplit(@custids, ','))
-				AND BA.STatusID NOT IN (0,1) 
-				AND BA.winlostdate < @winlostdate
-		END
-
+					DELETE BA			
+					FROM BetTrans_Agent BA --JOIN Bettrans B ON BA.Transid=B.Transid
+					WHERE AgentId IN (SELECT val FROM dbo.strSplit(@custids, ','))
+						AND BA.STatusID NOT IN (0,1) 
+						AND BA.winlostdate < @winlostdate
+				END
+			END 
+			ELSE IF @IsCreditTrans = 1
+			BEGIN 
+				DELETE FROM dbo.CreditTrans
+				WHERE AgentId IN (SELECT val FROM dbo.strSplit(@custids, ','))
+					  AND winlostdate < @winlostdate
+			END 
 		COMMIT TRANSACTION
 		
 	END TRY

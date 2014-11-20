@@ -26,15 +26,16 @@ AS
 BEGIN 
 SET NOCOUNT ON 
 
-DECLARE @Credit AS TABLE ( TransID BIGINT, TransDate DATETIME,	TransType NVARCHAR(20), Amount MONEY, BalanceAmount MONEY, TransDesc NVARCHAR(300) )
+DECLARE @Credit AS TABLE ( TransID BIGINT, TransDate DATETIME,	TransType NVARCHAR(20), Amount MONEY, BalanceAmount MONEY, TransDesc NVARCHAR(300), WinlostDate DATE)
 
 
 IF @Todate > @BalanceUpDay
 BEGIN  
-	INSERT INTO @Credit ( TransID, TransDate, TransType, Amount, BalanceAmount, TransDesc)
-	SELECT TransID, TransDate, CASE WHEN Amount < 0  THEN 'Draw' ELSE 'Deposit' END AS TransType, Amount AS Amount, BalanceBefore + Amount AS BalanceAmount, TransDesc
+	INSERT INTO @Credit ( TransID, TransDate, TransType, Amount, BalanceAmount, TransDesc, WinlostDate)
+	SELECT TransID, TransDate, CASE WHEN Bettype = 22001 THEN 'Deposit' ELSE 'Draw' END AS TransType, Amount, BalanceBefore + Amount AS BalanceAmount, TransDesc, WinlostDate
 	FROM dbo.CreditTrans WITH (NOLOCK)
 	WHERE WinlostDate BETWEEN @FromDate AND @ToDate
+		  AND bettype > 20000
 		  AND ( (AgentID = @AgentId AND @CustID = -1)
 				OR (CustID = @CustID AND @AgentId = -1)
 			   )
@@ -46,8 +47,8 @@ BEGIN
 	IF @ToDate >= DATEADD(dd, -1, @BalanceUpDay)
 	SELECT @ToDate = DATEADD(dd, -1, @BalanceUpDay)
 
-	INSERT INTO @Credit ( TransID, TransDate, TransType, Amount, BalanceAmount, TransDesc)
-	SELECT TransID, TransDate, CASE WHEN Amount < 0  THEN 'Draw' ELSE 'Deposit' END AS TransType, Amount AS Amount, BalanceBefore + Amount AS BalanceAmount, TransDesc
+	INSERT INTO @Credit ( TransID, TransDate, TransType, Amount, BalanceAmount, TransDesc, WinlostDate)
+	SELECT TransID, TransDate, CASE WHEN Bettype = 22001 THEN 'Deposit' ELSE 'Draw' END AS TransType, Amount, BalanceBefore + Amount AS BalanceAmount, TransDesc, WinlostDate
 	FROM SVRARC.ArchiveDB.dbo.CreditTrans_BK WITH (NOLOCK)
 	WHERE WinlostDate BETWEEN @FromDate AND @ToDate
 		  AND ( (AgentID = @AgentId AND @CustID = -1)
@@ -56,7 +57,7 @@ BEGIN
 END
 
 SELECT * FROM @Credit
-ORDER BY TransDate DESC, TransID DESC
+ORDER BY WinlostDate DESC, TransDate DESC, TransID DESC
 
 
 END 
