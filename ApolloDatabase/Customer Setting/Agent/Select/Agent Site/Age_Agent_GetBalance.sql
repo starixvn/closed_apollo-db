@@ -7,7 +7,7 @@ AS
 BEGIN 
 SET NOCOUNT ON 
 
-SELECT SUM(ISNULL(Amount,0)) AS SportCredit FROM dbo.CreditTrans WITH (NOLOCK) WHERE AgentId = @AgentId 
+SELECT ISNULL(SUM(Amount),0) AS SportCredit FROM dbo.CreditTrans WITH (NOLOCK) WHERE AgentId = @AgentId 
 
 END
 GO 

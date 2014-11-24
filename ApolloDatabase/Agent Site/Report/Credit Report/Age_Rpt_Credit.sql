@@ -1,9 +1,9 @@
-ALTER PROCEDURE [dbo].[Age_Rpt_Credit]
-	@AgentId 	INT = -1,
-	@CustId		INT = -1,
-	@FromDate 	DATE,
-	@ToDate 	DATE,		
-	@BalanceUpDay DATE
+ALTER PROCEDURE [dbo].[Age_Rpt_Credit] 
+	@AgentId INT = - 1
+	,@CustId INT = - 1
+	,@FromDate DATE
+	,@ToDate DATE
+	,@BalanceUpDay DATE
 AS
  /*
     Created	: Sophia
@@ -24,40 +24,66 @@ AS
  */
 
 BEGIN 
-SET NOCOUNT ON 
+	SET NOCOUNT ON 
 
-DECLARE @Credit AS TABLE ( TransID BIGINT, TransDate DATETIME,	TransType NVARCHAR(20), Amount MONEY, BalanceAmount MONEY, TransDesc NVARCHAR(300), WinlostDate DATE)
+	DECLARE @Credit AS TABLE ( TransID BIGINT, TransDate DATETIME,	TransType NVARCHAR(20), Amount MONEY, BalanceAmount MONEY, TransDesc NVARCHAR(300), WinlostDate DATE)
 
 
-IF @Todate > @BalanceUpDay
-BEGIN  
-	INSERT INTO @Credit ( TransID, TransDate, TransType, Amount, BalanceAmount, TransDesc, WinlostDate)
-	SELECT TransID, TransDate, CASE WHEN Bettype = 22001 THEN 'Deposit' ELSE 'Draw' END AS TransType, Amount, BalanceBefore + Amount AS BalanceAmount, TransDesc, WinlostDate
-	FROM dbo.CreditTrans WITH (NOLOCK)
-	WHERE WinlostDate BETWEEN @FromDate AND @ToDate
-		  AND bettype > 20000
-		  AND ( (AgentID = @AgentId AND @CustID = -1)
-				OR (CustID = @CustID AND @AgentId = -1)
-			   )
-END
+	IF @Todate > @BalanceUpDay
+	BEGIN  
+		IF @CustID = -1  ---- Agent
+		BEGIN 
+			INSERT INTO @Credit ( TransID, TransDate, TransType, Amount, BalanceAmount, TransDesc, WinlostDate)
+			SELECT TransID, TransDate, CASE WHEN Bettype = 22001 THEN 'Deposit' ELSE 'Draw' END AS TransType, Amount, BalanceBefore + Amount AS BalanceAmount, TransDesc, WinlostDate
+			FROM dbo.CreditTrans WITH (NOLOCK)
+			WHERE AgentID = @AgentId 
+				  AND CustID = 0					
+				  AND WinlostDate BETWEEN @FromDate AND @ToDate
+				  AND bettype > 20000
+		END 
+		ELSE IF @AgentId = -1  --- Cust
+		BEGIN 
+			INSERT INTO @Credit ( TransID, TransDate, TransType, Amount, BalanceAmount, TransDesc, WinlostDate)
+			SELECT TransID, TransDate, CASE WHEN Bettype = 22001 THEN 'Deposit' ELSE 'Draw' END AS TransType, Amount, BalanceBefore + Amount AS BalanceAmount, TransDesc, WinlostDate
+			FROM dbo.CreditTrans WITH (NOLOCK)
+			WHERE AgentId = 0 
+				  AND CustID = @CustID				 
+				  AND WinlostDate BETWEEN @FromDate AND @ToDate
+				  AND bettype > 20000
+		END 
+			
+	END
 
------ BK -------
-IF @FromDate < @BalanceUpDay 
-BEGIN    	
-	IF @ToDate >= DATEADD(dd, -1, @BalanceUpDay)
-	SELECT @ToDate = DATEADD(dd, -1, @BalanceUpDay)
+	----- BK -------
+	IF @FromDate < @BalanceUpDay 
+	BEGIN    	
+		IF @ToDate >= DATEADD(dd, -1, @BalanceUpDay)
+		SELECT @ToDate = DATEADD(dd, -1, @BalanceUpDay)
 
-	INSERT INTO @Credit ( TransID, TransDate, TransType, Amount, BalanceAmount, TransDesc, WinlostDate)
-	SELECT TransID, TransDate, CASE WHEN Bettype = 22001 THEN 'Deposit' ELSE 'Draw' END AS TransType, Amount, BalanceBefore + Amount AS BalanceAmount, TransDesc, WinlostDate
-	FROM SVRARC.ArchiveDB.dbo.CreditTrans_BK WITH (NOLOCK)
-	WHERE WinlostDate BETWEEN @FromDate AND @ToDate
-		  AND ( (AgentID = @AgentId AND @CustID = -1)
-				OR (CustID = @CustID AND @AgentId = -1)
-			   )
-END
+		IF @CustID = -1  ---- Agent
+		BEGIN 
+			INSERT INTO @Credit ( TransID, TransDate, TransType, Amount, BalanceAmount, TransDesc, WinlostDate)
+			SELECT TransID, TransDate, CASE WHEN Bettype = 22001 THEN 'Deposit' ELSE 'Draw' END AS TransType, Amount, BalanceBefore + Amount AS BalanceAmount, TransDesc, WinlostDate
+			FROM SVRARC.ArchiveDB.dbo.CreditTrans_BK WITH (NOLOCK)
+			WHERE AgentID = @AgentId 
+				  AND CustID = 0					
+				  AND WinlostDate BETWEEN @FromDate AND @ToDate
 
-SELECT * FROM @Credit
-ORDER BY WinlostDate DESC, TransDate DESC, TransID DESC
+		END 
+		ELSE IF @AgentId = -1  --- Cust
+		BEGIN 
+			INSERT INTO @Credit ( TransID, TransDate, TransType, Amount, BalanceAmount, TransDesc, WinlostDate)
+			SELECT TransID, TransDate, CASE WHEN Bettype = 22001 THEN 'Deposit' ELSE 'Draw' END AS TransType, Amount, BalanceBefore + Amount AS BalanceAmount, TransDesc, WinlostDate
+			FROM SVRARC.ArchiveDB.dbo.CreditTrans_BK WITH (NOLOCK)
+			WHERE AgentID = @AgentId 
+				  AND CustID = 0					
+				  AND WinlostDate BETWEEN @FromDate AND @ToDate
+		END 
+
+	END
+
+	SELECT * FROM @Credit
+	ORDER BY WinlostDate DESC, TransDate DESC, TransID DESC
 
 
 END 

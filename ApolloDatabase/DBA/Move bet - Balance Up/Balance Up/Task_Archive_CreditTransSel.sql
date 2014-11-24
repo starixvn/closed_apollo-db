@@ -4,7 +4,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-ALTER PROCEDURE [dbo].[Task_Archive_CreditTrans]
+ALTER PROCEDURE [dbo].[Task_Archive_CreditTransSel]
 AS
 /*
 Created: Sophia

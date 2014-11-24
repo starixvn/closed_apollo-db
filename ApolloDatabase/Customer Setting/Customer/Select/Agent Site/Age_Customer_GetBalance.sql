@@ -7,7 +7,7 @@ AS
 BEGIN 
 SET NOCOUNT ON 
 
-SELECT SUM(ISNULL(Winlost,0) - ISNULL(Actual_Stake,0) + ISNULL(PlayerComm,0)) AS SportCredit FROM dbo.Bettrans WITH (NOLOCK) WHERE CustID = @CustID 
+SELECT ISNULL(SUM(Winlost),0) - ISNULL(SUM(Actual_Stake),0) + ISNULL(SUM(PlayerComm),0) AS SportCredit FROM dbo.Bettrans WITH (NOLOCK) WHERE CustID = @CustID 
 
 END
 GO 

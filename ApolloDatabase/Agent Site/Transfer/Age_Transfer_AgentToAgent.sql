@@ -129,7 +129,7 @@ SELECT @Bettype =
 			SELECT @ParentBalanceBefore = SUM(ISNULL(Amount,0)) FROM dbo.CreditTrans WITH (NOLOCK) WHERE AgentId = @ParentId
 		
 			--- Check valid
-			IF @Amount < 0
+			IF @Amount <= 0
 			BEGIN 
 				SELECT	@ErrCode = 8003,			
 						@ErrMsg = 'Invalid Amount.'
@@ -380,7 +380,7 @@ SELECT @Bettype =
 				
 		--- Check valid
 		
-			IF @Amount  < 0
+			IF @Amount  <= 0
 			BEGIN 
 				SELECT	@ErrCode = 8003,			
 						@ErrMsg = 'Invalid amount.'
