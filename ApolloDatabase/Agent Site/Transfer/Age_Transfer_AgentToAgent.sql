@@ -139,7 +139,7 @@ SELECT @Bettype =
 			IF @ParentBalanceBefore < @Amount AND @ParentLevel >= 2
 			BEGIN 
 				SELECT	@ErrCode = 8001,			
-						@ErrMsg = 'Sport Credit of '+ @ParentName +' is not enough to deposit.'
+						@ErrMsg = 'Your credit is not available to deposit.'
 				RETURN
 			END
 			
@@ -390,7 +390,7 @@ SELECT @Bettype =
 			IF @BalanceBefore < @Amount
 			BEGIN 
 				SELECT	@ErrCode = 8002,			
-						@ErrMsg = 'Sport Credit of downline '+ @Username +' is not enough to draw.'
+						@ErrMsg = 'Downline''s credit is not available to draw.'
 				RETURN
 			END 
 
