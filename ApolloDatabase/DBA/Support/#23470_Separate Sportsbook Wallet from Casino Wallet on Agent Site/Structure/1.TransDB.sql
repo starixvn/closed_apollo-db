@@ -40,7 +40,7 @@ CREATE TABLE [dbo].[CreditTrans](
 	[BalanceBefore] [money] NULL,
 	[Amount] [money] NULL,
 	[BetType] [smallint] NULL,
-	[WinlostDate] [smalldatetime] NULL,
+	[WinlostDate] [DATE] NULL,
 	[TransDesc] [nvarchar](300) NULL,
 	[Username] [nvarchar](50) NULL,
 	[RefNo] [bigint] NULL,
