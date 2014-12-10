@@ -14,7 +14,7 @@ DisplayOrder,
 IsActive
 )
 VALUES (
-6,
+5,
 'Credit_Balance',
 'Credit/Balance',
 2,
