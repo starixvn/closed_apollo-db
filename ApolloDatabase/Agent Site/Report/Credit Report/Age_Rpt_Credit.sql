@@ -28,59 +28,27 @@ BEGIN
 
 	DECLARE @Credit AS TABLE ( TransID BIGINT, TransDate DATETIME,	TransType NVARCHAR(20), Amount MONEY, BalanceAmount MONEY, TransDesc NVARCHAR(300), WinlostDate DATE)
 
-
-	IF @Todate > @BalanceUpDay
-	BEGIN  
-		IF @CustID = -1  ---- Agent
-		BEGIN 
-			INSERT INTO @Credit ( TransID, TransDate, TransType, Amount, BalanceAmount, TransDesc, WinlostDate)
-			SELECT TransID, TransDate, CASE WHEN Bettype = 22001 THEN 'Deposit' ELSE 'Draw' END AS TransType, Amount, BalanceBefore + Amount AS BalanceAmount, TransDesc, WinlostDate
-			FROM dbo.CreditTrans WITH (NOLOCK)
-			WHERE AgentID = @AgentId 
-				  AND CustID = 0					
-				  AND WinlostDate BETWEEN @FromDate AND @ToDate
-				  AND bettype > 20000
-		END 
-		ELSE IF @AgentId = -1  --- Cust
-		BEGIN 
-			INSERT INTO @Credit ( TransID, TransDate, TransType, Amount, BalanceAmount, TransDesc, WinlostDate)
-			SELECT TransID, TransDate, CASE WHEN Bettype = 22001 THEN 'Deposit' ELSE 'Draw' END AS TransType, Amount, BalanceBefore + Amount AS BalanceAmount, TransDesc, WinlostDate
-			FROM dbo.CreditTrans WITH (NOLOCK)
-			WHERE AgentId = 0 
-				  AND CustID = @CustID				 
-				  AND WinlostDate BETWEEN @FromDate AND @ToDate
-				  AND bettype > 20000
-		END 
-			
-	END
-
-	----- BK -------
-	IF @FromDate < @BalanceUpDay 
-	BEGIN    	
-		IF @ToDate >= DATEADD(dd, -1, @BalanceUpDay)
-		SELECT @ToDate = DATEADD(dd, -1, @BalanceUpDay)
-
-		IF @CustID = -1  ---- Agent
-		BEGIN 
-			INSERT INTO @Credit ( TransID, TransDate, TransType, Amount, BalanceAmount, TransDesc, WinlostDate)
-			SELECT TransID, TransDate, CASE WHEN Bettype = 22001 THEN 'Deposit' ELSE 'Draw' END AS TransType, Amount, BalanceBefore + Amount AS BalanceAmount, TransDesc, WinlostDate
-			FROM SVRARC.ArchiveDB.dbo.CreditTrans_BK WITH (NOLOCK)
-			WHERE AgentID = @AgentId 
-				  AND CustID = 0					
-				  AND WinlostDate BETWEEN @FromDate AND @ToDate
-
-		END 
-		ELSE IF @AgentId = -1  --- Cust
-		BEGIN 
-			INSERT INTO @Credit ( TransID, TransDate, TransType, Amount, BalanceAmount, TransDesc, WinlostDate)
-			SELECT TransID, TransDate, CASE WHEN Bettype = 22001 THEN 'Deposit' ELSE 'Draw' END AS TransType, Amount, BalanceBefore + Amount AS BalanceAmount, TransDesc, WinlostDate
-			FROM SVRARC.ArchiveDB.dbo.CreditTrans_BK WITH (NOLOCK)
-			WHERE AgentID = @AgentId 
-				  AND CustID = 0					
-				  AND WinlostDate BETWEEN @FromDate AND @ToDate
-		END 
-
-	END
+	IF @CustID = -1  ---- Agent
+	BEGIN 
+		INSERT INTO @Credit ( TransID, TransDate, TransType, Amount, BalanceAmount, TransDesc, WinlostDate)
+		SELECT TransID, TransDate, CASE WHEN Bettype = 22001 THEN 'Deposit' ELSE 'Draw' END AS TransType, Amount, BalanceBefore + Amount AS BalanceAmount, TransDesc, WinlostDate
+		FROM dbo.CreditTrans WITH (NOLOCK)
+		WHERE AgentID = @AgentId 
+				AND CustID = 0					
+				AND WinlostDate BETWEEN @FromDate AND @ToDate
+				AND bettype > 20000
+	END 
+	ELSE IF @AgentId = -1  --- Cust
+	BEGIN 
+		INSERT INTO @Credit ( TransID, TransDate, TransType, Amount, BalanceAmount, TransDesc, WinlostDate)
+		SELECT TransID, TransDate, CASE WHEN Bettype = 22001 THEN 'Deposit' ELSE 'Draw' END AS TransType, Amount, BalanceBefore + Amount AS BalanceAmount, TransDesc, WinlostDate
+		FROM dbo.CreditTrans WITH (NOLOCK)
+		WHERE AgentId = 0 
+				AND CustID = @CustID				 
+				AND WinlostDate BETWEEN @FromDate AND @ToDate
+				AND bettype > 20000
+	END 
+	
 
 	SELECT * FROM @Credit
 	ORDER BY WinlostDate DESC, TransDate DESC, TransID DESC
