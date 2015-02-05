@@ -87,7 +87,8 @@ SELECT @Bettype =
 	 END
 
 
-	SELECT	@Agentname = A.Username			
+	SELECT	@Agentname = A.Username,
+			@AgentHID = AgentHID
 	FROM	dbo.AgentInfo A WITH (NOLOCK)			
 	WHERE	A.AgentID = @AgentID 	
  
