@@ -1,6 +1,6 @@
 ﻿USE [TransDB]
 GO
-/****** Object:  StoredProcedure [dbo].[Task_BalanceUp_Agent]    Script Date: 6/6/2013 4:31:16 PM ******/
+/****** Object:  StoredProcedure [dbo].[Task_BalanceUp_Agent]    Script Date: 1/29/2015 12:23:10 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -80,8 +80,11 @@ BEGIN
 			BEGIN TRANSACTION
 			DELETE FROM dbo.BalanceTable_Agent_Tmp
 			WHERE agentid IN (select val from dbo.strSplit(@agentid_list, ','))
-
-			EXEC dbo.ExecRep_07 @agentid_list, 1, @winlostdate
+			
+			EXEC dbo.ExecRep_07 @custids = @agentid_list,
+								@isAgent = 1 ,
+								@IsCreditTrans = 0,
+								@winlostdate = @winlostdate
 
 			COMMIT TRANSACTION
 		END TRY
