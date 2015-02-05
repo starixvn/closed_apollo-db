@@ -16,6 +16,7 @@ ALTER PROCEDURE [dbo].[Age_Transfer_AgentToAgent]
     Task	: Transfer credit from Agent To Agent
     DB		: SVRTXN/TransDB
     Revisions: 
+		- 20150205@Sophia: Check LoggedID must be the upper level of AgentID 
 
 	Parameters:
 		@TransType  = 1: Deposit
@@ -42,7 +43,7 @@ AS
 BEGIN 
 SET NOCOUNT ON
 
-DECLARE @LoggedHId	HIERARCHYID, 
+DECLARE @AgentHID	HIERARCHYID, 
 		@Bettype SMALLINT,
 		@ParentId INT, @ParentLevel SMALLINT,
 		@ParentName NVARCHAR(50), @ParentBalanceBefore MONEY, 
@@ -76,7 +77,8 @@ SELECT @Bettype =
 
 ----- Get Agent Info
 	SELECT	@Username = A.Username,	
-			@ParentId = A.ParentId		
+			@ParentId = A.ParentId,
+			@AgentHID = AgentHID		
 	FROM	dbo.AgentInfo A WITH (NOLOCK)			
 	WHERE	A.AgentID = @AgentID 
 
@@ -85,6 +87,19 @@ SELECT @Bettype =
 	FROM	dbo.AgentInfo WITH (NOLOCK) 
 			WHERE AgentID = @ParentId
 			
+
+----- Check LoggedID must be the upper level of AgentID
+	IF NOT EXISTS ( SELECT	TOP 1 1
+					FROM	dbo.AgentInfo WITH (NOLOCK) 
+					WHERE	AgentID = @LoggedID 
+							AND @AgentHID.IsDescendantOf(AgentHID) = 1
+							AND @LoggedID <> @AgentID) 
+	BEGIN 
+		SELECT	@ErrCode = 5106,			
+				@ErrMsg = 'Invalid agent ID.'
+		RETURN 
+	END 
+
 
  --- Check exists
  IF ISNULL(@Username ,'') = '' AND ISNULL(@ParentId, 0) = 0
