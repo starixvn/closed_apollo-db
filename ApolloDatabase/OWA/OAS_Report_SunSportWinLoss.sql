@@ -12,9 +12,9 @@ DB:  SVRReport.ReportDB
 Original:  
 
 Revisions:
-- 20131128@Sophia: Add column TCommission, TCommissionEUR, GrossWinLossCompany, GrossWinLossCompanyEUR
-- 20140107@Sophia: Get ExchangeDaily Info
-    
+	- 20131128@Sophia: Add column TCommission, TCommissionEUR, GrossWinLossCompany, GrossWinLossCompanyEUR
+	- 20140107@Sophia: Get ExchangeDaily Info
+	- 20150304@Sophia: Get GBP currency as EUR 
 Param's Explanation:  
 	 @DrawType = 0: Normal
 			   = 1: No Draw for turnover and Betcount
@@ -54,7 +54,7 @@ SELECT @Str =
 	 'DECLARE @ExchangeDaily TABLE(ExchangeDate smalldatetime,ExchangeId int, EUR float,unique clustered (ExchangeDate,ExchangeId)) ' + char(13) 
 SELECT @Str = @Str + 
 	 'INSERT INTO @ExchangeDaily(ExchangeDate,ExchangeId,EUR) ' + char(13) +
-	 'SELECT exchangedate,exchangeid,EUR FROM RepDB.dbo.Lrf_f_GetExchangeDaily(''' + CONVERT(varchar(10),@FromDate, 120) + ''',''' +  CONVERT(varchar(10),@ToDate, 120) + ''')' + char(13) + char(13) 
+	 'SELECT exchangedate,exchangeid,GBP as EUR FROM RepDB.dbo.Lrf_f_GetExchangeDaily(''' + CONVERT(varchar(10),@FromDate, 120) + ''',''' +  CONVERT(varchar(10),@ToDate, 120) + ''')' + char(13) + char(13) 
 
 
 
