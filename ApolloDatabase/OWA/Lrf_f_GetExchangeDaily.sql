@@ -4,17 +4,17 @@
       @todate DATETIME
       
     )
-RETURNS @tempDate TABLE (exchangedate DATETIME,ExchangeId INT,Code VARCHAR(5),MYR FLOAT, USD FLOAT, EUR FLOAT, CNY FLOAT, actualrate FLOAT, UNIQUE CLUSTERED(exchangedate,exchangeid))
+RETURNS @tempDate TABLE (exchangedate DATETIME,ExchangeId INT,Code VARCHAR(5),MYR FLOAT, USD FLOAT, EUR FLOAT, CNY FLOAT, GBP FLOAT, actualrate FLOAT, UNIQUE CLUSTERED(exchangedate,exchangeid))
 AS
 
  /*
 	Created: 20131013@Dan
 	Task : Get exchange daily for LRF reports. The values are the same in 1 month
-	DB: SVRSCD.RepDB
+	DB: SVRCSD.RepDB
 	Original:  DB052.bodb02, DB06.bodb02 [Lrf_f_GetExchangeDaily] 
 
 	Revisions:	
-
+		- 20150304@Sophia: Get GBP currency
 	 
 
 */
@@ -46,8 +46,8 @@ BEGIN
 	
 	WHILE (@tmpDate<=@tmpToDate AND @tmpDate<=@todate)
 	BEGIN
-		INSERT INTO @tempDate (exchangedate,ExchangeId,Code,MYR, USD, EUR, CNY, actualrate)
-		SELECT @tmpDate,ExchangeId,Code,MYR, USD, EUR, CNY, actualrate
+		INSERT INTO @tempDate (exchangedate,ExchangeId,Code,MYR, USD, EUR, CNY, GBP, actualrate)
+		SELECT @tmpDate,ExchangeId,Code,MYR, USD, EUR, CNY, GBP, actualrate
 		FROM ExchangeDailyOanda WITH (NOLOCK)
 		WHERE ExchangeDate = @tmpToDate
 	

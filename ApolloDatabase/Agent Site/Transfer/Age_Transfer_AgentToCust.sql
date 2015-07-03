@@ -16,7 +16,7 @@ ALTER PROCEDURE [dbo].[Age_Transfer_AgentToCust]
     Task	: Transfer credit from Agent To Member
     DB		: SVRTXN/TransDB
     Revisions: 
-
+		- 20150205@Sophia: Check AgentID must be the downline of LoggedID 
 	Parameters:
 		@TransType  = 1: Deposit
 					= 2: Draw		
@@ -44,7 +44,7 @@ AS
 BEGIN 
 SET NOCOUNT ON
 
-DECLARE @LoggedHId	HIERARCHYID, 
+DECLARE @AgentHID	HIERARCHYID, 
 		@rowcnt INT, @Bettype SMALLINT,
 		@AgentId INT, @AgentName  NVARCHAR(50), @AgentBalanceBefore MONEY, 
 		@Username NVARCHAR(50), @BalanceBefore MONEY 			
@@ -87,10 +87,25 @@ SELECT @Bettype =
 	 END
 
 
-	SELECT	@Agentname = A.Username	
+	SELECT	@Agentname = A.Username,
+			@AgentHID = AgentHID
 	FROM	dbo.AgentInfo A WITH (NOLOCK)			
-	WHERE	A.AgentID = @AgentID 			
+	WHERE	A.AgentID = @AgentID 	
  
+ 
+----- Check LoggedID must be the upper level of AgentID
+	IF NOT EXISTS ( SELECT	TOP 1 1
+					FROM	dbo.AgentInfo WITH (NOLOCK) 
+					WHERE	AgentID = @LoggedID 
+							AND @AgentHID.IsDescendantOf(AgentHID) = 1
+					) 
+	BEGIN 
+		SELECT	@ErrCode = 5106,			
+				@ErrMsg = 'Invalid agent ID.'
+		RETURN 
+	END 
+	
+	
  	-----------------------------------
 	--- Get RefNo
 	BEGIN TRANSACTION
